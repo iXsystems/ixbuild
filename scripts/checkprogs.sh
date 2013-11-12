@@ -41,3 +41,11 @@ if [ ! -d "/usr/local/lib/grub/x86_64-efi" ]; then
   echo "Installing grub2-efi.."
   rc_halt "pkg install sysutils/grub2-efi"
 fi
+
+if [ "$PKGREPO" = "local" ] ; then
+  which poudriere >/dev/null 2>/dev/null
+  if [ "$?" != "0" ]; then
+    echo "Installing poudriere.."
+    rc_halt "pkg install ports-mgmt/poudriere"
+  fi
+fi

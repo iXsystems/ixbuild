@@ -27,5 +27,5 @@ export POUD
 
 # Set if we are using a locally built PKGNG repo, or a remote one
 # local / remote
-PKGREPO="local"
+PKGREPO="remote"
 export PKGREPO

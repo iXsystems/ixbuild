@@ -100,6 +100,9 @@ if [ -z "$TARGET" ] ; then TARGET="all"; fi
 
 case $TARGET in
  all|ALL) do_world 
+	  if [ "$PKGREPO" = "local" ] ; then
+	    do_ports
+	  fi
           do_iso ;;
    world) do_world ;;
      iso) do_iso ;;
