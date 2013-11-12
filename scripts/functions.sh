@@ -3,6 +3,12 @@
 # Most of these dont need to be modified
 #########################################################
 
+# Where is the pcbsd-build program installed
+PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+
+# Source vars
+. ${PROGDIR}/pcbsd.cfg
+
 # Where on disk is the PCBSD GIT branch
 GITBRANCH="${PROGDIR}/git/pcbsd"
 export GITBRANCH
@@ -16,8 +22,6 @@ KERNDIST="$DISTDIR/kernel.txz"
 L32DIST="$DISTDIR/lib32.txz"
 export BASEDIST KERNDIST L32DIST
 
-# Source pcbsd.cfg
-. ${PROGDIR}/pcbsd.cfg
 
 # Kernel Config
 PCBSDKERN="GENERIC" ; export PCBSDKERN
@@ -33,15 +37,7 @@ PDESTDIRFBSD="${PROGDIR}/buildworld-fbsd" ; export PDESTDIRFBSD
 PDESTDIRSERVER="${PROGDIR}/buildworld-server" ; export PDESTDIRSERVER
 
 # Set the PC-BSD Version
-REVISION="`cat ${WORLDSRC}/sys/conf/newvers.sh 2>/dev/null | grep '^REVISION=' | cut -d '"' -f 2`"
-if [ -z "$REVISION" ] ; then
-   REVISION="UNKNOWN"
-fi
-BRANCH="`cat ${WORLDSRC}/sys/conf/newvers.sh 2>/dev/null | grep '^BRANCH=' | cut -d '"' -f 2`"
-if [ -z "$BRANCH" ] ; then
-   BRANCH="UNKNOWN"
-fi
-export PCBSDVER="${REVISION}-${BRANCH}"
+export PCBSDVER="${TARGETREL}"
 
 # Where are the config files
 PCONFDIR="${GITBRANCH}/build-files/conf" ; export PCONFDIR
@@ -59,6 +55,24 @@ esac
 
 # Set the location of packages needed for our Meta-Packages
 export METAPKGDIR="${PROGDIR}/tmp/All"
+
+# Poudriere Ports tag, change to use multiple ports trees
+if [ -z "$POUDPORTS" ] ; then
+   POUDPORTS="pcbsdports" ; export POUDPORTS
+fi
+
+
+# Poudriere Ports tag, change to use multiple ports trees
+if [ -z "$POUDPORTS" ] ; then
+   POUDPORTS="pcbsdports" ; export POUDPORTS
+fi
+
+# Poudriere variables
+PBUILD="pcbsd-`echo $TARGETREL | sed 's|\.||g'`"
+PJDIR="$POUD/jails/$PBUILD"
+PPKGDIR="$POUD/data/packages/$PBUILD-$POUDPORTS"
+PJPORTSDIR="$POUD/ports/$POUDPORTS"
+export PBUILD PJDIR PJPORTSDIR PPKGDIR
 
 # Check for required dirs
 rDirs="/log /git /iso /fbsd-dist /tmp"
@@ -207,6 +221,12 @@ create_pkg_conf()
    sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/pkg.conf
    sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/pkg.conf
    sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/pkg.conf
+
+   if [ "$PKGREPO" = "local" ]; then
+      cat ${PROGDIR}/tmp/pkg.conf | grep -v "packagesite:" > ${PROGDIR}/tmp/pkg.conf.local
+      mv ${PROGDIR}/tmp/pkg.conf.local ${PROGDIR}/tmp/pkg.conf
+      echo "packagesite: file://${PPKGDIR}" >> ${PROGDIR}/tmp/pkg.conf
+   fi
 }
 
 # Copy the ISO package files to a new location
@@ -246,4 +266,49 @@ cp_iso_pkg_files()
 
     # Copy pkgng
     cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz
+}
+
+update_poudriere_jail()
+{
+  # Setup fake poudriere file URL
+  mkdir -p /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/$PCBSDVER >/dev/null 2>/dev/null
+  dfiles="src.txz base.txz doc.xz games.txz kernel.txz"
+  if [ "$ARCH" = "amd64" ] ; then dfiles="$dfiles lib32.txz" ; fi
+  for i in $dfiles
+  do
+    ln -sf "${DISTDIR}/$i" /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/${PCBSDVER}/$i
+  done
+
+  echo "FREEBSD_HOST=file:///fakeftp/" >> /usr/local/etc/poudriere.conf
+
+  # Clean old poudriere dir
+  poudriere jail -d -j $PBUILD >/dev/null 2>/dev/null
+
+  poudriere jail -c -j $PBUILD -v ${PCBSDVER} -a $ARCH
+  if [ $? -ne 0 ] ; then
+    cat /usr/local/etc/poudriere.conf | grep -v "^FREEBSD_HOST=file:///fakeftp/" >/tmp/.pconf.$$
+    mv /tmp/.pconf.$$ /usr/local/etc/poudriere.conf
+    echo "Failed to create poudriere jail"
+    exit 1
+  fi
+
+  # Cleanup the hostname
+  cat /usr/local/etc/poudriere.conf | grep -v "^FREEBSD_HOST=file:///fakeftp/" >/tmp/.pconf.$$
+  mv /tmp/.pconf.$$ /usr/local/etc/poudriere.conf
+
+  rm -rf /fakeftp
+}
+
+get_last_rev()
+{
+   oPWD=`pwd`
+   rev=0
+   cd "$1"
+   rev=`git log -n 1 --date=raw ${1} | grep 'Date:' | awk '{print $2}'`
+   cd $oPWD
+   if [ $rev -ne 0 ] ; then
+     echo "$rev"
+     return 0
+   fi
+   return 1
 }

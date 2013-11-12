@@ -13,10 +13,19 @@ GITFBSDURL="https://github.com/pcbsd/freebsd.git"
 GITFBSDBRANCH="releng/9.2"
 export GITFBSDURL GITFBSDBRANCH
 
-# Set the target version for pulling pkgng packages
+# Set the target version for pulling pkgng packages / poudriere jail
 TARGETREL="9.2-RELEASE"
 export TARGETREL
 
 # Set the target ARCH type for world / pkgng
 ARCH="amd64"
 export ARCH
+
+# Poudriere data location
+POUD="/usr/local/poudriere"
+export POUD
+
+# Set if we are using a locally built PKGNG repo, or a remote one
+# local / remote
+PKGREPO="local"
+export PKGREPO
