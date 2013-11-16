@@ -104,13 +104,16 @@ merge_pcbsd_src_ports()
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
 
    # Need to add these ports to INDEX / SUBDIR
-   rc_halt "cd ${portsdir}"
-   local subdirs="sysutils/pcbsd-utils sysutils/pcbsd-utils-qt4 sysutils/grub2-efi `ls -d misc/pcbsd-* misc/trueos-*`"
-   for i in $subdirs
+   rc_halt "cd ${svndir}/build-files/ports-overlay"
+   for i in `find . | grep '/Makefile$' | sed 's|/Makefile||g' | sed 's|\./||g'`
    do
+      rc_halt "cd ${svndir}/build-files/ports-overlay"
+      if [ ! -d "$i" ] ; then echo "Invalid merge dir ${i}" ; continue ; fi
       cDir=`echo $i | cut -d '/' -f 1`
       pDir=`echo $i | cut -d '/' -f 2`
-      grep -q "SUBDIR += ${pDir}" ${cDir}/Makefile 
+
+      rc_halt "cd ${portsdir}"
+      grep -q "SUBDIR += ${pDir}" ${cDir}/Makefile
       if [ $? -eq 0 ] ; then continue; fi
 
       echo "Adding ${pDir} to ${cDir}/Makefile..."
