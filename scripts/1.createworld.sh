@@ -31,14 +31,14 @@ cd ${WORLDSRC}
 MACHINE_ARCH="$REALARCH"
 MACHINE="$REALARCH"
 export MACHINE_ARCH MACHINE
-make buildworld TARGET=$ARCH
+make -j8 buildworld TARGET=$ARCH
 if [ $? -ne 0 ] ; then
    echo "Failed running: make buildworld TARGET=$ARCH"
    exit 1 
 fi
 
 # Make the standard kernel
-make buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}
+make -j8 buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}
 if [ $? -ne 0 ] ; then
    echo "Failed running: make buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}"
    exit 1 
