@@ -15,10 +15,10 @@ if [ ! -e "${PROGDIR}/pkg-pubkey.cert.dist" ] ; then
    cp ${PROGDIR}/pkg-pubkey.cert.dist ${PROGDIR}/pkg-pubkey.cert
 fi
 
-# Source the config file
-. ../pcbsd.cfg
-
 cd ${PROGDIR}/scripts
+
+# Source the config file
+. ${PROGDIR}/pcbsd.cfg
 
 # First, lets check if we have all the required programs to build an ISO
 . ${PROGDIR}/scripts/functions.sh

@@ -1,16 +1,12 @@
 #!/bin/sh
 
-# Check if we have sourced the variables yet
-if [ "${PDESTDIR}" = "" ]
-then
-  . ../pcbsd.cfg
-fi
+# Where is the pcbsd-build program installed
+PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
-if [ -z ${PDESTDIR} ]
-then
-  echo "ERROR: PDESTDIR is still unset!"
-  exit 1
-fi
+# Source the config file
+. ${PROGDIR}/pcbsd.cfg
+
+cd ${PROGDIR}/scripts
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh

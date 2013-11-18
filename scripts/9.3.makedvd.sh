@@ -4,18 +4,13 @@
 #     Copyright: 2010 PC-BSD Software / iXsystems
 ############################################################################
 
-# Check if we have sourced the variables yet
-if [ -z $PDESTDIR ]
-then
-  . ../pcbsd.cfg
-fi
+# Where is the pcbsd-build program installed
+PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
+# Source the config file
+. ${PROGDIR}/pcbsd.cfg
 
-if [ -z ${PDESTDIR} ]
-then
-  echo "ERROR: PDESTDIR is still unset!"
-  exit 1
-fi
+cd ${PROGDIR}/scripts
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh

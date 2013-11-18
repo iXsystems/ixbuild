@@ -4,11 +4,11 @@
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 # Source the config file
-. ../pcbsd.cfg
+. ${PROGDIR}/pcbsd.cfg
 
 cd ${PROGDIR}/scripts
 
-# First, lets check if we have all the required programs to build an ISO
+# Source our functions
 . ${PROGDIR}/scripts/functions.sh
 
 # Check requirements
