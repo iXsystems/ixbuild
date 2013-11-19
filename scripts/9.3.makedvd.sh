@@ -50,10 +50,6 @@ if [ $? -ne 0 ] ; then
    exit_err "Failed running grub-mkrescue"
 fi
 
-#echo '/dev/iso9660/PCBSD_INSTALL / cd9660 ro 0 0' > ${PDESTDIR9}/etc/fstab
-#makefs -t cd9660 -o "bootimage=i386;${PDESTDIR9}/boot/cdboot" -o no-emul-boot -o rockridge -o label="PCBSD_Install" ${PROGDIR}/iso/${bFile}-DVD.iso ${PDESTDIR9}
-#rc_halt "rm ${PDESTDIR9}/etc/fstab"
-
 # Run MD5 command
 cd ${PROGDIR}/iso
 md5 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.md5

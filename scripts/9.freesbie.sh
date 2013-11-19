@@ -295,6 +295,8 @@ rm ${PROGDIR}/iso/* >/dev/null 2>/dev/null
 # Make the uzip file
 setup_usr_uzip
 
+cd ${PROGDIR}/scripts
+
 echo "Making DVD/USB Install Images"
 ${PROGDIR}/scripts/9.3.makedvd.sh
 if [ $? -ne 0 ] ; then
