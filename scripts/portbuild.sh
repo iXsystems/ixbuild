@@ -18,6 +18,8 @@ sh ${PROGDIR}/scripts/checkprogs.sh
 cStat=$?
 if [ $cStat -ne 0 ] ; then exit $cStat; fi
 
+# Set the GIT_URL variable for poudriere to work with
+GIT_URL="$PORTS_GIT_URL" ; export GIT_URL
 
 exit_trap()
 {
@@ -155,13 +157,13 @@ do_portsnap()
    echo "Updating ports collection..."
    poudriere -l | grep -q "^{POUDPORTS" 
    if [ $? -eq 0 ] ; then
-     poudriere ports -u -p "$POUDPORTS" 
+     poudriere ports -u -m git -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
        echo "Failed to update ports $POUDPORTS"
        exit 1
      fi
    else
-     poudriere ports -c -p "$POUDPORTS" 
+     poudriere ports -c -m git -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
        echo "Failed to create ports $POUDPORTS"
        exit 1
