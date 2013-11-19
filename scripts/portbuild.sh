@@ -18,9 +18,6 @@ sh ${PROGDIR}/scripts/checkprogs.sh
 cStat=$?
 if [ $cStat -ne 0 ] ; then exit $cStat; fi
 
-# Set the GIT_URL variable for poudriere to work with
-GIT_URL="$PORTS_GIT_URL" ; export GIT_URL
-
 exit_trap()
 {
    echo -e "Cleaning up poudriere build...\c"
@@ -154,21 +151,29 @@ mk_metapkg_bulkfile()
 
 do_portsnap()
 {
+   cp /usr/local/etc/poudriere.conf /tmp/.poudriere.conf.$$
+   cat /usr/local/etc/poudriere.conf | grep -v "GIT_URL" > /tmp/.poud.tmp.$$
+   echo "GIT_URL=\"$PORTS_GIT_URL\" ; export GIT_URL" >> /tmp/.poud.tmp.$$
+   mv /tmp/.poud.tmp.$$ /usr/local/etc/poudriere.conf
+
    echo "Updating ports collection..."
    poudriere -l | grep -q "^{POUDPORTS" 
    if [ $? -eq 0 ] ; then
      poudriere ports -u -m git -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
        echo "Failed to update ports $POUDPORTS"
+       mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
        exit 1
      fi
    else
      poudriere ports -c -m git -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
        echo "Failed to create ports $POUDPORTS"
+       mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
        exit 1
      fi
    fi
+   mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
 }
 
 do_pcbsd_portmerge()
