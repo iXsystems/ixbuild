@@ -11,7 +11,7 @@ fi
 if [ ! -e "${PROGDIR}/pkg.conf" ] ; then
    cp ${PROGDIR}/pkg.conf.dist ${PROGDIR}/pkg.conf
 fi
-if [ ! -e "${PROGDIR}/pkg-pubkey.cert.dist" ] ; then
+if [ ! -e "${PROGDIR}/pkg-pubkey.cert" ] ; then
    cp ${PROGDIR}/pkg-pubkey.cert.dist ${PROGDIR}/pkg-pubkey.cert
 fi
 
