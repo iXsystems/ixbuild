@@ -70,7 +70,8 @@ do_ports()
   fi
 
   # Check if we have a portstree to build
-  if [ ! -d "${PJPORTSDIR}" ] ; then
+  poudriere ports -l | grep -q "^$POUDPORTS"
+  if [ $? -ne 0 ] ; then
      sh ${PROGDIR}/scripts/portbuild.sh portsnap
      sync ; sleep 1
   fi
