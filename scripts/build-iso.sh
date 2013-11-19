@@ -66,11 +66,13 @@ do_ports()
   poudriere jail -l | grep -q $PBUILD
   if [ $? -ne 0 ] ; then
     update_poudriere_jail
+     sync ; sleep 1
   fi
 
   # Check if we have a portstree to build
   if [ ! -d "${PJPORTSDIR}" ] ; then
      sh ${PROGDIR}/scripts/portbuild.sh portsnap
+     sync ; sleep 1
   fi
 
   sh ${PROGDIR}/scripts/portbuild.sh all
