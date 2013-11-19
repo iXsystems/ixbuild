@@ -1,31 +1,45 @@
 #!/bin/sh
 # PC-BSD Build configuration settings
 
-# Which PC-BSD git branch to use
-# Note, this is only used for the overlays/install-overlay directory
-# All other PC-BSD code is pulled from PKGNG pcbsd-utils / pcbsd-utils-qt4
+# Which PC-BSD git URL to clone
 GITPCBSDURL="https://github.com/pcbsd/pcbsd.git"
+export GITPCBSDURL
+
+# Branch of the PC-BSD repo to build with
+# Available (9.2-release/master)
+#
+# Note, this is only used for the overlays/install-overlay directory
+# All other PC-BSD code is pulled from the PKGNG repo. If you want to
+# customize these bits, you will want to build a new local repo below.
 GITPCBSDBRANCH="9.2-release"
-export GITPCBSDURL GITPCBSDBRANCH
+export GITPCBSDBRANCH
 
-# What TrueOS/FreeBSD git branch to use
+# Which PC-BSD/FreeBSD git URL to clone for FreeBSD world/kernel
 GITFBSDURL="https://github.com/pcbsd/freebsd.git"
-GITFBSDBRANCH="releng/9.2"
-export GITFBSDURL GITFBSDBRANCH
+export GITFBSDURL
 
-# Set the target version for pulling pkgng packages / poudriere jail
+# The branch of PC-BSD/FreeBSD to build
+# Available (releng/9.2, stable/10)
+GITFBSDBRANCH="releng/9.2"
+export GITFBSDBRANCH
+
+# Set the target version of this build
+# Used for pulling pkgng packages / poudriere jail
 TARGETREL="9.2-RELEASE"
 export TARGETREL
 
-# Set the target ARCH type for world / pkgng
+# Set the target ARCH type for world / pkgng building
 ARCH="amd64"
 export ARCH
 
-# Poudriere data location
-POUD="/usr/local/poudriere"
-export POUD
-
 # Set if we are using a locally built PKGNG repo, or a remote one
-# local / remote
+# Available (local, remote)
+#
+# NOTE: If using local, you will need to install poudriere and be required
+# to do a complete PKGNG build of the FreeBSD ports tree.
 PKGREPO="remote"
 export PKGREPO
+
+# Poudriere data location, used if PKGREPO is set to "local"
+POUD="/usr/local/poudriere"
+export POUD
