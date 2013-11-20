@@ -80,13 +80,13 @@ TITLE="Main Menu"
 
 cd ${PROGDIR}/scripts
 
-upmenu=""
 if [ -e "upload.sh" ]; then
-  upmenu="upload \"Upload Menu\""
+  # Start the main dialog
+  dialog --backtitle "$TITLE" --menu "Select a build option:" 16 50 40 world "Rebuild World/Kernel" packages "Build packages (Poudriere)" iso "Create ISO Files" ports "Ports menu" upload "Upload menu" exit "Exit" 2>${ans}
+else
+  dialog --backtitle "$TITLE" --menu "Select a build option:" 16 50 40 world "Rebuild World/Kernel" packages "Build packages (Poudriere)" iso "Create ISO Files" ports "Ports menu" exit "Exit" 2>${ans}
 fi
 
-# Start the main dialog
-dialog --backtitle "$TITLE" --menu "Select a build option:" 16 50 40 world "Rebuild World/Kernel" packages "Build packages (Poudriere)" iso "Create ISO Files" $upmenu ports "Ports menu" exit "Exit" 2>${ans}
 if [ $? -ne 0 ] ; then
    echo "Canceled!"
    exit_trap
