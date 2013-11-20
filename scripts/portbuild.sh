@@ -136,12 +136,13 @@ do_portsnap()
    mv /tmp/.poud.tmp.$$ /usr/local/etc/poudriere.conf
 
    echo "Updating ports collection..."
-   poudriere -l | grep -q "^${POUDPORTS}" 
+   poudriere ports -l | grep -q "^${POUDPORTS}" 
    if [ $? -eq 0 ] ; then
 
+     echo "Removing old ports tree ${POUDPORTS}"
      poudriere ports -d -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
-       echo "Failed to update ports $POUDPORTS"
+       echo "Failed to delete ports $POUDPORTS"
        mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
        exit 1
      fi
