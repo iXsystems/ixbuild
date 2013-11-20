@@ -136,29 +136,27 @@ do_portsnap()
    mv /tmp/.poud.tmp.$$ /usr/local/etc/poudriere.conf
 
    echo "Updating ports collection..."
-   poudriere -l | grep -q "^{POUDPORTS" 
+   poudriere -l | grep -q "^${POUDPORTS}" 
    if [ $? -eq 0 ] ; then
-     if [ -d "$PJPORTSDIR" ] ; then
-	echo "Removing old $PJPORTSDIR"
-	rm -rf $PJPORTSDIR
-     fi
-     poudriere ports -u -m git -p "$POUDPORTS"
+
+     poudriere ports -d -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
        echo "Failed to update ports $POUDPORTS"
        mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
        exit 1
      fi
-   else
+
      if [ -d "$PJPORTSDIR" ] ; then
 	echo "Removing old $PJPORTSDIR"
 	rm -rf $PJPORTSDIR
      fi
-     poudriere ports -c -m git -p "$POUDPORTS"
-     if [ $? -ne 0 ] ; then
-       echo "Failed to create ports $POUDPORTS"
-       mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
-       exit 1
-     fi
+   fi
+
+   poudriere ports -c -m git -p "$POUDPORTS"
+   if [ $? -ne 0 ] ; then
+     echo "Failed to create ports $POUDPORTS"
+     mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
+     exit 1
    fi
    mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
 }
