@@ -18,27 +18,6 @@ sh ${PROGDIR}/scripts/checkprogs.sh
 cStat=$?
 if [ $cStat -ne 0 ] ; then exit $cStat; fi
 
-exit_trap()
-{
-   echo -e "Cleaning up poudriere build...\c"
-   if [ -z "$1" ] ; then
-      status="99"
-   else
-      status="$1"
-   fi
-   if [ -e "$ans" ] ; then
-      rm ${ans}
-   fi
-   if [ -n "$pCleanup" ] ; then
-      sleep 10
-      poudriere jail -k $pCleanup
-   fi
-   echo -e "Done"
-   exit 0
-}
-
-trap exit_trap 1 2 3 9 15
-
 merge_pcbsd_src_ports()
 {
    local mcwd=`pwd`
@@ -159,6 +138,10 @@ do_portsnap()
    echo "Updating ports collection..."
    poudriere -l | grep -q "^{POUDPORTS" 
    if [ $? -eq 0 ] ; then
+     if [ -d "$PJPORTSDIR" ] ; then
+	echo "Removing old $PJPORTSDIR"
+	rm -rf $PJPORTSDIR
+     fi
      poudriere ports -u -m git -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
        echo "Failed to update ports $POUDPORTS"
@@ -166,6 +149,10 @@ do_portsnap()
        exit 1
      fi
    else
+     if [ -d "$PJPORTSDIR" ] ; then
+	echo "Removing old $PJPORTSDIR"
+	rm -rf $PJPORTSDIR
+     fi
      poudriere ports -c -m git -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
        echo "Failed to create ports $POUDPORTS"
