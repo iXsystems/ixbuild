@@ -21,27 +21,6 @@ fi
 # Set answer file
 ans="/tmp/.ans.$$"
 
-exit_trap()
-{
-   echo -e "Cleaning up...\c"
-   if [ -z "$1" ] ; then
-      status="99"
-   else
-      status="$1"
-   fi
-   if [ -e "$ans" ] ; then
-      rm ${ans}
-   fi
-   if [ -n "$pCleanup" ] ; then
-      sleep 10
-      poudriere jail -k -j ${pCleanup}
-   fi
-   echo -e "Done"
-   exit 0
-}
-
-trap exit_trap 1 2 3 9 15
-
 upload_menu()
 {
   sh ${PROGDIR}/scripts/upload.sh
@@ -57,7 +36,7 @@ ports_menu()
     dialog --backtitle "$TITLE" --menu "Select a build option:" 14 40 40 merge "Update just PC-BSD ports" pup "Update entire ports tree" back "Back" 2>${ans}
   if [ $? -ne 0 ] ; then
      echo "Canceled!"
-     exit_trap
+     exit 1
   fi
     case `cat $ans` in
         pup) ./portbuild.sh portsnap ; rtn ;;
@@ -89,7 +68,7 @@ fi
 
 if [ $? -ne 0 ] ; then
    echo "Canceled!"
-   exit_trap
+   exit 1
 fi
 case `cat $ans` in
     world) echo "Rebuild the FreeBSD world?"
@@ -107,7 +86,7 @@ case `cat $ans` in
  packages) ./build-iso.sh packages ; rtn ;;
     ports) ports_menu ;;
    upload) upload_menu ;;
-     exit) exit_trap 0 ;;
+     exit) exit 0 ;;
         *) ;; 
 esac
 
