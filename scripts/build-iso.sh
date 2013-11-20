@@ -86,14 +86,19 @@ do_ports()
 do_ports_all()
 {
   sh ${PROGDIR}/scripts/portbuild.sh portsnap
+  exit $?
 }
 
 do_ports_pcbsd()
 {
   if [ ! -d "${PJPORTSDIR}" ] ; then
      sh ${PROGDIR}/scripts/portbuild.sh portsnap
+     if [ $? -ne 0 ] ; then
+        exit 1
+     fi
   fi
   sh ${PROGDIR}/scripts/portbuild.sh portmerge
+  exit $?
 }
 
 echo "Operation started: `date`"
