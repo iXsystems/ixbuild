@@ -180,14 +180,14 @@ rc_halt "cp ${GITBRANCH}/build-files/conf/installcd-packages ${PDESTDIR9}/instal
 rc_halt "mount -t devfs devfs ${PDESTDIR9}/dev"
 
 # Bootstrap PKGNG
-pkg -c ${PDESTDIR9} add /mnt/pkg-*.txz
+rc_halt "pkg-static -c ${PDESTDIR9} add /mnt/pkg.txz"
 
 echo '#!/bin/sh
 cd /mnt
 while read pkg
 do
   echo "Adding PACKAGE: $pkg"
-  pkg add -f ${pkg} >/tmp/pkg-log 2>/tmp/pkg-log
+  pkg-static add -f ${pkg} >/tmp/pkg-log 2>/tmp/pkg-log
   if [ $? -ne 0 ] ; then
      echo "FAILED adding: $pkg"
      echo "Output:"

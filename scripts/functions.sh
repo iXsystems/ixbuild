@@ -272,7 +272,7 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "pkg -C ${PROGDIR}/tmp/pkg.conf fetch -y -d ${pkgName}"
+      rc_halt "pkg-static -C ${PROGDIR}/tmp/pkg.conf fetch -y -d ${pkgName}"
     done
 
     # Copy pkgng
