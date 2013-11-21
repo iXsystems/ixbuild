@@ -116,11 +116,15 @@ case $TARGET in
  all|ALL) do_world 
 	  if [ "$PKGREPO" = "local" ] ; then
 	    do_ports
+	    check_essential_pkgs
 	  fi
           do_iso ;;
    world) do_world ;;
      iso) do_iso ;;
-   ports) do_ports ;;
+   ports) do_ports
+          check_essential_pkgs "NO"
+          exit $?
+          ;;
 check-ports) do_check_ports ;;
 ports-update-all) do_ports_all ;;
 ports-update-pcbsd) do_ports_pcbsd ;;
