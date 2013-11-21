@@ -37,7 +37,7 @@ mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages
 fDate="-`date '+%m-%d-%Y'`"
 
 # Base file name
-bFile="PCBSD${PCBSDVER}${fDate}-${FARCH}"
+bFile="PCBSD${ISOVER}${fDate}-${FARCH}"
 export bFile
 
 # Set the pcbsd-media-details file marker on this media

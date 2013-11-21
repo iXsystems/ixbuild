@@ -39,6 +39,17 @@ PDESTDIRSERVER="${PROGDIR}/buildworld-server" ; export PDESTDIRSERVER
 # Set the PC-BSD Version
 export PCBSDVER="${TARGETREL}"
 
+# Set the ISO Version
+REVISION="`cat ${WORLDSRC}/sys/conf/newvers.sh 2>/dev/null | grep '^REVISION=' | cut -d '"' -f 2`"
+if [ -z "$REVISION" ] ; then
+   REVISION="UNKNOWN"
+fi
+BRANCH="`cat ${WORLDSRC}/sys/conf/newvers.sh 2>/dev/null | grep '^BRANCH=' | cut -d '"' -f 2`"
+if [ -z "$BRANCH" ] ; then
+   BRANCH="UNKNOWN"
+fi
+export ISOVER="${REVISION}-${BRANCH}"
+
 # Where are the config files
 PCONFDIR="${GITBRANCH}/build-files/conf" ; export PCONFDIR
 
