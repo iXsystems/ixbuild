@@ -101,6 +101,12 @@ do_ports_pcbsd()
   exit $?
 }
 
+do_check_ports()
+{
+  check_essential_pkgs "NO"
+  exit $?
+}
+
 echo "Operation started: `date`"
 
 TARGET="$1"
@@ -115,6 +121,7 @@ case $TARGET in
    world) do_world ;;
      iso) do_iso ;;
    ports) do_ports ;;
+check-ports) do_check_ports ;;
 ports-update-all) do_ports_all ;;
 ports-update-pcbsd) do_ports_pcbsd ;;
    clean) do_clean ;;

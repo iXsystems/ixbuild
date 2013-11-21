@@ -323,3 +323,45 @@ get_last_rev()
    fi
    return 1
 }
+
+check_essential_pkgs()
+{
+   echo "Checking essential pkgs..."
+   haveWarn=0
+
+   # Check all our PC-BSD meta-pkgs, warn if some of them don't exist
+   # or cannot be determined
+   chkList=`ls -d ${PJPORTSDIR}/sysutils/pcbsd-util* ${PJPORTSDIR}/misc/pcbsd-* ${PJPORTSDIR}/misc/trueos-*`
+   for i in $chkList
+   do
+
+     # Get the pkgname
+     pkgName=""
+     pkgName=`make -C ${i} -V PKGNAME PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/$PBUILD-make.conf`
+     if [ -z "${pkgName}" ] ; then
+        echo "Could not get PKGNAME for ${i}"
+        haveWarn=1
+     fi
+
+     # Check the arch type
+     pArch=`make -C ${i} -V ONLY_FOR_ARCHS PORTSDIR=${PJPORTSDIR}`
+     if [ -n "$pArch" -a "$pArch" != "$ARCH" ] ; then continue; fi
+
+     if [ ! -e "${PPKGDIR}/All/${pkgName}.txz" ] ; then
+        echo "WARNING: Missing package ${pkgName} for port ${i}"
+        haveWarn=1
+     else
+     fi
+   done
+   if [ $haveWarn -ne 0 -a "$1" != "NO" ] ; then
+      echo "Warning: Packages are missing! Continue?"
+      echo -e "(Y/N)\c"
+      read tmp
+      if [ "$tmp" != "y" -a "$tmp" != "Y" ] ; then
+         rtn
+         exit 1
+      fi
+   fi
+
+   return $haveWarn
+}
