@@ -30,8 +30,8 @@ echo "Copying dist files.."
 cp ${DISTDIR}/* ${ISODISTDIR}/
 cp /usr/ports.txz ${ISODISTDIR}/ 2>/dev/null
 
-mkdir ${ISODISTDIR}/packages
-mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages
+rc_halt "mkdir -p ${ISODISTDIR}/packages/All"
+rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages/All"
 
 # Set the file-date
 fDate="-`date '+%m-%d-%Y'`"
@@ -56,6 +56,6 @@ md5 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.md5
 sha256 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.sha256
 ln -s ${bFile}-DVD-USB.iso latest.iso
 
-umount ${ISODISTDIR}/packages
+rc_halt "umount ${ISODISTDIR}/packages/All"
 
 exit 0
