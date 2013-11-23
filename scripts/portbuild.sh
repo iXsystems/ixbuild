@@ -91,7 +91,7 @@ merge_pcbsd_src_ports()
       pDir=`echo $i | cut -d '/' -f 2`
 
       rc_halt "cd ${portsdir}"
-      grep -q "SUBDIR += ${pDir}" ${cDir}/Makefile
+      grep -q "SUBDIR += ${pDir}\$" ${cDir}/Makefile
       if [ $? -eq 0 ] ; then continue; fi
 
       echo "Adding ${pDir} to ${cDir}/Makefile..."
