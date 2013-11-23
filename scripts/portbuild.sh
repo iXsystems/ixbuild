@@ -170,6 +170,10 @@ do_pcbsd_portmerge()
    # Create the ports INDEX file
    cd ${PJPORTSDIR}
    make -C ${PJPORTSDIR} PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/$PBUILD-make.conf index
+   if [ $? -ne 0 ] ; then
+      echo "Failed building port INDEX..."
+      exit 1
+   fi
 
    # Make dist ports files
    rm ${PROGDIR}/usr/ports 2>/dev/null
