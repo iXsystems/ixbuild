@@ -65,7 +65,7 @@ case $ARCH in
 esac
 
 # Set the location of packages needed for our Meta-Packages
-export METAPKGDIR="${PROGDIR}/tmp/All"
+export METAPKGDIR="${PROGDIR}/tmp"
 
 # Poudriere Ports tag, change to use multiple ports trees
 if [ -z "$POUDPORTS" ] ; then
@@ -240,8 +240,18 @@ create_pkg_conf()
    fi
 }
 
+create_installer_pkg_conf()
+{
+   cp ${PROGDIR}/pkg.conf ${PROGDIR}/tmp/pkg.conf
+   cp ${PROGDIR}/pkg-pubkey.cert ${PROGDIR}/tmp/pkg-pubkey.cert
+
+   cat ${PROGDIR}/tmp/pkg.conf | grep -v "packagesite:" > ${PROGDIR}/tmp/pkg.conf.local
+   mv ${PROGDIR}/tmp/pkg.conf.local ${PROGDIR}/tmp/pkg.conf
+   echo "packagesite: file:///dist/packages" >> ${PROGDIR}/tmp/pkg.conf
+}
+
 # Copy the ISO package files to a new location
-cp_iso_pkg_files() 
+cp_iso_pkg_files()
 {
    if [ -d "$METAPKGDIR" ] ; then
      rm -rf ${METAPKGDIR}
@@ -278,6 +288,13 @@ cp_iso_pkg_files()
 
     # Copy pkgng
     cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz
+
+    # Now we need to grab the digests / packagesite / repo
+    PSITE="`grep 'packagesite:' ${PROGDIR}/tmp/pkg.conf | cut -d ' ' -f 2`"
+    rc_halt "fetch -o ${PROGDIR}/tmp/digests.txz ${PSITE}/digests.txz"
+    rc_halt "fetch -o ${PROGDIR}/tmp/packagesite.txz ${PSITE}/packagesite.txz"
+    rc_halt "fetch -o ${PROGDIR}/tmp/repo.txz ${PSITE}/repo.txz"
+    create_installer_pkg_conf
 }
 
 update_poudriere_jail()

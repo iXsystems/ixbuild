@@ -30,8 +30,8 @@ echo "Copying dist files.."
 cp ${DISTDIR}/* ${ISODISTDIR}/
 cp /usr/ports.txz ${ISODISTDIR}/ 2>/dev/null
 
-rc_halt "mkdir -p ${ISODISTDIR}/packages/All"
-rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages/All"
+rc_halt "mkdir -p ${ISODISTDIR}/packages"
+rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"
 
 # Set the file-date
 fDate="-`date '+%m-%d-%Y'`"
