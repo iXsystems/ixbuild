@@ -243,9 +243,10 @@ create_pkg_conf()
 # Copy the ISO package files to a new location
 cp_iso_pkg_files() 
 {
-   if [ ! -d "$METAPKGDIR" ] ; then
-     mkdir ${METAPKGDIR}
+   if [ -d "$METAPKGDIR" ] ; then
+     rm -rf ${METAPKGDIR}
    fi
+   mkdir ${METAPKGDIR}
 
    create_pkg_conf
 
