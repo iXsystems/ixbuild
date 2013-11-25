@@ -56,6 +56,6 @@ md5 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.md5
 sha256 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.sha256
 ln -s ${bFile}-DVD-USB.iso latest.iso
 
-rc_halt "umount ${ISODISTDIR}/packages/All"
+rc_halt "umount ${ISODISTDIR}/packages"
 
 exit 0
