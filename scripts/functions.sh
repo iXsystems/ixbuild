@@ -242,12 +242,12 @@ create_pkg_conf()
 
 create_installer_pkg_conf()
 {
-   cp ${PROGDIR}/pkg.conf ${PROGDIR}/tmp/pkg.conf
    cp ${PROGDIR}/pkg-pubkey.cert ${PROGDIR}/tmp/pkg-pubkey.cert
 
-   cat ${PROGDIR}/tmp/pkg.conf | grep -v "packagesite:" > ${PROGDIR}/tmp/pkg.conf.local
-   mv ${PROGDIR}/tmp/pkg.conf.local ${PROGDIR}/tmp/pkg.conf
-   echo "packagesite: file:///dist/packages" >> ${PROGDIR}/tmp/pkg.conf
+   echo "packagesite: file:///mnt" > ${PROGDIR}/tmp/pkg.conf
+   echo "PUBKEY: /mnt/pkg-pubkey.cert" >> ${PROGDIR}/tmp/pkg.conf
+   echo "PKG_CACHEDIR: /usr/local/tmp" >> ${PROGDIR}/tmp/pkg.conf
+
 }
 
 # Copy the ISO package files to a new location
