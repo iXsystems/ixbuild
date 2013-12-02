@@ -214,7 +214,7 @@ if [ "$target" = "all" ] ; then
    export pCleanup
 
    # Build entire ports tree
-   poudriere bulk -a -j $PBUILD -p $POUDPORTS | tee ${PROGDIR}/log/poudriere.log
+   poudriere bulk -a -v -j $PBUILD -p $POUDPORTS | tee ${PROGDIR}/log/poudriere.log
    if [ $? -ne 0 ] ; then
       echo "Failed poudriere build..."
    fi
