@@ -47,3 +47,7 @@ export PORTS_GIT_URL
 # Poudriere data location, used if PKGREPO is set to "local"
 POUD="/usr/local/poudriere"
 export POUD
+
+# Run Poudriere in verbose mode?
+# YES / NO - Default NO
+#POUD_VERBOSE="YES"

@@ -208,13 +208,19 @@ if [ -e "/usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere" ] ; then
   cat /usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere >> /usr/local/etc/poudriere.d/$PBUILD-make.conf
 fi
 
+# Running poudriere in verbose mode?
+pV=""
+if [ "$POUD_VERBOSE" = "YES" ] ; then
+  pV="-v"
+fi
+
 if [ "$target" = "all" ] ; then
    # Set cleanup var
    pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
    export pCleanup
 
    # Build entire ports tree
-   poudriere bulk -a -v -j $PBUILD -p $POUDPORTS | tee ${PROGDIR}/log/poudriere.log
+   poudriere bulk -a ${pV} -j $PBUILD -p $POUDPORTS | tee ${PROGDIR}/log/poudriere.log
    if [ $? -ne 0 ] ; then
       echo "Failed poudriere build..."
    fi
