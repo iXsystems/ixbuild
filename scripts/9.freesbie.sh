@@ -303,6 +303,13 @@ if [ $? -ne 0 ] ; then
    exit_err "Failed running 9.3.makedvd.sh"
 fi
 
+# Make the net install file directory now
+echo "Making Net Files"
+${PROGDIR}/scripts/9.6.makenetfiles.sh
+if [ $? -ne 0 ] ; then
+   exit_err "Failed running 9.6.makenetfiles.sh"
+fi
+
 umount -f ${PDESTDIR9} 2>/dev/null
 rmdir ${PDESTDIR9}
 
