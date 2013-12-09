@@ -303,7 +303,7 @@ cp_iso_pkg_files()
     cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz
 
     # Now we need to grab the digests / packagesite
-    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g'`
+    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
     rc_halt "fetch -o ${PROGDIR}/tmp/digests.txz ${PSITE}/digests.txz"
     rc_halt "fetch -o ${PROGDIR}/tmp/packagesite.txz ${PSITE}/packagesite.txz"
     create_installer_pkg_conf
