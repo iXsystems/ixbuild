@@ -8,11 +8,8 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 if [ ! -e "${PROGDIR}/pcbsd.cfg" ] ; then
    cp ${PROGDIR}/pcbsd.cfg.dist ${PROGDIR}/pcbsd.cfg
 fi
-if [ ! -e "${PROGDIR}/pkg.conf" ] ; then
-   cp ${PROGDIR}/pkg.conf.dist ${PROGDIR}/pkg.conf
-fi
-if [ ! -e "${PROGDIR}/pkg-pubkey.cert" ] ; then
-   cp ${PROGDIR}/pkg-pubkey.cert.dist ${PROGDIR}/pkg-pubkey.cert
+if [ ! -e "${PROGDIR}/repo.conf" ] ; then
+   cp ${PROGDIR}/repo.conf.dist ${PROGDIR}/repo.conf
 fi
 
 cd ${PROGDIR}/scripts

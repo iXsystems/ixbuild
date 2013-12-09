@@ -227,27 +227,40 @@ rtn()
 
 create_pkg_conf()
 {
-   cp ${PROGDIR}/pkg.conf ${PROGDIR}/tmp/pkg.conf
-   cp ${PROGDIR}/pkg-pubkey.cert ${PROGDIR}/tmp/pkg-pubkey.cert
-   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/pkg.conf
-   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/pkg.conf
-   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/pkg.conf
 
-   if [ "$PKGREPO" = "local" ]; then
-      cat ${PROGDIR}/tmp/pkg.conf | grep -v "packagesite:" > ${PROGDIR}/tmp/pkg.conf.local
-      mv ${PROGDIR}/tmp/pkg.conf.local ${PROGDIR}/tmp/pkg.conf
-      echo "packagesite: file://${PPKGDIR}" >> ${PROGDIR}/tmp/pkg.conf
+   if [ -d "${PROGDIR}/tmp/repo" ] ; then
+      rm -rf ${PROGDIR}/tmp/repo
    fi
+   mkdir ${PROGDIR}/tmp/repo
+
+   # Doing a local package build
+   if [ "$PKGREPO" = "local" ]; then
+      echo "pcbsd-build: {
+               url: \"file://${PPKGDIR}\",
+               enabled: true
+              }" >  ${PROGDIR}/tmp/repo/repo.conf
+	return
+   fi
+
+   # Doing a remote pull from a repo
+   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/repo.conf
+   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/repo.conf
+   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/repo.conf
+   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/repo.conf
+
 }
 
 create_installer_pkg_conf()
 {
-   cp ${PROGDIR}/pkg-pubkey.cert ${PROGDIR}/tmp/pkg-pubkey.cert
+   if [ -d "${PROGDIR}/tmp/repo-installer" ] ; then
+      rm -rf ${PROGDIR}/tmp/repo-installer
+   fi
+   mkdir ${PROGDIR}/tmp/repo-installer
 
-   echo "packagesite: file:///mnt" > ${PROGDIR}/tmp/pkg.conf
-   echo "PUBKEY: /mnt/pkg-pubkey.cert" >> ${PROGDIR}/tmp/pkg.conf
-   echo "PKG_CACHEDIR: /usr/local/tmp" >> ${PROGDIR}/tmp/pkg.conf
-
+   echo "pcbsd-build: {
+               url: \"file:///mnt\",
+               enabled: true
+              }" >  ${PROGDIR}/tmp/repo-installer/repo.conf
 }
 
 # Copy the ISO package files to a new location
@@ -283,17 +296,16 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "pkg-static -C ${PROGDIR}/tmp/pkg.conf fetch -y -d ${pkgName}"
+      rc_halt "pkg-static -R ${PROGDIR}/tmp/repo/ fetch -y -d ${pkgName}"
     done
 
     # Copy pkgng
     cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz
 
-    # Now we need to grab the digests / packagesite / repo
-    PSITE="`grep 'packagesite:' ${PROGDIR}/tmp/pkg.conf | cut -d ' ' -f 2`"
+    # Now we need to grab the digests / packagesite
+    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g'`
     rc_halt "fetch -o ${PROGDIR}/tmp/digests.txz ${PSITE}/digests.txz"
     rc_halt "fetch -o ${PROGDIR}/tmp/packagesite.txz ${PSITE}/packagesite.txz"
-    rc_halt "fetch -o ${PROGDIR}/tmp/repo.txz ${PSITE}/repo.txz"
     create_installer_pkg_conf
 }
 

@@ -1,3 +1,0 @@
-packagesite: http://pkg.cdn.pcbsd.org/%RELVERSION%/%ARCH%
-PUBKEY: %PROGDIR%/pkg-pubkey.cert
-PKG_CACHEDIR: %PROGDIR%/tmp
