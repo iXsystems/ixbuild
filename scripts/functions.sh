@@ -233,6 +233,8 @@ create_pkg_conf()
    fi
    mkdir ${PROGDIR}/tmp/repo
 
+   echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
+
    # Doing a local package build
    if [ "$PKGREPO" = "local" ]; then
       echo "pcbsd-build: {
@@ -296,7 +298,7 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "pkg-static -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -d ${pkgName}"
+      rc_halt "pkg-static -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -d ${pkgName}"
     done
 
     # Copy pkgng
