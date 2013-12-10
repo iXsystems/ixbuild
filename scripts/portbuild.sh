@@ -225,6 +225,13 @@ if [ "$target" = "all" ] ; then
       echo "Failed poudriere build..."
    fi
 
+   # If the user wanted to sign the repo lets do it now
+   if [ -n "$POUD_SIGN_REPO" ] ; then
+      echo "Signing repo..."
+      rc_halt "cd $PPKGDIR"
+      rc_halt "pkg repo . ${POUD_SIGN_REPO}"
+   fi
+
    # Unset cleanup var
    pCleanup=""
    export pCleanup

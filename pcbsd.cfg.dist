@@ -51,3 +51,8 @@ export POUD
 # Run Poudriere in verbose mode?
 # YES / NO - Default NO
 #POUD_VERBOSE="YES"
+export POUD_VERBOSE
+
+# Set this with the flag for pkg repo to do signing with
+#POUD_SIGN_REPO="signing_command: <cmd>"
+export POUD_SIGN_REPO
