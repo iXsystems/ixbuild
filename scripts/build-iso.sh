@@ -80,6 +80,12 @@ do_ports()
   fi
 }
 
+do_ports_meta()
+{
+  sh ${PROGDIR}/scripts/portbuild.sh meta
+  exit $?
+}
+
 do_ports_all()
 {
   sh ${PROGDIR}/scripts/portbuild.sh portsnap
@@ -123,6 +129,7 @@ case $TARGET in
           exit $?
           ;;
 check-ports) do_check_ports ;;
+ports-meta-only) do_ports_meta ;;
 ports-update-all) do_ports_all ;;
 ports-update-pcbsd) do_ports_pcbsd ;;
    clean) do_clean ;;

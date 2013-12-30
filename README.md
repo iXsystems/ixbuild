@@ -59,6 +59,12 @@ ports
 Will rebuild the local ports / pkgng repo, using poudriere, if enable in
 pcbsd.cfg
 
+ports-meta-only
+---
+
+Will do a poudriere build of just the PC-BSD specific meta-ports for creating
+an ISO file, not the entire ports tree
+
 ports-update-all
 ---
 

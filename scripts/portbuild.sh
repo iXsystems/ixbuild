@@ -237,6 +237,33 @@ if [ "$target" = "all" ] ; then
    export pCleanup
 
    exit 0
+elif [ "$target" = "meta" ] ; then
+   bList="/tmp/.bulkList.$$"
+
+   # Build specific meta-pkg list
+   mk_metapkg_bulkfile "$bList"
+
+   # Set cleanup var
+   pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
+   export pCleanup
+
+   poudriere bulk ${pV} -j $PBUILD -p $POUDPORTS -f $bList | tee ${PROGDIR}/log/poudriere.log
+   if [ $? -ne 0 ] ; then
+      echo "Failed poudriere build..."
+   fi
+
+   # If the user wanted to sign the repo lets do it now
+   if [ -n "$POUD_SIGN_REPO" ] ; then
+      echo "Signing repo..."
+      rc_halt "cd $PPKGDIR"
+      rc_halt "pkg repo . ${POUD_SIGN_REPO}"
+   fi
+
+   # Unset cleanup var
+   pCleanup=""
+   export pCleanup
+
+   exit 0
 elif [ "$1" = "portsnap" ] ; then
    do_portsnap
    do_pcbsd_portmerge

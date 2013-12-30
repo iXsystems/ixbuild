@@ -14,6 +14,8 @@ check-ports:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh check-ports
 ports:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh ports
+ports-meta-only:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh ports-meta-only
 ports-update-all:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh ports-update-all
 ports-update-pcbsd:
