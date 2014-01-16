@@ -33,6 +33,11 @@ do_world() {
     echo "Script failed!"
     exit 1
   fi
+
+  # If we are using a local repo, we should update the jail now
+  if [ "$PKGREPO" = "local" ] ; then
+    update_poudriere_jail
+  fi
 }
 
 do_iso() 
