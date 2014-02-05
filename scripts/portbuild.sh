@@ -186,6 +186,17 @@ do_pcbsd_portmerge()
    rc_halt "rmdir ${PROGDIR}/usr"
 }
 
+sign_pkg_repo()
+{
+   echo "Signing repo..."
+   if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
+   rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static"
+   rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$"
+   rc_halt "cd $PPKGDIR"
+   rc_halt "/tmp/pkg-static.$$ repo . ${POUD_SIGN_REPO}"
+   rc_halt "rm /tmp/pkg-static.$$"
+}
+
 if [ -z "$1" ] ; then
    target="all"
 else
@@ -227,9 +238,7 @@ if [ "$target" = "all" ] ; then
 
    # If the user wanted to sign the repo lets do it now
    if [ -n "$POUD_SIGN_REPO" ] ; then
-      echo "Signing repo..."
-      rc_halt "cd $PPKGDIR"
-      rc_halt "pkg repo . ${POUD_SIGN_REPO}"
+      sign_pkg_repo
    fi
 
    # Unset cleanup var
@@ -254,9 +263,7 @@ elif [ "$target" = "meta" ] ; then
 
    # If the user wanted to sign the repo lets do it now
    if [ -n "$POUD_SIGN_REPO" ] ; then
-      echo "Signing repo..."
-      rc_halt "cd $PPKGDIR"
-      rc_halt "pkg repo . ${POUD_SIGN_REPO}"
+      sign_pkg_repo
    fi
 
    # Unset cleanup var
