@@ -179,8 +179,13 @@ rc_halt "mount_nullfs ${METAPKGDIR} ${PDESTDIR9}/mnt"
 rc_halt "cp ${GITBRANCH}/build-files/conf/installcd-packages ${PDESTDIR9}/installcd-packages"
 rc_halt "mount -t devfs devfs ${PDESTDIR9}/dev"
 
+
 # Bootstrap PKGNG
-rc_halt "pkg-static -c ${PDESTDIR9} add /mnt/All/pkg.txz"
+if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
+rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static"
+rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$"
+rc_halt "/tmp/pkg-static.$$ -c ${PDESTDIR9} add /mnt/All/pkg.txz"
+rc_halt "rm /tmp/pkg-static.$$"
 
 echo '#!/bin/sh
 cd /mnt/All

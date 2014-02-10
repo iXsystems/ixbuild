@@ -275,6 +275,10 @@ cp_iso_pkg_files()
 
    create_pkg_conf
 
+   if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
+   rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static"
+   rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$"
+
    echo "Fetching PC-BSD ISO packages... Please wait, this may take several minutes..."
 
    haveWarn=0
@@ -298,17 +302,19 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "pkg-static -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -d ${pkgName}"
-    done
+      rc_halt "/tmp/pkg-static.$$ -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -d ${pkgName}"
+   done
 
-    # Copy pkgng
-    cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz
+   # Copy pkgng
+   cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz
 
-    # Now we need to grab the digests / packagesite
-    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
-    rc_halt "fetch -o ${PROGDIR}/tmp/digests.txz ${PSITE}/digests.txz"
-    rc_halt "fetch -o ${PROGDIR}/tmp/packagesite.txz ${PSITE}/packagesite.txz"
-    create_installer_pkg_conf
+   # Now we need to grab the digests / packagesite
+   PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
+   rc_halt "fetch -o ${PROGDIR}/tmp/digests.txz ${PSITE}/digests.txz"
+   rc_halt "fetch -o ${PROGDIR}/tmp/packagesite.txz ${PSITE}/packagesite.txz"
+   create_installer_pkg_conf
+
+   rc_halt "rm /tmp/pkg-static.$$"
 }
 
 update_poudriere_jail()
