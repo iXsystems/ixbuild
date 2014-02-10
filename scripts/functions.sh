@@ -275,16 +275,8 @@ cp_iso_pkg_files()
 
    create_pkg_conf
 
-   # Grab latest pkgng from the repo
    if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
-   if [ "$PKGREPO" = "local" ]; then
-     rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static"
-   else
-     pkgUrl=`cat ${PROGDIR}/tmp/pkg.conf | grep url | cut -d '"' -f 2`
-     rc_halt "fetch -o /tmp/.pkg.txz.$$ $pkgUrl/Latest/pkg.txz"
-     rc_halt "tar xv --strip-components 4 -f /tmp/.pkg.txz.$$ -C /tmp /usr/local/sbin/pkg-static"
-     rc_halt "rm /tmp/.pkg.txz.$$"
-   fi
+   rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static"
    rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$"
 
    echo "Fetching PC-BSD ISO packages... Please wait, this may take several minutes..."
