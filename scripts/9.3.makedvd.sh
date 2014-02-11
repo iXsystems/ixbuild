@@ -55,6 +55,8 @@ cd ${PROGDIR}/iso
 md5 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.md5
 sha256 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.sha256
 ln -s ${bFile}-DVD-USB.iso latest.iso
+ln -s ${bFile}-DVD-USB.iso.md5 latest.iso.md5
+ln -s ${bFile}-DVD-USB.iso.sha256 latest.iso.sha256
 
 rc_halt "umount ${ISODISTDIR}/packages"
 
