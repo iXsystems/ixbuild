@@ -28,7 +28,6 @@ mkdir ${ISODISTDIR}
 
 echo "Copying dist files.."
 cp ${DISTDIR}/* ${ISODISTDIR}/
-cp /usr/ports.txz ${ISODISTDIR}/ 2>/dev/null
 
 rc_halt "mkdir -p ${ISODISTDIR}/packages"
 rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"

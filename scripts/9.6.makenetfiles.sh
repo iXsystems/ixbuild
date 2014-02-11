@@ -17,6 +17,5 @@ fi
 rc_nohalt "rm -rf ${PROGDIR}/iso/dist"
 rc_halt "mkdir ${PROGDIR}/iso/dist"
 rc_halt "cp ${DISTDIR}/* ${PROGDIR}/iso/dist/"
-rc_halt "cp /usr/ports.txz ${PROGDIR}/iso/dist/"
 
 exit 0
