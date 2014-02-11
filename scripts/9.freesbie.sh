@@ -16,6 +16,18 @@ cd ${PROGDIR}/scripts
 . ${PROGDIR}/scripts/functions.sh
 
 
+# Make sure we have our freebsd sources
+if [ ! -d "${WORLDSRC}" ]; then
+   rc_halt "git clone ${GITFBSDURL} ${WORLDSRC}"
+   git_fbsd_up "${WORLDSRC}" "${WORLDSRC}"
+else
+  if [ -d "${WORLDSRC}/.git" ]; then
+    echo "Updating FreeBSD sources..."
+    git_fbsd_up "${WORLDSRC}" "${WORLDSRC}"
+  fi
+fi
+
+# Make sure we have our pcbsd sources
 if [ ! -d "${GITBRANCH}" ] ; then
    rc_halt "git clone ${GITPCBSDURL} ${GITBRANCH}"
 else
