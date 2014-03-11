@@ -48,7 +48,10 @@ BRANCH="`cat ${WORLDSRC}/sys/conf/newvers.sh 2>/dev/null | grep '^BRANCH=' | cut
 if [ -z "$BRANCH" ] ; then
    BRANCH="UNKNOWN"
 fi
-export ISOVER="${REVISION}-${BRANCH}"
+if [ -z "$ISOVER" ] ; then
+  # This can be overridden via pcbsd.cfg
+  export ISOVER="${REVISION}-${BRANCH}"
+fi
 
 # Where are the config files
 PCONFDIR="${GITBRANCH}/build-files/conf" ; export PCONFDIR
