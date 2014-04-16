@@ -54,8 +54,10 @@ merge_pcbsd_src_ports()
    # Make the dist files
    cliREV=`get_last_rev "${svndir}/src-sh"`
    guiREV=`get_last_rev "${svndir}/src-qt4"`
+   deREV=`get_last_rev "${svndir}/lumina"`
    rc_halt "cd ${svndir}"
    rc_nohalt "rm ${distCache}/pcbsd-utils*.bz2"
+   rc_nohalt "rm ${distCache}/lumina-*.bz2"
 
    echo "Creating dist files for version: $cliREV"
    rc_halt "tar cvjf ${distCache}/pcbsd-utils-${cliREV}.tar.bz2 src-sh" 2>/dev/null
@@ -63,23 +65,39 @@ merge_pcbsd_src_ports()
    echo "Creating dist files for version: $guiREV"
    rc_halt "tar cvjf ${distCache}/pcbsd-utils-qt4-${guiREV}.tar.bz2 src-qt4" 2>/dev/null
 
+   echo "Creating dist files for version: $deREV"
+   rc_halt "tar cvjf ${distCache}/lumina-${deREV}.tar.bz2 lumina" 2>/dev/null
+
    # Copy ports files
    rm -rf ${portsdir}/sysutils/pcbsd-utils 2>/dev/null
    rm -rf ${portsdir}/sysutils/pcbsd-utils-qt4 2>/dev/null
    rm -rf ${portsdir}/sysutils/pcbsd-base 2>/dev/null
    rm -rf ${portsdir}/sysutils/trueos-base 2>/dev/null
+   rm -rf ${portsdir}/x11/lumina 2>/dev/null
    rc_halt "cp -r src-sh/port-files ${portsdir}/sysutils/pcbsd-utils" 
    rc_halt "cp -r src-qt4/port-files ${portsdir}/sysutils/pcbsd-utils-qt4" 
+   rc_halt "cp -r lumina/port-files ${portsdir}/x11/lumina"
    
    # Set the version numbers
    sed -i '' "s|CHGVERSION|${cliREV}|g" ${portsdir}/sysutils/pcbsd-utils/Makefile
    sed -i '' "s|CHGVERSION|${guiREV}|g" ${portsdir}/sysutils/pcbsd-utils-qt4/Makefile
+   sed -i '' "s|CHGVERSION|${deREV}|g" ${portsdir}/x11/lumina/Makefile
 
    # Create the makesums / distinfo file
    rc_halt "cd ${portsdir}/sysutils/pcbsd-utils"
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
    rc_halt "cd ${portsdir}/sysutils/pcbsd-utils-qt4"
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
+   rc_halt "cd ${portsdir}/x11/lumina"
+   rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
+
+   echo "Adding x11/lumina to x11/Makefile..."
+   # Add to $cDir / Makefile
+   rc_halt "cd ${portsdir}"
+   mv x11/Makefile x11/Makefile.$$
+   echo "    SUBDIR += lumina" >x11/Makefile
+   cat x11/Makefile.$$ >> x11/Makefile
+   rm x11/Makefile.$$
 
    # Need to add these ports to INDEX / SUBDIR
    rc_halt "cd ${svndir}/build-files/ports-overlay"
