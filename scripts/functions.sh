@@ -366,7 +366,7 @@ check_essential_pkgs()
 
    # Check all our PC-BSD meta-pkgs, warn if some of them don't exist
    # or cannot be determined
-   chkList=`ls -d ${PJPORTSDIR}/sysutils/pcbsd-util* ${PJPORTSDIR}/misc/pcbsd-* ${PJPORTSDIR}/misc/trueos-*`
+   chkList=`ls -d ${PJPORTSDIR}/sysutils/pcbsd-util* ${PJPORTSDIR}/misc/pcbsd-* ${PJPORTSDIR}/misc/trueos-* ${PJPORTSDIR}/x11/lumina`
    for i in $chkList
    do
 
