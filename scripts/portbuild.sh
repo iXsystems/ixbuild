@@ -21,7 +21,7 @@ if [ $cStat -ne 0 ] ; then exit $cStat; fi
 merge_pcbsd_src_ports()
 {
    local mcwd=`pwd`
-   local svndir="$1"
+   local gitdir="$1"
    local portsdir="$2"
    local distCache=`grep '^DISTFILES_CACHE=' /usr/local/etc/poudriere.conf | cut -d '=' -f 2`
    if [ -z "$distCache" ] ; then
@@ -29,18 +29,18 @@ merge_pcbsd_src_ports()
    fi
 
    if [ ! -d "$distCache" ] ; then rc_halt "mkdir -p ${distCache}" ; fi
-   git_up "$svndir" "$svndir"
-   rc_halt "cd ${svndir}"
+   git_up "$gitdir" "$gitdir"
+   rc_halt "cd ${gitdir}"
 
      
    echo "Merging PC-BSD ports-overlay..."
-   rc_halt "${PROGDIR}/scripts/mergesvnports ${svndir}/build-files/ports-overlay ${portsdir}"
+   rc_halt "${PROGDIR}/scripts/mergesvnports ${gitdir}/build-files/ports-overlay ${portsdir}"
 
    # Now massage all the CHGVERSION variables into the REV
    rc_halt "cd ${portsdir}/misc"
    for i in `ls -d pcbsd* trueos*`
    do
-      mREV=`get_last_rev "${svndir}/build-files/ports-overlay/misc/${i}"`
+      mREV=`get_last_rev "${gitdir}/build-files/ports-overlay/misc/${i}"`
       rc_halt "cd ${portsdir}/misc"
       if [ ! -e "${i}/Makefile" ] ; then
          exit_err "Error: missing Makefile for ${portsdir}/misc/${i}"
@@ -52,10 +52,10 @@ merge_pcbsd_src_ports()
    done
 
    # Make the dist files
-   cliREV=`get_last_rev "${svndir}/src-sh"`
-   guiREV=`get_last_rev "${svndir}/src-qt4"`
-   deREV=`get_last_rev "${svndir}/lumina"`
-   rc_halt "cd ${svndir}"
+   cliREV=`get_last_rev "${gitdir}/src-sh"`
+   guiREV=`get_last_rev "${gitdir}/src-qt4"`
+   deREV=`get_last_rev "${gitdir}/lumina"`
+   rc_halt "cd ${gitdir}"
    rc_nohalt "rm ${distCache}/pcbsd-utils*.bz2"
    rc_nohalt "rm ${distCache}/lumina-*.bz2"
 
@@ -100,10 +100,10 @@ merge_pcbsd_src_ports()
    rm x11/Makefile.$$
 
    # Need to add these ports to INDEX / SUBDIR
-   rc_halt "cd ${svndir}/build-files/ports-overlay"
+   rc_halt "cd ${gitdir}/build-files/ports-overlay"
    for i in `find . | grep '/Makefile$' | sed 's|/Makefile||g' | sed 's|\./||g'`
    do
-      rc_halt "cd ${svndir}/build-files/ports-overlay"
+      rc_halt "cd ${gitdir}/build-files/ports-overlay"
       if [ ! -d "$i" ] ; then echo "Invalid merge dir ${i}" ; continue ; fi
       cDir=`echo $i | cut -d '/' -f 1`
       pDir=`echo $i | cut -d '/' -f 2`
@@ -257,6 +257,22 @@ if [ "$target" = "all" ] ; then
    # If the user wanted to sign the repo lets do it now
    if [ -n "$POUD_SIGN_REPO" ] ; then
       sign_pkg_repo
+   fi
+
+   # See if we can create the PBI index files for this repo
+   if [ -d "$GITBRANCH/pbi-modules" ] ; then
+      # Lets update the PBI-INDEX
+      PKGREPO='local'
+      create_pkg_conf
+      REPOS_DIR="${PROGDIR}/tmp/repos" ; export REPOS_DIR
+      PKG_DBDIR="${PROGDIR}/tmp/repodb" ; export PKG_DBDIR
+      if [ -d "$PKG_DBDIR" ] ; then rm -rf ${PKG_DBDIR}; fi
+      mkdir -p ${PKG_DBDIR}
+
+      rc_halt "cd ${GITBRANCH}/pbi-modules"
+      rc_halt "pbi makeindex ${PROGDIR}/keys/pbikey.pem"
+      rc_nohalt "rm PBI-INDEX"
+      rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/"
    fi
 
    # Unset cleanup var
