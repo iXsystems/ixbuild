@@ -270,7 +270,7 @@ if [ "$target" = "all" ] ; then
       mkdir -p ${PKG_DBDIR}
 
       rc_halt "cd ${GITBRANCH}/pbi-modules"
-      rc_halt "pbi makeindex ${PROGDIR}/keys/pbikey.pem"
+      rc_halt "pbi_makeindex ${PROGDIR}/keys/pbikey.pem"
       rc_nohalt "rm PBI-INDEX"
       rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/"
    fi
