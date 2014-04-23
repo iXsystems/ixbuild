@@ -264,7 +264,7 @@ if [ "$target" = "all" ] ; then
       # Lets update the PBI-INDEX
       PKGREPO='local'
       create_pkg_conf
-      REPOS_DIR="${PROGDIR}/tmp/repos" ; export REPOS_DIR
+      REPOS_DIR="${PROGDIR}/tmp/repo" ; export REPOS_DIR
       PKG_DBDIR="${PROGDIR}/tmp/repodb" ; export PKG_DBDIR
       if [ -d "$PKG_DBDIR" ] ; then rm -rf ${PKG_DBDIR}; fi
       mkdir -p ${PKG_DBDIR}
