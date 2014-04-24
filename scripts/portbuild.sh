@@ -248,6 +248,9 @@ if [ "$target" = "all" ] ; then
    pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
    export pCleanup
 
+   # Remove old PBI-INDEX.txz files
+   rm ${PPKGDIR}/PBI-INDEX.txz* 2>/dev/null
+
    # Build entire ports tree
    poudriere bulk -a ${pV} -j $PBUILD -p $POUDPORTS | tee ${PROGDIR}/log/poudriere.log
    if [ $? -ne 0 ] ; then
