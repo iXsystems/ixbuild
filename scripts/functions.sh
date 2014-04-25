@@ -363,10 +363,41 @@ check_essential_pkgs()
 {
    echo "Checking essential pkgs..."
    haveWarn=0
+   local eP="${PCONFDIR}/essential-packages"
+
+   # Make sure we have the file we need
+   if [ ! -e "${eP}" ] ; then
+      echo "WARNING: Missing ${eP}"
+      if [ "$1" != "NO" ] ; then
+        echo "Warning: Packages are missing! Continue?"
+        echo -e "(Y/N)\c"
+        read tmp
+        if [ "$tmp" != "y" -a "$tmp" != "Y" ] ; then
+           rtn
+           exit 1
+        fi
+        return 1
+      fi
+   fi
+
+   chkList=""
+   # Build the list of packages to check
+   while read line
+   do
+       # See if these dirs exist
+       ls -d ${PJPORTSDIR}/${line} >/dev/null 2>/dev/null
+       if [ $? -ne 0 ] ; then
+          echo "Warning: No such port ($line) to check..."
+          continue
+       fi
+       for i in `ls -d ${PJPORTSDIR}/${line}`
+       do
+          chkList="$chkList $i"
+       done
+   done < ${eP}
 
    # Check all our PC-BSD meta-pkgs, warn if some of them don't exist
    # or cannot be determined
-   chkList=`ls -d ${PJPORTSDIR}/sysutils/pcbsd-util* ${PJPORTSDIR}/misc/pcbsd-* ${PJPORTSDIR}/misc/trueos-* ${PJPORTSDIR}/x11/lumina`
    for i in $chkList
    do
 
