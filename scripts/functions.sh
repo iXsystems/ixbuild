@@ -282,15 +282,11 @@ cp_iso_pkg_files()
 
    haveWarn=0
 
-   # Pkgs to skip for now
-   skipPkgs="misc/pcbsd-meta-gnome-games misc/pcbsd-meta-kde-education misc/pcbsd-meta-kde-games misc/pcbsd-meta-kde-toys misc/pcbsd-meta-kde-webdevkit misc/pcbsd-meta-mythtv misc/pcbsd-meta-xbmc misc/pcbsd-meta-kde-calligra misc/pcbsd-meta-kde-sdk misc/pcbsd-meta-rekonq misc/pcbsd-meta-development-embedded misc/pcbsd-meta-development-science"
-
-   # Build a list of packages we need to fetch
-   cd ${GITBRANCH}/build-files/ports-overlay
-   local pkgList="ports-mgmt/pkg sysutils/pcbsd-utils sysutils/pcbsd-utils-qt4 `ls -d misc/pcbsd*` `ls -d misc/trueos*`"
+   # Packages to fetch / include on install media
+   local eP="${PCONFDIR}/iso-packages"
 
    # Now fetch these packages
-   for pkgName in $pkgList
+   for pkgName in `cat $eP`
    do
       # See if this is something we can skip for now
       skip=0
