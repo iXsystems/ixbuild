@@ -218,7 +218,8 @@ sign_pkg_repo()
 do_pbi-index()
 {
    # See if we can create the PBI index files for this repo
-   if [ -d "$GITBRANCH/pbi-modules" ] ; then
+   if [ ! -d "$GITBRANCH/pbi-modules" ] ; then
+      echo "No pbi-modules in this GIT branch"
       return 1
    fi
 
