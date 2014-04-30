@@ -222,6 +222,8 @@ do_pbi-index()
       return 1
    fi
 
+   echo "Building new PBI-INDEX"
+
    # Lets update the PBI-INDEX
    PKGREPO='local'
    create_pkg_conf
