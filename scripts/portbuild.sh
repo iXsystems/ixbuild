@@ -215,6 +215,28 @@ sign_pkg_repo()
    rc_halt "rm /tmp/pkg-static.$$"
 }
 
+do_pbi-index()
+{
+   # See if we can create the PBI index files for this repo
+   if [ -d "$GITBRANCH/pbi-modules" ] ; then
+      return 1
+   fi
+
+   # Lets update the PBI-INDEX
+   PKGREPO='local'
+   create_pkg_conf
+   REPOS_DIR="${PROGDIR}/tmp/repo" ; export REPOS_DIR
+   PKG_DBDIR="${PROGDIR}/tmp/repodb" ; export PKG_DBDIR
+   if [ -d "$PKG_DBDIR" ] ; then rm -rf ${PKG_DBDIR}; fi
+   mkdir -p ${PKG_DBDIR}
+
+   rc_halt "cd ${GITBRANCH}/pbi-modules"
+   rc_halt "pbi_makeindex ${PROGDIR}/keys/pbikey.pem"
+   rc_nohalt "rm PBI-INDEX"
+   rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/"
+   return 0
+}
+
 if [ -z "$1" ] ; then
    target="all"
 else
@@ -262,21 +284,8 @@ if [ "$target" = "all" ] ; then
       sign_pkg_repo
    fi
 
-   # See if we can create the PBI index files for this repo
-   if [ -d "$GITBRANCH/pbi-modules" ] ; then
-      # Lets update the PBI-INDEX
-      PKGREPO='local'
-      create_pkg_conf
-      REPOS_DIR="${PROGDIR}/tmp/repo" ; export REPOS_DIR
-      PKG_DBDIR="${PROGDIR}/tmp/repodb" ; export PKG_DBDIR
-      if [ -d "$PKG_DBDIR" ] ; then rm -rf ${PKG_DBDIR}; fi
-      mkdir -p ${PKG_DBDIR}
-
-      rc_halt "cd ${GITBRANCH}/pbi-modules"
-      rc_halt "pbi_makeindex ${PROGDIR}/keys/pbikey.pem"
-      rc_nohalt "rm PBI-INDEX"
-      rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/"
-   fi
+   # Update the PBI index file
+   do_pbi-index
 
    # Unset cleanup var
    pCleanup=""
@@ -315,6 +324,9 @@ elif [ "$1" = "portsnap" ] ; then
 elif [ "$1" = "portmerge" ] ; then
    do_pcbsd_portmerge
    exit 0
+elif [ "$1" = "pbi-index" ] ; then
+   do_pbi-index
+   exit $?
 else
    echo "Invalid option!"
    exit 1

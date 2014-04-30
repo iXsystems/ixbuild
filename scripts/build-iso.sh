@@ -97,6 +97,12 @@ do_ports_all()
   exit $?
 }
 
+do_pbi-index()
+{
+  sh ${PROGDIR}/scripts/portbuild.sh pbi-index
+  exit $?
+}
+
 do_ports_pcbsd()
 {
   if [ ! -d "${PJPORTSDIR}" ] ; then
@@ -137,6 +143,7 @@ check-ports) do_check_ports ;;
 ports-meta-only) do_ports_meta ;;
 ports-update-all) do_ports_all ;;
 ports-update-pcbsd) do_ports_pcbsd ;;
+pbi-index) do_pbi-index ;;
    clean) do_clean ;;
     menu) sh ${PROGDIR}/scripts/menu.sh ;;
        *) ;;

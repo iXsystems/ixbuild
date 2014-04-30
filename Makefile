@@ -20,6 +20,8 @@ ports-update-all:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh ports-update-all
 ports-update-pcbsd:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh ports-update-pcbsd
+pbi-index:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh pbi-index
 clean:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh clean
 menu:
