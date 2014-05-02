@@ -151,7 +151,8 @@ setup_usr_uzip() {
 
     umount_md_devices ${DEVICES}
     trap "" INT
-    uzip ${PDESTDIR9}/uzip/usr.ufs ${PDESTDIR9}/uzip/usr.uzip
+    echo "Compressing with uzip..."
+    rc_halt "uzip ${PDESTDIR9}/uzip/usr.ufs ${PDESTDIR9}/uzip/usr.uzip" >/dev/null 2>/dev/null
     md5 -q ${PDESTDIR9}/uzip/usr.uzip > ${PDESTDIR9}/uzip/usr.uzip.md5
 
 }
@@ -201,6 +202,7 @@ do
   echo "Adding PACKAGE: $pkg"
   pkg-static add -f ${pkg} >/tmp/pkg-log 2>/tmp/pkg-log
   if [ $? -ne 0 ] ; then
+     sleep 5
      echo "FAILED adding: $pkg"
      echo "Output:"
      cat /tmp/pkg-log

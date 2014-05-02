@@ -285,8 +285,16 @@ cp_iso_pkg_files()
    # Packages to fetch / include on install media
    local eP="${PCONFDIR}/iso-packages"
 
+   # Build the list of pkgs to fetch
+   pList=""
+   for pkg in `cat $eP`
+   do
+      res=`pkg rquery -g '%o' $pkg | awk 1 ORS=' '`
+      pList="$pList $res"
+   done
+
    # Now fetch these packages
-   for pkgName in `cat $eP`
+   for pkgName in $pList
    do
       # See if this is something we can skip for now
       skip=0
