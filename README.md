@@ -37,9 +37,12 @@ this build finishes, the builder will begin fetching packages from the
 pkgng repo specified in pkg.conf. Lastly the ISO will be built in the ~/iso
 directory.
 
-Before you can run make image you must have unicode.pf2 in /usr/local/share/grub/.
-You can copy /boot/grub/pcbsdfont.pf2 if you have pcbsd installed.  Alternatively
-you may fetch pcbsdfont.pf2 from PCBSD github.
+Before you can run "make image" you must have unicode.pf2 in /usr/local/share/grub/.
+You can copy /boot/grub/pcbsdfont.pf2 if you have PC-BSD installed.  
+
+/boot/grub/pcbsdfont.pf2 -> /usr/local/share/grub/unicode.pf2
+
+Alternatively you may fetch pcbsdfont.pf2 from PC-BSD github.
 
 
 Advanced Usage:
