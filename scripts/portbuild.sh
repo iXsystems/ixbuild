@@ -185,13 +185,17 @@ do_pcbsd_portmerge()
    # Copy our PCBSD port files
    merge_pcbsd_src_ports "${GITBRANCH}" "${PJPORTSDIR}"
 
+   # 6/11/2014 - Disable ports INDEX creation. Looks like poudreire / pkgng
+   # don't need / use it at all anyway, and it causes some failures in 
+   # stable/current
+   # 
    # Create the ports INDEX file
-   cd ${PJPORTSDIR}
-   make -C ${PJPORTSDIR} PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/$PBUILD-make.conf index
-   if [ $? -ne 0 ] ; then
-      echo "Failed building port INDEX..."
-      exit 1
-   fi
+   # cd ${PJPORTSDIR}
+   # make -C ${PJPORTSDIR} PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/$PBUILD-make.conf index
+   # if [ $? -ne 0 ] ; then
+   #    echo "Failed building port INDEX..."
+   #    exit 1
+   # fi
 
    # Make dist ports files
    rm ${PROGDIR}/usr/ports 2>/dev/null
