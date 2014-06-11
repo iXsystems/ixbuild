@@ -15,7 +15,7 @@ Requirements:
  - grub-mkrescue
  - xorriso
  - poudriere (optional)
-
+ - unicode.pf2 (required for grub-mkrescue)
 Getting Started:
 
 First, you will need to copy the following *.dist files in the root directory
@@ -36,6 +36,13 @@ downloaded from GIT automatically, and then a world / kernel built. Once
 this build finishes, the builder will begin fetching packages from the 
 pkgng repo specified in pkg.conf. Lastly the ISO will be built in the ~/iso
 directory.
+
+Before you can run "make image" you must have unicode.pf2 in /usr/local/share/grub/.
+You can copy /boot/grub/pcbsdfont.pf2 if you have PC-BSD installed.  
+
+/boot/grub/pcbsdfont.pf2 -> /usr/local/share/grub/unicode.pf2
+
+Alternatively you may fetch pcbsdfont.pf2 from PC-BSD github.
 
 
 Advanced Usage:
