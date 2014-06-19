@@ -193,7 +193,7 @@ rc_halt "cp ${GITBRANCH}/build-files/conf/installcd-packages ${PDESTDIR9}/instal
 rc_halt "mount -t devfs devfs ${PDESTDIR9}/dev"
 
 # Bootstrap PKGNG
-rc_halt "pkg-static -c ${PDESTDIR9} add /mnt/Latest/pkg.txz"
+rc_halt "pkg-static -c ${PDESTDIR9} add /mnt/All/pkg.txz"
 
 echo '#!/bin/sh
 cd /mnt/All
