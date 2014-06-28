@@ -289,7 +289,7 @@ cp_iso_pkg_files()
    pList=""
    for pkg in `cat $eP`
    do
-      res=`pkg rquery -g '%o' $pkg | awk 1 ORS=' '`
+      res=`pkg-static -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
       pList="$pList $res"
    done
 
@@ -309,7 +309,7 @@ cp_iso_pkg_files()
     done
 
     # Copy pkgng
-    cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz
+    rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
 
     # Now we need to grab the digests / packagesite
     PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
