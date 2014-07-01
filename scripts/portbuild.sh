@@ -171,7 +171,7 @@ do_portsnap()
      fi
    fi
 
-   poudriere ports -c -m git -p "$POUDPORTS"
+   poudriere ports -c -m git -p "$POUDPORTS" >/dev/null 2>/dev/null
    if [ $? -ne 0 ] ; then
      echo "Failed to create ports $POUDPORTS"
      mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
@@ -203,7 +203,7 @@ do_pcbsd_portmerge()
    rc_halt "mkdir ${PROGDIR}/usr"
    rc_halt "ln -fs ${PJPORTSDIR} ${PROGDIR}/usr/ports"
    echo "Creating ports distfile.. Will take several minutes.."
-   rc_halt "tar cLvJf ${DISTDIR}/ports.txz --exclude usr/ports/.portsnap.INDEX --exclude usr/ports/.snap --exclude usr/ports/distfiles --exclude usr/ports/.git -C ${PROGDIR} usr/ports"
+   rc_halt "tar cLvJf ${DISTDIR}/ports.txz --exclude usr/ports/.portsnap.INDEX --exclude usr/ports/.snap --exclude usr/ports/distfiles --exclude usr/ports/.git -C ${PROGDIR} usr/ports" 2>/dev/null
    rc_halt "rm ${PROGDIR}/usr/ports"
    rc_halt "rmdir ${PROGDIR}/usr"
 }
