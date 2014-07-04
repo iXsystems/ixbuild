@@ -198,14 +198,14 @@ do_pcbsd_portmerge()
    # fi
 
    # Make dist ports files
-   rm ${PROGDIR}/usr/ports 2>/dev/null
-   rmdir ${PROGDIR}/usr 2>/dev/null
-   rc_halt "mkdir ${PROGDIR}/usr"
-   rc_halt "ln -fs ${PJPORTSDIR} ${PROGDIR}/usr/ports"
-   echo "Creating ports distfile.. Will take several minutes.."
-   rc_halt "tar cLvJf ${DISTDIR}/ports.txz --exclude usr/ports/.portsnap.INDEX --exclude usr/ports/.snap --exclude usr/ports/distfiles --exclude usr/ports/.git -C ${PROGDIR} usr/ports" 2>/dev/null
-   rc_halt "rm ${PROGDIR}/usr/ports"
-   rc_halt "rmdir ${PROGDIR}/usr"
+   #rm ${PROGDIR}/usr/ports 2>/dev/null
+   #rmdir ${PROGDIR}/usr 2>/dev/null
+   #rc_halt "mkdir ${PROGDIR}/usr"
+   #rc_halt "ln -fs ${PJPORTSDIR} ${PROGDIR}/usr/ports"
+   #echo "Creating ports distfile.. Will take several minutes.."
+   #rc_halt "tar cLvJf ${DISTDIR}/ports.txz --exclude usr/ports/.portsnap.INDEX --exclude usr/ports/.snap --exclude usr/ports/distfiles --exclude usr/ports/.git -C ${PROGDIR} usr/ports" 2>/dev/null
+   #rc_halt "rm ${PROGDIR}/usr/ports"
+   #rc_halt "rmdir ${PROGDIR}/usr"
 }
 
 sign_pkg_repo()
