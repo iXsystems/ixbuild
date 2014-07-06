@@ -286,6 +286,12 @@ if [ "$target" = "all" ] ; then
       echo "Failed poudriere build..."
    fi
 
+   # Make sure the essentials built, exit now if not
+   check_essential_pkgs "NO"
+   if [ $? -ne 0 ] ; then
+      exit 1
+   fi
+
    # If the user wanted to sign the repo lets do it now
    if [ -n "$POUD_SIGN_REPO" ] ; then
       sign_pkg_repo

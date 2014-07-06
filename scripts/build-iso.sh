@@ -130,13 +130,12 @@ case $TARGET in
  all|ALL) do_world 
 	  if [ "$PKGREPO" = "local" ] ; then
 	    do_ports
-	    check_essential_pkgs
+	    if [ $? -ne 0 ] ; then exit 1 ; fi
 	  fi
           do_iso ;;
    world) do_world ;;
      iso) do_iso ;;
    ports) do_ports
-          check_essential_pkgs "NO"
           exit $?
           ;;
 check-ports) do_check_ports ;;
