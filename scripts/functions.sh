@@ -55,6 +55,9 @@ fi
 
 # Where are the config files
 PCONFDIR="${GITBRANCH}/build-files/conf" ; export PCONFDIR
+if [ "$SYSBUILD" = "trueos" ] ; then
+  PCONFDIR="${GITBRANCH}/build-files/conf/trueos" ; export PCONFDIR
+fi
 
 # Where do we place the log files
 PLOGFILES="${PROGDIR}/log" ; export PLOGFILES

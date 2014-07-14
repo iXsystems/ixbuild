@@ -260,8 +260,8 @@ if [ ! -d "${GITBRANCH}" ]; then
    rc_halt "git clone ${GITPCBSDURL} ${GITBRANCH}"
 fi
 git_up "${GITBRANCH}" "${GITBRANCH}"
-rc_halt "cd ${GITBRANCH}/build-files/conf/"
-cp ${GITBRANCH}/build-files/conf/port-make.conf /usr/local/etc/poudriere.d/$PBUILD-make.conf
+rc_halt "cd ${PCONFDIR}/"
+cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/$PBUILD-make.conf
 if [ -e "/usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere" ] ; then
   cat /usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere >> /usr/local/etc/poudriere.d/$PBUILD-make.conf
 fi

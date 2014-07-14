@@ -87,7 +87,7 @@ prune_fs()
     rc_halt "cd ${PDESTDIR9}/"
 
     # If PRUNE_LIST file exists, delete files and dir listed in it
-    PRUNE_LIST="${GITBRANCH}/build-files/conf/installcd-prunelist"
+    PRUNE_LIST="${PCONFDIR}/installcd-prunelist"
 
     if [ -f ${PRUNE_LIST} ]; then
       echo "Deleting files listed in ${PRUNE_LIST}"
@@ -189,7 +189,7 @@ git_up "${GITBRANCH}" "${GITBRANCH}"
 # Lets install the packages we will be needing
 mkdir ${PDESTDIR9}/mnt >/dev/null 2>/dev/null
 rc_halt "mount_nullfs ${METAPKGDIR} ${PDESTDIR9}/mnt"
-rc_halt "cp ${GITBRANCH}/build-files/conf/installcd-packages ${PDESTDIR9}/installcd-packages"
+rc_halt "cp ${PCONFDIR}/installcd-packages ${PDESTDIR9}/installcd-packages"
 rc_halt "mount -t devfs devfs ${PDESTDIR9}/dev"
 
 # Bootstrap PKGNG
