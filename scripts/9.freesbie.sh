@@ -230,6 +230,13 @@ umount -f ${PDESTDIR9}/dev
 ##########################################################################
 tar cvf - -C ${GITBRANCH}/overlays/install-overlay --exclude .svn . 2>/dev/null | tar xvpf - -C ${PDESTDIR9}/ 2>/dev/null
 
+# Setup grub.cfg
+if [ "$SYSBUILD" = "trueos" ] ; then
+   mv ${PDESTDIR9}/boot/grub.cfg.trueos ${PDESTDIR9}/boot/grub.cfg
+else
+   mv ${PDESTDIR9}/boot/grub.cfg.pcbsd ${PDESTDIR9}/boot/grub.cfg
+fi
+
 # Since GIT is stupid and doesn't allow tracking empty dirs, lets make them here
 mkdir ${PDESTDIR9}/bin 2>/dev/null
 mkdir ${PDESTDIR9}/dev 2>/dev/null
