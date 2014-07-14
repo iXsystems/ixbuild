@@ -73,19 +73,18 @@ esac
 # Set the location of packages needed for our Meta-Packages
 export METAPKGDIR="${PROGDIR}/tmp"
 
-# Poudriere Ports tag, change to use multiple ports trees
-if [ -z "$POUDPORTS" ] ; then
-   POUDPORTS="pcbsdports" ; export POUDPORTS
-fi
-
-
-# Poudriere Ports tag, change to use multiple ports trees
-if [ -z "$POUDPORTS" ] ; then
-   POUDPORTS="pcbsdports" ; export POUDPORTS
-fi
-
 # Poudriere variables
-PBUILD="pcbsd-`echo $TARGETREL | sed 's|\.||g'`"
+if [ "$SYSBUILD" = "trueos" ] ; then
+  PBUILD="trueos-`echo $TARGETREL | sed 's|\.||g'`"
+  if [ -z "$POUDPORTS" ] ; then
+    POUDPORTS="trueosports" ; export POUDPORTS
+  fi
+else
+  PBUILD="pcbsd-`echo $TARGETREL | sed 's|\.||g'`"
+  if [ -z "$POUDPORTS" ] ; then
+    POUDPORTS="pcbsdports" ; export POUDPORTS
+  fi
+fi
 PJDIR="$POUD/jails/$PBUILD"
 PPKGDIR="$POUD/data/packages/$PBUILD-$POUDPORTS"
 PJPORTSDIR="$POUD/ports/$POUDPORTS"
