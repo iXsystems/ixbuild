@@ -36,11 +36,15 @@ rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"
 fDate="-`date '+%m-%d-%Y'`"
 
 # Base file name
-bFile="PCBSD${ISOVER}${fDate}-${FARCH}"
+if [ "$SYSBUILD" = "trueos" ] ; then
+  bFile="TRUEOS${ISOVER}${fDate}-${FARCH}"
+else
+  bFile="PCBSD${ISOVER}${fDate}-${FARCH}"
+fi
 export bFile
 
 # Set the pcbsd-media-details file marker on this media
-echo "PC-BSD ${PCBSDVER} "$ARCH" INSTALL DVD/USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
+echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL DVD/USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
 
 # Use GRUB to create the hybrid DVD/USB image
 echo "Creating ISO..."
