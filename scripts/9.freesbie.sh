@@ -233,6 +233,7 @@ tar cvf - -C ${GITBRANCH}/overlays/install-overlay --exclude .svn . 2>/dev/null 
 # Setup grub.cfg
 if [ "$SYSBUILD" = "trueos" ] ; then
    mv ${PDESTDIR9}/boot/grub.cfg.trueos ${PDESTDIR9}/boot/grub.cfg
+   touch ${PDESTDIR9}/root/trueos-installonly
 else
    mv ${PDESTDIR9}/boot/grub.cfg.pcbsd ${PDESTDIR9}/boot/grub.cfg
 fi
