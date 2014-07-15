@@ -269,7 +269,7 @@ fi
 # Running poudriere in verbose mode?
 pV=""
 if [ "$POUD_VERBOSE" = "YES" ] ; then
-  pV="-v"
+  pV="-vv"
 fi
 
 if [ "$target" = "all" ] ; then
