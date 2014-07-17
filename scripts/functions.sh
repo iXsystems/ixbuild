@@ -463,4 +463,7 @@ get_pkgstatic()
   rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$" >/dev/null 2>/dev/null
 
   PKGSTATIC="/tmp/pkg-static.$$" ; export PKGSTATIC
+
+  # Update the repo schema files before using
+  rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ update"
 }
