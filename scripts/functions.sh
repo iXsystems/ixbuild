@@ -287,11 +287,14 @@ cp_iso_pkg_files()
    # Packages to fetch / include on install media
    local eP="${PCONFDIR}/iso-packages"
 
+   # Use the version of pkgng for the target
+   get_pkgstatic
+
    # Build the list of pkgs to fetch
    pList=""
    for pkg in `cat $eP`
    do
-      res=`pkg-static -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
+      res=`${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
       pList="$pList $res"
    done
 
@@ -307,11 +310,14 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "pkg-static -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -d ${pkgName}"
+      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -d ${pkgName}"
     done
 
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
+
+    # Cleanup PKGSTATIC
+    rc_halt "rm ${PKGSTATIC}"
 
     # Now we need to grab the digests / packagesite
     PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
@@ -436,4 +442,25 @@ check_essential_pkgs()
    fi
 
    return $haveWarn
+}
+
+get_pkgstatic()
+{
+  create_pkg_conf
+
+  echo "Setting up pkg-static"
+  if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
+
+  if [ "$PKGREPO" = "local" ]; then
+    rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
+  else
+    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
+    rc_halt "fetch -o /tmp/.pkg.txz.$$ ${PSITE}/Latest/pkg.txz" 
+    rc_halt "tar xv --strip-components 4 -f /tmp/.pkg.txz.$$ -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
+    rc_halt "rm /tmp/.pkg.txz.$$" >/dev/null 2>/dev/null
+  fi
+
+  rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$" >/dev/null 2>/dev/null
+
+  PKGSTATIC="/tmp/pkg-static.$$" ; export PKGSTATIC
 }

@@ -211,12 +211,10 @@ do_pcbsd_portmerge()
 sign_pkg_repo()
 {
    echo "Signing repo..."
-   if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
-   rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
-   rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$" >/dev/null 2>/dev/null
+   get_pkgstatic
    rc_halt "cd $PPKGDIR" >/dev/null 2>/dev/null
-   rc_halt "/tmp/pkg-static.$$ repo . ${POUD_SIGN_REPO}" >/dev/null 2>/dev/null
-   rc_halt "rm /tmp/pkg-static.$$" >/dev/null 2>/dev/null
+   rc_halt "${PKGSTATIC} repo . ${POUD_SIGN_REPO}" >/dev/null 2>/dev/null
+   rc_halt "rm ${PKGSTATIC}" >/dev/null 2>/dev/null
 }
 
 do_pbi-index()

@@ -192,8 +192,12 @@ rc_halt "mount_nullfs ${METAPKGDIR} ${PDESTDIR9}/mnt"
 rc_halt "cp ${PCONFDIR}/installcd-packages ${PDESTDIR9}/installcd-packages"
 rc_halt "mount -t devfs devfs ${PDESTDIR9}/dev"
 
+# Get the correct version of pkgng binary
+get_pkgstatic
+
 # Bootstrap PKGNG
-rc_halt "pkg-static -c ${PDESTDIR9} add /mnt/All/pkg.txz"
+rc_halt "${PKGSTATIC} -c ${PDESTDIR9} add /mnt/All/pkg.txz"
+rc_halt "rm ${PKGSTATIC}"
 
 echo '#!/bin/sh
 cd /mnt/All
