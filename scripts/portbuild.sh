@@ -219,6 +219,8 @@ sign_pkg_repo()
 
 do_pbi-index()
 {
+   if [ -z "$PBI_REPO_KEY" ] ; then return ; fi
+
    # See if we can create the PBI index files for this repo
    if [ ! -d "$GITBRANCH/pbi-modules" ] ; then
       echo "No pbi-modules in this GIT branch"
@@ -236,7 +238,7 @@ do_pbi-index()
    mkdir -p ${PKG_DBDIR}
 
    rc_halt "cd ${GITBRANCH}/pbi-modules"
-   rc_halt "pbi_makeindex ${PROGDIR}/keys/pbikey.pem"
+   rc_halt "pbi_makeindex ${PBI_REPO_KEY}"
    rc_nohalt "rm PBI-INDEX"
    rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/"
    return 0

@@ -61,3 +61,8 @@ export POUD_VERBOSE
 # Set this with the flag for pkg repo to do signing with
 #POUD_SIGN_REPO="signing_command: <cmd>"
 export POUD_SIGN_REPO
+
+# Set PBI signing key, used for pbi_makeindex
+#PBI_REPO_KEY=""
+export PBI_REPO_KEY
+
