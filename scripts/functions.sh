@@ -310,7 +310,7 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -d ${pkgName}"
+      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -o ${PROGDIR}/tmp -d ${pkgName}"
     done
 
     # Copy pkgng
