@@ -237,10 +237,10 @@ do_pbi-index()
    if [ -d "$PKG_DBDIR" ] ; then rm -rf ${PKG_DBDIR}; fi
    mkdir -p ${PKG_DBDIR}
 
-   rc_halt "cd ${GITBRANCH}/pbi-modules"
-   rc_halt "pbi_makeindex ${PBI_REPO_KEY}"
-   rc_nohalt "rm PBI-INDEX"
-   rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/"
+   rc_halt "cd ${GITBRANCH}/pbi-modules" >/dev/null 2>/dev/null
+   rc_halt "pbi_makeindex ${PBI_REPO_KEY}" >/dev/null 2>/dev/null
+   rc_nohalt "rm PBI-INDEX" >/dev/null 2>/dev/null
+   rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/" >/dev/null 2>/dev/null
    return 0
 }
 
