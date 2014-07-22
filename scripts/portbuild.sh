@@ -30,18 +30,18 @@ merge_pcbsd_src_ports()
 
    if [ ! -d "$distCache" ] ; then rc_halt "mkdir -p ${distCache}" ; fi
    git_up "$gitdir" "$gitdir"
-   rc_halt "cd ${gitdir}"
+   rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
 
      
    echo "Merging PC-BSD ports-overlay..."
    rc_halt "${PROGDIR}/scripts/mergesvnports ${gitdir}/build-files/ports-overlay ${portsdir}"
 
    # Now massage all the CHGVERSION variables into the REV
-   rc_halt "cd ${portsdir}/misc"
+   rc_halt "cd ${portsdir}/misc" >/dev/null 2>/dev/null
    for i in `ls -d pcbsd* trueos*`
    do
       mREV=`get_last_rev "${gitdir}/build-files/ports-overlay/misc/${i}"`
-      rc_halt "cd ${portsdir}/misc"
+      rc_halt "cd ${portsdir}/misc" >/dev/null 2>/dev/null
       if [ ! -e "${i}/Makefile" ] ; then
          exit_err "Error: missing Makefile for ${portsdir}/misc/${i}"
       fi
@@ -55,7 +55,7 @@ merge_pcbsd_src_ports()
    cliREV=`get_last_rev "${gitdir}/src-sh"`
    guiREV=`get_last_rev "${gitdir}/src-qt4"`
    deREV=`get_last_rev "${gitdir}/lumina"`
-   rc_halt "cd ${gitdir}"
+   rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
    rc_nohalt "rm ${distCache}/pcbsd-utils*.bz2"
    rc_nohalt "rm ${distCache}/lumina-*.bz2"
 
@@ -84,31 +84,31 @@ merge_pcbsd_src_ports()
    sed -i '' "s|CHGVERSION|${deREV}|g" ${portsdir}/x11/lumina/Makefile
 
    # Create the makesums / distinfo file
-   rc_halt "cd ${portsdir}/sysutils/pcbsd-utils"
+   rc_halt "cd ${portsdir}/sysutils/pcbsd-utils" >/dev/null 2>/dev/null
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
-   rc_halt "cd ${portsdir}/sysutils/pcbsd-utils-qt4"
+   rc_halt "cd ${portsdir}/sysutils/pcbsd-utils-qt4" >/dev/null 2>/dev/null
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
-   rc_halt "cd ${portsdir}/x11/lumina"
+   rc_halt "cd ${portsdir}/x11/lumina" >/dev/null 2>/dev/null
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
 
    echo "Adding x11/lumina to x11/Makefile..."
    # Add to $cDir / Makefile
-   rc_halt "cd ${portsdir}"
+   rc_halt "cd ${portsdir}" >/dev/null 2>/dev/null
    mv x11/Makefile x11/Makefile.$$
    echo "    SUBDIR += lumina" >x11/Makefile
    cat x11/Makefile.$$ >> x11/Makefile
    rm x11/Makefile.$$
 
    # Need to add these ports to INDEX / SUBDIR
-   rc_halt "cd ${gitdir}/build-files/ports-overlay"
+   rc_halt "cd ${gitdir}/build-files/ports-overlay" >/dev/null 2>/dev/null
    for i in `find . | grep '/Makefile$' | sed 's|/Makefile||g' | sed 's|\./||g'`
    do
-      rc_halt "cd ${gitdir}/build-files/ports-overlay"
+      rc_halt "cd ${gitdir}/build-files/ports-overlay" >/dev/null 2>/dev/null
       if [ ! -d "$i" ] ; then echo "Invalid merge dir ${i}" ; continue ; fi
       cDir=`echo $i | cut -d '/' -f 1`
       pDir=`echo $i | cut -d '/' -f 2`
 
-      rc_halt "cd ${portsdir}"
+      rc_halt "cd ${portsdir}" >/dev/null 2>/dev/null
       grep -q "SUBDIR += ${pDir}\$" ${cDir}/Makefile
       if [ $? -eq 0 ] ; then continue; fi
 
@@ -121,7 +121,7 @@ merge_pcbsd_src_ports()
    done
 
    # Jump back to where we belong
-   rc_halt "cd $mcwd"
+   rc_halt "cd $mcwd" >/dev/null 2>/dev/null
 }
 
 mk_metapkg_bulkfile()
@@ -260,7 +260,7 @@ if [ ! -d "${GITBRANCH}" ]; then
    rc_halt "git clone ${GITPCBSDURL} ${GITBRANCH}"
 fi
 git_up "${GITBRANCH}" "${GITBRANCH}"
-rc_halt "cd ${PCONFDIR}/"
+rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
 cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/$PBUILD-make.conf
 if [ -e "/usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere" ] ; then
   cat /usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere >> /usr/local/etc/poudriere.d/$PBUILD-make.conf
