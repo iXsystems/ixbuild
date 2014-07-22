@@ -314,7 +314,7 @@ cp_iso_pkg_files()
     done
 
     # Add back the TEMP fix to pkgng 1.3.0rc4
-    mv ${PROGDIR}/tmp/.real_*/All ${PROGDIR}/tmp
+    #mv ${PROGDIR}/tmp/.real_*/All ${PROGDIR}/tmp
 
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
