@@ -313,9 +313,6 @@ cp_iso_pkg_files()
       rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -o ${PROGDIR}/tmp -d ${pkgName}"
     done
 
-    # TEMP fix to bug in pkgng 1.3.0.rc4, remove me when rc5 or later hits
-    mv ${PROGDIR}/tmp/.real_*/All ${PROGDIR}/tmp
-
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
 
