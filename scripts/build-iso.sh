@@ -43,10 +43,32 @@ do_world() {
 do_iso() 
 {
   echo "Building ISO file"
-  ${PROGDIR}/scripts/9.freesbie.sh
-  if [ $? -ne 0 ] ; then
-    echo "Script failed!"
-    exit 1
+
+  rm ${PROGDIR}/iso/* >/dev/null 2>/dev/null
+
+  # Are we building both TrueOS / PC-BSD images?
+  if [ -z "$SYSBUILD" -o "$SYSBUILD" = "BOTH" ] ; then
+
+    local oSys="$SYSBUILD"
+    SYSBUILD="pcbsd" ; export SYSBUILD
+    ${PROGDIR}/scripts/9.freesbie.sh
+    if [ $? -ne 0 ] ; then
+      echo "Script failed!"
+      exit 1
+    fi
+    SYSBUILD="trueos" ; export SYSBUILD
+    ${PROGDIR}/scripts/9.freesbie.sh
+    if [ $? -ne 0 ] ; then
+      echo "Script failed!"
+      exit 1
+    fi
+    SYSBUILD="$oSys" ; export SYSBUILD
+  else
+    ${PROGDIR}/scripts/9.freesbie.sh
+    if [ $? -ne 0 ] ; then
+      echo "Script failed!"
+      exit 1
+    fi
   fi
 }
 

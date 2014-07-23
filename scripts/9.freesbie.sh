@@ -315,9 +315,6 @@ chmod 755 ${PDESTDIR9}/bin/du
 cp ${PDESTDIR9}/usr/bin/cmp ${PDESTDIR9}/bin/
 chmod 755 ${PDESTDIR9}/bin/cmp
 
-# Cleanup
-rm ${PROGDIR}/iso/* >/dev/null 2>/dev/null
-
 # Make the uzip file
 setup_usr_uzip
 
