@@ -101,12 +101,19 @@ merge_pcbsd_src_ports()
    rc_halt "cd ${portsdir}/x11/lumina" >/dev/null 2>/dev/null
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
 
+   echo "Adding sysutils/pcbsd-appweb to sysutils/Makefile..."
+   # Add to $cDir / Makefile
+   rc_halt "cd ${portsdir}" >/dev/null 2>/dev/null
+   mv sysutils/Makefile sysutils/Makefile.$$
+   echo "    SUBDIR += pcbsd-appweb" >sysutils/Makefile
+   cat sysutils/Makefile.$$ >> sysutils/Makefile
+   rm sysutils/Makefile.$$
+
    echo "Adding x11/lumina to x11/Makefile..."
    # Add to $cDir / Makefile
    rc_halt "cd ${portsdir}" >/dev/null 2>/dev/null
    mv x11/Makefile x11/Makefile.$$
    echo "    SUBDIR += lumina" >x11/Makefile
-   echo "    SUBDIR += pcbsd-appweb" >x11/Makefile
    cat x11/Makefile.$$ >> x11/Makefile
    rm x11/Makefile.$$
 
