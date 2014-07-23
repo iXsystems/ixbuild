@@ -54,9 +54,11 @@ merge_pcbsd_src_ports()
    # Make the dist files
    cliREV=`get_last_rev "${gitdir}/src-sh"`
    guiREV=`get_last_rev "${gitdir}/src-qt4"`
+   webREV=`get_last_rev "${gitdir}/src-webui"`
    deREV=`get_last_rev "${gitdir}/lumina"`
    rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
    rc_nohalt "rm ${distCache}/pcbsd-utils*.bz2"
+   rc_nohalt "rm ${distCache}/pcbsd-appweb*.bz2"
    rc_nohalt "rm ${distCache}/lumina-*.bz2"
 
    echo "Creating dist files for version: $cliREV"
@@ -65,25 +67,33 @@ merge_pcbsd_src_ports()
    echo "Creating dist files for version: $guiREV"
    rc_halt "tar cvjf ${distCache}/pcbsd-utils-qt4-${guiREV}.tar.bz2 src-qt4" 2>/dev/null
 
+   echo "Creating dist files for version: $webREV"
+   rc_halt "tar cvjf ${distCache}/pcbsd-appweb-${webREV}.tar.bz2 src-appweb" 2>/dev/null
+
    echo "Creating dist files for version: $deREV"
    rc_halt "tar cvjf ${distCache}/lumina-${deREV}.tar.bz2 lumina" 2>/dev/null
 
    # Copy ports files
+   rm -rf ${portsdir}/sysutils/pcbsd-appweb 2>/dev/null
    rm -rf ${portsdir}/sysutils/pcbsd-utils 2>/dev/null
    rm -rf ${portsdir}/sysutils/pcbsd-utils-qt4 2>/dev/null
    rm -rf ${portsdir}/sysutils/pcbsd-base 2>/dev/null
    rm -rf ${portsdir}/sysutils/trueos-base 2>/dev/null
    rm -rf ${portsdir}/x11/lumina 2>/dev/null
+   rc_halt "cp -r src-webui/port-files ${portsdir}/sysutils/pcbsd-appweb"
    rc_halt "cp -r src-sh/port-files ${portsdir}/sysutils/pcbsd-utils" 
    rc_halt "cp -r src-qt4/port-files ${portsdir}/sysutils/pcbsd-utils-qt4" 
    rc_halt "cp -r lumina/port-files ${portsdir}/x11/lumina"
    
    # Set the version numbers
+   sed -i '' "s|CHGVERSION|${webREV}|g" ${portsdir}/sysutils/pcbsd-appweb/Makefile
    sed -i '' "s|CHGVERSION|${cliREV}|g" ${portsdir}/sysutils/pcbsd-utils/Makefile
    sed -i '' "s|CHGVERSION|${guiREV}|g" ${portsdir}/sysutils/pcbsd-utils-qt4/Makefile
    sed -i '' "s|CHGVERSION|${deREV}|g" ${portsdir}/x11/lumina/Makefile
 
    # Create the makesums / distinfo file
+   rc_halt "cd ${portsdir}/sysutils/pcbsd-appweb" >/dev/null 2>/dev/null
+   rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
    rc_halt "cd ${portsdir}/sysutils/pcbsd-utils" >/dev/null 2>/dev/null
    rc_halt "make makesum DISTDIR=${distCache} PORTSDIR=${portsdir}"
    rc_halt "cd ${portsdir}/sysutils/pcbsd-utils-qt4" >/dev/null 2>/dev/null
@@ -96,6 +106,7 @@ merge_pcbsd_src_ports()
    rc_halt "cd ${portsdir}" >/dev/null 2>/dev/null
    mv x11/Makefile x11/Makefile.$$
    echo "    SUBDIR += lumina" >x11/Makefile
+   echo "    SUBDIR += pcbsd-appweb" >x11/Makefile
    cat x11/Makefile.$$ >> x11/Makefile
    rm x11/Makefile.$$
 
