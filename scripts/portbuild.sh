@@ -212,7 +212,11 @@ sign_pkg_repo()
 {
    echo "Signing repo..."
    get_pkgstatic
-   rc_halt "cd $PPKGDIR/.latest" >/dev/null 2>/dev/null
+   if [ -e "cd $PPKGDIR/.latest" ] ; then
+     rc_halt "cd $PPKGDIR/.latest" >/dev/null 2>/dev/null
+   else
+     rc_halt "cd $PPKGDIR/" >/dev/null 2>/dev/null
+   fi
    rc_halt "${PKGSTATIC} repo . ${POUD_SIGN_REPO}" >/dev/null 2>/dev/null
    rc_halt "rm ${PKGSTATIC}" >/dev/null 2>/dev/null
 }
