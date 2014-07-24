@@ -74,7 +74,7 @@ esac
 export METAPKGDIR="${PROGDIR}/tmp"
 
 # Poudriere variables
-if [ "$SYSBUILD" = "trueos" ] ; then
+if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
   PBUILD="trueos-`echo $TARGETREL | sed 's|\.||g'`"
   if [ -z "$POUDPORTS" ] ; then
     POUDPORTS="trueosports" ; export POUDPORTS

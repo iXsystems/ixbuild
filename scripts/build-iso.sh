@@ -50,6 +50,7 @@ do_iso()
   if [ -z "$SYSBUILD" -o "$SYSBUILD" = "BOTH" ] ; then
 
     local oSys="$SYSBUILD"
+    DOINGSYSBOTH="YES" ; export DOINGSYSBOTH
     SYSBUILD="pcbsd" ; export SYSBUILD
     ${PROGDIR}/scripts/9.freesbie.sh
     if [ $? -ne 0 ] ; then
@@ -63,6 +64,7 @@ do_iso()
       exit 1
     fi
     SYSBUILD="$oSys" ; export SYSBUILD
+    unset DOINGSYSBOTH
   else
     ${PROGDIR}/scripts/9.freesbie.sh
     if [ $? -ne 0 ] ; then
