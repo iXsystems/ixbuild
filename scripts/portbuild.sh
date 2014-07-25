@@ -302,6 +302,9 @@ if [ "$target" = "all" ] ; then
    # Remove old PBI-INDEX.txz files
    rm ${PPKGDIR}/PBI-INDEX.txz* 2>/dev/null
 
+   # Make sure this builder isn't already going
+   poudriere jail -k -j $PBUILD -p $POUDPORTS
+
    # Build entire ports tree
    poudriere bulk -a ${pV} -j $PBUILD -p $POUDPORTS | tee ${PROGDIR}/log/poudriere.log
    if [ $? -ne 0 ] ; then
@@ -337,6 +340,10 @@ elif [ "$target" = "meta" ] ; then
    pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
    export pCleanup
 
+   # Make sure this builder isn't already going
+   poudriere jail -k -j $PBUILD -p $POUDPORTS
+
+   # Start the build
    poudriere bulk ${pV} -j $PBUILD -p $POUDPORTS -f $bList | tee ${PROGDIR}/log/poudriere.log
    if [ $? -ne 0 ] ; then
       echo "Failed poudriere build..."
