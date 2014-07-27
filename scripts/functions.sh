@@ -240,6 +240,14 @@ create_pkg_conf()
 
    echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
 
+   # If working in tandem with a full repo, pull from there also
+   if [ -n "$FULLPKGREPO" ] ; then
+      echo "pcbsd-master: {
+               url: \"${FULLPKGREPO}\",
+               enabled: true
+              }" >  ${PROGDIR}/tmp/repo/full-repo.conf
+   fi
+
    # Doing a local package build
    if [ "$PKGREPO" = "local" ]; then
       echo "pcbsd-build: {
@@ -310,7 +318,7 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -r pcbsd-build -y -o ${PROGDIR}/tmp -d ${pkgName}"
+      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp -d ${pkgName}"
     done
 
     # Add back the TEMP fix to pkgng 1.3.0rc4
@@ -378,7 +386,12 @@ check_essential_pkgs()
 {
    echo "Checking essential pkgs..."
    haveWarn=0
-   local eP="${PCONFDIR}/essential-packages"
+
+   if [ -z "$FULLPKGREPO" ] ; then
+     local eP="${PCONFDIR}/essential-packages"
+   else
+     local eP="${PCONFDIR}/essential-packages-nonrel"
+   fi
 
    # Make sure we have the file we need
    if [ ! -e "${eP}" ] ; then

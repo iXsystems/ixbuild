@@ -147,21 +147,7 @@ mk_metapkg_bulkfile()
    local bulkList=$1
    rm $bulkList >/dev/null 2>/dev/null
 
-   # Save the bulk file
-   echo "==> Scheduling build for: sysutils/pcbsd-utils"
-   echo "sysutils/pcbsd-utils" > $bulkList
-   echo "==> Scheduling build for: sysutils/pcbsd-utils-qt4"
-   echo "sysutils/pcbsd-utils-qt4" >> $bulkList
-   
-   # Get a listing of all pcbsd-* and trueos-* packages to build
-   for i in `ls -d ${PJPORTSDIR}/misc/pcbsd-* ${PJPORTSDIR}/misc/trueos-* | sed "s|${PJPORTSDIR}/||g"`
-   do
-     # Check the arch type
-     pArch=`make -C ${PJPORTSDIR}/${i} -V ONLY_FOR_ARCHS PORTSDIR=${PJPORTSDIR}`
-     if [ -n "$pArch" -a "$pArch" != "$ARCH" ] ; then continue; fi
-     echo "==> Scheduling build for: $i"
-     echo "${i}" >> $bulkList
-   done
+   rc_halt "cp ${PCONFDIR}/essential-pkgs-nonrel $bulkList"
 }
 
 do_portsnap()
@@ -347,6 +333,12 @@ elif [ "$target" = "meta" ] ; then
    poudriere bulk ${pV} -j $PBUILD -p $POUDPORTS -f $bList | tee ${PROGDIR}/log/poudriere.log
    if [ $? -ne 0 ] ; then
       echo "Failed poudriere build..."
+   fi
+
+   # Make sure the essentials built, exit now if not
+   check_essential_pkgs "NO"
+   if [ $? -ne 0 ] ; then
+      exit 1
    fi
 
    # If the user wanted to sign the repo lets do it now

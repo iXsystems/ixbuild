@@ -82,6 +82,12 @@ do_clean()
 
 do_ports()
 {
+  # The user meant to run meta build, lets do it now
+  if [ -n "$FULLPKGREPO" ] ; then
+     do_ports_meta
+     return $?
+  fi
+
   echo "Building ports"
 
   if [ ! -e "${DISTDIR}/base.txz" ] ; then
@@ -111,8 +117,32 @@ do_ports()
 
 do_ports_meta()
 {
+
+  echo "Building ports"
+
+  if [ ! -e "${DISTDIR}/base.txz" ] ; then
+     exit_err "You must create a world before running poudriere"
+  fi
+
+  # Make sure the jail is created
+  poudriere jail -l | grep -q $PBUILD
+  if [ $? -ne 0 ] ; then
+    update_poudriere_jail
+     sync ; sleep 1
+  fi
+
+  # Check if we have a portstree to build
+  poudriere ports -l | grep -q "^$POUDPORTS"
+  if [ $? -ne 0 ] ; then
+     sh ${PROGDIR}/scripts/portbuild.sh portsnap
+     sync ; sleep 1
+  fi
+
   sh ${PROGDIR}/scripts/portbuild.sh meta
-  exit $?
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
 }
 
 do_ports_all()

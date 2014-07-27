@@ -66,3 +66,15 @@ export POUD_SIGN_REPO
 #PBI_REPO_KEY=""
 export PBI_REPO_KEY
 
+# Set this if building a non XX.0-RELEASE branch
+# This will instruct the builder to create only
+# kernel / driver specific packages to this release
+# while pulling the rest of the package tree from the URL
+# specified
+#
+# The list of packages to build is located in the PC-BSD git repo:
+# https://github.com/pcbsd/pcbsd/blob/master/build-files/conf/essential-packages-nonrel
+#
+# FULLPKGREPO="http://pkg.cdn.pcbsd.org/10.0-RELEASE/edge/amd64/"
+export FULLPKGREPO
+
