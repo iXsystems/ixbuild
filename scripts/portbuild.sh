@@ -147,7 +147,7 @@ mk_metapkg_bulkfile()
    local bulkList=$1
    rm $bulkList >/dev/null 2>/dev/null
 
-   rc_halt "cp ${PCONFDIR}/essential-pkgs-nonrel $bulkList"
+   rc_halt "cp ${PCONFDIR}/essential-packages-nonrel $bulkList"
 }
 
 do_portsnap()
