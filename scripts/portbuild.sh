@@ -68,7 +68,7 @@ merge_pcbsd_src_ports()
    rc_halt "tar cvjf ${distCache}/pcbsd-utils-qt4-${guiREV}.tar.bz2 src-qt4" 2>/dev/null
 
    echo "Creating dist files for version: $webREV"
-   rc_halt "tar cvjf ${distCache}/pcbsd-appweb-${webREV}.tar.bz2 src-appweb" 2>/dev/null
+   rc_halt "tar cvjf ${distCache}/pcbsd-appweb-${webREV}.tar.bz2 src-webui" 2>/dev/null
 
    echo "Creating dist files for version: $deREV"
    rc_halt "tar cvjf ${distCache}/lumina-${deREV}.tar.bz2 lumina" 2>/dev/null
