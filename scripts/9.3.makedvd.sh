@@ -29,6 +29,13 @@ mkdir ${ISODISTDIR}
 echo "Copying dist files.."
 cp ${DISTDIR}/* ${ISODISTDIR}/
 
+# Remove the symbols from kernel.txz
+rc_halt "mkdir ${ISODISTDIR}/kerntmp"
+rc_halt "tar xvpf ${ISODISTDIR}/kernel.txz -C ${ISODISTDIR}/kerntmp"
+rc_halt "rm ${ISODISTDIR}/tmp/boot/kernel/*.symbols"
+rc_halt "tar cvJf ${ISODISTDIR}/kernel.txz -C ${ISODISTDIR}/kerntmp ."
+rc_halt "rm -rf ${ISODISTDIR}/kerntmp"
+
 rc_halt "mkdir -p ${ISODISTDIR}/packages"
 rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"
 
