@@ -32,7 +32,7 @@ cp ${DISTDIR}/* ${ISODISTDIR}/
 # Remove the symbols from kernel.txz
 rc_halt "mkdir ${ISODISTDIR}/kerntmp"
 rc_halt "tar xvpf ${ISODISTDIR}/kernel.txz -C ${ISODISTDIR}/kerntmp"
-rc_halt "rm ${ISODISTDIR}/tmp/boot/kernel/*.symbols"
+rc_halt "rm ${ISODISTDIR}/kerntmp/tmp/boot/kernel/*.symbols"
 rc_halt "tar cvJf ${ISODISTDIR}/kernel.txz -C ${ISODISTDIR}/kerntmp ."
 rc_halt "rm -rf ${ISODISTDIR}/kerntmp"
 
