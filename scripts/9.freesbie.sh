@@ -182,6 +182,9 @@ if [ "$ARCH" = "amd64" ] ; then
   extract_dist "${L32DIST}" "${PDESTDIR9}"
 fi
 
+# Remove space hogging symbols from install media
+rc_halt "rm ${PDESTDIR9}/boot/kernel/*.symbols"
+
 # Make sure GIT is updated
 cd ${GITBRANCH}
 git_up "${GITBRANCH}" "${GITBRANCH}"
