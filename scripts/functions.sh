@@ -327,13 +327,14 @@ cp_iso_pkg_files()
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
 
+    # Now we need to create the new repo files for DVD / USB
+    rc_halt "cd ${PROGDIR}/tmp"
+    rc_halt "${PKGSTATIC} repo ."
+    rc_halt "cd ${PROGDIR}"
+
     # Cleanup PKGSTATIC
     rc_halt "rm ${PKGSTATIC}"
 
-    # Now we need to grab the digests / packagesite
-    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
-    rc_halt "fetch -o ${PROGDIR}/tmp/digests.txz ${PSITE}/digests.txz"
-    rc_halt "fetch -o ${PROGDIR}/tmp/packagesite.txz ${PSITE}/packagesite.txz"
     create_installer_pkg_conf
 }
 
