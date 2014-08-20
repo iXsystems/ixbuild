@@ -28,18 +28,13 @@ fi
 which grub-mkrescue >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing grub-mkrescue.."
-  rc_halt "pkg install sysutils/grub2"
+  rc_halt "pkg install sysutils/grub2-pcbsd"
 fi
 
 which xorriso >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing xorriso.."
   rc_halt "pkg install sysutils/xorriso"
-fi
-
-if [ ! -d "/usr/local/lib/grub/x86_64-efi" ]; then
-  echo "Installing grub2-efi.."
-  rc_halt "pkg install sysutils/grub2-efi"
 fi
 
 if [ "$PKGREPO" = "local" ] ; then
