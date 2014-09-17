@@ -213,6 +213,7 @@ do
      echo "FAILED adding: $pkg"
      echo "Output:"
      cat /tmp/pkg-log
+     exit 1
   fi
 done </installcd-packages
 rm /installcd-packages
@@ -226,12 +227,21 @@ do
   ln -fs ${i} /usr/local/share/fonts/`basename $i`
 done
 
+exit 0
 ' > ${PDESTDIR9}/.insPkgs.sh
 chmod 755 ${PDESTDIR9}/.insPkgs.sh
 chroot ${PDESTDIR9} /.insPkgs.sh
+res=$?
 rm ${PDESTDIR9}/.insPkgs.sh
 umount -f ${PDESTDIR9}/mnt
 umount -f ${PDESTDIR9}/dev
+
+# If we failed installing packages, time to halt here
+if [ $res -ne 0 ] ; then
+  echo "Failed installing ISO packages!"
+  umount -f ${PDESTDIR9}
+  rm ${PDESTDIR9}
+fi
 
 # Copy over the overlays/install-overlay directory to the pcbsdcd directory
 ##########################################################################
