@@ -241,6 +241,7 @@ if [ $res -ne 0 ] ; then
   echo "Failed installing ISO packages!"
   umount -f ${PDESTDIR9}
   rm ${PDESTDIR9}
+  exit 1
 fi
 
 # Copy over the overlays/install-overlay directory to the pcbsdcd directory
