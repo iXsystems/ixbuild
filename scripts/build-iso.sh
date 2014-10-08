@@ -42,6 +42,8 @@ do_world() {
 
 do_iso() 
 {
+  if [ "$ARCH" = "i386" ] ; then return 0; fi
+
   echo "Building ISO file"
 
   rm ${PROGDIR}/iso/* >/dev/null 2>/dev/null
@@ -80,8 +82,46 @@ do_clean()
   rm ${PROGDIR}/tmp/All/* 2>/dev/null
 }
 
+do_ports_i386()
+{
+  echo "Building i386 ports"
+
+  if [ ! -e "${DISTDIR}/base.txz" ] ; then
+     exit_err "You must create a world before running poudriere"
+  fi
+
+  # Make sure the jail is created
+  poudriere jail -l | grep -q $PBUILD
+  if [ $? -ne 0 ] ; then
+    update_poudriere_jail
+     sync ; sleep 1
+  fi
+
+  # Check if we have a portstree to build
+  poudriere ports -l | grep -q "^$POUDPORTS"
+  if [ $? -ne 0 ] ; then
+     sh ${PROGDIR}/scripts/portbuild.sh portsnap
+     sync ; sleep 1
+  fi
+
+  sh ${PROGDIR}/scripts/portbuild.sh i386
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
+
+  return 0
+}
+
+
 do_ports()
 {
+  # Doing a selective i386 ports build
+  if [ "$ARCH" = "i386" ] ; then
+    do_ports_i386
+    return $?
+  fi
+
   # The user meant to run meta build, lets do it now
   if [ -n "$FULLPKGREPO" ] ; then
      do_ports_meta
@@ -153,6 +193,7 @@ do_ports_all()
 
 do_pbi-index()
 {
+  if [ "$ARCH" = "i386" ] ; then return 0; fi
   sh ${PROGDIR}/scripts/portbuild.sh pbi-index
   exit $?
 }
@@ -171,6 +212,7 @@ do_ports_pcbsd()
 
 do_check_ports()
 {
+  if [ "$ARCH" = "i386" ] ; then return 0; fi
   check_essential_pkgs "NO"
   exit $?
 }

@@ -333,6 +333,26 @@ elif [ "$target" = "meta" ] ; then
    export pCleanup
 
    exit 0
+elif [ "$target" = "i386" ] ; then
+   bList="${PROGDIR}/scripts/i386-pkgs"
+
+   # Set cleanup var
+   pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
+   export pCleanup
+
+   # Make sure this builder isn't already going
+   poudriere jail -k -j $PBUILD -p $POUDPORTS
+
+   # Start the build
+   poudriere bulk ${pV} -j $PBUILD -p $POUDPORTS -f $bList | tee ${PROGDIR}/log/poudriere.log
+   if [ $? -ne 0 ] ; then
+      echo "Failed poudriere build..."
+   fi
+
+   # Unset cleanup var
+   pCleanup=""
+   export pCleanup
+
 elif [ "$1" = "portsnap" ] ; then
    do_portsnap
    do_pcbsd_portmerge

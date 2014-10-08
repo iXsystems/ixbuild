@@ -76,11 +76,13 @@ export METAPKGDIR="${PROGDIR}/tmp"
 # Poudriere variables
 if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
   PBUILD="trueos-`echo $TARGETREL | sed 's|\.||g'`"
+  if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   if [ -z "$POUDPORTS" ] ; then
     POUDPORTS="trueosports" ; export POUDPORTS
   fi
 else
   PBUILD="pcbsd-`echo $TARGETREL | sed 's|\.||g'`"
+  if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   if [ -z "$POUDPORTS" ] ; then
     POUDPORTS="pcbsdports" ; export POUDPORTS
   fi
