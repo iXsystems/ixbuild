@@ -20,6 +20,8 @@ if [ $cStat -ne 0 ] ; then exit $cStat; fi
 
 merge_pcbsd_src_ports()
 {
+   if [ "$ARCH" == "i386" ] ; then return 0 ; fi
+
    local mcwd=`pwd`
    local gitdir="$1"
    local portsdir="$2"
