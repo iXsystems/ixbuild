@@ -1,3 +1,6 @@
 emulators/wine
 emulators/wine-devel
 emulators/wine-compholio
+emulators/i386-wine
+emulators/i386-wine-devel
+emulators/i386-wine-compholio
