@@ -351,11 +351,6 @@ elif [ "$target" = "i386" ] ; then
       echo "Failed poudriere build..."
    fi
 
-   # If the user wanted to sign the repo lets do it now
-   if [ -n "$POUD_SIGN_REPO" ] ; then
-      sign_pkg_repo
-   fi
-
    # Unset cleanup var
    pCleanup=""
    export pCleanup
