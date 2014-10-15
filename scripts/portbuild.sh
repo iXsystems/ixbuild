@@ -113,7 +113,7 @@ do_portsnap()
 	rm -rf $PJPORTSDIR
      fi
    fi
-
+   sleep 4
    poudriere ports -c -m git -p "$POUDPORTS" >/dev/null 2>/dev/null
    if [ $? -ne 0 ] ; then
      echo "Failed to create ports $POUDPORTS"
