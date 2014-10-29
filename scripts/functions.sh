@@ -301,16 +301,23 @@ cp_iso_pkg_files()
    get_pkgstatic
 
    # Build the list of pkgs to fetch
-   pList=""
-   for pkg in `cat $eP`
-   do
-      res=`${PKGSTATIC} -C ${PROGDIR}/tmp/local.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
-      pList="$pList $res"
-   done
+   #pList=""
+   #while read pkgLine
+   #do
+   #   res=`${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
+   #   pList="$pList $res"
+   #done < $eP
 
    # Now fetch these packages
-   for pkgName in $pList
+   while read pkgLine
    do
+      pkgName=`echo $pkgLine | cut -d ' ' -f 1`
+      pkgLocal=`echo $pkgLine | cut -d ' ' -f 2`
+      localFlg=""
+      if [ "$pkgLocal" = "local" -a -e "${PROGDIR}/tmp/repo/full-repo.conf" ] ; then
+	 localFlg="--repository localrepo"
+      fi
+
       # See if this is something we can skip for now
       skip=0
       for j in $skipPkgs
@@ -320,8 +327,8 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp -d ${pkgName}"
-    done
+      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp $localFlg -d ${pkgName}"
+    done < $eP
 
     # Add back the TEMP fix to pkgng 1.3.0rc4
     #mv ${PROGDIR}/tmp/.real_*/All ${PROGDIR}/tmp
