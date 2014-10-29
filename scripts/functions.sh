@@ -255,15 +255,15 @@ create_pkg_conf()
       echo "pcbsd-build: {
                url: \"file://${PPKGDIR}\",
                enabled: true
-              }" >  ${PROGDIR}/tmp/repo/repo.conf
+              }" >  ${PROGDIR}/tmp/repo/01repo.conf
 	return
    fi
 
    # Doing a remote pull from a repo
-   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/repo.conf
-   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/repo.conf
-   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/repo.conf
-   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/repo.conf
+   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/01repo.conf
+   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/01repo.conf
+   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/01repo.conf
+   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/01repo.conf
 
 }
 
@@ -473,7 +473,7 @@ get_pkgstatic()
   if [ "$PKGREPO" = "local" ]; then
     rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
   else
-    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
+    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/01repo.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
     rc_halt "fetch -o /tmp/.pkg.txz.$$ ${PSITE}/Latest/pkg.txz" 
     rc_halt "tar xv --strip-components 4 -f /tmp/.pkg.txz.$$ -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
     rc_halt "rm /tmp/.pkg.txz.$$" >/dev/null 2>/dev/null
