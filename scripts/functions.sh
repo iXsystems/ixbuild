@@ -244,7 +244,7 @@ create_pkg_conf()
 
    # If working in tandem with a full repo, pull from there also
    if [ -n "$FULLPKGREPO" ] ; then
-      echo "pcbsd-master: {
+      echo "oldrepo: {
                url: \"${FULLPKGREPO}\",
                enabled: true
               }" >  ${PROGDIR}/tmp/repo/full-repo.conf
@@ -255,15 +255,15 @@ create_pkg_conf()
       echo "pcbsd-build: {
                url: \"file://${PPKGDIR}\",
                enabled: true
-              }" >  ${PROGDIR}/tmp/repo/repo.conf
+              }" >  ${PROGDIR}/tmp/repo/01.conf
 	return
    fi
 
    # Doing a remote pull from a repo
-   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/repo.conf
-   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/repo.conf
-   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/repo.conf
-   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/repo.conf
+   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/01.conf
+   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/01.conf
+   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/01.conf
+   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/01.conf
 
 }
 
