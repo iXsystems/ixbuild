@@ -244,7 +244,7 @@ create_pkg_conf()
 
    # If working in tandem with a full repo, pull from there also
    if [ -n "$FULLPKGREPO" ] ; then
-      echo "oldrepo: {
+      echo "remoterepo: {
                url: \"${FULLPKGREPO}\",
                enabled: true
               }" >  ${PROGDIR}/tmp/repo/full-repo.conf
@@ -252,18 +252,18 @@ create_pkg_conf()
 
    # Doing a local package build
    if [ "$PKGREPO" = "local" ]; then
-      echo "pcbsd-build: {
+      echo "localrepo: {
                url: \"file://${PPKGDIR}\",
                enabled: true
-              }" >  ${PROGDIR}/tmp/repo/01.conf
+              }" >  ${PROGDIR}/tmp/repo/local.conf
 	return
    fi
 
    # Doing a remote pull from a repo
-   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/01.conf
-   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/01.conf
-   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/01.conf
-   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/01.conf
+   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/local.conf
+   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/local.conf
+   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/local.conf
+   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/local.conf
 
 }
 
@@ -304,7 +304,7 @@ cp_iso_pkg_files()
    pList=""
    for pkg in `cat $eP`
    do
-      res=`${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
+      res=`${PKGSTATIC} -C ${PROGDIR}/tmp/local.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
       pList="$pList $res"
    done
 
