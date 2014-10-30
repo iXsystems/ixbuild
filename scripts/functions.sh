@@ -239,6 +239,7 @@ create_pkg_conf()
       rm -rf ${PROGDIR}/tmp/repo
    fi
    mkdir ${PROGDIR}/tmp/repo
+   mkdir ${PROGDIR}/tmp/sysrel
 
    echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
 
@@ -300,23 +301,17 @@ cp_iso_pkg_files()
    # Use the version of pkgng for the target
    get_pkgstatic
 
-   # Build the list of pkgs to fetch
-   #pList=""
-   #while read pkgLine
-   #do
-   #   res=`${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ rquery -g '%o' $pkg | awk 1 ORS=' '`
-   #   pList="$pList $res"
-   #done < $eP
-
    # Now fetch these packages
    while read pkgLine
    do
       pkgName=`echo $pkgLine | cut -d ' ' -f 1`
       pkgLocal=`echo $pkgLine | cut -d ' ' -f 2`
       localFlg=""
-      if [ "$pkgLocal" = "local" -a -e "${PROGDIR}/tmp/repo/full-repo.conf" ] ; then
-	 localFlg="--repository localrepo"
-      fi
+      pConf="-C ${PROGDIR}/tmp/pkg.conf"
+      #if [ "$pkgLocal" = "local" -a -e "${PROGDIR}/tmp/repo/full-repo.conf" ] ; then
+      #  pConf="-C ${PROGDIR}/tmp/pkg-sysrel.conf"
+      #	 localFlg="--repository localrepo"
+      #fi
 
       # See if this is something we can skip for now
       skip=0
@@ -327,11 +322,18 @@ cp_iso_pkg_files()
       if [ $skip -eq 1 ] ; then echo "Skipping $pkgBase.."; continue ; fi
 
       # Fetch the packages
-      rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp $localFlg -d ${pkgName}"
+      rc_halt "${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp $localFlg -d ${pkgName}"
     done < $eP
 
     # Add back the TEMP fix to pkgng 1.3.0rc4
     #mv ${PROGDIR}/tmp/.real_*/All ${PROGDIR}/tmp
+
+    # If we are copying system specific packages and the PC-BSD / xorg images
+    # then merge the local packages with the ones going to ISO
+    #if [ -d "${PROGDIR}/tmp/sysrel/All" ] ; then
+    #   echo "Copying local packages..."
+    #   mv ${PROGDIR}/tmp/sysrel/All/*.txz ${PROGDIR}/tmp/All/
+    #fi
 
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
