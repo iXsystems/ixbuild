@@ -347,6 +347,12 @@ if [ $? -ne 0 ] ; then
    exit_err "Failed running 9.6.makenetfiles.sh"
 fi
 
+echo "Creating VM images"
+${PROGDIR}/scripts/9.7.makevbox.sh
+if [ $? -ne 0 ] ; then
+   exit_err "Failed running 9.7.makevbox.sh"
+fi
+
 umount -f ${PDESTDIR9} 2>/dev/null
 rmdir ${PDESTDIR9}
 
