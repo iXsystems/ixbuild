@@ -37,6 +37,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install sysutils/xorriso"
 fi
 
+which pixz >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing pixz.."
+  rc_halt "pkg install archivers/pixz"
+fi
+
 if [ "$PKGREPO" = "local" ] ; then
   which poudriere >/dev/null 2>/dev/null
   if [ "$?" != "0" ]; then
