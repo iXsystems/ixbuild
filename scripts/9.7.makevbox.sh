@@ -115,7 +115,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
 
   VDIFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}-VBOX.vdi"
   VMDKFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}-VMWARE.vmdk"
-  RAWFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}-VMWARE.raw"
+  RAWFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.raw"
 
   # Create the disk images from the raw file now
  
