@@ -123,21 +123,21 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   rm ${VDIFILE} 2>/dev/null
   rm ${VDIFILE}.xz 2>/dev/null
   rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${VDIFILE}"
-  rc_halt "xz ${VDIFILE}"
+  rc_halt "xz -3 ${VDIFILE}"
   rc_halt "chmod 644 ${VDIFILE}.xz"
 
   # Do VMWARE now
   rm ${VMDKFILE} 2>/dev/null
   rm ${VMDKFILE}.xz 2>/dev/null
   rc_halt "VBoxManage convertfromraw --format VMDK ${MFSFILE} ${VMDKFILE}"
-  rc_halt "xz ${VMDKFILE}"
+  rc_halt "xz -3 ${VMDKFILE}"
   rc_halt "chmod 644 ${VMDKFILE}.xz"
 
   # Do RAW now
   rm ${RAWFILE} 2>/dev/null
   rm ${RAWFILE}.xz 2>/dev/null
   rc_halt "mv $MFSFILE $RAWFILE"
-  rc_halt "xz ${RAWFILE}"
+  rc_halt "xz -3 ${RAWFILE}"
   rc_halt "chmod 644 ${RAWFILE}.xz"
 
   # Run MD5 command
