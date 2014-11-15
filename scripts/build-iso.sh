@@ -74,6 +74,19 @@ do_iso()
       exit 1
     fi
   fi
+
+  # Make the net install file directory now
+  echo "Making Net Files"
+  ${PROGDIR}/scripts/9.6.makenetfiles.sh
+  if [ $? -ne 0 ] ; then
+     exit_err "Failed running 9.6.makenetfiles.sh"
+  fi
+
+  echo "Creating VM images"
+  ${PROGDIR}/scripts/9.7.makevbox.sh
+  if [ $? -ne 0 ] ; then
+     exit_err "Failed running 9.7.makevbox.sh"
+  fi
 }
 
 do_clean()
