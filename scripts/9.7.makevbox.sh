@@ -63,6 +63,7 @@ if [ $? -ne 0 ] ; then
 fi
 rc_halt "umount /dev/$MD"
 rc_halt "mdconfig -d -u $MD"
+rc_halt "rmdir ${ISODIR}-tmp"
 
 echo "Extracting /root and /etc"
 rc_halt "tar xvf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root" >/dev/null 2>/dev/null
@@ -120,6 +121,10 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
      # if the disk image is too small, something didn't work, bail out!
      echo "bhyve install failed!"
      tail ${PROGDIR}/log/vmbuild.log
+
+     # Cleanup tempfs
+     umount ${ISODIR} 2>/dev/null
+     rmdir ${ISODIR}
      exit 1
   fi
 
@@ -165,4 +170,5 @@ done
 
 # Cleanup tempfs
 umount ${ISODIR} 2>/dev/null
+rmdir ${ISODIR}
 exit 0
