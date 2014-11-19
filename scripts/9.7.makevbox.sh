@@ -110,8 +110,17 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   # Just in case the install hung, we don't need to be waiting for over an hour
   (sleep 3600 && bhyve --destroy --vm=vminstall) &
   kPid=$!
-  sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall
+  sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall >${PROGDIR}/log/vmbuild.log 2>${PROGDIR}/log/vmbuild.log
   kill -9 $kPid
+
+  # Check that this device seemed to install properly
+  dSize=`du -m ${MFSFILE} | awk '{print $1}'`
+  if [ $dSize -lt 10 ] ; then
+     # if the disk image is too small, something didn't work, bail out!
+     echo "bhyve install failed!"
+     tail ${PROGDIR}/log/vmbuild.log
+     exit 1
+  fi
 
   VDIFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}-VBOX.vdi"
   VMDKFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}-VMWARE.vmdk"
