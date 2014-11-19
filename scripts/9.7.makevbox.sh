@@ -108,6 +108,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   # Run BHYVE now
 
   # Just in case the install hung, we don't need to be waiting for over an hour
+  echo "Running bhyve for installation now..."
   (sleep 3600 && bhyve --destroy --vm=vminstall) &
   kPid=$!
   sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall >${PROGDIR}/log/vmbuild.log 2>${PROGDIR}/log/vmbuild.log
