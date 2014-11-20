@@ -112,7 +112,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   echo "Running bhyve for installation now..."
   (sleep 3600 && bhyve --destroy --vm=vminstall) &
   kPid=$!
-  sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall >${PROGDIR}/log/vmbuild.log 2>${PROGDIR}/log/vmbuild.log
+  sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall
   kill -9 $kPid
 
   # Check that this device seemed to install properly
