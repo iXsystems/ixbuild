@@ -33,7 +33,7 @@ VPKGLIST="pcbsd-base misc/pcbsd-meta-kde archivers/unzip archivers/unrar pcbsd-m
 # Cleanup any failed build
 umount ${ISODIR} 2>/dev/null
 umount ${ISODIR}-tmp 2>/dev/null
-rmdir ${ISODIR}-tmp
+rmdir ${ISODIR}-tmp 2>/dev/null
 sleep 1
 
 # Create the tmp dir we will be using
@@ -107,20 +107,34 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   fi
 
   # Run BHYVE now
+  sync
+  sleep 15
 
   # Just in case the install hung, we don't need to be waiting for over an hour
-  echo "Running bhyve for installation now..."
-  (sleep 3600 && bhyve --destroy --vm=vminstall) &
-  kPid=$!
-  sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall
-  kill -9 $kPid
+  echo "Running bhyve for installation to $MFSFILE..."
+  count=0
+  daemon -f -p /tmp/vminstall.pid sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall
+  while :
+  do
+    if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
+
+    pgrep -qF /tmp/vminstall.pid
+    if [ $? -ne 0 ] ; then
+          break;
+    fi
+
+    count=`expr $count + 1`
+    if [ $count -gt 360 ] ; then bhyve --destroy --vm=vminstall ; fi
+    echo -e ".\c"
+
+    sleep 10
+  done
 
   # Check that this device seemed to install properly
   dSize=`du -m ${MFSFILE} | awk '{print $1}'`
   if [ $dSize -lt 10 ] ; then
      # if the disk image is too small, something didn't work, bail out!
      echo "bhyve install failed!"
-     tail ${PROGDIR}/log/vmbuild.log
 
      # Cleanup tempfs
      umount ${ISODIR} 2>/dev/null
