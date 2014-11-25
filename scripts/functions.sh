@@ -239,6 +239,9 @@ create_pkg_conf()
       rm -rf ${PROGDIR}/tmp/repo
    fi
    mkdir ${PROGDIR}/tmp/repo
+   if [ -d "${PROGDIR}/tmp/sysrel" ] ; then
+     rm -rf ${PROGDIR}/tmp/sysrel
+   fi
    mkdir ${PROGDIR}/tmp/sysrel
 
    echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
