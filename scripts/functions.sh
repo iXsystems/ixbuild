@@ -246,14 +246,6 @@ create_pkg_conf()
 
    echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
 
-   # If working in tandem with a full repo, pull from there also
-   if [ -n "$FULLPKGREPO" ] ; then
-      echo "remoterepo: {
-               url: \"${FULLPKGREPO}\",
-               enabled: true
-              }" >  ${PROGDIR}/tmp/repo/full-repo.conf
-   fi
-
    # Doing a local package build
    if [ "$PKGREPO" = "local" ]; then
       echo "localrepo: {
