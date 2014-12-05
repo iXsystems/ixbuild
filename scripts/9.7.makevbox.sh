@@ -42,7 +42,7 @@ mkdir ${ISODIR}-tmp
 
 
 # Extract the ISO file
-DVDFILE=`ls ${PROGDIR}/iso/PCBSD*.iso`
+DVDFILE=`ls ${PROGDIR}/iso/PCBSD*DVD-USB.iso`
 if [ ! -e "$DVDFILE" ] ; then
   echo "No such ISO file: $DVDFILE"
   exit 1
