@@ -53,9 +53,9 @@ export bFile
 # Set the pcbsd-media-details file marker on this media
 echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL DVD/USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
 
-# Use GRUB to create the hybrid DVD/USB image
-echo "Creating ISO..."
-grub-mkrescue -o ${PROGDIR}/iso/${bFile}-DVD-USB.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
+# Use GRUB to create the hybrid BIOS DVD/USB image
+echo "Creating BIOS ISO..."
+grub-mkrescue -d " /usr/local/lib/grub/i386-pc" -o ${PROGDIR}/iso/${bFile}-DVD-USB.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
 if [ $? -ne 0 ] ; then
    exit_err "Failed running grub-mkrescue"
 fi
@@ -67,6 +67,15 @@ sha256 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.sha256
 ln -s ${bFile}-DVD-USB.iso latest.iso
 ln -s ${bFile}-DVD-USB.iso.md5 latest.iso.md5
 ln -s ${bFile}-DVD-USB.iso.sha256 latest.iso.sha256
+
+# Use GRUB to create the hybrid UEFI DVD/USB image
+echo "Creating UEFI ISO..."
+grub-mkrescue -d " /usr/local/lib/grub/x86_64-efi" -o ${PROGDIR}/iso/${bFile}-DVD-USB-UEFI.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
+if [ $? -ne 0 ] ; then
+   exit_err "Failed running grub-mkrescue"
+fi
+md5 -q ${bFile}-DVD-USB-UEFI.iso >${bFile}-DVD-USB-UEFI.iso.md5
+sha256 -q ${bFile}-DVD-USB-UEFI.iso >${bFile}-DVD-USB-UEFI.iso.sha256
 
 rc_halt "umount ${ISODISTDIR}/packages"
 
