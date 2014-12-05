@@ -55,7 +55,7 @@ echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL DVD/USB - `date`" > ${PDESTDIR9}/pcbsd-
 
 # Use GRUB to create the hybrid BIOS DVD/USB image
 echo "Creating BIOS ISO..."
-grub-mkrescue -d " /usr/local/lib/grub/i386-pc" -o ${PROGDIR}/iso/${bFile}-DVD-USB.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
+grub-mkrescue -d "/usr/local/lib/grub/i386-pc" -o ${PROGDIR}/iso/${bFile}-DVD-USB.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
 if [ $? -ne 0 ] ; then
    exit_err "Failed running grub-mkrescue"
 fi
@@ -70,7 +70,7 @@ ln -s ${bFile}-DVD-USB.iso.sha256 latest.iso.sha256
 
 # Use GRUB to create the hybrid UEFI DVD/USB image
 echo "Creating UEFI ISO..."
-grub-mkrescue -d " /usr/local/lib/grub/x86_64-efi" -o ${PROGDIR}/iso/${bFile}-DVD-USB-UEFI.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
+grub-mkrescue -d "/usr/local/lib/grub/x86_64-efi" -o ${PROGDIR}/iso/${bFile}-DVD-USB-UEFI.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
 if [ $? -ne 0 ] ; then
    exit_err "Failed running grub-mkrescue"
 fi
