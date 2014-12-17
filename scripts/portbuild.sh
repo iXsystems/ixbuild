@@ -34,47 +34,7 @@ merge_pcbsd_src_ports()
    git_up "$gitdir" "$gitdir"
    rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
      
-   echo "Merging PC-BSD ports-overlay..."
-   rc_halt "${PROGDIR}/scripts/mergesvnports ${gitdir}/build-files/ports-overlay ${portsdir}"
-
-   # Now massage all the CHGVERSION variables into the REV
-   rc_halt "cd ${portsdir}/misc" >/dev/null 2>/dev/null
-   for i in `ls -d pcbsd* trueos*`
-   do
-      mREV=`get_last_rev "${gitdir}/build-files/ports-overlay/misc/${i}"`
-      rc_halt "cd ${portsdir}/misc" >/dev/null 2>/dev/null
-      if [ ! -e "${i}/Makefile" ] ; then
-         exit_err "Error: missing Makefile for ${portsdir}/misc/${i}"
-      fi
-      sed -i '' "s|CHGVERSION|$mREV|g" ${i}/Makefile
-      if [ $? -ne 0 ] ; then
-         exit_err "Error: Failed running sed on ${portsdir}/misc/${i}"
-      fi
-   done
-
-   # Need to add these ports to INDEX / SUBDIR
-   rc_halt "cd ${gitdir}/build-files/ports-overlay" >/dev/null 2>/dev/null
-   for i in `find . | grep '/Makefile$' | sed 's|/Makefile||g' | sed 's|\./||g'`
-   do
-      rc_halt "cd ${gitdir}/build-files/ports-overlay" >/dev/null 2>/dev/null
-      if [ ! -d "$i" ] ; then echo "Invalid merge dir ${i}" ; continue ; fi
-      cDir=`echo $i | cut -d '/' -f 1`
-      pDir=`echo $i | cut -d '/' -f 2`
-
-      rc_halt "cd ${portsdir}" >/dev/null 2>/dev/null
-      grep -q "SUBDIR += ${pDir}\$" ${cDir}/Makefile
-      if [ $? -eq 0 ] ; then continue; fi
-
-      echo "Adding ${pDir} to ${cDir}/Makefile..."
-      # Add to $cDir / Makefile
-      mv ${cDir}/Makefile ${cDir}/Makefile.$$
-      echo "    SUBDIR += ${pDir}" >${cDir}/Makefile
-      cat ${cDir}/Makefile.$$ >> ${cDir}/Makefile
-      rm ${cDir}/Makefile.$$
-   done
-
    # Now use the git script to create source ports
-   cd ${gitdir}
    rc_halt "./mkports.sh ${portsdir} ${distCache}"
 
    # Jump back to where we belong
