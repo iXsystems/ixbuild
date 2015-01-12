@@ -142,25 +142,34 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
      exit 1
   fi
 
-  VDIFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}-VBOX.vdi"
-  VMDKFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}-VMWARE.vmdk"
+  OVAFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.ova"
+  VDIFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.vdi"
   RAWFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.raw"
 
-  # Create the disk images from the raw file now
- 
-  # Do VirtualBox now
+  # Create the VDI
   rm ${VDIFILE} 2>/dev/null
   rm ${VDIFILE}.xz 2>/dev/null
   rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${VDIFILE}"
   rc_halt "pixz ${VDIFILE}"
   rc_halt "chmod 644 ${VDIFILE}.xz"
 
-  # Do VMWARE now
-  rm ${VMDKFILE} 2>/dev/null
-  rm ${VMDKFILE}.xz 2>/dev/null
-  rc_halt "VBoxManage convertfromraw --format VMDK ${MFSFILE} ${VMDKFILE}"
-  rc_halt "pixz ${VMDKFILE}"
-  rc_halt "chmod 644 ${VMDKFILE}.xz"
+  # Create the OVA file now
+  rm ${OVAFILE} 2>/dev/null
+  rm ${OVAFILE}.xz 2>/dev/null
+  VM="$pName"
+  rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
+  rc_halt "VBoxManage storagectl $VM --name 'IDE Controller' --add ide --controller PIIX4"
+  rc_halt "VBoxManage storageattach $VM --storagectl 'IDE Controller' --port 0 --device 0 --type hdd --medium ${VDIFILE}"
+  rc_halt "VBoxManage modifyvm $VM --ioapic on --boot1 disk --memory 1024 --vram 12"
+  rc_halt "VBoxManage modifyvm $VM --nic1 nat"
+  rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
+  rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
+  rc_halt "VBoxManage modifyvm $VM --pae off"
+  rc_halt "VBoxManage modifyvm $VM --usb on"
+  rc_halt "VBoxManage modifyvm $VM --audio oss"
+  rc_halt "VBoxManage modifyvm $VM --audiocontroller ac97"
+  rc_halt "VBoxManage export $VM -o $OVAFILE"
+  rc_halt "VBoxManage unregistervm $VM --delete"
 
   # Do RAW now
   rm ${RAWFILE} 2>/dev/null
