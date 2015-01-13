@@ -142,10 +142,10 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
      exit 1
   fi
 
-  OVAFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.ova"
-  VDIFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.vdi"
-  VMDKFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.vmdk"
-  RAWFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.raw"
+  OVAFILE="${PROGDIR}/iso/PCBSD${ISOVER}-${FARCH}-${pName}.ova"
+  VDIFILE="${PROGDIR}/iso/PCBSD${ISOVER}-${FARCH}-${pName}.vdi"
+  VMDKFILE="${PROGDIR}/iso/PCBSD${ISOVER}-${FARCH}-${pName}.vmdk"
+  RAWFILE="${PROGDIR}/iso/PCBSD${ISOVER}-${FARCH}-${pName}.raw"
 
   # Create the VDI
   rm ${VDIFILE} 2>/dev/null
@@ -172,6 +172,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   rc_halt "VBoxManage modifyvm $VM --audiocontroller ac97"
   rc_halt "VBoxManage export $VM -o $OVAFILE"
   rc_halt "VBoxManage unregistervm $VM --delete"
+  rc_halt "chmod 644 $OVAFILE"
 
   # Create the VDI
   rm ${VDIFILE} 2>/dev/null
