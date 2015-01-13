@@ -157,9 +157,12 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   rm ${OVAFILE} 2>/dev/null
   rm ${OVAFILE}.xz 2>/dev/null
   VM="$pName"
+  # Remove any crashed / old VM
+  VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
+
   rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
-  rc_halt "VBoxManage storagectl $VM --name 'IDE Controller' --add ide --controller PIIX4"
-  rc_halt "VBoxManage storageattach $VM --storagectl 'IDE Controller' --port 0 --device 0 --type hdd --medium ${VDIFILE}"
+  rc_halt "VBoxManage storagectl $VM --name IDE --add ide --controller PIIX4"
+  rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 0 --type hdd --medium ${VDIFILE}"
   rc_halt "VBoxManage modifyvm $VM --ioapic on --boot1 disk --memory 1024 --vram 12"
   rc_halt "VBoxManage modifyvm $VM --nic1 nat"
   rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
