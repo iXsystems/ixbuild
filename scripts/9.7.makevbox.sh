@@ -173,7 +173,10 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   rc_halt "VBoxManage export $VM -o $OVAFILE"
   rc_halt "VBoxManage unregistervm $VM --delete"
 
-  # Compress the VDI file now
+  # Create the VDI
+  rm ${VDIFILE} 2>/dev/null
+  rm ${VDIFILE}.xz 2>/dev/null
+  rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${VDIFILE}"
   rc_halt "pixz ${VDIFILE}"
   rc_halt "chmod 644 ${VDIFILE}.xz"
 
