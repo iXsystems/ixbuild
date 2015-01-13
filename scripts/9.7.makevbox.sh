@@ -144,14 +144,13 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
 
   OVAFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.ova"
   VDIFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.vdi"
+  VMDKFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.vmdk"
   RAWFILE="${PROGDIR}/iso/PCBSD${PCBSDVER}-${FARCH}-${pName}.raw"
 
   # Create the VDI
   rm ${VDIFILE} 2>/dev/null
   rm ${VDIFILE}.xz 2>/dev/null
   rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${VDIFILE}"
-  rc_halt "pixz ${VDIFILE}"
-  rc_halt "chmod 644 ${VDIFILE}.xz"
 
   # Create the OVA file now
   rm ${OVAFILE} 2>/dev/null
@@ -173,6 +172,17 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   rc_halt "VBoxManage modifyvm $VM --audiocontroller ac97"
   rc_halt "VBoxManage export $VM -o $OVAFILE"
   rc_halt "VBoxManage unregistervm $VM --delete"
+
+  # Compress the VDI file now
+  rc_halt "pixz ${VDIFILE}"
+  rc_halt "chmod 644 ${VDIFILE}.xz"
+
+  # Create the VMDK
+  rm ${VMDKFILE} 2>/dev/null
+  rm ${VMDKFILE}.xz 2>/dev/null
+  rc_halt "VBoxManage convertfromraw --format VMDK ${MFSFILE} ${VMDKFILE}"
+  rc_halt "pixz ${VMDKFILE}"
+  rc_halt "chmod 644 ${VMDKFILE}.xz"
 
   # Do RAW now
   rm ${RAWFILE} 2>/dev/null
