@@ -28,6 +28,8 @@ mkdir ${ISODISTDIR}
 
 echo "Copying dist files.."
 cp ${DISTDIR}/* ${ISODISTDIR}/
+# Nuke the src.txz, its 110MB~ and 99.9% of users don't need it
+rm ${ISODISTDIR}/src.txz
 
 # Remove the symbols from kernel.txz
 rc_halt "mkdir ${ISODISTDIR}/kerntmp"
