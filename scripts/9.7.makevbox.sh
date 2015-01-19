@@ -197,6 +197,8 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
 
   # Run MD5 command
   cd ${PROGDIR}/iso
+  md5 -q ${OVAFILE} >${OVAFILE}.md5
+  sha256 -q ${OVAFILE} >${OVAFILE}.sha256
   md5 -q ${VDIFILE}.xz >${VDIFILE}.xz.md5
   sha256 -q ${VDIFILE}.xz >${VDIFILE}.xz.sha256
   md5 -q ${VMDKFILE}.xz >${VMDKFILE}.xz.md5
