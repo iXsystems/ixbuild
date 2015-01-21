@@ -97,8 +97,11 @@ do
 shutdown_cmd: shutdown -p now
 confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
 
-  # Use GRUB to create the hybrid DVD/USB image
+  # Use makefs to create the image
   echo "Creating ISO..."
+  echo "kern.geom.label.disk_ident.enable=0" >> ${ISODIR}/boot/loader.conf
+  echo "kern.geom.label.gptid.enable=0" >> ${ISODIR}/boot/loader.conf
+  echo "kern.geom.label.ufsid.enable=0" >> ${ISODIR}/boot/loader.conf
   echo "/dev/iso9660/PCBSD_INSTALL / cd9660 ro 0 0" > ${ISODIR}/etc/fstab
   bootable="-o bootimage=i386;$4/boot/cdboot -o no-emul-boot"
   makefs -t cd9660 $bootable -o rockridge -o label=PCBSD_INSTALL -o publisher="PCBSD" ${PROGDIR}/iso/VMAUTO.iso ${ISODIR}
