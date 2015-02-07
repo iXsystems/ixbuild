@@ -244,7 +244,9 @@ create_pkg_conf()
    fi
    mkdir ${PROGDIR}/tmp/sysrel
 
+   ABIVER=`echo $TARGETREL | cut -d '-' -f 1 | cut -d '.' -f 1`
    echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
+   echo "ALTABI: freebsd:${ABIVER}:x86:64" >> ${PROGDIR}/tmp/pkg.conf
 
    # Doing a local package build
    if [ "$PKGREPO" = "local" ]; then
