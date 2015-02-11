@@ -127,7 +127,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
     fi
 
     count=`expr $count + 1`
-    if [ $count -gt 360 ] ; then bhyve --destroy --vm=vminstall ; fi
+    if [ $count -gt 360 ] ; then bhyvectl --destroy --vm=vminstall ; fi
     echo -e ".\c"
 
     sleep 10
