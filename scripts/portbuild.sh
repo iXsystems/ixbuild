@@ -137,12 +137,14 @@ do_pbi-index()
    echo "Building new PBI-INDEX"
 
    # Lets update the PBI-INDEX
-   PKGREPO='local'
+   PKGREPO='local' ; export PKGREPO
    create_pkg_conf
    REPOS_DIR="${PROGDIR}/tmp/repo" ; export REPOS_DIR
    PKG_DBDIR="${PROGDIR}/tmp/repodb" ; export PKG_DBDIR
    if [ -d "$PKG_DBDIR" ] ; then rm -rf ${PKG_DBDIR}; fi
    mkdir -p ${PKG_DBDIR}
+   ABIVER=`echo $TARGETREL | cut -d '-' -f 1 | cut -d '.' -f 1`
+   PBI_PKGCFLAG="-o ABI=freebsd:${ABIVER}:x86:64" ; export PBI_PKGCFLAG
 
    rc_halt "cd ${GITBRANCH}/pbi-modules" >/dev/null 2>/dev/null
    rc_halt "pbi_makeindex ${PBI_REPO_KEY}" >/dev/null 2>/dev/null
