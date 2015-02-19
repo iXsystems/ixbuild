@@ -147,7 +147,7 @@ do_pbi-index()
    PBI_PKGCFLAG="-o ABI=freebsd:${ABIVER}:x86:64" ; export PBI_PKGCFLAG
 
    rc_halt "cd ${GITBRANCH}/pbi-modules" >/dev/null 2>/dev/null
-   rc_halt "pbi_makeindex ${PBI_REPO_KEY}" >/dev/null 2>/dev/null
+   rc_halt "pbi_makeindex ${PBI_REPO_KEY}"
    rc_nohalt "rm PBI-INDEX" >/dev/null 2>/dev/null
    rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/" >/dev/null 2>/dev/null
    return 0
