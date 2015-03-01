@@ -338,7 +338,7 @@ update_poudriere_jail()
 {
   # Setup fake poudriere file URL
   mkdir -p /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/$PCBSDVER >/dev/null 2>/dev/null
-  dfiles="src.txz base.txz doc.xz games.txz kernel.txz"
+  dfiles="src.txz base.txz doc.xz kernel.txz"
   if [ "$ARCH" = "amd64" ] ; then dfiles="$dfiles lib32.txz" ; fi
   for i in $dfiles
   do
