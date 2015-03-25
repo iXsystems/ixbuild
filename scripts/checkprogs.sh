@@ -22,31 +22,67 @@ fi
 which zip >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing zip.."
-  rc_halt "pkg install archivers/zip"
+  rc_halt "pkg install -y archivers/zip"
 fi
 
 which grub-mkrescue >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing grub-mkrescue.."
-  rc_halt "pkg install sysutils/grub2-pcbsd"
+  rc_halt "pkg install -y sysutils/grub2-pcbsd"
 fi
 
 which xorriso >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing xorriso.."
-  rc_halt "pkg install sysutils/xorriso"
+  rc_halt "pkg install -y sysutils/xorriso"
 fi
 
 which pixz >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pixz.."
-  rc_halt "pkg install archivers/pixz"
+  rc_halt "pkg install -y archivers/pixz"
+fi
+
+pkg info textproc/py-sphinx >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing py-sphinx.."
+  rc_halt "pkg install -y textproc/py-sphinx"
+fi
+
+pkg info textproc/py-sphinx-httpdomain >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing py-sphinx-httpdomain.."
+  rc_halt "pkg install -y textproc/py-sphinx-httpdomain"
+fi
+
+pkg info textproc/py-sphinx-intl >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing py-sphinx-intl.."
+  rc_halt "pkg install -y textproc/py-sphinx-intl"
+fi
+
+pkg info "print/tex-formats" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing print/tex-formats.."
+  rc_halt "pkg install -y print/tex-formats"
+fi
+
+pkg info "print/tex-dvipsk" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing print/tex-dvipsk.."
+  rc_halt "pkg install -y print/tex-dvipsk"
+fi
+
+pkg info "devel/gmake" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing devel/gmake.."
+  rc_halt "pkg install -y devel/gmake"
 fi
 
 if [ "$PKGREPO" = "local" ] ; then
   which poudriere >/dev/null 2>/dev/null
   if [ "$?" != "0" ]; then
     echo "Installing poudriere.."
-    rc_halt "pkg install ports-mgmt/poudriere"
+    rc_halt "pkg install -y ports-mgmt/poudriere"
   fi
 fi
