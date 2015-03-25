@@ -49,16 +49,16 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y textproc/py-sphinx"
 fi
 
-pkg info textproc/py-sphinx-httpdomain >/dev/null 2>/dev/null
+pkg info textproc/py-sphinxcontrib-httpdomain >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing py-sphinx-httpdomain.."
-  rc_halt "pkg install -y textproc/py-sphinx-httpdomain"
+  echo "Installing py-sphinxcontrib-httpdomain.."
+  rc_halt "pkg install -y textproc/py-sphinxcontrib-httpdomain"
 fi
 
 pkg info textproc/py-sphinx-intl >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing py-sphinx-intl.."
-  rc_halt "pkg install -y textproc/py-sphinx-intl"
+  #rc_halt "pkg install -y textproc/py-sphinx-intl"
 fi
 
 pkg info "print/tex-formats" >/dev/null 2>/dev/null
