@@ -346,8 +346,8 @@ make html
 
 # Move over the HTML docs
 mkdir ${PROGDIR}/iso/docs
-mv_build/html ${PROGDIR}/iso/docs/html
-rm -rf build
+mv _build/html ${PROGDIR}/iso/docs/html
+rm -rf _build
 
 umount -f ${PDESTDIR9} 2>/dev/null
 rmdir ${PDESTDIR9}
