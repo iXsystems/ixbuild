@@ -340,6 +340,15 @@ if [ $? -ne 0 ] ; then
    exit_err "Failed running 9.3.makedvd.sh"
 fi
 
+# With ISO's done, lets create the docs now
+cd ${GITBRANCH}/src-qt5/docs
+make html
+
+# Move over the HTML docs
+mkdir ${PROGDIR}/iso/docs
+mv_build/html ${PROGDIR}/iso/docs/html
+rm -rf build
+
 umount -f ${PDESTDIR9} 2>/dev/null
 rmdir ${PDESTDIR9}
 
