@@ -345,6 +345,9 @@ cd ${GITBRANCH}/src-qt5/docs
 make html
 
 # Move over the HTML docs
+if [ -d "${PROGDIR}/iso/docs" ] ; then
+  rm -rf ${PROGDIR}/iso/docs
+fi
 mkdir ${PROGDIR}/iso/docs
 mv _build/html ${PROGDIR}/iso/docs/html
 rm -rf _build
