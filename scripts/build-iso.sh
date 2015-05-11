@@ -254,7 +254,7 @@ case $TARGET in
    ports) do_ports
           exit $?
           ;;
-   jail) dojail_
+    jail) do_jail
           exit $?
           ;;
 check-ports) do_check_ports ;;
