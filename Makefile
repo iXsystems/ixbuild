@@ -10,6 +10,8 @@ image:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh iso
 world:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh world
+jail:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh jail
 check-ports:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh check-ports
 ports:

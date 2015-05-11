@@ -40,6 +40,13 @@ do_world() {
   fi
 }
 
+do_jail() {
+  if [ ! -e "${DISTDIR}/base.txz" ] ; then
+     exit_err "You must create a world before running poudriere"
+  fi
+  update_poudriere_jail
+}
+
 do_iso() 
 {
   if [ "$ARCH" = "i386" ] ; then return 0; fi
@@ -245,6 +252,9 @@ case $TARGET in
    world) do_world ;;
      iso) do_iso ;;
    ports) do_ports
+          exit $?
+          ;;
+   jail) dojail_
           exit $?
           ;;
 check-ports) do_check_ports ;;
