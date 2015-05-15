@@ -34,9 +34,13 @@ do_world() {
     exit 1
   fi
 
-  # If we are using a local repo, we should update the jail now
+  # If we are using a local repo, we should check the jail now
   if [ "$PKGREPO" = "local" ] ; then
-    update_poudriere_jail
+    # Make sure the jail is created
+    poudriere jail -l | grep -q $PBUILD
+    if [ $? -ne 0 ] ; then
+      update_poudriere_jail
+    fi
   fi
 }
 
