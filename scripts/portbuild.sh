@@ -60,6 +60,9 @@ do_portsnap()
    poudriere ports -l | grep -q -w "^${POUDPORTS}" 
    if [ $? -eq 0 ] ; then
 
+     # Stop the jail in case its running
+     poudriere jail -k -j $PBUILD -p $POUDPORTS
+
      echo "Removing old ports tree ${POUDPORTS}"
      poudriere ports -d -p "$POUDPORTS"
      if [ $? -ne 0 ] ; then
