@@ -79,7 +79,7 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y devel/gmake"
 fi
 
-if [ "$PKGREPO" = "local" ] ; then
+if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
   which poudriere >/dev/null 2>/dev/null
   if [ "$?" != "0" ]; then
     echo "Installing poudriere.."

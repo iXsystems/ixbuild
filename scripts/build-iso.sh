@@ -35,7 +35,7 @@ do_world() {
   fi
 
   # If we are using a local repo, we should check the jail now
-  if [ "$PKGREPO" = "local" ] ; then
+  if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
     # Make sure the jail is created
     poudriere jail -l | grep -q $PBUILD
     if [ $? -ne 0 ] ; then
@@ -146,12 +146,6 @@ do_ports()
     return $?
   fi
 
-  # The user meant to run meta build, lets do it now
-  if [ -n "$FULLPKGREPO" ] ; then
-     do_ports_meta
-     return $?
-  fi
-
   echo "Building ports"
 
   if [ ! -e "${DISTDIR}/base.txz" ] ; then
@@ -248,7 +242,7 @@ if [ -z "$TARGET" ] ; then TARGET="all"; fi
 
 case $TARGET in
  all|ALL) do_world 
-	  if [ "$PKGREPO" = "local" ] ; then
+	  if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
 	    do_ports
 	    if [ $? -ne 0 ] ; then exit 1 ; fi
 	  fi

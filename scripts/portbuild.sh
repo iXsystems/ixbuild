@@ -114,19 +114,6 @@ do_pcbsd_portmerge()
    #rc_halt "rmdir ${PROGDIR}/usr"
 }
 
-sign_pkg_repo()
-{
-   echo "Signing repo..."
-   get_pkgstatic
-   if [ -e "cd $PPKGDIR/.latest" ] ; then
-     rc_halt "cd $PPKGDIR/.latest" >/dev/null 2>/dev/null
-   else
-     rc_halt "cd $PPKGDIR/" >/dev/null 2>/dev/null
-   fi
-   rc_halt "${PKGSTATIC} repo . ${POUD_SIGN_REPO}" >/dev/null 2>/dev/null
-   rc_halt "rm ${PKGSTATIC}" >/dev/null 2>/dev/null
-}
-
 do_pbi-index()
 {
    if [ -z "$PBI_REPO_KEY" ] ; then return ; fi
@@ -207,11 +194,6 @@ if [ "$target" = "all" ] ; then
       exit 1
    fi
 
-   # If the user wanted to sign the repo lets do it now
-   if [ -n "$POUD_SIGN_REPO" ] ; then
-      sign_pkg_repo
-   fi
-
    # Update the PBI index file
    do_pbi-index
 
@@ -243,11 +225,6 @@ elif [ "$target" = "meta" ] ; then
    check_essential_pkgs "NO"
    if [ $? -ne 0 ] ; then
       exit 1
-   fi
-
-   # If the user wanted to sign the repo lets do it now
-   if [ -n "$POUD_SIGN_REPO" ] ; then
-      sign_pkg_repo
    fi
 
    # Unset cleanup var

@@ -384,11 +384,7 @@ check_essential_pkgs()
    echo "Checking essential pkgs..."
    haveWarn=0
 
-   if [ -z "$FULLPKGREPO" ] ; then
-     local eP="${PCONFDIR}/essential-packages"
-   else
-     local eP="${PCONFDIR}/essential-packages-nonrel"
-   fi
+   local eP="${PCONFDIR}/essential-packages"
 
    # Make sure we have the file we need
    if [ ! -e "${eP}" ] ; then
@@ -464,7 +460,7 @@ get_pkgstatic()
   echo "Setting up pkg-static"
   if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
 
-  if [ "$PKGREPO" = "local" ]; then
+  if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ]; then
     rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
   else
     PSITE=`grep 'url' ${PROGDIR}/tmp/repo/local.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
