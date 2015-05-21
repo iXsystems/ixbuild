@@ -1,0 +1,9 @@
+
+Jenkins helper automation scripts
+
+Usage:
+
+Copy build.conf.dist to build.conf and set the values
+
+./jenkins.sh <world/jail/ports/iso> <version> <edge/production>
+
