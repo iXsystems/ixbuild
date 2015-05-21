@@ -24,9 +24,14 @@ GITFBSDBRANCH="releng/10.1"
 export GITFBSDBRANCH
 
 # Set the target version of this build
-# Used for pulling pkgng packages / poudriere jail
-TARGETREL="10.1.2-RELEASE"
+# This is where pkgs will be uploaded to
+TARGETREL="10.0-RELEASE"
 export TARGETREL
+
+# Set the poudreire jail target
+# This is what will be used for poudriere jail
+#POUDRIEREJAILVER="10.1-RELEASE"
+export POUDREIREJAILVER
 
 # Set the target ARCH type for world / pkgng building
 ARCH="amd64"
@@ -59,4 +64,8 @@ export POUD_VERBOSE
 # Set PBI signing key, used for pbi_makeindex
 #PBI_REPO_KEY=""
 export PBI_REPO_KEY
+
+# Set the ISO version manually
+#ISOVER="10.2-RELEASE"   
+export ISOVER
 

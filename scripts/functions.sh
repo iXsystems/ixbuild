@@ -73,15 +73,19 @@ esac
 # Set the location of packages needed for our Meta-Packages
 export METAPKGDIR="${PROGDIR}/tmp"
 
+if [ -z "$POUDIREREJAILVER" ] ; then
+POUDIREREJAILVER="$TARGETREL"
+fi
+
 # Poudriere variables
 if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
-  PBUILD="trueos-`echo $TARGETREL | sed 's|\.||g'`"
+  PBUILD="trueos-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   if [ -z "$POUDPORTS" ] ; then
     POUDPORTS="trueosports" ; export POUDPORTS
   fi
 else
-  PBUILD="pcbsd-`echo $TARGETREL | sed 's|\.||g'`"
+  PBUILD="pcbsd-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   if [ -z "$POUDPORTS" ] ; then
     POUDPORTS="pcbsdports" ; export POUDPORTS
