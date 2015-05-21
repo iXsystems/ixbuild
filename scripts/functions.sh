@@ -342,15 +342,19 @@ cp_iso_pkg_files()
 
 update_poudriere_jail()
 {
+  if [ -z "$POUDRIEREJAILVER" ] ; then
+    POUDRIEREJAILVER="$PCBSDVER"
+  fi
+
   # Setup fake poudriere file URL
-  mkdir -p /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/$PCBSDVER >/dev/null 2>/dev/null
+  mkdir -p /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/$POUDRIEREJAILVER >/dev/null 2>/dev/null
   dfiles="MANIFEST src.txz base.txz doc.xz kernel.txz"
   if [ "$ARCH" = "amd64" ] ; then dfiles="$dfiles lib32.txz" ; fi
   if [ -e "${DISTDIR}/games.txz" ] ; then dfiles="$dfiles games.txz" ; fi
 
   for i in $dfiles
   do
-    ln -sf "${DISTDIR}/$i" /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/${PCBSDVER}/$i
+    ln -sf "${DISTDIR}/$i" /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/${POUDRIEREJAILVER}/$i
   done
 
   echo "FREEBSD_HOST=file:///fakeftp/" >> /usr/local/etc/poudriere.conf
@@ -358,9 +362,6 @@ update_poudriere_jail()
   # Clean old poudriere dir
   poudriere jail -d -j $PBUILD >/dev/null 2>/dev/null
 
-  if [ -z "$POUDRIEREJAILVER" ] ; then
-    POUDRIEREJAILVER="$PCBSDVER"
-  fi
 
   poudriere jail -c -j $PBUILD -v ${POUDRIEREJAILVER} -a $ARCH
   if [ $? -ne 0 ] ; then
