@@ -318,6 +318,8 @@ cp_iso_pkg_files()
 
       # Fetch the packages
       rc_halt "${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp $localFlg -d ${pkgName}"
+      sync
+      sleep 0.5
     done < $eP
 
     # Copy pkgng
