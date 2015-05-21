@@ -346,6 +346,8 @@ update_poudriere_jail()
   mkdir -p /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/$PCBSDVER >/dev/null 2>/dev/null
   dfiles="MANIFEST src.txz base.txz doc.xz kernel.txz"
   if [ "$ARCH" = "amd64" ] ; then dfiles="$dfiles lib32.txz" ; fi
+  if [ -e "${DISTDIR}/games.txz" ] ; then dfiles="$dfiles games.txz" ; fi
+
   for i in $dfiles
   do
     ln -sf "${DISTDIR}/$i" /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/${PCBSDVER}/$i
