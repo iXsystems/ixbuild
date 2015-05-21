@@ -483,7 +483,7 @@ get_pkgstatic()
   echo "Setting up pkg-static"
   if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
 
-  if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ]; then
+  if [ "$PKGREPO" = "local" ]; then
     rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
   else
     PSITE=`grep 'url' ${PROGDIR}/tmp/repo/local.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
