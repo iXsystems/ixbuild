@@ -358,7 +358,11 @@ update_poudriere_jail()
   # Clean old poudriere dir
   poudriere jail -d -j $PBUILD >/dev/null 2>/dev/null
 
-  poudriere jail -c -j $PBUILD -v ${PCBSDVER} -a $ARCH
+  if [ -z "$POUDRIEREJAILVER" ] ; then
+    POUDRIEREJAILVER="$PCBSDVER"
+  fi
+
+  poudriere jail -c -j $PBUILD -v ${POUDRIEREJAILVER} -a $ARCH
   if [ $? -ne 0 ] ; then
     cat /usr/local/etc/poudriere.conf | grep -v "^FREEBSD_HOST=file:///fakeftp/" >/tmp/.pconf.$$
     mv /tmp/.pconf.$$ /usr/local/etc/poudriere.conf
