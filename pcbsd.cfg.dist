@@ -69,3 +69,10 @@ export PBI_REPO_KEY
 #ISOVER="10.2-RELEASE"   
 export ISOVER
 
+# Where to save PCBSD git sources
+#PCBSDGITDIR=""
+export PCBSDGITDIR
+
+# Where to save FreeBSD git sources
+#FREEBSDGITDIR=""
+export FREEBSDGITDIR

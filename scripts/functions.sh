@@ -10,8 +10,13 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 . ${PROGDIR}/pcbsd.cfg
 
 # Where on disk is the PCBSD GIT branch
-GITBRANCH="${PROGDIR}/git/pcbsd"
-export GITBRANCH
+if [ -n "$PCBSDGITDIR" ] ; then
+  GITBRANCH="${PCBSDGITDIR}"
+  export GITBRANCH
+else
+  GITBRANCH="${PROGDIR}/git/pcbsd"
+  export GITBRANCH
+fi
 
 # Where are the dist files
 DISTDIR="${PROGDIR}/fbsd-dist" ; export DISTDIR
@@ -27,8 +32,13 @@ export BASEDIST KERNDIST L32DIST
 PCBSDKERN="GENERIC" ; export PCBSDKERN
 
 # Set where we wish to copy our checked out FreeBSD source
-WORLDSRC="${PROGDIR}/git/freebsd"
-export WORLDSRC
+if [ -n "$FREEBSDGITDIR" ] ; then
+  WORLDSRC="${FREEBSDGITDIR}"
+  export WORLDSRC
+else
+  WORLDSRC="${PROGDIR}/git/freebsd"
+  export WORLDSRC
+fi
 
 # Where to build the world directory
 PDESTDIR="${PROGDIR}/buildworld" ; export PDESTDIR
