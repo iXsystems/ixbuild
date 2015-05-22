@@ -93,6 +93,9 @@ do_iso()
      exit_err "Failed running 9.6.makenetfiles.sh"
   fi
 
+}
+
+do_vms() {
   echo "Creating VM images"
   ${PROGDIR}/scripts/9.7.makevbox.sh
   if [ $? -ne 0 ] ; then
@@ -249,6 +252,7 @@ case $TARGET in
           do_iso ;;
    world) do_world ;;
      iso) do_iso ;;
+      vm) do_vms ;;
    ports) do_ports
           exit $?
           ;;

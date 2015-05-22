@@ -8,6 +8,10 @@ all:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh all
 image:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh iso
+iso:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh iso
+vm:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh vm
 world:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh world
 jail:
