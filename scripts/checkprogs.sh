@@ -58,7 +58,7 @@ fi
 pkg info textproc/py-sphinx-intl >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing py-sphinx-intl.."
-  #rc_halt "pkg install -y textproc/py-sphinx-intl"
+  rc_halt "pkg install -y textproc/py-sphinx-intl"
 fi
 
 pkg info "print/tex-formats" >/dev/null 2>/dev/null
