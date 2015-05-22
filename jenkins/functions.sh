@@ -137,6 +137,25 @@ pull_world()
   if [ $? -ne 0 ] ; then exit 1; fi
 }
 
+pull_iso()
+{
+  # Check if we have any workdirs to re-sync
+  ssh ${SFTPUSER}@${SFTPHOST} "ls ${ISOSTAGE}" >/dev/null 2>/dev/null
+  if [ $? -ne 0 ] ; then
+     return 0
+  fi
+
+  if [ ! -d "${MASTERWRKDIR}/iso" ] ; then
+    mkdir -p ${MASTERWRKDIR}/iso
+  fi
+
+  cd ${MASTERWRKDIR}/iso
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ .
+  if [ $? -ne 0 ] ; then exit 1; fi
+}
+
 jenkins_world()
 {
   create_workdir
@@ -220,6 +239,32 @@ jekins_iso()
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make image
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  # Now lets sync the ISOs
+  cd ${MASTERWRKDIR}/iso
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  cleanup_workdir
+
+  exit 0
+}
+
+jekins_vm()
+{
+  create_workdir
+
+  pull_world
+  pull_isos
+
+  cd ${MASTERWRKDIR}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  make vm
   if [ $? -ne 0 ] ; then exit 1; fi
 
   # Now lets sync the ISOs

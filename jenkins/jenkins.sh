@@ -19,6 +19,7 @@ case $TYPE in
    jail) jenkins_jail ;;
     pkg) jenkins_pkg ;; 
     iso) jekins_iso ;;
+     vm) jekins_vm ;;
       *) echo "Invalid Type: $1" 
          exit 1
          ;;
