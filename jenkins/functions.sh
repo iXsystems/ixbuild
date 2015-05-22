@@ -16,8 +16,8 @@ cd ${BDIR}/${BUILD}
 
 
 # Set the variables to reference poudrire jail locations
-if [ -z "$POUDIREREJAILVER" ] ; then
-  POUDIREREJAILVER="$TARGETREL"
+if [ -z "$POUDRIEREJAILVER" ] ; then
+  POUDRIEREJAILVER="$TARGETREL"
 fi
 
 # Poudriere variables

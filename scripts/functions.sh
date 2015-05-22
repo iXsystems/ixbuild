@@ -83,8 +83,8 @@ esac
 # Set the location of packages needed for our Meta-Packages
 export METAPKGDIR="${PROGDIR}/tmp"
 
-if [ -z "$POUDIREREJAILVER" ] ; then
-POUDIREREJAILVER="$TARGETREL"
+if [ -z "$POUDRIEREJAILVER" ] ; then
+  POUDRIEREJAILVER="$TARGETREL"
 fi
 
 # Poudriere variables
