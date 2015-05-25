@@ -43,6 +43,11 @@ elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
   WORKWORLD="${SFTPWORKDIR}/world/${TARGETREL}/edge/amd64"
   WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/edge/amd64"
+elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
+  PKGSTAGE="${SFTPFINALDIR}/pkg/${TARGETREL}/enterprise/amd64"
+  ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
+  WORKWORLD="${SFTPWORKDIR}/world/${TARGETREL}/enterprise/amd64"
+  WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/enterprise/amd64"
 else
   echo "Invalid BRANCH"
   exit 1
