@@ -33,15 +33,6 @@ do_world() {
     echo "Script failed!"
     exit 1
   fi
-
-  # If we are using a local repo, we should check the jail now
-  if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
-    # Make sure the jail is created
-    poudriere jail -l | grep -q $PBUILD
-    if [ $? -ne 0 ] ; then
-      update_poudriere_jail
-    fi
-  fi
 }
 
 do_jail() {
@@ -152,8 +143,8 @@ do_ports()
   echo "Building ports"
 
   if [ ! -e "${DISTDIR}/base.txz" ] ; then
-     echo "No world has been built, starting.."
-     do_world
+     echo "Missing WORLD files, please create first!"
+     exit 1
   fi
 
   # Make sure the jail is created
