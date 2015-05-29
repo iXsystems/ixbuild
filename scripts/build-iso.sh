@@ -152,7 +152,8 @@ do_ports()
   echo "Building ports"
 
   if [ ! -e "${DISTDIR}/base.txz" ] ; then
-     exit_err "You must create a world before running poudriere"
+     echo "No world has been built, starting.."
+     do_world
   fi
 
   # Make sure the jail is created
