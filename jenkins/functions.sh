@@ -19,6 +19,10 @@ cd ${BDIR}/${BUILD}
 if [ -z "$POUDRIEREJAILVER" ] ; then
   POUDRIEREJAILVER="$TARGETREL"
 fi
+case $TYPE in
+  jail|port) WORLDTREL="$POUDRIEREJAILVER" ;;
+   *) WORLDTREL="$TARGETREL" ;;
+esac
 
 # Poudriere variables
 PBUILD="pcbsd-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
@@ -36,22 +40,23 @@ export PBUILD PJDIR PJPORTSDIR PPKGDIR
 if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
   PKGSTAGE="${SFTPFINALDIR}/pkg/${TARGETREL}/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
-  WORKWORLD="${SFTPWORKDIR}/world/${TARGETREL}/amd64"
+  WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/amd64"
 elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
   PKGSTAGE="${SFTPFINALDIR}/pkg/${TARGETREL}/edge/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
-  WORKWORLD="${SFTPWORKDIR}/world/${TARGETREL}/edge/amd64"
+  WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/edge/amd64"
   WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/edge/amd64"
 elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
   PKGSTAGE="${SFTPFINALDIR}/pkg/${TARGETREL}/enterprise/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
-  WORKWORLD="${SFTPWORKDIR}/world/${TARGETREL}/enterprise/amd64"
+  WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/enterprise/amd64"
   WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/enterprise/amd64"
 else
   echo "Invalid BRANCH"
   exit 1
 fi
+
 
 create_workdir()
 {
