@@ -90,3 +90,9 @@ if [ "$?" != "0" ]; then
   echo "Installing www/npm.."
   rc_halt "pkg install -y www/npm"
 fi
+
+pkg info "pxz" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing archivers/pxz.."
+  rc_halt "pkg install -y archivers/pxz"
+fi
