@@ -23,7 +23,7 @@ else
 fi
 
 # Now create the world / kernel / distribution
-cd ${FNASSRC}/freenas
+cd ${FNASSRC}
 rc_halt "make git-external"
 rc_halt "make checkout"
 rc_halt "make release"
