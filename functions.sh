@@ -69,9 +69,6 @@ create_workdir()
   git clone --depth=1 https://github.com/pcbsd/pcbsd-build.git ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
-  cp ${BDIR}/${BUILD}/* ${MASTERWRKDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
-
   cd ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
@@ -79,6 +76,9 @@ create_workdir()
     freenas) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
           *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
   esac
+
+  cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
+  if [ $? -ne 0 ] ; then exit 1; fi
 
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
