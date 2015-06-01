@@ -12,7 +12,12 @@ fi
 
 # Source build conf and set some vars
 cd ${BDIR}/${BUILD}
-. pcbsd.cfg
+
+if [ "$TARGET" = "freenas" -o "$TARGET" = "freenastest" ] ; then
+  . freenas.cfg
+else
+  . pcbsd.cfg
+fi
 
 
 # Set the variables to reference poudrire jail locations
