@@ -14,6 +14,7 @@ cd ${PROGDIR}/scripts
 # Make sure we have our freenas sources
 if [ ! -d "${FNASSRC}" ]; then 
    rc_halt "rm -rf /tmp/fnasb"
+   rc_nohalt "mkdir `dirname ${FNASSRC}`"
    rc_halt "git clone ${GITFNASURL} /tmp/fnasb"
    rc_halt "ln -s /tmp/fnasb ${FNASSRC}"
    git_fnas_up "${FNASSRC}" "${FNASSRC}"
