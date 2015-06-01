@@ -79,6 +79,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y devel/gmake"
 fi
 
+pkg info "archivers/pxz" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing archivers/pxz.."
+  rc_halt "pkg install -y archivers/pxz"
+fi
+
 if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
   which poudriere >/dev/null 2>/dev/null
   if [ "$?" != "0" ]; then
