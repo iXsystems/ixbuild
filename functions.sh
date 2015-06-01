@@ -74,6 +74,14 @@ create_workdir()
 
   cd ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
+
+  case $TYPE in
+    freenas) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
+          *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
+  esac
+
+  cd ${TBUILDDIR}
+  if [ $? -ne 0 ] ; then exit 1; fi
 }
 
 cleanup_workdir()
@@ -119,7 +127,7 @@ pull_pkgworkdir()
 
 push_world()
 {
-  cd ${MASTERWRKDIR}/fbsd-dist
+  cd ${TBUILDDIR}/fbsd-dist
   if [ $? -ne 0 ] ; then exit 1; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
@@ -136,11 +144,11 @@ pull_world()
      return 0
   fi
 
-  if [ ! -d "${MASTERWRKDIR}/fbsd-dist" ] ; then
-    mkdir -p ${MASTERWRKDIR}/fbsd-dist
+  if [ ! -d "${TBUILDDIR}/fbsd-dist" ] ; then
+    mkdir -p ${TBUILDDIR}/fbsd-dist
   fi
 
-  cd ${MASTERWRKDIR}/fbsd-dist
+  cd ${TBUILDDIR}/fbsd-dist
   if [ $? -ne 0 ] ; then exit 1; fi
 
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ .
@@ -155,11 +163,11 @@ pull_iso()
      return 0
   fi
 
-  if [ ! -d "${MASTERWRKDIR}/iso" ] ; then
-    mkdir -p ${MASTERWRKDIR}/iso
+  if [ ! -d "${TBUILDDIR}/iso" ] ; then
+    mkdir -p ${TBUILDDIR}/iso
   fi
 
-  cd ${MASTERWRKDIR}/iso
+  cd ${TBUILDDIR}/iso
   if [ $? -ne 0 ] ; then exit 1; fi
 
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ .
@@ -170,7 +178,7 @@ jenkins_world()
 {
   create_workdir
 
-  cd ${MASTERWRKDIR}
+  cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make world
@@ -189,7 +197,7 @@ jenkins_jail()
 
   pull_world
 
-  cd ${MASTERWRKDIR}
+  cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make jail
@@ -207,7 +215,7 @@ jenkins_pkg()
   # Pull in the world directory
   pull_world
 
-  cd ${MASTERWRKDIR}
+  cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make ports-update-all
@@ -216,7 +224,7 @@ jenkins_pkg()
   # Pull the workdir from the cache
   pull_pkgworkdir
 
-  cd ${MASTERWRKDIR}
+  cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make ports
@@ -245,14 +253,14 @@ jekins_iso()
 
   pull_world
 
-  cd ${MASTERWRKDIR}
+  cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make image
   if [ $? -ne 0 ] ; then exit 1; fi
 
   # Now lets sync the ISOs
-  cd ${MASTERWRKDIR}/iso
+  cd ${TBUILDDIR}/iso
   if [ $? -ne 0 ] ; then exit 1; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
@@ -271,14 +279,14 @@ jekins_vm()
   pull_world
   pull_isos
 
-  cd ${MASTERWRKDIR}
+  cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make vm
   if [ $? -ne 0 ] ; then exit 1; fi
 
   # Now lets sync the ISOs
-  cd ${MASTERWRKDIR}/iso
+  cd ${TBUILDDIR}/iso
   if [ $? -ne 0 ] ; then exit 1; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null

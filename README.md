@@ -1,14 +1,22 @@
 pcbsd-build
 ===========
 
-Scripts to build PC-BSD world / kernel / ISO files
+Scripts for the following
+
+ * PC-BSD Builds -  ISO / regression test
+ * FreeNAS Builds - ISO / regression test
+ * Jenkins automation
+
+
+PC-BSD Builds
+============
 
 This program will do the compile of a FreeBSD world / kernel, 
 fetch packages from the PC-BSD PKGNG CDN and assemble an ISO file. 
 
 Requirements:
 
- - FreeBSD 9.2 or higher
+ - FreeBSD 10.1 or higher
  - A PKGNG repo for the target version / arch
  - git
  - zip
@@ -16,12 +24,12 @@ Requirements:
  - xorriso
  - poudriere (optional)
  - unicode.pf2 (required for grub-mkrescue)
+
 Getting Started:
 
-First, you will need to copy the following *.dist files in the root directory
+First, cd to the "pcbsd" sub-directory and make a copy of the following:
 
 pcbsd.cfg.dist -> pcbsd.cfg
-pkg-pubkey.cert.dist -> pkg-pubkey.cert
 pkg.conf.dist -> pkg.conf
 
 Next, you will want to edit pcbsd.cfg and check that the options are correct
@@ -99,4 +107,22 @@ clean
 ---
 
 Will cleanup any temp files in ${PROGDIR}/tmp
+
+
+FreeNAS Builds
+============
+
+TODO
+
+
+Jenkins Automation
+============
+
+Jenkins helper automation scripts
+
+Usage:
+
+Copy build.conf.dist to build.conf and set the values
+
+./jenkins.sh <world/jail/ports/iso> <version> <edge/production>
 
