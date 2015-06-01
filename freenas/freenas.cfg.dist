@@ -9,3 +9,7 @@ export GITFNASURL
 # Available (master|freenas10/development)
 GITFNASBRANCH="freenas10/development"
 export GITFNASBRANCH
+
+# Set location for release to be stored
+TARGETREL="freenas-10.0-alpha-m2"
+export TARGETREL

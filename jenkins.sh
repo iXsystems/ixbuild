@@ -20,6 +20,7 @@ case $TYPE in
     pkg) jenkins_pkg ;; 
     iso) jekins_iso ;;
      vm) jekins_vm ;;
+freenas) jekins_freenas ;;
       *) echo "Invalid Type: $1" 
          exit 1
          ;;

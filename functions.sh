@@ -73,7 +73,7 @@ create_workdir()
   if [ $? -ne 0 ] ; then exit 1; fi
 
   case $TYPE in
-    freenas) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
+    freenas|freenastest) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
           *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
   esac
 
@@ -283,6 +283,29 @@ jekins_vm()
   if [ $? -ne 0 ] ; then exit 1; fi
 
   make vm
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  # Now lets sync the ISOs
+  cd ${TBUILDDIR}/iso
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  cleanup_workdir
+
+  exit 0
+}
+
+jekins_freenas()
+{
+  create_workdir
+
+  cd ${TBUILDDIR}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  make iso
   if [ $? -ne 0 ] ; then exit 1; fi
 
   # Now lets sync the ISOs
