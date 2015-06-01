@@ -14,11 +14,11 @@ cd ${PROGDIR}/scripts
 # Make sure we have our freenas sources
 if [ ! -d "${FNASSRC}" ]; then 
    rc_halt "git clone ${GITFNASURL} ${FNASSRC}"
-   git_fbsd_up "${FNASSRC}" "${FNASSRC}"
+   git_fnas_up "${FNASSRC}" "${FNASSRC}"
 else
   if [ -d "${GITBRANCH}/.git" ]; then 
     echo "Updating FreeBSD sources..."
-    git_fbsd_up "${FNASSRC}" "${FNASSRC}"
+    git_fnas_up "${FNASSRC}" "${FNASSRC}"
   fi
 fi
 
