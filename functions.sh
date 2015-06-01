@@ -314,7 +314,7 @@ jekins_freenas()
   if [ $? -ne 0 ] ; then exit 1; fi
 
   # Now lets sync the ISOs
-  cd ${TBUILDDIR}/iso
+  cd /tmp/fnasb/_BE/release/
   if [ $? -ne 0 ] ; then exit 1; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
