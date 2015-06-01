@@ -1,0 +1,11 @@
+#!/bin/sh
+# FreeNAS Build configuration settings
+
+# Which FreeNAS git URL to clone
+GITFNASURL="https://github.com/freenas/freenas.git"
+export GITFNASURL
+
+# Branch of the FreeNAS repo to build with
+# Available (master|freenas10/development)
+GITFNASBRANCH="freenas10/development"
+export GITFNASBRANCH
