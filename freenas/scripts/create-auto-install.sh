@@ -120,6 +120,9 @@ rm base.ufs
 rc_halt "mv base.ufs.uzip isodir/data/base.ufs.uzip"
 
 # Create the new ISO file
+if [ -e "freenas-auto.iso" ] ; then
+  rm freenas-auto.iso
+fi
 grub-mkrescue -o freenas-auto.iso isodir -- -volid FreeNAS
 
 # Cleanup old iso dir
