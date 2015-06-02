@@ -32,14 +32,24 @@ do_iso() {
   fi
 }
 
+do_tests() {
+  echo "Starting FreeNAS regression testing"
+  ${PROGDIR}/scripts/2.runtests.sh
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
+}
+
 echo "Operation started: `date`"
 
 TARGET="$1"
 if [ -z "$TARGET" ] ; then TARGET="all"; fi
 
 case $TARGET in
-     all) do_iso ;;
+     all) do_iso ; do_tests ;;
      iso) do_iso ;;
+   tests) do_tests ;;
        *) ;;
 esac
 

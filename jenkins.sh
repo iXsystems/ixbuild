@@ -18,9 +18,10 @@ case $TYPE in
   world) jenkins_world ;;
    jail) jenkins_jail ;;
     pkg) jenkins_pkg ;; 
-    iso) jekins_iso ;;
-     vm) jekins_vm ;;
-freenas) jekins_freenas ;;
+    iso) jenkins_iso ;;
+     vm) jenkins_vm ;;
+freenas) jenkins_freenas ;;
+freenas-tests) jenkins_freenas_tests ;;
       *) echo "Invalid Type: $1" 
          exit 1
          ;;

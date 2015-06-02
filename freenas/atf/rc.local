@@ -1,0 +1,11 @@
+#!/bin/sh
+TERM="cons25"
+PATH="${PATH}:/usr/local/bin:/usr/local/sbin"
+
+clear
+
+# TODO - Start putting regression tests here, which are run from within
+# FreeNAS after installation and booting it for the first time
+echo "RUNNING ATF...."
+sleep 30
+

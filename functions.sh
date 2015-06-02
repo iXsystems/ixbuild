@@ -252,7 +252,7 @@ jenkins_pkg()
   exit 0
 }
 
-jekins_iso()
+jenkins_iso()
 {
   create_workdir
 
@@ -277,7 +277,7 @@ jekins_iso()
   exit 0
 }
 
-jekins_vm()
+jenkins_vm()
 {
   create_workdir
 
@@ -303,7 +303,7 @@ jekins_vm()
   exit 0
 }
 
-jekins_freenas()
+jenkins_freenas()
 {
   create_workdir
 
@@ -319,6 +319,33 @@ jekins_freenas()
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  cleanup_workdir
+
+  exit 0
+}
+
+jenkins_freenas_tests()
+{
+  create_workdir
+
+  cd ${TBUILDDIR}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  # Now lets sync the ISOs
+  if [ -d "/tmp/fnasb/_BE/release" ] ; then
+    mkdir -p /tmp/fnasb/_BE/release
+  fi
+
+  cd /tmp/fnasb/_BE/release
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} .
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  make tests
   if [ $? -ne 0 ] ; then exit 1; fi
 
   cleanup_workdir

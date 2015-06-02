@@ -1,0 +1,6 @@
+This is a directory copied into FreeNAS during installation
+for automated testing of features and regression testing
+
+The rc.local script will be executed automatically at startup,
+and scripts in this directory may be called from it at the
+/atf/<foo> location. 
