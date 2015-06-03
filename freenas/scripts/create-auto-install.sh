@@ -78,7 +78,7 @@ sed -i '' "s|zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local 
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Copy over the ATF scripts
-cp -r ${PROGDIR}/ uzipdir/
+cp -r ${PROGDIR}/atf uzipdir/
 if [ $? -ne 0 ] ; then exit 1; fi
 
 echo "#### Creating uzip file ####"
