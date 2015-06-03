@@ -2,12 +2,12 @@
 
 if [ -z "$BUILD" -o -z "$BRANCH" ] ; then
   echo "Missing BUILD / BRANCH"
-  exit 1
+  exit_clean
 fi
 
 if [ ! -d "${BDIR}/${BUILD}" ] ; then
   echo "Invalid BUILD dir: $BUILD"
-  exit 1
+  exit_clean
 fi
 
 # Source build conf and set some vars
@@ -59,7 +59,7 @@ elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
   WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
 else
   echo "Invalid BRANCH"
-  exit 1
+  exit_clean
 fi
 
 
@@ -72,10 +72,10 @@ create_workdir()
   MASTERWRKDIR=`mktemp -d /tmp/pcbsd-build/XXXXXXXXXXXXXXXX` 
 
   git clone --depth=1 https://github.com/pcbsd/pcbsd-build.git ${MASTERWRKDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cd ${MASTERWRKDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   case $TYPE in
     freenas|freenastest) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
@@ -83,31 +83,46 @@ create_workdir()
   esac
 
   cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 cleanup_workdir()
 {
-  if [ -n "$MASTERWRKDIR" -a "$MASTERWRKDIR" != "/" ] ; then
-    mount | grep -q "on ${MASTERWRKDIR}/"
-    if [ $? -ne 0 ] ; then
-      rm -rf ${MASTERWRKDIR}
-    fi
+  if [ -z "$MASTERWRKDIR" ] ; then return 0; fi
+  if [ ! -d "$MASTERWRKDIR" ] ; then return 0 ; fi
+  if [ "$MASTERWRKDIR" = "/" ] ; then return 0 ; fi
+
+  # Cleanup any leftover mounts
+  for i in `mount | grep -q "on ${MASTERWRKDIR}/" | awk '{print $1}' | tail -r`
+  do
+    umount -f $i
+  done
+
+  # Should be done with unmounts
+  mount | grep -q "on ${MASTERWRKDIR}/"
+  if [ $? -ne 0 ] ; then
+    rm -rf ${MASTERWRKDIR}
   fi
+}
+
+exit_clean()
+{
+  cleanup_workdir
+  exit 1
 }
 
 push_pkgworkdir()
 {
   cd ${PPKGDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKPKG}" >/dev/null 2>/dev/null
 
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 
@@ -124,21 +139,21 @@ pull_pkgworkdir()
   fi
 
   cd ${PPKGDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ .
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 push_world()
 {
   cd ${TBUILDDIR}/fbsd-dist
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
 
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 pull_world()
@@ -154,10 +169,10 @@ pull_world()
   fi
 
   cd ${TBUILDDIR}/fbsd-dist
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ .
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 pull_iso()
@@ -173,10 +188,10 @@ pull_iso()
   fi
 
   cd ${TBUILDDIR}/iso
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ .
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 jenkins_world()
@@ -184,10 +199,10 @@ jenkins_world()
   create_workdir
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   make world
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   push_world
 
@@ -203,10 +218,10 @@ jenkins_jail()
   pull_world
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   make jail
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cleanup_workdir
 
@@ -221,31 +236,31 @@ jenkins_pkg()
   pull_world
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   make ports-update-all
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Pull the workdir from the cache
   pull_pkgworkdir
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   make ports
-  if [ $? -ne 0 ] ; then push_pkgworkdir; exit 1; fi
+  if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
 
   # Push over the workdir to the cache
   push_pkgworkdir
 
   # Yay, success! Lets rsync the package set to staging machine
   cd $PPKGDIR
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}" >/dev/null 2>/dev/null
 
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cleanup_workdir
 
@@ -259,18 +274,18 @@ jenkins_iso()
   pull_world
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   make image
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Now lets sync the ISOs
   cd ${TBUILDDIR}/iso
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cleanup_workdir
 
@@ -285,18 +300,18 @@ jenkins_vm()
   pull_isos
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   make vm
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Now lets sync the ISOs
   cd ${TBUILDDIR}/iso
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cleanup_workdir
 
@@ -308,18 +323,18 @@ jenkins_freenas()
   create_workdir
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   make iso
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Now lets sync the ISOs
   cd /tmp/fnasb/_BE/release/
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean ; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cleanup_workdir
 
@@ -331,7 +346,7 @@ jenkins_freenas_tests()
   create_workdir
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean ; fi
 
   # Now lets sync the ISOs
   if [ -d "/tmp/fnasb/_BE/release" ] ; then
@@ -339,14 +354,14 @@ jenkins_freenas_tests()
   fi
 
   cd /tmp/fnasb/_BE/release
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} .
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean ; fi
 
   make tests
-  if [ $? -ne 0 ] ; then exit 1; fi
+  if [ $? -ne 0 ] ; then exit_clean ; fi
 
   cleanup_workdir
 
