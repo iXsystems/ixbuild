@@ -258,7 +258,7 @@ create_pkg_conf()
    fi
    mkdir ${PROGDIR}/tmp/sysrel
 
-   ABIVER=`echo $TARGETREL | cut -d '-' -f 1 | cut -d '.' -f 1`
+   ABIVER=`echo $POUDRIEREJAILVER | cut -d '-' -f 1 | cut -d '.' -f 1`
    echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
    echo "ALTABI: freebsd:${ABIVER}:x86:64" >> ${PROGDIR}/tmp/pkg.conf
    echo "ABI: FreeBSD:${ABIVER}:amd64" >> ${PROGDIR}/tmp/pkg.conf
@@ -275,7 +275,7 @@ create_pkg_conf()
 
    # Doing a remote pull from a repo
    cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/local.conf
-   sed -i '' "s|%RELVERSION%|$TARGETREL|g" ${PROGDIR}/tmp/repo/local.conf
+   sed -i '' "s|%RELVERSION%|$POUDRIEREJAILVER|g" ${PROGDIR}/tmp/repo/local.conf
    sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/local.conf
    sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/local.conf
 
