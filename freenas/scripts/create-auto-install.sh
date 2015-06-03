@@ -126,7 +126,15 @@ rc_halt "mv base.ufs.uzip isodir/data/base.ufs.uzip"
 if [ -e "freenas-auto.iso" ] ; then
   rm freenas-auto.iso
 fi
-grub-mkrescue -o freenas-auto.iso isodir -- -volid FreeNAS
+echo "kern.geom.label.disk_ident.enable=0" >> isodir/boot/loader.conf
+echo "kern.geom.label.gptid.enable=0" >> isodir/boot/loader.conf
+echo "kern.geom.label.ufsid.enable=0" >> isodir/boot/loader.conf
+echo "/dev/iso9660/PCBSD_INSTALL / cd9660 ro 0 0" > isodir/etc/fstab
+bootable="-o bootimage=i386;isodir/boot/cdboot -o no-emul-boot"
+makefs -t cd9660 $bootable -o rockridge -o label=FreeNAS -o publisher="FreeNAS" freenas-auto.iso isodir
+if [ $? -ne 0 ] ; then
+  exit 1
+fi
 
 # Cleanup old iso dir
 rm -rf isodir
