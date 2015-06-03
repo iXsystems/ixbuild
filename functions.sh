@@ -38,7 +38,7 @@ fi
 # Source build conf and set some vars
 cd ${BDIR}/${BUILD}
 
-if [ "$TYPE" = "freenas" -o "$TYPE" = "freenastests" ] ; then
+if [ "$TYPE" = "freenas" -o "$TYPE" = "freenas-tests" ] ; then
   . freenas.cfg
 else
   . pcbsd.cfg
@@ -103,7 +103,7 @@ create_workdir()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   case $TYPE in
-    freenas|freenastest) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
+    freenas|freenas-tests) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
           *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
   esac
 
