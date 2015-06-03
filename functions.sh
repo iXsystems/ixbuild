@@ -43,19 +43,19 @@ export PBUILD PJDIR PJPORTSDIR PPKGDIR
 
 # Set all the stage / work dirs
 if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
-  PKGSTAGE="${SFTPFINALDIR}/pkg/${TARGETREL}/amd64"
+  PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
-  WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/amd64"
+  WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/amd64"
   WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
 elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
-  PKGSTAGE="${SFTPFINALDIR}/pkg/${TARGETREL}/edge/amd64"
+  PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/edge/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
-  WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/edge/amd64"
+  WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/edge/amd64"
   WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
 elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
-  PKGSTAGE="${SFTPFINALDIR}/pkg/${TARGETREL}/enterprise/amd64"
+  PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/enterprise/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
-  WORKPKG="${SFTPWORKDIR}/pkg/${TARGETREL}/enterprise/amd64"
+  WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/enterprise/amd64"
   WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
 else
   echo "Invalid BRANCH"
