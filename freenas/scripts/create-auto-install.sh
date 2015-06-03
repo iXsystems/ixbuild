@@ -12,12 +12,10 @@ VMDISK="vtbd0"
 ########################################################
 
 # Where is the program installed
-PROGDIR="`realpath ${0} | sed 's|/scripts||g'`" ; export PROGDIR
-
-cd ${PROGDIR}/scripts
+PROGDIR="`realpath ${0} | sed 's|/create-auto-install.sh||g'`" ; export PROGDIR
 
 # Source our functions
-. ${PROGDIR}/scripts/functions.sh
+. ${PROGDIR}/functions.sh
 
 ISO="$1"
 
@@ -75,7 +73,7 @@ sed -i '' "s|zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local 
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Copy over the ATF scripts
-cp -r ${PROGDIR}/atf uzipdir/
+cp -r ${PROGDIR}/../atf uzipdir/
 if [ $? -ne 0 ] ; then exit 1; fi
 
 echo "#### Creating uzip file ####"
