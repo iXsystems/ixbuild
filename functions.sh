@@ -1,5 +1,30 @@
 #!/bin/sh
 
+cleanup_workdir()
+{
+  if [ -z "$MASTERWRKDIR" ] ; then return 0; fi
+  if [ ! -d "$MASTERWRKDIR" ] ; then return 0 ; fi
+  if [ "$MASTERWRKDIR" = "/" ] ; then return 0 ; fi
+
+  # Cleanup any leftover mounts
+  for i in `mount | grep -q "on ${MASTERWRKDIR}/" | awk '{print $1}' | tail -r`
+  do
+    umount -f $i
+  done
+
+  # Should be done with unmounts
+  mount | grep -q "on ${MASTERWRKDIR}/"
+  if [ $? -ne 0 ] ; then
+    rm -rf ${MASTERWRKDIR}
+  fi
+}
+
+exit_clean()
+{
+  cleanup_workdir
+  exit 1
+}
+
 if [ -z "$BUILD" -o -z "$BRANCH" ] ; then
   echo "Missing BUILD / BRANCH"
   exit_clean
@@ -88,32 +113,6 @@ create_workdir()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 }
-
-cleanup_workdir()
-{
-  if [ -z "$MASTERWRKDIR" ] ; then return 0; fi
-  if [ ! -d "$MASTERWRKDIR" ] ; then return 0 ; fi
-  if [ "$MASTERWRKDIR" = "/" ] ; then return 0 ; fi
-
-  # Cleanup any leftover mounts
-  for i in `mount | grep -q "on ${MASTERWRKDIR}/" | awk '{print $1}' | tail -r`
-  do
-    umount -f $i
-  done
-
-  # Should be done with unmounts
-  mount | grep -q "on ${MASTERWRKDIR}/"
-  if [ $? -ne 0 ] ; then
-    rm -rf ${MASTERWRKDIR}
-  fi
-}
-
-exit_clean()
-{
-  cleanup_workdir
-  exit 1
-}
-
 push_pkgworkdir()
 {
   cd ${PPKGDIR}
