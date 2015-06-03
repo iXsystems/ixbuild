@@ -3,18 +3,15 @@
 # Most of these dont need to be modified
 #########################################################
 
-# Where is the pcbsd-build program installed
-PROGDIR="`realpath ${0} | sed 's|/functions.sh||g'`" ; export PROGDIR
-
 # Source vars
-. ${PROGDIR}/../freenas.cfg
+. ${PROGDIR}/freenas.cfg
 
 # Where on disk is the FreeNAS GIT branch
 if [ -n "$FNASGITDIR" ] ; then
   FNASSRC="${FNASGITDIR}"
   export FNASSRC
 else
-  FNASSRC="${PROGDIR}/../git/freenas"
+  FNASSRC="${PROGDIR}/freenas"
   export FNASSRC
 fi
 

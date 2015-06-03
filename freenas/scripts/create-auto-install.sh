@@ -8,14 +8,13 @@
 # DISK name for VM
 VMDISK="vtbd0"
 
-
 ########################################################
 
 # Where is the program installed
-PROGDIR="`realpath ${0} | sed 's|/create-auto-install.sh||g'`" ; export PROGDIR
+PROGDIR="`realpath ${0} | sed 's|/create-auto-install.sh||g'`/../" ; export PROGDIR
 
 # Source our functions
-. ${PROGDIR}/functions.sh
+. ${PROGDIR}/scripts/functions.sh
 
 ISO="$1"
 
