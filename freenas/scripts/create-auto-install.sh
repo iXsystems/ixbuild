@@ -12,7 +12,7 @@ VMDISK="vtbd0"
 ########################################################
 
 # Where is the program installed
-PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+PROGDIR="`realpath ${0} | sed 's|/scripts||g'`" ; export PROGDIR
 
 cd ${PROGDIR}/scripts
 
