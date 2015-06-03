@@ -359,6 +359,7 @@ jenkins_freenas_tests()
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} .
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
+  cd ${TBUILDDIR}
   make tests
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
