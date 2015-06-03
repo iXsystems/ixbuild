@@ -16,6 +16,8 @@ cleanup_workdir()
   mount | grep -q "on ${MASTERWRKDIR}/"
   if [ $? -ne 0 ] ; then
     rm -rf ${MASTERWRKDIR}
+    chflags -R noschg ${MASTERWRKDIR} 2>/dev/null
+    rm -rf ${MASTERWRKDIR}
   fi
 }
 

@@ -39,6 +39,12 @@ rmdir isomnt
 mdconfig -d -u $MD
 if [ $? -ne 0 ] ; then exit 1; fi
 
+# Load geom_uzip if necessary
+kldstat | grep -q 'geom_uzip'
+if [ $? -ne 0 ] ; then
+  kldload geom_uzip
+fi
+
 # Now extract the UZIP file
 MD=`mdconfig -a -t vnode isodir/data/base.ufs.uzip`
 if [ $? -ne 0 ] ; then exit 1; fi
@@ -72,7 +78,7 @@ sed -i '' "s|zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local 
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Copy over the ATF scripts
-cp -r ${PROGDIR}/../atf uzipdir/
+cp -r ${PROGDIR}/ uzipdir/
 if [ $? -ne 0 ] ; then exit 1; fi
 
 echo "#### Creating uzip file ####"
