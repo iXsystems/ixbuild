@@ -15,7 +15,7 @@ ISOFILE=`find /tmp/fnasb/_BE/release | grep \.iso$`
 
 # Create the automatic ISO installer
 cd ${PROGDIR}/tmp
-${PROGDIR}/scripts/create-autoinstall.sh ${ISOFILE}
+${PROGDIR}/scripts/create-auto-install.sh ${ISOFILE}
 if [ $? -ne 0 ] ; then
   exit_err "Failed creating auto-install ISO!"
 fi
