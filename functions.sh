@@ -38,7 +38,7 @@ fi
 # Source build conf and set some vars
 cd ${BDIR}/${BUILD}
 
-if [ "$TYPE" = "freenas" -o "$TYPE" = "freenastest" ] ; then
+if [ "$TYPE" = "freenas" -o "$TYPE" = "freenastests" ] ; then
   . freenas.cfg
 else
   . pcbsd.cfg
