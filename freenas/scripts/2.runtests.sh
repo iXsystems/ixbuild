@@ -88,6 +88,7 @@ screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screenvm.sh
 
 # Display output of screen command
 cat flush
+echo ""
 
 # Check that this device seemed to install properly
 dSize=`du -m ${MFSFILE} | awk '{print $1}'`
@@ -96,4 +97,6 @@ if [ $dSize -lt 10 ] ; then
    echo "bhyve install failed!"
    exit 1
 fi
+
+echo "Bhyve installation successful!"
 
