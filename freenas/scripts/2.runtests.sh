@@ -20,6 +20,17 @@ if [ $? -ne 0 ] ; then
   exit_err "Failed creating auto-install ISO!"
 fi
 
+# Lets check status of "tap0" devices
+ifconfig tap0 >/dev/null 2>/dev/null
+if [ $? -ne 0 ] ; then
+  iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
+  ifconfig tap0 create
+  sysctl net.link.tap.up_on_open=1
+  ifconfig bridge0 create
+  ifconfig bridge0 addm ${iface} addm tap0
+  ifconfig bridge0 up
+fi
+
 # Now lets spin-up bhyve and do an installation
 ######################################################
 MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
@@ -33,12 +44,13 @@ echo "Performing bhyve installation..."
 count=0
 
 # Start grub-bhyve
+bhyvectl --destroy --vm=vminstall >/dev/null 2>/dev/null
 echo "(hd0) ${MFSFILE}
 (cd0) ${PROGDIR}/tmp/freenas-auto.iso" > ${PROGDIR}/tmp/device.map
 grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall
 
 #daemon -f -p /tmp/vminstall.pid sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/tmp/freenas-auto.iso vminstall
-daemon -f -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap1 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M vminstall
+daemon -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap1 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M vminstall
 while :
 do
   if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
@@ -49,11 +61,14 @@ do
   fi
 
   count=`expr $count + 1`
-  if [ $count -gt 360 ] ; then bhyvectl --destroy --vm=vminstall ; fi
+  if [ $count -gt 360 ] ; then break; fi
   echo -e ".\c"
 
   sleep 10
 done
+
+# Cleanup the old VM
+bhyvectl --destroy --vm=vminstall
 
 # Check that this device seemed to install properly
 dSize=`du -m ${MFSFILE} | awk '{print $1}'`
