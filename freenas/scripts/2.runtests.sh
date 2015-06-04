@@ -52,29 +52,42 @@ fi
 bhyvectl --destroy --vm=vminstall >/dev/null 2>/dev/null
 echo "(hd0) ${MFSFILE}
 (cd0) ${PROGDIR}/tmp/freenas-auto.iso" > ${PROGDIR}/tmp/device.map
-rc_halt "grub-bhyve -n -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall"
 
+# We run the bhyve commands in a seperate screen session, so that they can run
+# in jenkins / save output
+echo "#!/bin/sh
 
-#daemon -f -p /tmp/vminstall.pid sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/tmp/freenas-auto.iso vminstall
+grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall
+
 daemon -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M vminstall
+
+# Wait for initial bhyve startup
 while :
 do
   if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
 
   pgrep -qF /tmp/vminstall.pid
-  if [ $? -ne 0 ] ; then
+  if [ \$? -ne 0 ] ; then
         break;
   fi
 
-  count=`expr $count + 1`
-  if [ $count -gt 360 ] ; then break; fi
-  echo -e ".\c"
+  count=\`expr \$count + 1\`
+  if [ \$count -gt 360 ] ; then break; fi
+  echo -e \".\c\"
 
   sleep 10
 done
 
 # Cleanup the old VM
 bhyvectl --destroy --vm=vminstall
+"> ${PROGDIR}/tmp/screenvm.sh
+chmod 755 ${PROGDIR}/tmp/screenvm.sh
+
+echo "Running bhyve in screen session, will display when finished..."
+screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screenvm.sh
+
+# Display output of screen command
+cat flush
 
 # Check that this device seemed to install properly
 dSize=`du -m ${MFSFILE} | awk '{print $1}'`
