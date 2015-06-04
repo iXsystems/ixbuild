@@ -46,7 +46,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Set kernel to boot in serial mode
-sed -i '' "s|/boot/kernel/kernel|/boot/kernel/kernel -D|g" isodir/boot/grub/grub.cfg
+sed -i '' "s|/boot/kernel/kernel|/boot/kernel/kernel -D -h|g" isodir/boot/grub/grub.cfg
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Now extract the UZIP file
