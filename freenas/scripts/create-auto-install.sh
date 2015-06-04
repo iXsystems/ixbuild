@@ -45,6 +45,10 @@ if [ $? -ne 0 ] ; then
   kldload geom_uzip
 fi
 
+# Set kernel to boot in serial mode
+sed -i '' "s|/boot/kernel/kernel|/boot/kernel/kernel -D -h|g" isodir/boot/grub/grub.cfg
+if [ $? -ne 0 ] ; then exit 1; fi
+
 # Now extract the UZIP file
 MD=`mdconfig -a -t vnode isodir/data/base.ufs.uzip`
 if [ $? -ne 0 ] ; then exit 1; fi
@@ -87,7 +91,7 @@ UFSFILE=base.ufs
 sync
 cd uzipdir
 DIRSIZE=$(($(du -kd 0 | cut -f 1)))
-FSSIZE=$(($DIRSIZE + $DIRSIZE + 55000))
+FSSIZE=$(($DIRSIZE + $DIRSIZE + 100000))
 cd ..
 rc_halt "dd if=/dev/zero of=${UFSFILE} bs=1k count=${FSSIZE}"
 
@@ -127,9 +131,7 @@ if [ -e "freenas-auto.iso" ] ; then
   rm freenas-auto.iso
 fi
 grub-mkrescue -o freenas-auto.iso isodir -- -volid FreeNAS
-if [ $? -ne 0 ] ; then
-  exit 1
-fi
+if [ $? -ne 0 ] ; then exit 1; fi
 
 # Cleanup old iso dir
 rm -rf isodir
