@@ -52,7 +52,8 @@ fi
 bhyvectl --destroy --vm=vminstall >/dev/null 2>/dev/null
 echo "(hd0) ${MFSFILE}
 (cd0) ${PROGDIR}/tmp/freenas-auto.iso" > ${PROGDIR}/tmp/device.map
-grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall
+rc_halt "grub-bhyve -n -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall"
+
 
 #daemon -f -p /tmp/vminstall.pid sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/tmp/freenas-auto.iso vminstall
 daemon -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M vminstall
