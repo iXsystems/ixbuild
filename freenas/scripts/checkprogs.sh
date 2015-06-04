@@ -96,3 +96,9 @@ if [ "$?" != "0" ]; then
   echo "Installing archivers/pxz.."
   rc_halt "pkg install -y archivers/pxz"
 fi
+
+pkg info "grub2-bhyve" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing grub2-bhyve.."
+  rc_halt "pkg install -y sysutils/grub2-bhyve"
+fi
