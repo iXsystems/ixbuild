@@ -43,6 +43,11 @@ cp ${PROGDIR}/tmp/freenas-auto.iso /root/
 echo "Performing bhyve installation..."
 count=0
 
+kldstat | grep -q "vmm"
+if [ $? -ne 0 ] ; then
+  kldload vmm
+fi
+
 # Start grub-bhyve
 bhyvectl --destroy --vm=vminstall >/dev/null 2>/dev/null
 echo "(hd0) ${MFSFILE}
