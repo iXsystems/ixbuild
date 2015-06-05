@@ -46,7 +46,7 @@ if [ -n "$FREENASLEGACY" ] ; then
    export MTREE_CMD
    if [ ! -e "/lib/libmd.so.5" ] ; then
      cp ${PROGDIR}/scripts/kludges/libmd.so.5 /lib/libmd.so.5
-   cp
+   fi 
 
    # Copy our kludged build_jail.sh
    cp ${PROGDIR}/scripts/kludges/build_jail.sh ${FNASSRC}/build/build_jail.sh
