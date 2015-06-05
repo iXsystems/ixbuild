@@ -38,6 +38,9 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/Makefile.sysinstall
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/picobsd/build/picobsd
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/tools/tools/tinybsd/tinybsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/share/examples/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/include/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/usr.sbin/sysinstall/install.c
 fi
 
 rc_halt "make release"
