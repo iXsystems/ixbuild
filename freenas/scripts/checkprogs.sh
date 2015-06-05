@@ -102,3 +102,8 @@ if [ "$?" != "0" ]; then
   echo "Installing grub2-bhyve.."
   rc_halt "pkg install -y sysutils/grub2-bhyve"
 fi
+pkg info "compat9x" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing compat9x.."
+  rc_halt "pkg install -y misc/compat9x"
+fi
