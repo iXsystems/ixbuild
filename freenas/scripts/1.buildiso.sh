@@ -35,6 +35,9 @@ rc_halt "make checkout"
 # Ugly back to get freenas 9.x to build on CURRENT
 if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/Makefile.inc1
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/Makefile.sysinstall
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/picobsd/build/picobsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/tools/tools/tinybsd/tinybsd
 fi
 
 rc_halt "make release"
