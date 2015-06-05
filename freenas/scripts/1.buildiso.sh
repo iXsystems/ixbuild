@@ -41,6 +41,8 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/share/examples/Makefile
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/include/Makefile
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/usr.sbin/sysinstall/install.c
+   MTREE_CMD="${PROGDIR}/scripts/mtree"
+   export MTREE_CMD
 fi
 
 rc_halt "make release"
