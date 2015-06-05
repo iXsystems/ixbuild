@@ -52,7 +52,7 @@ if [ -z "$POUDRIEREJAILVER" ] ; then
   POUDRIEREJAILVER="$TARGETREL"
 fi
 case $TYPE in
-  jail|port) WORLDTREL="$POUDRIEREJAILVER" ;;
+  jail|pkg) WORLDTREL="$POUDRIEREJAILVER" ;;
    *) WORLDTREL="$TARGETREL" ;;
 esac
 
