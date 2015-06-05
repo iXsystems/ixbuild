@@ -34,6 +34,7 @@ rc_halt "make checkout"
 
 # Ugly hack to get freenas 9.x to build on CURRENT
 if [ -n "$FREENASLEGACY" ] ; then
+   # Add all the fixes to use a 9.3 version of mtree
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/Makefile.inc1
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/Makefile.sysinstall
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/picobsd/build/picobsd
@@ -43,7 +44,17 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/usr.sbin/sysinstall/install.c
    MTREE_CMD="${PROGDIR}/scripts/kludges/mtree"
    export MTREE_CMD
+
+   # Copy our kludged build_jail.sh
    cp ${PROGDIR}/scripts/kludges/build_jail.sh ${FNASSRC}/build/build_jail.sh
+
+   # NANO_WORLDDIR expects this to exist
+   if [ ! -d "/var/home" ] ; then
+      mkdir /var/home
+   fi
+
+   # Fix a missing directory in NANO_WORLDDIR
+   sed -i '' 's|compress_ko geom_gate.ko|compress_ko geom_gate.ko;mkdir ${NANO_WORLDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
 fi
 
 rc_halt "make release"
