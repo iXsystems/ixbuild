@@ -330,8 +330,14 @@ jenkins_freenas()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Now lets sync the ISOs
-  cd /tmp/fnasb/_BE/release/
-  if [ $? -ne 0 ] ; then exit_clean ; fi
+  if [ -n "$FREENASLEGACY" ] ; then
+    cd /tmp/fnasb/objs
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+    rm -rf os-base
+  else
+    cd /tmp/fnasb/_BE/release/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+  fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
