@@ -44,6 +44,9 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/usr.sbin/sysinstall/install.c
    MTREE_CMD="${PROGDIR}/scripts/kludges/mtree"
    export MTREE_CMD
+   if [ ! -e "/lib/libmd.so.5" ] ; then
+     cp ${PROGDIR}/scripts/kludges/libmd.so.5 /lib/libmd.so.5
+   cp
 
    # Copy our kludged build_jail.sh
    cp ${PROGDIR}/scripts/kludges/build_jail.sh ${FNASSRC}/build/build_jail.sh
