@@ -54,7 +54,7 @@ if [ -n "$FREENASLEGACY" ] ; then
    fi
 
    # Fix a missing directory in NANO_WORLDDIR
-   sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
+   sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
 fi
 
 rc_halt "make release"
