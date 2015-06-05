@@ -17,12 +17,12 @@ if [ ! -d "${FNASSRC}" ]; then
    rc_nohalt "chflags -R noschg /tmp/fnasb"
    rc_nohalt "rm -rf /tmp/fnasb"
    rc_nohalt "mkdir `dirname ${FNASSRC}`"
-   rc_halt "git clone ${GITFNASURL} /tmp/fnasb"
+   rc_halt "git clone --depth=1 ${GITFNASURL} /tmp/fnasb"
    rc_halt "ln -s /tmp/fnasb ${FNASSRC}"
    git_fnas_up "${FNASSRC}" "${FNASSRC}"
 else
   if [ -d "${GITBRANCH}/.git" ]; then 
-    echo "Updating FreeBSD sources..."
+    echo "Updating FreeNAS sources..."
     git_fnas_up "${FNASSRC}" "${FNASSRC}"
   fi
 fi
@@ -31,4 +31,10 @@ fi
 cd ${FNASSRC}
 rc_halt "make git-external"
 rc_halt "make checkout"
+
+# Ugly back to get freenas 9.x to build on CURRENT
+if [ -n "$FREENASLEGACY" ] ; then
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/mtree -deU|g" ${FNASSRC}/FreeBSD/src/Makefile.inc1
+fi
+
 rc_halt "make release"
