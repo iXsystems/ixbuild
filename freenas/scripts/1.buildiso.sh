@@ -46,7 +46,8 @@ if [ -n "$FREENASLEGACY" ] ; then
    export MTREE_CMD
 
    if [ ! -e "/usr/bin/makeinfo" ] ; then
-      ln -s /usr/local/bin/makeinfo /usr/bin/makeinfo
+      cp ${PROGDIR}/scripts/kludges/makeinfo /usr/bin/makeinfo
+      chmod 755 /usr/bin/makeinfo
    fi
 
    # Copy our kludged build_jail.sh
