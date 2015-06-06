@@ -49,6 +49,10 @@ if [ -n "$FREENASLEGACY" ] ; then
       cp ${PROGDIR}/scripts/kludges/makeinfo /usr/bin/makeinfo
       chmod 755 /usr/bin/makeinfo
    fi
+   if [ ! -e "/usr/bin/install-info" ] ; then
+      cp ${PROGDIR}/scripts/kludges/install-info /usr/bin/install-info
+      chmod 755 /usr/bin/install-info
+   fi
 
    # Copy our kludged build_jail.sh
    cp ${PROGDIR}/scripts/kludges/build_jail.sh ${FNASSRC}/build/build_jail.sh
