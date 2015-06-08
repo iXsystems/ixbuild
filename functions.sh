@@ -364,7 +364,7 @@ jenkins_freenas_tests()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} .
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} /tmp/fnasb/_BE/release/
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   cd ${TBUILDDIR}
