@@ -56,6 +56,7 @@ echo "(hd0) ${MFSFILE}
 # We run the bhyve commands in a seperate screen session, so that they can run
 # in jenkins / save output
 echo "#!/bin/sh
+count=0
 
 grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall
 
