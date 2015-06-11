@@ -100,4 +100,46 @@ if [ $dSize -lt 10 ] ; then
 fi
 
 echo "Bhyve installation successful!"
+sleep 1
+echo "Starting Bhyve testing now!"
 
+# Start grub-bhyve
+echo "(hd0) ${MFSFILE}" > ${PROGDIR}/tmp/device.map
+
+# We run the bhyve commands in a seperate screen session, so that they can run
+# in jenkins / save output
+echo "#!/bin/sh
+count=0
+
+grub-bhyve -m ${PROGDIR}/tmp/device.map -M 2048M vminstall
+
+daemon -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -l com1,stdio -c 4 -m 2048M vminstall
+
+# Wait for initial bhyve startup
+while :
+do
+  if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
+
+  pgrep -qF /tmp/vminstall.pid
+  if [ \$? -ne 0 ] ; then
+        break;
+  fi
+
+  count=\`expr \$count + 1\`
+  if [ \$count -gt 65 ] ; then break; fi
+  echo -e \".\c\"
+
+  sleep 10
+done
+
+# Cleanup the old VM
+bhyvectl --destroy --vm=vminstall
+"> ${PROGDIR}/tmp/screenvm.sh
+chmod 755 ${PROGDIR}/tmp/screenvm.sh
+
+echo "Running bhyve tests in screen session, will display when finished..."
+screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screenvm.sh
+
+# Display output of screen command
+cat flush
+echo ""

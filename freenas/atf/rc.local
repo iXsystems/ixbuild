@@ -11,7 +11,7 @@ if [ -e "/etc/netcli" ] ; then
   # Set the default password for 9.x
   /etc/netcli reset_root_pw "testing"
 else
-  # Set the default password for 10.x
+  echo "Missing /etc/netcli...! RootPW not set!"
 fi
 
 # Wait 10 minutes, then shutdown
