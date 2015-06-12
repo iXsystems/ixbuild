@@ -101,6 +101,10 @@ fi
 
 echo "Bhyve installation successful!"
 sleep 1
+
+# Exit for now, can't do live run until grub-bhyve is updated
+exit 0
+
 echo "Starting Bhyve testing now!"
 
 # Start grub-bhyve
