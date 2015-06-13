@@ -5,7 +5,7 @@ PATH="${PATH}:/usr/local/bin:/usr/local/sbin"
 clear
 
 # Set the IP address we will use for testing
-/sbin/ifconfig vtnet0 192.168.0.15 255.255.255.0
+/sbin/ifconfig em0 192.168.0.15 255.255.255.0
 
 if [ -e "/etc/netcli" ] ; then
   # Set the default password for 9.x
