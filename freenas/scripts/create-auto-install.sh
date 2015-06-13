@@ -90,7 +90,7 @@ else
 fi
 
 # Set serial mode
-sed -i '' 's|# And now move the backup files back in place|sed -i"" "s,kernel/kernel,kernel/kernel -D -h,g" \${_mnt}/boot/grub/grub.cfg|g' uzipdir/conf/default/etc/install.sh
+sed -i '' 's|# And now move the backup files back in place|chroot \${_mnt} sed -i "" "s;kernel/kernel;kernel/kernel -D -h;g" \${_mnt}/boot/grub/grub.cfg|g' uzipdir/conf/default/etc/install.sh
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Copy over the ATF scripts
