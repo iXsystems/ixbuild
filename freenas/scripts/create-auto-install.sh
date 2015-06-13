@@ -93,6 +93,8 @@ fi
 # Disable features / LZ4
 sed -i '' "s|zpool create|zpool create -d|g" uzipdir/conf/default/etc/install.sh
 if [ $? -ne 0 ] ; then exit 1; fi
+sed -i '' "s|version=28|version=33ULL|g" uzipdir/conf/default/etc/install.sh
+if [ $? -ne 0 ] ; then exit 1; fi
 grep -v "zpool set feature" uzipdir/conf/default/etc/install.sh > uzipdir/conf/default/etc/install.sh.new
 mv uzipdir/conf/default/etc/install.sh.new uzipdir/conf/default/etc/install.sh
 grep -v "zfs set compress" uzipdir/conf/default/etc/install.sh > uzipdir/conf/default/etc/install.sh.new
