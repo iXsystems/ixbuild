@@ -97,6 +97,7 @@ grep -v "zpool set feature" uzipdir/conf/default/etc/install.sh > uzipdir/conf/d
 mv uzipdir/conf/default/etc/install.sh.new uzipdir/conf/default/etc/install.sh
 grep -v "zfs set compress" uzipdir/conf/default/etc/install.sh > uzipdir/conf/default/etc/install.sh.new
 mv uzipdir/conf/default/etc/install.sh.new uzipdir/conf/default/etc/install.sh
+chmod 755 uzipdir/conf/default/etc/install.sh
 
 # Copy over the ATF scripts
 cp -r ${PROGDIR}/atf uzipdir/
