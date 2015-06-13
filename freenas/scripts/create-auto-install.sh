@@ -89,18 +89,6 @@ else
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
 
-# Since grub2-bhyve can't use lz4 / newer ZFS features, we turn them off for now
-# Disable features / LZ4
-sed -i '' "s|zpool create|zpool create -d|g" uzipdir/conf/default/etc/install.sh
-if [ $? -ne 0 ] ; then exit 1; fi
-sed -i '' "s|version=28|version=33ULL|g" uzipdir/conf/default/etc/install.sh
-if [ $? -ne 0 ] ; then exit 1; fi
-grep -v "zpool set feature" uzipdir/conf/default/etc/install.sh > uzipdir/conf/default/etc/install.sh.new
-mv uzipdir/conf/default/etc/install.sh.new uzipdir/conf/default/etc/install.sh
-grep -v "zfs set compress" uzipdir/conf/default/etc/install.sh > uzipdir/conf/default/etc/install.sh.new
-mv uzipdir/conf/default/etc/install.sh.new uzipdir/conf/default/etc/install.sh
-chmod 755 uzipdir/conf/default/etc/install.sh
-
 # Copy over the ATF scripts
 cp -r ${PROGDIR}/atf uzipdir/
 if [ $? -ne 0 ] ; then exit 1; fi

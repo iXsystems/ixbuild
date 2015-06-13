@@ -108,3 +108,16 @@ if [ "$?" != "0" ]; then
   echo "Installing misc/compat9x.."
   rc_halt "pkg install -y misc/compat9x"
 fi
+
+pkg info "emulators/virtualbox-ose" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing emulators/virtualbox-ose.."
+  rc_halt "pkg install -y emulators/virtualbox-ose"
+fi
+
+pkg info "emulators/virtualbox-ose-kmod" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing emulators/virtualbox-ose-kmod.."
+  rc_halt "pkg install -y emulators/virtualbox-ose-kmod"
+fi
+
