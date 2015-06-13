@@ -108,7 +108,7 @@ echo "Bhyve installation successful!"
 sleep 1
 
 # Exit for now, can't do live run until grub-bhyve is updated
-#exit 0
+exit 0
 
 echo "Starting testing now!"
 
@@ -145,5 +145,9 @@ echo "Running VBoxHeadless"
 vboxheadless -startvm "$VM" --vrde off
 
 rc_halt "VBoxManage unregistervm $VM --delete"
+
+echo "Output from runtime tests:"
+echo "----------------------------------"
+cat /tmp/vboxpipe
 
 echo ""
