@@ -139,7 +139,7 @@ rc_halt "VBoxManage modifyvm $VM --pae off"
 rc_halt "VBoxManage modifyvm $VM --usb on"
 rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
 rm /tmp/vboxpipe 2>/dev/null
-rc_halt "VBoxManage modifyvm $VM --uartmode1 server /tmp/vboxpipe"
+rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
 
 echo "Running VBoxHeadless"
 vboxheadless -startvm "$VM" --vrde off
