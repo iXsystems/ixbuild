@@ -108,7 +108,7 @@ echo "Bhyve installation successful!"
 sleep 1
 
 # Exit for now, can't do live run until grub-bhyve is updated
-#exit 0
+exit 0
 
 echo "Starting testing now!"
 
@@ -162,11 +162,13 @@ daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
 sleep 300
 
 # Run the REST tests now
+cd ${PROGDIR}/scripts
+
 if [ -n "$FREENASLEGACY" ] ; then
-  ${PROGDIR}/scripts/9.3-tests.sh
+  ./9.3-tests.sh
   res=$?
 else
-  ${PROGDIR}/scripts/10-tests.sh
+  ./10-tests.sh
   res=$?
 fi
 
