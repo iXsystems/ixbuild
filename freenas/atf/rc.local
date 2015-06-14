@@ -14,6 +14,9 @@ else
   echo "Missing /etc/netcli...! RootPW not set!"
 fi
 
+
+echo "Running rc.local, waiting for REST connections..."
+
 # Wait 5 minutes, then shutdown
 sleep 300
 shutdown -p now
