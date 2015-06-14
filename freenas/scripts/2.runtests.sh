@@ -147,7 +147,7 @@ rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
 rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 1 --type hdd --medium ${MFSFILE}.disk1"
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk2 --size 20000"
-rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 2 --type hdd --medium ${MFSFILE}.disk2"
+rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 1 --device 1 --type hdd --medium ${MFSFILE}.disk2"
 
 # Get rid of old output file
 if [ -e "/tmp/vboxpipe" ] ; then
