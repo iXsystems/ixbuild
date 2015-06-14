@@ -158,6 +158,9 @@ fi
 echo "Running Installed System..."
 daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
 
+# Give about 5 minutes to boot, should be ready for REST calls now
+sleep 300
+
 # Run the REST tests now
 if [ -n "$FREENASLEGACY" ] ; then
   ${PROGDIR}/scripts/9.3-tests.sh
