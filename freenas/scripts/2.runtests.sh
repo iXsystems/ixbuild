@@ -78,10 +78,10 @@ do
   fi
 
   count=\`expr \$count + 1\`
-  if [ \$count -gt 360 ] ; then break; fi
+  if [ \$count -gt 20 ] ; then break; fi
   echo -e \".\c\"
 
-  sleep 10
+  sleep 30
 done
 
 # Cleanup the old VM
@@ -108,7 +108,7 @@ echo "Bhyve installation successful!"
 sleep 1
 
 # Exit for now, can't do live run until grub-bhyve is updated
-exit 0
+#exit 0
 
 echo "Starting testing now!"
 
@@ -141,8 +141,26 @@ rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
 rm /tmp/vboxpipe 2>/dev/null
 rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
 
-echo "Running VBoxHeadless"
-vboxheadless -startvm "$VM" --vrde off
+echo "Running Installed System..."
+daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
+
+# Wait for first vbox headless to finish
+count=0
+while :
+do
+  if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
+
+  pgrep -qF /tmp/vminstall.pid
+  if [ $? -ne 0 ] ; then
+        break;
+  fi
+
+  count=`expr $count + 1`
+  if [ $count -gt 20 ] ; then break; fi
+  echo -e ".\c"
+
+  sleep 30
+done
 
 rc_halt "VBoxManage unregistervm $VM --delete"
 
