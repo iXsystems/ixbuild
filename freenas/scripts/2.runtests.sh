@@ -156,13 +156,21 @@ do
   fi
 
   count=`expr $count + 1`
-  if [ $count -gt 20 ] ; then break; fi
+  if [ $count -gt 20 ] ; then 
+    # Shutdown the VM now
+    vboxmanage controlvm vminstall poweroff 2>/dev/null >/dev/null
+    break
+  fi
   echo -e ".\c"
 
   sleep 30
 done
 
-rc_halt "VBoxManage unregistervm $VM --delete"
+sleep 2
+sync
+
+# Delete the VM
+VBoxManage unregistervm $VM --delete
 
 echo "Output from runtime tests:"
 echo "----------------------------------"
