@@ -112,8 +112,9 @@ sleep 1
 
 echo "Starting testing now!"
 
-# Start grub-bhyve
-
+# We now switch from bhyve to virtualbox headless
+# This is because grub-bhyve can't boot FreeBSD on root/zfs
+# Once bhyve matures we can switch this back over
 kldunload vmm
 kldload vboxdrv
 kldload vboxnetflt
@@ -123,11 +124,11 @@ kldload vboxnetadp
 rm ${MFSFILE}.vdi 2>/dev/null
 rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${MFSFILE}.vdi"
 
-# Create the OVA file now
 VM="vminstall"
 # Remove any crashed / old VM
 VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
           
+# Create the VM in virtualbox
 rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
 rc_halt "VBoxManage storagectl $VM --name IDE --add ide --controller PIIX4"
 rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
@@ -137,14 +138,21 @@ rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
 rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
 rc_halt "VBoxManage modifyvm $VM --pae off"
 rc_halt "VBoxManage modifyvm $VM --usb on"
+
+# Setup serial output
 rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
+rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
+
+# Attach extra disks to the VM for testing
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
 rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 1 --type hdd --medium ${MFSFILE}.disk1"
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk2 --size 20000"
 rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 2 --type hdd --medium ${MFSFILE}.disk2"
 
-rm /tmp/vboxpipe 2>/dev/null
-rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
+# Get rid of old output file
+if [ -e "/tmp/vboxpipe" ] ; then
+  rm /tmp/vboxpipe
+fi
 
 echo "Running Installed System..."
 daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
