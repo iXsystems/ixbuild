@@ -138,36 +138,25 @@ rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
 rc_halt "VBoxManage modifyvm $VM --pae off"
 rc_halt "VBoxManage modifyvm $VM --usb on"
 rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
+rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
+rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 1 --type hdd --medium ${MFSFILE}.disk1"
+rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk2 --size 20000"
+rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 2 --type hdd --medium ${MFSFILE}.disk2"
+
 rm /tmp/vboxpipe 2>/dev/null
 rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
 
 echo "Running Installed System..."
 daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
 
-# Wait for first vbox headless to finish
-count=0
-while :
-do
-  if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
-
-  pgrep -qF /tmp/vminstall.pid
-  if [ $? -ne 0 ] ; then
-        break;
-  fi
-
-  count=`expr $count + 1`
-  if [ $count -gt 20 ] ; then 
-    # Shutdown the VM now
-    vboxmanage controlvm vminstall poweroff 2>/dev/null >/dev/null
-    break
-  fi
-  echo -e ".\c"
-
-  sleep 30
-done
-
-sleep 2
-sync
+# Run the REST tests now
+if [ -n "$FREENASLEGACY" ] ; then
+  ${PROGDIR}/scripts/9.3-tests.sh
+  res=$?
+else
+  ${PROGDIR}/scripts/10-tests.sh
+  res=$?
+fi
 
 # Delete the VM
 VBoxManage unregistervm $VM --delete
@@ -176,4 +165,4 @@ echo "Output from runtime tests:"
 echo "----------------------------------"
 cat /tmp/vboxpipe
 
-echo ""
+exit $res

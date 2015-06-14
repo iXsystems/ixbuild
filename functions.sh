@@ -356,7 +356,8 @@ jenkins_freenas_tests()
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   # Now lets sync the ISOs
-  if [ ! -d "/tmp/fnasb/_BE/release" ] ; then
+  if [ -d "/tmp/fnasb/_BE/release" ] ; then
+    rm -rf /tmp/fnasb/_BE/release
     mkdir -p /tmp/fnasb/_BE/release
   fi
 
