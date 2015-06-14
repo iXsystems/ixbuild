@@ -127,7 +127,7 @@ rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${MFSFILE}.vdi"
 VM="vminstall"
 # Remove any crashed / old VM
 VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
-rm -rf /root/VirtualBox VMs/vminstall >/dev/null 2>/dev/null
+rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
           
 # Create the VM in virtualbox
 rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
