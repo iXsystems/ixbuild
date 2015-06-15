@@ -44,6 +44,7 @@ echo "Performing bhyve installation..."
 count=0
 
 # Unload VB
+VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
 kldunload vboxdrv 2>/dev/null
 kldunload vboxnetflt 2>/dev/null
 kldunload vboxnetadp 2>/dev/null
