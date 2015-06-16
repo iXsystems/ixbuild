@@ -166,18 +166,22 @@ sleep 300
 cd ${PROGDIR}/scripts
 
 if [ -n "$FREENASLEGACY" ] ; then
-  ./9.3-tests.sh
+  ./9.3-tests.sh >/tmp/fnas-tests.log 2>/tmp/fnas-tests.log
   res=$?
 else
-  ./10-tests.sh
+  ./10-tests.sh >/tmp/fnas-tests.log 2>/tmp/fnas-tests.log
   res=$?
 fi
+
+# Shutdown that VM
+VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
+sync
 
 # Delete the VM
 VBoxManage unregistervm $VM --delete
 
-echo "Output from runtime tests:"
-echo "----------------------------------"
+echo "Output from console during runtime tests:"
+echo "-----------------------------------------"
 cat /tmp/vboxpipe
 
 exit $res
