@@ -80,9 +80,9 @@ if [ $? -ne 0 ] ; then exit 1; fi
 # Now setup ATF to run at first boot after install
 
 if [ -n "$FREENASLEGACY" ] ; then
-  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local /tmp/data/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
+  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
   if [ $? -ne 0 ] ; then exit 1; fi
-  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local /tmp/data/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
+  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
   if [ $? -ne 0 ] ; then exit 1; fi
 else
   sed -i '' "s|zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;cp /atf/rc.local /tmp/data/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
