@@ -21,9 +21,9 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Lets check status of "tap0" devices
+iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 ifconfig tap0 >/dev/null 2>/dev/null
 if [ $? -ne 0 ] ; then
-  iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
   ifconfig tap0 create
   sysctl net.link.tap.up_on_open=1
   ifconfig bridge0 create
@@ -141,6 +141,7 @@ rc_halt "VBoxManage storagectl $VM --name IDE --add ide --controller PIIX4"
 rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
 rc_halt "VBoxManage modifyvm $VM --ioapic on --boot1 disk --memory 2048 --vram 12"
 rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
+rc_halt "VBoxManage modifyvm $VM --bridgeadapter1 ${iface}"
 rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
 rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
 rc_halt "VBoxManage modifyvm $VM --pae off"
