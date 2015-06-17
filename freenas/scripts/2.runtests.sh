@@ -122,6 +122,11 @@ echo "Starting testing now!"
 # This is because grub-bhyve can't boot FreeBSD on root/zfs
 # Once bhyve matures we can switch this back over
 kldunload vmm
+# Remove bridge0/tap0 so vbox bridge mode works
+ifconfig bridge0 destroy
+ifconfig tap0 destroy
+
+# Load VBOX modules
 kldload vboxdrv
 kldload vboxnetflt
 kldload vboxnetadp
