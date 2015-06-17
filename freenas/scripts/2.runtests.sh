@@ -144,7 +144,7 @@ rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
 rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
 rc_halt "VBoxManage storagectl $VM --name IDE --add ide --controller PIIX4"
 rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
-rc_halt "VBoxManage modifyvm $VM --ioapic on --boot1 disk --memory 2048 --vram 12"
+rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 2048 --vram 12"
 rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
 rc_halt "VBoxManage modifyvm $VM --bridgeadapter1 ${iface}"
 rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
