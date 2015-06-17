@@ -65,6 +65,8 @@ echo "#!/bin/sh
 count=0
 
 grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall
+sync
+sleep 2
 
 daemon -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M vminstall
 
@@ -104,6 +106,9 @@ if [ $dSize -lt 10 ] ; then
    echo "bhyve install failed!"
    exit 1
 fi
+
+sync
+sleep 2
 
 echo "Bhyve installation successful!"
 sleep 1
