@@ -127,7 +127,7 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y ftp/curl"
 fi
 
-pkg info "shell/bash" >/dev/null 2>/dev/null
+pkg info "shells/bash" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing shells/bash.."
   rc_halt "pkg install -y shells/bash"
