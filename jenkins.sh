@@ -22,6 +22,7 @@ case $TYPE in
      vm) jenkins_vm ;;
 freenas) jenkins_freenas ;;
 freenas-tests) jenkins_freenas_tests ;;
+ hbsdvm) sh ${BDIR}/vm/hardenedbsd.sh ${1} ${2} ${3} ;;
       *) echo "Invalid Type: $1" 
          exit 1
          ;;
