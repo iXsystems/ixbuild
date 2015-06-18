@@ -21,9 +21,9 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Lets check status of "tap0" devices
+iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 ifconfig tap0 >/dev/null 2>/dev/null
 if [ $? -ne 0 ] ; then
-  iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
   ifconfig tap0 create
   sysctl net.link.tap.up_on_open=1
   ifconfig bridge0 create
@@ -65,6 +65,8 @@ echo "#!/bin/sh
 count=0
 
 grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall
+sync
+sleep 2
 
 daemon -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M vminstall
 
@@ -105,11 +107,14 @@ if [ $dSize -lt 10 ] ; then
    exit 1
 fi
 
+sync
+sleep 2
+
 echo "Bhyve installation successful!"
 sleep 1
 
 # Exit for now, can't do live run until grub-bhyve is updated
-exit 0
+#exit 0
 
 echo "Starting testing now!"
 
@@ -117,6 +122,11 @@ echo "Starting testing now!"
 # This is because grub-bhyve can't boot FreeBSD on root/zfs
 # Once bhyve matures we can switch this back over
 kldunload vmm
+# Remove bridge0/tap0 so vbox bridge mode works
+ifconfig bridge0 destroy
+ifconfig tap0 destroy
+
+# Load VBOX modules
 kldload vboxdrv
 kldload vboxnetflt
 kldload vboxnetadp
@@ -134,8 +144,9 @@ rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
 rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
 rc_halt "VBoxManage storagectl $VM --name IDE --add ide --controller PIIX4"
 rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
-rc_halt "VBoxManage modifyvm $VM --ioapic on --boot1 disk --memory 2048 --vram 12"
-rc_halt "VBoxManage modifyvm $VM --nic1 nat"
+rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 2048 --vram 12"
+rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
+rc_halt "VBoxManage modifyvm $VM --bridgeadapter1 ${iface}"
 rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
 rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
 rc_halt "VBoxManage modifyvm $VM --pae off"
@@ -159,25 +170,33 @@ fi
 echo "Running Installed System..."
 daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
 
-# Give about 5 minutes to boot, should be ready for REST calls now
-sleep 300
+# Give a few minutes to boot, should be ready for REST calls now
+sleep 500
 
 # Run the REST tests now
 cd ${PROGDIR}/scripts
 
 if [ -n "$FREENASLEGACY" ] ; then
-  ./9.3-tests.sh
+  ./9.3-tests.sh >/tmp/fnas-tests.log 2>/tmp/fnas-tests.log
   res=$?
 else
-  ./10-tests.sh
+  ./10-tests.sh >/tmp/fnas-tests.log 2>/tmp/fnas-tests.log
   res=$?
 fi
+
+# Shutdown that VM
+VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
+sync
 
 # Delete the VM
 VBoxManage unregistervm $VM --delete
 
-echo "Output from runtime tests:"
-echo "----------------------------------"
+echo "Output from console during runtime tests:"
+echo "-----------------------------------------"
 cat /tmp/vboxpipe
+
+echo "Output from REST API calls:"
+echo "-----------------------------------------"
+cat /tmp/fnas-tests.log
 
 exit $res
