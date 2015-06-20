@@ -11,8 +11,12 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 # IP of client we are testing
 ip="192.168.0.15"
 
+# Set the username / pass of FreeNAS for REST calls
+fuser="root"
+fpass="testing"
+
 # Source our resty / jsawk functions
-. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u root:testing
+. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
 # Log files
 RESTYOUT=/tmp/resty.out
