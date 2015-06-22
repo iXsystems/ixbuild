@@ -20,57 +20,65 @@ if [ $? -ne 0 ] ; then
   exit_err "Failed creating auto-install ISO!"
 fi
 
-# Lets check status of "tap0" devices
-iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
-ifconfig tap0 >/dev/null 2>/dev/null
-if [ $? -ne 0 ] ; then
-  ifconfig tap0 create
-  sysctl net.link.tap.up_on_open=1
-  ifconfig bridge0 create
-  ifconfig bridge0 addm ${iface} addm tap0
-  ifconfig bridge0 up
-fi
+# We now run virtualbox headless
+# This is because grub-bhyve can't boot FreeBSD on root/zfs
+# Once bhyve matures we can switch this back over
+kldunload vmm 2>/dev/null >/dev/null
+# Remove bridge0/tap0 so vbox bridge mode works
+ifconfig bridge0 destroy >/dev/null 2>/dev/null
+ifconfig tap0 destroy >/dev/null 2>/dev/null
 
-# Now lets spin-up bhyve and do an installation
+# Load up VBOX
+kldload vboxdrv >/dev/null 2>/dev/null
+service vboxnet start >dev/null 2>/dev/null
+
+# Now lets spin-up vbox and do an installation
 ######################################################
 MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
 echo "Creating $MFSFILE"
-rc_halt "truncate -s 5000M $MFSFILE"
+rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 5000"
 
+VM="vminstall"
+# Remove any crashed / old VM
+VBoxManage unregistervm $VM >/dev/null 2>/dev/null
+rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
+
+# Copy ISO over to /root in case we need to grab it from jenkins node later
 cp ${PROGDIR}/tmp/freenas-auto.iso /root/
 
+# Remove from the vbox registry
+VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
+
+# Create the VM in virtualbox
+rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
+rc_halt "VBoxManage storagectl $VM --name SATA --add sata --controller IntelAhci"
+rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
+rc_halt "VBoxManage openmedium dvd ${PROGDIR}/tmp/freenas-auto.iso"
+rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/tmp/freenas-auto.iso"
+rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 2048 --vram 12"
+rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
+rc_halt "VBoxManage modifyvm $VM --bridgeadapter1 ${iface}"
+rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
+rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
+rc_halt "VBoxManage modifyvm $VM --pae off"
+rc_halt "VBoxManage modifyvm $VM --usb on"
+
+# Setup serial output
+rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
+rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
+
 # Just in case the install hung, we don't need to be waiting for over an hour
-echo "Performing bhyve installation..."
+echo "Performing VM installation..."
 count=0
 
 # Unload VB
 VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
-kldunload vboxdrv 2>/dev/null
-kldunload vboxnetflt 2>/dev/null
-kldunload vboxnetadp 2>/dev/null
 
-kldstat | grep -q "vmm"
-if [ $? -ne 0 ] ; then
-  kldload vmm
-fi
-
-# Start grub-bhyve
-bhyvectl --destroy --vm=vminstall >/dev/null 2>/dev/null
-echo "(hd0) ${MFSFILE}
-(cd0) ${PROGDIR}/tmp/freenas-auto.iso" > ${PROGDIR}/tmp/device.map
-
-# We run the bhyve commands in a seperate screen session, so that they can run
-# in jenkins / save output
-echo "#!/bin/sh
-count=0
-
-grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M vminstall
-sync
-sleep 2
-
-daemon -p /tmp/vminstall.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M vminstall
+# Start the VM
+daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
 
 # Wait for initial bhyve startup
+count=0
 while :
 do
   if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
@@ -87,30 +95,33 @@ do
   sleep 30
 done
 
-# Cleanup the old VM
-bhyvectl --destroy --vm=vminstall
-"> ${PROGDIR}/tmp/screenvm.sh
-chmod 755 ${PROGDIR}/tmp/screenvm.sh
+# Make sure VM is shutdown
+VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
 
-echo "Running bhyve in screen session, will display when finished..."
-screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screenvm.sh
+# Remove from the vbox registry
+VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
 
-# Display output of screen command
-cat flush
+# Set the DVD drive to empty
+rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium emptydrive"
+
+# Display output of VM serial mode
+echo "OUTPUT FROM INSTALLATION CONSOLE..."
+echo "---------------------------------------------"
+cat /tmp/vboxpipe
 echo ""
 
 # Check that this device seemed to install properly
-dSize=`du -m ${MFSFILE} | awk '{print $1}'`
+dSize=`du -m ${MFSFILE}.vdi | awk '{print $1}'`
 if [ $dSize -lt 10 ] ; then
    # if the disk image is too small, installation didn't work, bail out!
-   echo "bhyve install failed!"
+   echo "VM install failed!"
    exit 1
 fi
 
 sync
 sleep 2
 
-echo "Bhyve installation successful!"
+echo "VM installation successful!"
 sleep 1
 
 # Exit for now, can't do live run until grub-bhyve is updated
@@ -118,49 +129,11 @@ sleep 1
 
 echo "Starting testing now!"
 
-# We now switch from bhyve to virtualbox headless
-# This is because grub-bhyve can't boot FreeBSD on root/zfs
-# Once bhyve matures we can switch this back over
-kldunload vmm
-# Remove bridge0/tap0 so vbox bridge mode works
-ifconfig bridge0 destroy
-ifconfig tap0 destroy
-
-# Load VBOX modules
-kldload vboxdrv
-kldload vboxnetflt
-kldload vboxnetadp
-
-# Create the VDI
-rm ${MFSFILE}.vdi 2>/dev/null
-rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${MFSFILE}.vdi"
-
-VM="vminstall"
-# Remove any crashed / old VM
-VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
-rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
-          
-# Create the VM in virtualbox
-rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
-rc_halt "VBoxManage storagectl $VM --name IDE --add ide --controller PIIX4"
-rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
-rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 2048 --vram 12"
-rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
-rc_halt "VBoxManage modifyvm $VM --bridgeadapter1 ${iface}"
-rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
-rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
-rc_halt "VBoxManage modifyvm $VM --pae off"
-rc_halt "VBoxManage modifyvm $VM --usb on"
-
-# Setup serial output
-rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
-rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
-
 # Attach extra disks to the VM for testing
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
-rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 0 --device 1 --type hdd --medium ${MFSFILE}.disk1"
+rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type hdd --medium ${MFSFILE}.disk1"
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk2 --size 20000"
-rc_halt "VBoxManage storageattach $VM --storagectl IDE --port 1 --device 1 --type hdd --medium ${MFSFILE}.disk2"
+rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 2 --device 0 --type hdd --medium ${MFSFILE}.disk2"
 
 # Get rid of old output file
 if [ -e "/tmp/vboxpipe" ] ; then

@@ -6,7 +6,7 @@
 # Settings
 
 # DISK name for VM
-VMDISK="vtbd0"
+VMDISK="ada0"
 
 ########################################################
 
