@@ -298,7 +298,7 @@ jenkins_vm()
   create_workdir
 
   pull_world
-  pull_isos
+  pull_iso
 
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
