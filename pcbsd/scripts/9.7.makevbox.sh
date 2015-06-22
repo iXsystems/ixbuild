@@ -48,37 +48,46 @@ if [ ! -e "$DVDFILE" ] ; then
   exit 1
 fi
 
-# Make sure bhyve is loaded
-kldstat -n vmm >/dev/null 2>/dev/null
-if [ $? -ne 0 ] ; then
-   kldload vmm
-fi
+# We now run virtualbox headless
+# This is because grub-bhyve can't boot FreeBSD on root/zfs
+# Once bhyve matures we can switch this back over
+kldunload vmm 2>/dev/null >/dev/null
+# Remove bridge0/tap0 so vbox bridge mode works
+ifconfig bridge0 destroy >/dev/null 2>/dev/null
+ifconfig tap0 destroy >/dev/null 2>/dev/null
+
+# Get the default interface
+iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
+
+# Load up VBOX
+kldload vboxdrv >/dev/null 2>/dev/null
+service vboxnet onestart >dev/null 2>/dev/null
 
 echo "Copying file-system contents to memory..."
 MD=`mdconfig -a -t vnode -f ${DVDFILE}`
 rc_halt "mount_cd9660 /dev/$MD ${ISODIR}-tmp"
 tar cvf - -C ${ISODIR}-tmp . 2>/dev/null | tar xvf - -C ${ISODIR} 2>/dev/null
 if [ $? -ne 0 ] ; then
-  exit_err "Failed running grub-mkrescue"
+  exit_err "tar cvf"
 fi
 rc_halt "umount /dev/$MD"
 rc_halt "mdconfig -d -u $MD"
 rc_halt "rmdir ${ISODIR}-tmp"
 
-echo "Extracting /root and /etc"
-rc_halt "tar xvf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root" >/dev/null 2>/dev/null
-rc_halt "tar xvf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc" >/dev/null 2>/dev/null
+#echo "Extracting /root and /etc"
+#rc_halt "tar xvf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root" >/dev/null 2>/dev/null
+#rc_halt "tar xvf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc" >/dev/null 2>/dev/null
 
 # Copy the bhyve ttys / gettytab
-rc_halt "cp ${PROGDIR}/scripts/pre-installs/ttys ${ISODIR}/etc/"
-rc_halt "cp ${PROGDIR}/scripts/pre-installs/gettytab ${ISODIR}/etc/"
+#rc_halt "cp ${PROGDIR}/scripts/pre-installs/ttys ${ISODIR}/etc/"
+#rc_halt "cp ${PROGDIR}/scripts/pre-installs/gettytab ${ISODIR}/etc/"
 
 # Re-compression of /root and /etc
-echo "Re-compressing /root and /etc"
-rc_halt "tar cvJf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root ." >/dev/null 2>/dev/null
-rc_halt "tar cvJf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc ." >/dev/null 2>/dev/null
-rc_halt "rm -rf ${ISODIR}/root"
-rc_halt "mkdir ${ISODIR}/root"
+#echo "Re-compressing /root and /etc"
+#rc_halt "tar cvJf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root ." >/dev/null 2>/dev/null
+#rc_halt "tar cvJf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc ." >/dev/null 2>/dev/null
+#rc_halt "rm -rf ${ISODIR}/root"
+#rc_halt "mkdir ${ISODIR}/root"
 
 # Now loop through and generate VM disk images based upon supplied configs
 for cfg in `ls ${PROGDIR}/scripts/pre-installs/*.cfg`
@@ -87,8 +96,17 @@ do
 
   # Create the filesystem backend file
   echo "Creating $MFSFILE"
-  truncate -s 50000M $MFSFILE
 
+  rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 5000"
+
+  VM="vminstall"
+
+  # Remove any crashed / old VM
+  VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
+  rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
+
+  # Remove from the vbox registry
+  VBoxManage closemedium dvd ${PROGDIR}/ISO/VMAUTO.iso >/dev/null 2>/dev/null
   # Copy the pc-sysinstall config
   rc_halt "cp $cfg ${ISODIR}/pc-sysinstall.cfg"
    
@@ -99,24 +117,41 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
 
   # Use makefs to create the image
   echo "Creating ISO..."
+  sed -i '' 's|/kernel/kernel|/kernel/kernel -D -h|g' ${ISODIR}/boot/grub/grub.cfg
   echo "kern.geom.label.disk_ident.enable=0" >> ${ISODIR}/boot/loader.conf
   echo "kern.geom.label.gptid.enable=0" >> ${ISODIR}/boot/loader.conf
   echo "kern.geom.label.ufsid.enable=0" >> ${ISODIR}/boot/loader.conf
-  echo "/dev/iso9660/PCBSD_INSTALL / cd9660 ro 0 0" > ${ISODIR}/etc/fstab
-  bootable="-o bootimage=i386;$4/boot/cdboot -o no-emul-boot"
-  makefs -t cd9660 $bootable -o rockridge -o label=PCBSD_INSTALL -o publisher="PCBSD" ${PROGDIR}/iso/VMAUTO.iso ${ISODIR}
+  grub-mkrescue -o ${PROGDIR}/iso/VMAUTO.iso ${ISODIR} -- -volid "PCBSD_INSTALL"
   if [ $? -ne 0 ] ; then
-   exit_err "Failed running makefs"
+   exit_err "Failed running grub-mkrescue"
   fi
 
-  # Run BHYVE now
+  # Create the VM in virtualbox
+  rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
+  rc_halt "VBoxManage storagectl $VM --name SATA --add sata --controller IntelAhci"
+  rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
+  rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/ISO/VMAUTO.iso"
+  rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 2048 --vram 12"
+  rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
+  rc_halt "VBoxManage modifyvm $VM --bridgeadapter1 ${iface}"
+  rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
+  rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
+  rc_halt "VBoxManage modifyvm $VM --pae off"
+  rc_halt "VBoxManage modifyvm $VM --usb on"
+
+  # Setup serial output
+  rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
+  rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
+
+
+  # Run VM now
   sync
-  sleep 15
+  sleep 3
 
   # Just in case the install hung, we don't need to be waiting for over an hour
-  echo "Running bhyve for installation to $MFSFILE..."
+  echo "Running VM for installation to $MFSFILE.vdi..."
   count=0
-  daemon -f -p /tmp/vminstall.pid sh /usr/share/examples/bhyve/vmrun.sh -c 2 -m 2048M -d ${MFSFILE} -i -I ${PROGDIR}/iso/VMAUTO.iso vminstall
+  daemon -f -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
   while :
   do
     if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
@@ -127,17 +162,26 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
     fi
 
     count=`expr $count + 1`
-    if [ $count -gt 360 ] ; then bhyvectl --destroy --vm=vminstall ; fi
+    if [ $count -gt 360 ] ; then break; fi
     echo -e ".\c"
 
     sleep 10
   done
 
+  echo "Output from VM install:"
+  echo "------------------------------------"
+
+  # Make sure VM is shutdown
+  VBoxManage controlvm ${VM} poweroff >/dev/null 2>/dev/null
+
+  # Remove from the vbox registry
+  VBoxManage closemedium dvd ${PROGDIR}/ISO/VMAUTO.iso >/dev/null 2>/dev/null
+
   # Check that this device seemed to install properly
-  dSize=`du -m ${MFSFILE} | awk '{print $1}'`
+  dSize=`du -m ${MFSFILE}.vdi | awk '{print $1}'`
   if [ $dSize -lt 10 ] ; then
      # if the disk image is too small, something didn't work, bail out!
-     echo "bhyve install failed!"
+     echo "VM install failed!"
 
      # Cleanup tempfs
      umount ${ISODIR} 2>/dev/null
@@ -153,12 +197,13 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   # Create the VDI
   rm ${VDIFILE} 2>/dev/null
   rm ${VDIFILE}.xz 2>/dev/null
-  rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${VDIFILE}"
+  rc_halt "cp ${MFSFILE}.vdi ${VDIFILE}"
 
   # Create the OVA file now
   rm ${OVAFILE} 2>/dev/null
   rm ${OVAFILE}.xz 2>/dev/null
   VM="$pName"
+
   # Remove any crashed / old VM
   VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
 
@@ -180,21 +225,21 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   # Create the VDI
   rm ${VDIFILE} 2>/dev/null
   rm ${VDIFILE}.xz 2>/dev/null
-  rc_halt "VBoxManage convertfromraw --format VDI ${MFSFILE} ${VDIFILE}"
+  rc_halt "cp ${MFSFILE}.vdi ${VDIFILE}"
   rc_halt "pixz ${VDIFILE}"
   rc_halt "chmod 644 ${VDIFILE}.xz"
 
   # Create the VMDK
   rm ${VMDKFILE} 2>/dev/null
   rm ${VMDKFILE}.xz 2>/dev/null
-  rc_halt "VBoxManage convertfromraw --format VMDK ${MFSFILE} ${VMDKFILE}"
+  rc_halt "VBoxManage clonehd --format VMDK ${MFSFILE}.vdi ${VMDKFILE}"
   rc_halt "pixz ${VMDKFILE}"
   rc_halt "chmod 644 ${VMDKFILE}.xz"
 
   # Do RAW now
   rm ${RAWFILE} 2>/dev/null
   rm ${RAWFILE}.xz 2>/dev/null
-  rc_halt "mv $MFSFILE $RAWFILE"
+  rc_halt "VBoxManage clonehd --format RAW ${MFSFILE}.vdi ${RAWFILE}"
   rc_halt "pixz ${RAWFILE}"
   rc_halt "chmod 644 ${RAWFILE}.xz"
 
