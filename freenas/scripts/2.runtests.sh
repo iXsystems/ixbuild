@@ -28,6 +28,9 @@ kldunload vmm 2>/dev/null >/dev/null
 ifconfig bridge0 destroy >/dev/null 2>/dev/null
 ifconfig tap0 destroy >/dev/null 2>/dev/null
 
+# Get the default interface
+iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
+
 # Load up VBOX
 kldload vboxdrv >/dev/null 2>/dev/null
 service vboxnet start >dev/null 2>/dev/null
