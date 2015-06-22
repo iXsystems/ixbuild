@@ -74,20 +74,20 @@ rc_halt "umount /dev/$MD"
 rc_halt "mdconfig -d -u $MD"
 rc_halt "rmdir ${ISODIR}-tmp"
 
-#echo "Extracting /root and /etc"
-#rc_halt "tar xvf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root" >/dev/null 2>/dev/null
-#rc_halt "tar xvf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc" >/dev/null 2>/dev/null
+echo "Extracting /root and /etc"
+rc_halt "tar xvf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root" >/dev/null 2>/dev/null
+rc_halt "tar xvf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc" >/dev/null 2>/dev/null
 
 # Copy the bhyve ttys / gettytab
-#rc_halt "cp ${PROGDIR}/scripts/pre-installs/ttys ${ISODIR}/etc/"
-#rc_halt "cp ${PROGDIR}/scripts/pre-installs/gettytab ${ISODIR}/etc/"
+rc_halt "cp ${PROGDIR}/scripts/pre-installs/ttys ${ISODIR}/etc/"
+rc_halt "cp ${PROGDIR}/scripts/pre-installs/gettytab ${ISODIR}/etc/"
 
 # Re-compression of /root and /etc
-#echo "Re-compressing /root and /etc"
-#rc_halt "tar cvJf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root ." >/dev/null 2>/dev/null
-#rc_halt "tar cvJf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc ." >/dev/null 2>/dev/null
-#rc_halt "rm -rf ${ISODIR}/root"
-#rc_halt "mkdir ${ISODIR}/root"
+echo "Re-compressing /root and /etc"
+rc_halt "tar cvJf ${ISODIR}/uzip/root-dist.txz -C ${ISODIR}/root ." >/dev/null 2>/dev/null
+rc_halt "tar cvJf ${ISODIR}/uzip/etc-dist.txz -C ${ISODIR}/etc ." >/dev/null 2>/dev/null
+rc_halt "rm -rf ${ISODIR}/root"
+rc_halt "mkdir ${ISODIR}/root"
 
 # Now loop through and generate VM disk images based upon supplied configs
 for cfg in `ls ${PROGDIR}/scripts/pre-installs/*.cfg`
