@@ -198,7 +198,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   # Create the VDI
   rm ${VDIFILE} 2>/dev/null
   rm ${VDIFILE}.xz 2>/dev/null
-  rc_halt "cp ${MFSFILE}.vdi ${VDIFILE}"
+  rc_halt "VBoxManage clonehd ${MFSFILE}.vdi ${VDIFILE}"
 
   # Create the OVA file now
   rm ${OVAFILE} 2>/dev/null
@@ -226,7 +226,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   # Create the VDI
   rm ${VDIFILE} 2>/dev/null
   rm ${VDIFILE}.xz 2>/dev/null
-  rc_halt "cp ${MFSFILE}.vdi ${VDIFILE}"
+  rc_halt "VBoxManage clonehd --format VDI ${MFSFILE}.vdi ${VDIFILE}"
   rc_halt "pixz ${VDIFILE}"
   rc_halt "chmod 644 ${VDIFILE}.xz"
 
