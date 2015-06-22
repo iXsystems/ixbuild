@@ -61,7 +61,7 @@ iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 
 # Load up VBOX
 kldload vboxdrv >/dev/null 2>/dev/null
-service vboxnet onestart >dev/null 2>/dev/null
+service vboxnet onestart >/dev/null 2>/dev/null
 
 echo "Copying file-system contents to memory..."
 MD=`mdconfig -a -t vnode -f ${DVDFILE}`
@@ -130,7 +130,7 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
   rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
   rc_halt "VBoxManage storagectl $VM --name SATA --add sata --controller IntelAhci"
   rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
-  rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/ISO/VMAUTO.iso"
+  rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/iso/VMAUTO.iso"
   rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 2048 --vram 12"
   rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
   rc_halt "VBoxManage modifyvm $VM --bridgeadapter1 ${iface}"
@@ -170,12 +170,13 @@ confirm_install: NO" > ${ISODIR}/pc-autoinstall.conf
 
   echo "Output from VM install:"
   echo "------------------------------------"
+  cat /tmp/vboxpipe
 
   # Make sure VM is shutdown
   VBoxManage controlvm ${VM} poweroff >/dev/null 2>/dev/null
 
   # Remove from the vbox registry
-  VBoxManage closemedium dvd ${PROGDIR}/ISO/VMAUTO.iso >/dev/null 2>/dev/null
+  VBoxManage closemedium dvd ${PROGDIR}/iso/VMAUTO.iso >/dev/null 2>/dev/null
 
   # Check that this device seemed to install properly
   dSize=`du -m ${MFSFILE}.vdi | awk '{print $1}'`
