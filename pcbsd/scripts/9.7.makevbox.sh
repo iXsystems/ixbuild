@@ -96,6 +96,7 @@ do
 
   # Create the filesystem backend file
   echo "Creating $MFSFILE"
+  rm ${MFSFILE}.vdi >/dev/null 2>/dev/null
 
   rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 50000"
 
