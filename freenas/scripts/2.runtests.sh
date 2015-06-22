@@ -56,7 +56,6 @@ VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/nul
 rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
 rc_halt "VBoxManage storagectl $VM --name SATA --add sata --controller IntelAhci"
 rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
-rc_halt "VBoxManage openmedium dvd ${PROGDIR}/tmp/freenas-auto.iso"
 rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/tmp/freenas-auto.iso"
 rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 2048 --vram 12"
 rc_halt "VBoxManage modifyvm $VM --nic1 bridged"
