@@ -94,6 +94,10 @@ for cfg in `ls ${PROGDIR}/scripts/pre-installs/*.cfg`
 do
   pName="`basename $cfg | sed 's|.cfg||g'`"
 
+  # Remove any crashed / old VM
+  VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
+  rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
+
   # Create the filesystem backend file
   echo "Creating $MFSFILE"
   rm ${MFSFILE}.vdi >/dev/null 2>/dev/null
@@ -101,10 +105,6 @@ do
   rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 50000"
 
   VM="vminstall"
-
-  # Remove any crashed / old VM
-  VBoxManage unregistervm $VM --delete >/dev/null 2>/dev/null
-  rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
 
   # Remove from the vbox registry
   VBoxManage closemedium dvd ${PROGDIR}/ISO/VMAUTO.iso >/dev/null 2>/dev/null
