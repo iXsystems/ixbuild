@@ -155,12 +155,18 @@ Once that file is created with the correct values, you can run the following
 
 iso
 ---
-Build FreeNAS ISOs / update files from sources, this may take a while
+Build FreeNAS ISOs / update files from sources, this may take a while.
 
 tests
 ---
 Run the regression testing framework. Will generate auto-install ISOs and
-install them into a VM for testing purposes
+install them into a VM for testing purposes.
+
+Tests are located in the freenas/scripts/9.3-tests.sh and
+freenas/scripts/10-tests.sh files. These scripts can also be run directly
+by pointing them at a FreeNAS instance with the following syntax:
+
+# ./9.3-tests.sh <IP> <username> <password>
 
 all
 ---
