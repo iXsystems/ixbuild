@@ -301,6 +301,10 @@ rm ${PDESTDIR9}/.setPass.sh
 # Lets prune the file-system before we start archving
 prune_fs
 
+# Copy over the config.sh to install medium
+rc_halt "cp ${GITBRANCH}/src-sh/config.sh ${PDESTDIR9}/root/config.sh"
+rc_halt "chmod 755 ${PDESTDIR9}/root/config.sh"
+
 # Compress the /root directory for extraction into a memory fs
 rc_halt "tar cvJf ${PDESTDIR9}/uzip/root-dist.txz -C ${PDESTDIR9}/root ."
 rm -rf ${PDESTDIR9}/root >/dev/null 2>/dev/null
@@ -338,6 +342,12 @@ echo "Making DVD/USB Install Images"
 ${PROGDIR}/scripts/9.3.makedvd.sh
 if [ $? -ne 0 ] ; then
    exit_err "Failed running 9.3.makedvd.sh"
+fi
+
+echo "Making DVD/USB Network Images"
+${PROGDIR}/scripts/9.4.makenetiso.sh
+if [ $? -ne 0 ] ; then
+   exit_err "Failed running 9.4.makenetiso.sh"
 fi
 
 # With ISO's done, lets create the docs now
