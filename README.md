@@ -108,21 +108,53 @@ clean
 
 Will cleanup any temp files in ${PROGDIR}/tmp
 
+vm
+---
+
+Will create VM images of PC-BSD / TrueOS for VirtualBox / VMWare and raw disk
+
 
 FreeNAS Builds
 ============
 
-TODO
+Getting Started:
+
+First, cd to the "freenas" sub-directory and make a copy of the following:
+
+freenas.cfg.dist -> freenas.cfg
+
+Next, you will want to edit freenas.cfg and check that the options are correct
+for the version of FreeNAS you plan on building.
+
+Once that file is created with the correct values, you can run the following
+"make" commands to start a build:
+
+iso
+---
+Build FreeNAS ISOs / update files from sources, this may take a while
+
+tests
+---
+Run the regression testing framework. Will generate auto-install ISOs and
+install them into a VM for testing purposes
+
+all
+---
+Create the ISO files and run the testing framework to check for regressions
+
 
 
 Jenkins Automation
 ============
 
-Jenkins helper automation scripts
+Jenkins helper automation scripts, these are used by PC-BSD to handle
+the running of jobs from Jenkins on any random builder, while storing
+temp files and finished products on another system for easy access.
 
 Usage:
 
-Copy build.conf.dist to build.conf and set the values
+Copy build.conf.dist -> build.conf and set the values for your storage server
+to allow nodes to run sftp and sync data between them. Your nodes will need
+to have SSH setup to access this system already. 
 
-./jenkins.sh <world/jail/ports/iso> <version> <edge/production>
-
+./jenkins.sh <world/jail/ports/iso/vm/freenas/freenas-tests> <version> <edge/production>
