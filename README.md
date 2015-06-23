@@ -1,3 +1,27 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [pcbsd-build](#pcbsd-build)
+- [PC-BSD Builds](#pc-bsd-builds)
+  - [all](#all)
+  - [world](#world)
+  - [ports](#ports)
+  - [ports-meta-only](#ports-meta-only)
+  - [ports-update-all](#ports-update-all)
+  - [ports-update-pcbsd](#ports-update-pcbsd)
+  - [image](#image)
+  - [menu](#menu)
+  - [clean](#clean)
+  - [vm](#vm)
+- [FreeNAS Builds](#freenas-builds)
+  - [iso](#iso)
+  - [tests](#tests)
+  - [all](#all-1)
+- [Jenkins Automation](#jenkins-automation)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 pcbsd-build
 ===========
 
