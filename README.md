@@ -166,7 +166,7 @@ Tests are located in the freenas/scripts/9.3-tests.sh and
 freenas/scripts/10-tests.sh files. These scripts can also be run directly
 by pointing them at a FreeNAS instance with the following syntax:
 
- cd freenas/scripts && ./9.3-tests.sh <IP> <username> <password>
+ cd freenas/scripts && ./9.3-tests.sh IP username password
 
 all
 ---
@@ -187,4 +187,4 @@ Copy build.conf.dist -> build.conf and set the values for your storage server
 to allow nodes to run sftp and sync data between them. Your nodes will need
 to have SSH setup to access this system already. 
 
-./jenkins.sh <world/jail/ports/iso/vm/freenas/freenas-tests> <version> <edge/production>
+./jenkins.sh world/jail/ports/iso/vm/freenas/freenas-tests version edge/production
