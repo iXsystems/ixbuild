@@ -86,13 +86,13 @@ do
   if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
 
   pgrep -qF /tmp/vminstall.pid
-  if [ \$? -ne 0 ] ; then
+  if [ $? -ne 0 ] ; then
         break;
   fi
 
-  count=\`expr \$count + 1\`
-  if [ \$count -gt 20 ] ; then break; fi
-  echo -e \".\c\"
+  count=`expr $count + 1`
+  if [ $count -gt 20 ] ; then break; fi
+  echo -e ".\c"
 
   sleep 30
 done
