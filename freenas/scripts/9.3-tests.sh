@@ -38,6 +38,7 @@ RESTYERR=/tmp/resty.err
 # Run the tests now!
 #################################################################
 
+# Check for $1 REST response, error out if not found
 check_rest_response()
 {
   grep -q "$1" ${RESTYERR}
@@ -48,6 +49,8 @@ check_rest_response()
   fi
 }
 
+# $1 = Command to run
+# $2 = Command to run if $1 fails
 rc_halt()
 {
   echo "Running: $1"
