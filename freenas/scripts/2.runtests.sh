@@ -33,7 +33,7 @@ iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 
 # Load up VBOX
 kldload vboxdrv >/dev/null 2>/dev/null
-service vboxnet onestart >dev/null 2>/dev/null
+service vboxnet onestart >/dev/null 2>/dev/null
 
 # Now lets spin-up vbox and do an installation
 ######################################################
