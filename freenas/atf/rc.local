@@ -4,18 +4,21 @@ PATH="${PATH}:/usr/local/bin:/usr/local/sbin"
 
 clear
 
-# Set the IP address we will use for testing
-echo "Changing IP address for REST"
-/sbin/ifconfig em0 192.168.0.15 255.255.255.0
-
-sleep 5
-
 if [ -e "/etc/netcli" ] ; then
+  echo "FreeNAS 9 detected.."
+
   # Set the default password for 9.x
   echo "Setting ROOT password for REST"
   /etc/netcli reset_root_pw "testing"
+
+  # Set the IP address we will use for testing
+  echo "Changing IP address for REST"
+  /sbin/ifconfig em0 192.168.0.15 255.255.255.0
 else
-  echo "Missing /etc/netcli...! RootPW not set!"
+  echo "FreeNAS 10 detected.."
+  # Set the IP address we will use for testing
+  echo "Changing IP address for REST"
+  /sbin/ifconfig em0 192.168.0.16 255.255.255.0
 fi
 
 sleep 5
