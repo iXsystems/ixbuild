@@ -49,6 +49,12 @@ check_rest_response()
   fi
 }
 
+check_rest_response_continue()
+{
+  grep -q "$1" ${RESTYERR}
+  return $?
+}
+
 # $1 = Command to run
 # $2 = Command to run if $1 fails
 rc_halt()
@@ -61,11 +67,30 @@ rc_halt()
   fi
 }
 
+if [ -z "$1" ] ; then
+  # If we are running in jenkins mode, it make take a while for
+  # FreeNAS to become available, depending upon node speed
+  # Check if disk API call is up, or else wait a bit longer
+  count=0
+  while :
+  do
+    GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
+    check_rest_response_continue "200 OK"
+    if [ $? -eq 0 ] ; then break; fi
+    echo "Waiting for FreeNAS API to respond: $count"
+    sleep 30
+    if [ $count -gt 10 ] ; then
+       echo "FreeNAS API failed to respond!"
+       exit 1
+    fi
+    count=`expr $count + 1`
+  done
+fi
+
 # Check getting disks
 echo "Checking for disks / API functionality"
 GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
 check_rest_response "200 OK"
-
 
 # Check creating a zpool
 echo "Creating zpool tank"
