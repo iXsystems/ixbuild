@@ -14,6 +14,9 @@ fi
 if [ ! -d "${PROGDIR}/pkg" ] ; then
    cp -r ${PROGDIR}/pkg-dist ${PROGDIR}/pkg
 fi
+if [ ! -d "${PROGDIR}/pbi" ] ; then
+   cp -r ${PROGDIR}/pbi-dist ${PROGDIR}/pbi
+fi
 
 cd ${PROGDIR}/scripts
 

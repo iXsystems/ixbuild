@@ -53,9 +53,9 @@ Getting Started:
 
 First, cd to the "pcbsd" sub-directory and make a copy of the following:
 
-# cp pcbsd.cfg.dist pcbsd.cfg
-# cp pkg-dist pkg
-# cp pbi-dist pbi
+ cp pcbsd.cfg.dist pcbsd.cfg
+ cp pkg-dist pkg
+ cp pbi-dist pbi
 
 Next, you will want to edit pcbsd.cfg and check that the options are correct
 for the version of PC-BSD you plan on building.
