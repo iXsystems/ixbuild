@@ -244,9 +244,12 @@ if [ $res -ne 0 ] ; then
   exit 1
 fi
 
-# Copy over the overlays/install-overlay directory to the pcbsdcd directory
+# Copy over the overlays/install-overlay directory to the pcbsd directory
 ##########################################################################
 tar cvf - -C ${GITBRANCH}/overlays/install-overlay --exclude .svn . 2>/dev/null | tar xvpf - -C ${PDESTDIR9}/ 2>/dev/null
+
+# Copy over the default pkgng template
+cp -r ${PROGDIR}/pkg ${PDESTDIR9}/root/pkg-template
 
 # Setup grub.cfg
 if [ "$SYSBUILD" = "trueos" ] ; then

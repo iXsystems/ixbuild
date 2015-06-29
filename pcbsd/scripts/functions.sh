@@ -186,8 +186,11 @@ git_fbsd_up()
 git_up()
 {
   local lDir=${1}
-  local rDir=${2}
   local oDir=`pwd`
+
+  if [ -d "${lDir}/src-sh/pcbsd-utils/pc-extractoverlay/ports-overlay/usr/local/etc/pkg" ] ; then
+    rm -rf ${lDir}/src-sh/pcbsd-utils/pc-extractoverlay/ports-overlay/usr/local/etc/pkg >/dev/null 2>/dev/null
+  fi
   cd "${lDir}"
 
   local gbranch="$GITPCBSDBRANCH"
@@ -205,6 +208,12 @@ git_up()
   git pull 
   if [ $? -ne 0 ] ; then
      exit_err "Failed doing a git pull"
+  fi
+
+  # Copy the pkgng config into source tree
+  cp -r ${PROGDIR}/pkg ${lDir}/src-sh/pcbsd-utils/pc-extractoverlay/ports-overlay/usr/local/etc/
+  if [ $? -ne 0 ] ; then
+     exit_err "Failed copying pkgng config"
   fi
 
   cd "${oDir}"

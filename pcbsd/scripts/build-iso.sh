@@ -11,6 +11,9 @@ fi
 if [ ! -e "${PROGDIR}/repo.conf" ] ; then
    cp ${PROGDIR}/repo.conf.dist ${PROGDIR}/repo.conf
 fi
+if [ ! -d "${PROGDIR}/pkg" ] ; then
+   cp -r ${PROGDIR}/pkg-dist ${PROGDIR}/pkg
+fi
 
 cd ${PROGDIR}/scripts
 
