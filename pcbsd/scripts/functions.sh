@@ -219,7 +219,7 @@ git_up()
   fi
 
   # Copy the PBI keys / paths
-  cp ${PROGDIR}/pbi/* ${lDir}/src-sh/src-sh/pbi-manager/repo/
+  cp ${PROGDIR}/pbi/* ${lDir}/src-sh/pbi-manager/repo/
   if [ $? -ne 0 ] ; then
      exit_err "Failed copying pbi config"
   fi
