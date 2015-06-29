@@ -193,6 +193,8 @@ git_up()
   fi
   cd "${lDir}"
 
+  git reset --hard >/dev/null 2>/dev/null
+
   local gbranch="$GITPCBSDBRANCH"
   if [ -z "$gbranch" ] ; then
      gbranch="master"
@@ -214,6 +216,12 @@ git_up()
   cp -r ${PROGDIR}/pkg ${lDir}/src-sh/pcbsd-utils/pc-extractoverlay/ports-overlay/usr/local/etc/
   if [ $? -ne 0 ] ; then
      exit_err "Failed copying pkgng config"
+  fi
+
+  # Copy the PBI keys / paths
+  cp ${PROGDIR}/pbi/* ${lDir}/src-sh/src-sh/pbi-manager/repo/
+  if [ $? -ne 0 ] ; then
+     exit_err "Failed copying pbi config"
   fi
 
   cd "${oDir}"

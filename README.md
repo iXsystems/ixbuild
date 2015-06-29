@@ -53,26 +53,27 @@ Getting Started:
 
 First, cd to the "pcbsd" sub-directory and make a copy of the following:
 
-pcbsd.cfg.dist -> pcbsd.cfg
-pkg.conf.dist -> pkg.conf
+# cp pcbsd.cfg.dist pcbsd.cfg
+# cp pkg-dist pkg
+# cp pbi-dist pbi
 
 Next, you will want to edit pcbsd.cfg and check that the options are correct
 for the version of PC-BSD you plan on building.
 
-If you are going to be pulling PKGNG packages from repo other than the
-default PC-BSD repo, you will need to replace pkg.conf / pkg-pubkey.cert
-with your own versions.
+If you will be building the entire pkg repo (default) then the system will
+need to have poudriere installed and configured to be ready for building.
+If you are building a custom PC-BSD, you may wish to replace the pkg/pbi
+paths and keys in pkg/ and pbi/ directories. 
 
 To start a build, run "make" in the source directory. FreeBSD sources will be 
 downloaded from GIT automatically, and then a world / kernel built. Once
-this build finishes, the builder will begin fetching packages from the 
-pkgng repo specified in pkg.conf. Lastly the ISO will be built in the ~/iso
-directory.
+this build finishes, the builder will begin compiling packages with poudriere.
+Lastly the ISO will be built in the ~/iso directory.
 
 Before you can run "make image" you must have unicode.pf2 in /usr/local/share/grub/.
 You can copy /boot/grub/pcbsdfont.pf2 if you have PC-BSD installed.  
 
-/boot/grub/pcbsdfont.pf2 -> /usr/local/share/grub/unicode.pf2
+cp /boot/grub/pcbsdfont.pf2 /usr/local/share/grub/unicode.pf2
 
 Alternatively you may fetch pcbsdfont.pf2 from PC-BSD github.
 

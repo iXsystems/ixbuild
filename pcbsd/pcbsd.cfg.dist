@@ -20,17 +20,17 @@ export GITFBSDURL
 
 # The branch of FreeBSD to build
 # Available (releng/9.2, stable/10)
-GITFBSDBRANCH="releng/10.1"
+GITFBSDBRANCH="master"
 export GITFBSDBRANCH
 
 # Set the target version of this build
 # This is where pkgs will be uploaded to
-TARGETREL="10.0-RELEASE"
+TARGETREL="11.0-CURRENTJULY2015"
 export TARGETREL
 
 # Set the poudreire jail target
 # This is what will be used for poudriere jail
-#POUDRIEREJAILVER="10.1-RELEASE"
+#POUDRIEREJAILVER="10.0-RELEASE"
 export POUDREIREJAILVER
 
 # Set the target ARCH type for world / pkgng building
@@ -45,7 +45,7 @@ export ARCH
 #
 # If using "localpkg" packages will be built locally, and ISOs from remote
 # Be sure to configure repo.conf first!
-PKGREPO="remote"
+PKGREPO="local"
 export PKGREPO
 
 # Git URL to pull the ports tree from, used if PKGREPO is set to "local"
@@ -62,6 +62,8 @@ export POUD
 export POUD_VERBOSE
 
 # Set PBI signing key, used for pbi_makeindex
+# EXAMPLE: openssl genrsa -des3 -out private.pem 2048
+#          openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 #PBI_REPO_KEY=""
 export PBI_REPO_KEY
 
