@@ -59,7 +59,6 @@ check_rest_response_continue()
 # $2 = Command to run if $1 fails
 rc_halt()
 {
-  echo "Running: $1"
   ${1}
   if [ $? -ne 0 ] ; then
      ${2}
@@ -77,7 +76,7 @@ set_test_group_text()
 echo_test_title()
 {
   TCOUNT=`expr $TCOUNT + 1`
-  echo "Running $GROUPTEXT ($TCOUNT/$TOTALTESTS) -  $1"
+  echo "Running $GROUPTEXT ($TCOUNT/$TOTALTESTS) - $1"
 }
 
 storage_tests()
