@@ -53,9 +53,11 @@ Getting Started:
 
 First, cd to the "pcbsd" sub-directory and make a copy of the following:
 
- cp pcbsd.cfg.dist pcbsd.cfg
- cp pkg-dist pkg
- cp pbi-dist pbi
+```
+# cp pcbsd.cfg.dist pcbsd.cfg
+# cp pkg-dist pkg
+# cp pbi-dist pbi
+```
 
 Next, you will want to edit pcbsd.cfg and check that the options are correct
 for the version of PC-BSD you plan on building.
@@ -73,7 +75,9 @@ Lastly the ISO will be built in the ~/iso directory.
 Before you can run "make image" you must have unicode.pf2 in /usr/local/share/grub/.
 You can copy /boot/grub/pcbsdfont.pf2 if you have PC-BSD installed.  
 
-cp /boot/grub/pcbsdfont.pf2 /usr/local/share/grub/unicode.pf2
+```
+# cp /boot/grub/pcbsdfont.pf2 /usr/local/share/grub/unicode.pf2
+```
 
 Alternatively you may fetch pcbsdfont.pf2 from PC-BSD github.
 
