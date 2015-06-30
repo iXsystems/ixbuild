@@ -85,6 +85,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y archivers/pxz"
 fi
 
+pkg info "textproc/libucl" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing textproc/libucl.."
+  rc_halt "pkg install -y textproc/libucl"
+fi
+
 if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
   which poudriere >/dev/null 2>/dev/null
   if [ "$?" != "0" ]; then
