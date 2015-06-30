@@ -122,8 +122,8 @@ push_pkgworkdir()
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKPKG}" >/dev/null 2>/dev/null
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
 
@@ -142,8 +142,9 @@ pull_pkgworkdir()
   cd ${PPKGDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ .
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+
+  if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
 push_world()
@@ -153,8 +154,8 @@ push_world()
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
 pull_world()
@@ -172,8 +173,8 @@ pull_world()
   cd ${TBUILDDIR}/fbsd-dist
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ .
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
 pull_iso()
@@ -191,8 +192,8 @@ pull_iso()
   cd ${TBUILDDIR}/iso
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ .
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
 jenkins_world()
