@@ -72,16 +72,19 @@ export PBUILD PJDIR PJPORTSDIR PPKGDIR
 if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
   PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
+  FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/amd64"
   WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/amd64"
   WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
 elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
   PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/edge/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
+  FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/edge/amd64"
   WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/edge/amd64"
   WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
 elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
   PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/enterprise/amd64"
   ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
+  FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/enterprise/amd64"
   WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/enterprise/amd64"
   WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
 else
@@ -155,6 +158,14 @@ push_world()
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
 
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
+
+  cd ${TBUILDDIR}/fbsd-iso
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${FBSDISOSTAGE}" >/dev/null 2>/dev/null
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${FBSDISOSTAGE}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 

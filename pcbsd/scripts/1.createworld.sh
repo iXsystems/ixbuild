@@ -31,14 +31,21 @@ cd ${WORLDSRC}
 MACHINE_ARCH="$REALARCH"
 MACHINE="$REALARCH"
 export MACHINE_ARCH MACHINE
-make -j8 buildworld TARGET=$ARCH
+
+# We only really need to go up to 8 CPUS for building world
+CPUS=`sysctl -n kern.smp.cpus`
+if [ "$CPUS" -gt 8 ] ; then
+  CPUS=8
+fi
+
+make -j $CPUS buildworld TARGET=$ARCH
 if [ $? -ne 0 ] ; then
    echo "Failed running: make buildworld TARGET=$ARCH"
    exit 1 
 fi
 
 # Make the standard kernel
-make -j8 buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}
+make -j $CPUS buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}
 if [ $? -ne 0 ] ; then
    echo "Failed running: make buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}"
    exit 1 
@@ -53,12 +60,23 @@ rm ${DISTDIR}/MANIFEST 2>/dev/null
 cd ${WORLDSRC}/release
 make clean
 
+# Create the FTP files
 make ftp NOPORTS=yes NOSRC=yes TARGET=$ARCH
 if [ $? -ne 0 ] ; then
    echo "Failed running: make ftp NOPORTS=yes NOSRC=yes TARGET=$ARCH"
    exit 1 
 fi
 rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
+
+# Create the CD images
+rm -rf ${PROGDIR}/fbsd-iso >/dev/null 2>/dev/null
+mkdir ${PROGDIR}/fbsd-iso
+make cdrom
+if [ $? -ne 0 ] ; then
+   echo "Failed running: make cdrom"
+   exit 1 
+fi
+mv *.iso ${PROGDIR}/fbsd-iso
 
 # Cleanup old .txz files
 cd ${WORLDSRC}/release
