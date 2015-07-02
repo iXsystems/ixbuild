@@ -147,6 +147,19 @@ nfs_tests()
   rc_halt "rmdir /tmp/nfs-mnt.$$"
 }
 
+iscsi_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "iSCSI Tests" "1"
+
+  # Enable iSCSI server
+  echo_test_title "Creating iSCSI extent"
+  POST /services/iscsi/extent/ '{ "iscsi_target_extent_type": "File", "iscsi_target_extent_name": "extent", "iscsi_target_extent_filesize": "50MB", "iscsi_target_extent_path": "/mnt/tank/iscsi" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+
+}
+
+
 if [ -z "$1" ] ; then
   # If we are running in jenkins mode, it make take a while for
   # FreeNAS to become available, depending upon node speed
@@ -167,9 +180,11 @@ if [ -z "$1" ] ; then
   done
 fi
 
-
 # Run the storage tests
 storage_tests
+
+# Run the iSCSI tests
+iscsi_tests
 
 # Run the NFS tests
 nfs_tests
