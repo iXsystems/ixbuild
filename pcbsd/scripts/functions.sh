@@ -364,6 +364,7 @@ cp_iso_pkg_files()
        done < $plist
        tfile=`echo $plist | sed "s|${GITBRANCH}/overlays/install-overlay/root/pkgset/||g" | sed "s|/pkg-plist||g"`
        tfile=`basename $tfile`
+       echo "Saving deps for $tfile"
        ${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ rquery '%dn-%dv' $targets | sort | uniq > ${PROGDIR}/tmp/dep-list/${tfile}.deps
     done
 
