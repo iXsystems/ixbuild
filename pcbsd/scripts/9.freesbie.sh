@@ -312,6 +312,7 @@ rc_halt "chmod 755 ${PDESTDIR9}/root/config.sh"
 rc_halt "tar cvJf ${PDESTDIR9}/uzip/root-dist.txz -C ${PDESTDIR9}/root ."
 rm -rf ${PDESTDIR9}/root >/dev/null 2>/dev/null
 mkdir ${PDESTDIR9}/root >/dev/null 2>/dev/null
+cp -r ${PROGDIR}/tmp/dep-list ${PDESTDIR9}/root/pkg-dep-lists
 
 # Compress the /var directory for extraction into a memory fs
 rm -rf ${PDESTDIR9}/var/db/pkg

@@ -353,6 +353,20 @@ cp_iso_pkg_files()
       sleep 0.5
     done < $eP
 
+    # Create a list of deps for the meta-pkgs
+    mkdir ${PROGDIR}/tmp/dep-list
+    for plist in `find ${GITBRANCH}/overlays/install-overlay/root/pkgset | grep pkg-list`
+    do
+       targets=""
+       while read line
+       do
+	 targets="$targets $line"
+       done < $plist
+       tfile=`echo $plist | sed "s|${GITBRANCH}/overlays/install-overlay/root/pkgset/||g" | sed "s|/pkg-plist||g"`
+       tfile=`basename $tfile`
+       ${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ rquery '%dn-%dv' $targets | sort | uniq > ${PROGDIR}/tmp/dep-list/${tfile}.deps
+    done
+
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
 
