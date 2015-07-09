@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Set the repo we pull for build / tests
+GITREPO="https://github.com/iXsystems/ix-tests.git"
+
 cleanup_workdir()
 {
   if [ -z "$MASTERWRKDIR" ] ; then return 0; fi
@@ -103,7 +106,7 @@ create_workdir()
 
   MASTERWRKDIR=`mktemp -d /tmp/pcbsd-build/XXXXXXXXXXXXXXXX` 
 
-  git clone --depth=1 https://github.com/pcbsd/pcbsd-build.git ${MASTERWRKDIR}
+  git clone --depth=1 ${GITREPO} ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   cd ${MASTERWRKDIR}
