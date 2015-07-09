@@ -393,6 +393,7 @@ jenkins_freenas_tests()
 
 jenkins_ports_tests()
 {
+  echo "Changing to $WORKSPACE"
   cd "$WORKSPACE"
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
