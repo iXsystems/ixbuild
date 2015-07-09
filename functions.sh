@@ -112,7 +112,7 @@ copy_workspace()
 
   MASTERWRKDIR=`mktemp -d /tmp/pcbsd-build/XXXXXXXXXXXXXXXX`
 
-  cp -r ${WORKSPACE} ${MASTERWRKDIR}
+  cp -r "${WORKSPACE}" ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   cd ${MASTERWRKDIR}
@@ -419,7 +419,7 @@ jenkins_ports_tests()
 {
   copy_workspace
 
-  cd ${WORKSPACE}
+  cd ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   ./mkport-tests.sh /usr/ports
