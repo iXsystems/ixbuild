@@ -95,30 +95,6 @@ if [ "$TYPE" != "ports-tests" ] ; then
   fi
 fi
 
-copy_workspace()
-{
-  if [ ! -d "/tmp/pcbsd-build" ] ; then
-     mkdir /tmp/pcbsd-build
-  fi
-
-  if [ -z "$WORKSPACE" ] ; then
-     echo "Missing WORKSPACE variable"
-     exit 1
-  fi
-  if [ ! -d "$WORKSPACE" ] ; then
-     echo "Missing WORKSPACE directory"
-     exit 1
-  fi
-
-  MASTERWRKDIR=`mktemp -d /tmp/pcbsd-build/XXXXXXXXXXXXXXXX`
-
-  cp -r "${WORKSPACE}" ${MASTERWRKDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
-
-  cd ${MASTERWRKDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
-}
-
 create_workdir()
 {
   if [ ! -d "/tmp/pcbsd-build" ] ; then
@@ -417,13 +393,11 @@ jenkins_freenas_tests()
 
 jenkins_ports_tests()
 {
-  copy_workspace
-
-  cd ${MASTERWRKDIR}
-  if [ $? -ne 0 ] ; then exit_clean ; fi
+  cd "$WORKSPACE"
+  if [ $? -ne 0 ] ; then exit 1 ; fi
 
   ./mkport-tests.sh /usr/ports
-  if [ $? -ne 0 ] ; then exit_clean ; fi
+  if [ $? -ne 0 ] ; then exit 1 ; fi
 
   exit 0
 }
