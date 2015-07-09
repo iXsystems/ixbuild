@@ -27,7 +27,7 @@ exit_clean()
   exit 1
 }
 
-if [ "$TYPE" = "ports-tests" ] ; then
+if [ "$TYPE" != "ports-tests" ] ; then
 
   if [ -z "$BUILD" -o -z "$BRANCH" ] ; then
     echo "Missing BUILD / BRANCH"
