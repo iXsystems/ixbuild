@@ -92,6 +92,29 @@ else
   exit_clean
 fi
 
+copy_workspace()
+{
+  if [ ! -d "/tmp/pcbsd-build" ] ; then
+     mkdir /tmp/pcbsd-build
+  fi
+
+  if [ -z "$WORKSPACE" ] ; then
+     echo "Missing WORKSPACE variable"
+     exit 1
+  fi
+  if [ ! -d "$WORKSPACE" ] ; then
+     echo "Missing WORKSPACE directory"
+     exit 1
+  fi
+
+  MASTERWRKDIR=`mktemp -d /tmp/pcbsd-build/XXXXXXXXXXXXXXXX`
+
+  cp -r ${WORKSPACE} ${MASTERWRKDIR}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  cd ${MASTERWRKDIR}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+}
 
 create_workdir()
 {
@@ -385,6 +408,19 @@ jenkins_freenas_tests()
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   cleanup_workdir
+
+  exit 0
+}
+
+jenkins_ports_tests()
+{
+  copy_workspace
+
+  cd ${WORKSPACE}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  ./mkport-tests.sh /usr/ports
+  if [ $? -ne 0 ] ; then exit_clean ; fi
 
   exit 0
 }
