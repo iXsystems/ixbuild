@@ -27,69 +27,72 @@ exit_clean()
   exit 1
 }
 
-if [ -z "$BUILD" -o -z "$BRANCH" ] ; then
-  echo "Missing BUILD / BRANCH"
-  exit_clean
-fi
+if [ "$TYPE" = "ports-tests" ] ; then
 
-if [ ! -d "${BDIR}/${BUILD}" ] ; then
-  echo "Invalid BUILD dir: $BUILD"
-  exit_clean
-fi
+  if [ -z "$BUILD" -o -z "$BRANCH" ] ; then
+    echo "Missing BUILD / BRANCH"
+    exit_clean
+  fi
 
-# Source build conf and set some vars
-cd ${BDIR}/${BUILD}
+  if [ ! -d "${BDIR}/${BUILD}" ] ; then
+    echo "Invalid BUILD dir: $BUILD"
+    exit_clean
+  fi
 
-if [ "$TYPE" = "freenas" -o "$TYPE" = "freenas-tests" ] ; then
-  . freenas.cfg
-else
-  . pcbsd.cfg
-fi
+  # Source build conf and set some vars
+  cd ${BDIR}/${BUILD}
+
+  if [ "$TYPE" = "freenas" -o "$TYPE" = "freenas-tests" ] ; then
+    . freenas.cfg
+  else
+    . pcbsd.cfg
+  fi
 
 
-# Set the variables to reference poudrire jail locations
-if [ -z "$POUDRIEREJAILVER" ] ; then
-  POUDRIEREJAILVER="$TARGETREL"
-fi
-case $TYPE in
-  jail|pkg) WORLDTREL="$POUDRIEREJAILVER" ;;
-   *) WORLDTREL="$TARGETREL" ;;
-esac
+  # Set the variables to reference poudrire jail locations
+  if [ -z "$POUDRIEREJAILVER" ] ; then
+    POUDRIEREJAILVER="$TARGETREL"
+  fi
+  case $TYPE in
+    jail|pkg) WORLDTREL="$POUDRIEREJAILVER" ;;
+     *) WORLDTREL="$TARGETREL" ;;
+  esac
 
-# Poudriere variables
-PBUILD="pcbsd-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
-if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
-if [ -z "$POUDPORTS" ] ; then
-  POUDPORTS="pcbsdports" ; export POUDPORTS
-fi
-POUD="/usr/local/poudriere"
-PJDIR="$POUD/jails/$PBUILD"
-PPKGDIR="$POUD/data/packages/$PBUILD-$POUDPORTS"
-PJPORTSDIR="$POUD/ports/$POUDPORTS"
-export PBUILD PJDIR PJPORTSDIR PPKGDIR
+  # Poudriere variables
+  PBUILD="pcbsd-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
+  if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
+  if [ -z "$POUDPORTS" ] ; then
+    POUDPORTS="pcbsdports" ; export POUDPORTS
+  fi
+  POUD="/usr/local/poudriere"
+  PJDIR="$POUD/jails/$PBUILD"
+  PPKGDIR="$POUD/data/packages/$PBUILD-$POUDPORTS"
+  PJPORTSDIR="$POUD/ports/$POUDPORTS"
+  export PBUILD PJDIR PJPORTSDIR PPKGDIR
 
-# Set all the stage / work dirs
-if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
-  PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/amd64"
-  ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
-  FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/amd64"
-  WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/amd64"
-  WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
-elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
-  PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/edge/amd64"
-  ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
-  FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/edge/amd64"
-  WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/edge/amd64"
-  WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
-elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
-  PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/enterprise/amd64"
-  ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
-  FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/enterprise/amd64"
-  WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/enterprise/amd64"
-  WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
-else
-  echo "Invalid BRANCH"
-  exit_clean
+  # Set all the stage / work dirs
+  if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/amd64"
+    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
+    FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/amd64"
+    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
+  elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/edge/amd64"
+    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
+    FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/edge/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/edge/amd64"
+    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
+  elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/enterprise/amd64"
+    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
+    FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/enterprise/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/enterprise/amd64"
+    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
+  else
+    echo "Invalid BRANCH"
+    exit_clean
+  fi
 fi
 
 copy_workspace()
