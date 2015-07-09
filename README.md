@@ -2,9 +2,13 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [pcbsd-build](#pcbsd-build)
-- [PC-BSD Builds](#pc-bsd-builds)
+- [Test scripts and build framework for iX projects](#test-scripts-and-build-framework-for-ix-projects)
+- [FreeNAS Builds](#freenas-builds)
+  - [iso](#iso)
+  - [tests](#tests)
   - [all](#all)
+- [PC-BSD Builds](#pc-bsd-builds)
+  - [all](#all-1)
   - [world](#world)
   - [ports](#ports)
   - [ports-meta-only](#ports-meta-only)
@@ -14,15 +18,11 @@
   - [menu](#menu)
   - [clean](#clean)
   - [vm](#vm)
-- [FreeNAS Builds](#freenas-builds)
-  - [iso](#iso)
-  - [tests](#tests)
-  - [all](#all-1)
 - [Jenkins Automation](#jenkins-automation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-pcbsd-build
+Test scripts and build framework for iX projects
 ===========
 
 Scripts for the following
@@ -30,6 +30,41 @@ Scripts for the following
  * PC-BSD Builds -  ISO / regression test
  * FreeNAS Builds - ISO / regression test
  * Jenkins automation
+
+FreeNAS Builds
+============
+
+Getting Started:
+
+First, cd to the "freenas" sub-directory and make a copy of the following:
+
+freenas.cfg.dist -> freenas.cfg
+
+Next, you will want to edit freenas.cfg and check that the options are correct
+for the version of FreeNAS you plan on building.
+
+Once that file is created with the correct values, you can run the following
+"make" commands to start a build:
+
+iso
+---
+Build FreeNAS ISOs / update files from sources, this may take a while.
+
+tests
+---
+Run the regression testing framework. Will generate auto-install ISOs and
+install them into a VM for testing purposes.
+
+Tests are located in the freenas/scripts/9.3-tests.sh and
+freenas/scripts/10-tests.sh files. These scripts can also be run directly
+by pointing them at a FreeNAS instance with the following syntax:
+
+ cd freenas/scripts && ./9.3-tests.sh IP username password
+
+all
+---
+Create the ISO files and run the testing framework to check for regressions
+
 
 
 PC-BSD Builds
@@ -141,41 +176,6 @@ vm
 ---
 
 Will create VM images of PC-BSD / TrueOS for VirtualBox / VMWare and raw disk
-
-
-FreeNAS Builds
-============
-
-Getting Started:
-
-First, cd to the "freenas" sub-directory and make a copy of the following:
-
-freenas.cfg.dist -> freenas.cfg
-
-Next, you will want to edit freenas.cfg and check that the options are correct
-for the version of FreeNAS you plan on building.
-
-Once that file is created with the correct values, you can run the following
-"make" commands to start a build:
-
-iso
----
-Build FreeNAS ISOs / update files from sources, this may take a while.
-
-tests
----
-Run the regression testing framework. Will generate auto-install ISOs and
-install them into a VM for testing purposes.
-
-Tests are located in the freenas/scripts/9.3-tests.sh and
-freenas/scripts/10-tests.sh files. These scripts can also be run directly
-by pointing them at a FreeNAS instance with the following syntax:
-
- cd freenas/scripts && ./9.3-tests.sh IP username password
-
-all
----
-Create the ISO files and run the testing framework to check for regressions
 
 
 
