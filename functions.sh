@@ -397,7 +397,7 @@ jenkins_ports_tests()
   cd "$WORKSPACE"
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  ./mkport-tests.sh /usr/ports
+  ./mkports-tests.sh /usr/ports
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
   exit 0
