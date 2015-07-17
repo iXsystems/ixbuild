@@ -29,7 +29,6 @@ fi
 
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
-rc_halt "make git-external"
 rc_halt "make checkout"
 
 # Ugly hack to get freenas 9.x to build on CURRENT
