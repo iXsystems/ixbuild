@@ -29,10 +29,13 @@ fi
 
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
-rc_halt "make checkout"
 
 # Ugly hack to get freenas 9.x to build on CURRENT
 if [ -n "$FREENASLEGACY" ] ; then
+
+   cd /tmp/fnasb
+   rc_halt "make checkout"
+
    # Add all the fixes to use a 9.3 version of mtree
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/Makefile.inc1
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/Makefile.sysinstall
@@ -65,6 +68,7 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
   rc_halt "make release"
 else
+  cd /tmp/fnasb
   rc_halt "make checkout PROFILE=freenas9"
   # Do the build now
   rc_halt "make release PROFILE=freenas9"
