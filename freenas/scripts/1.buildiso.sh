@@ -37,13 +37,13 @@ if [ -n "$FREENASLEGACY" ] ; then
    rc_halt "make checkout"
 
    # Add all the fixes to use a 9.3 version of mtree
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/src/Makefile.inc1
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/src/release/Makefile.sysinstall
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/src/release/picobsd/build/picobsd
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/src/tools/tools/tinybsd/tinybsd
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/src/share/examples/Makefile
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/src/include/Makefile
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/src/usr.sbin/sysinstall/install.c
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/Makefile.inc1
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/release/Makefile.sysinstall
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/release/picobsd/build/picobsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/tools/tools/tinybsd/tinybsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/share/examples/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/include/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/usr.sbin/sysinstall/install.c
    MTREE_CMD="${PROGDIR}/scripts/kludges/mtree"
    export MTREE_CMD
 
