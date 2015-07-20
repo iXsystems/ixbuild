@@ -100,11 +100,11 @@ fi
 
 create_workdir()
 {
-  if [ ! -d "/tmp/pcbsd-build" ] ; then
-     mkdir /tmp/pcbsd-build
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
   fi
 
-  MASTERWRKDIR=`mktemp -d /tmp/pcbsd-build/XXXXXXXXXXXXXXXX` 
+  MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
   git clone --depth=1 ${GITREPO} ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
