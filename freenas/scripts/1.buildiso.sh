@@ -37,6 +37,7 @@ if [ -n "$FREENASLEGACY" ] ; then
    rc_halt "make checkout"
 
    # Add all the fixes to use a 9.3 version of mtree
+   sed -i '' "s|world: upgrade_checks|world: |g" ${FNASSRC}/_BE/trueos/Makefile
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/Makefile.inc1
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/release/Makefile.sysinstall
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/release/picobsd/build/picobsd
