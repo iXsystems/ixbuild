@@ -22,11 +22,8 @@ git_fnas_up()
   local oDir=`pwd`
   cd "${lDir}"
 
-  echo "GIT checkout $GITFNASBRANCH"
-  git checkout ${GITFNASBRANCH}
-
-  echo "GIT pull: ${GITFNASBRANCH}"
-  git pull origin ${GITFNASBRANCH}
+  echo "GIT pull"
+  git pull
   if [ $? -ne 0 ] ; then
      exit_err "Failed doing a git pull"
   fi
