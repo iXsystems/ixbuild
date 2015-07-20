@@ -37,13 +37,13 @@ if [ -n "$FREENASLEGACY" ] ; then
    rc_halt "make checkout"
 
    # Add all the fixes to use a 9.3 version of mtree
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/Makefile.inc1
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/release/Makefile.sysinstall
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/release/picobsd/build/picobsd
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/tools/tools/tinybsd/tinybsd
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/share/examples/Makefile
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/include/Makefile
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/usr.sbin/sysinstall/install.c
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/Makefile.inc1
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/release/Makefile.sysinstall
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/release/picobsd/build/picobsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/tools/tools/tinybsd/tinybsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/share/examples/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/include/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/usr.sbin/sysinstall/install.c
    MTREE_CMD="${PROGDIR}/scripts/kludges/mtree"
    export MTREE_CMD
 
@@ -68,7 +68,7 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/_BE/freenas/build/nanobsd-cfg/os-base-functions.sh
 
    # Do the build now
-   rc_halt "make release"
+   rc_halt "bmake release"
 else
    # FreeNAS 9.3 + FreeBSD 10.2 base OS
    rc_halt "make checkout PROFILE=freenas9"
