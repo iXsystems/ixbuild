@@ -29,22 +29,18 @@ fi
 
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
+rc_halt "make checkout"
 
 # Ugly hack to get freenas 9.x to build on CURRENT
 if [ -n "$FREENASLEGACY" ] ; then
-
-   # Legacy FreeNAS 9.3
-   rc_halt "make checkout"
-
    # Add all the fixes to use a 9.3 version of mtree
-   sed -i '' "s|world: upgrade_checks|world: |g" ${FNASSRC}/_BE/trueos/Makefile
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/Makefile.inc1
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/release/Makefile.sysinstall
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/release/picobsd/build/picobsd
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/tools/tools/tinybsd/tinybsd
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/share/examples/Makefile
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/include/Makefile
-   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/_BE/trueos/usr.sbin/sysinstall/install.c
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/Makefile.inc1
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/Makefile.sysinstall
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/picobsd/build/picobsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/tools/tools/tinybsd/tinybsd
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/share/examples/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/include/Makefile
+   sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/usr.sbin/sysinstall/install.c
    MTREE_CMD="${PROGDIR}/scripts/kludges/mtree"
    export MTREE_CMD
 
@@ -66,14 +62,12 @@ if [ -n "$FREENASLEGACY" ] ; then
    fi
 
    # Fix a missing directory in NANO_WORLDDIR
-   sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/_BE/freenas/build/nanobsd-cfg/os-base-functions.sh
-
-   # Do the build now
-   rc_halt "make release"
+   sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
+  rc_halt "make release"
 else
-   # FreeNAS 9.3 + FreeBSD 10.2 base OS
-   rc_halt "make checkout PROFILE=freenas9"
-   # Do the build now
-   rc_halt "make release PROFILE=freenas9"
+  rc_halt "make checkout PROFILE=freenas9"
+  # Do the build now
+  rc_halt "make release PROFILE=freenas9"
 fi
+
 
