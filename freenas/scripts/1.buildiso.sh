@@ -69,7 +69,7 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/_BE/freenas/build/nanobsd-cfg/os-base-functions.sh
 
    # Do the build now
-   rc_halt "bmake release"
+   rc_halt "make release"
 else
    # FreeNAS 9.3 + FreeBSD 10.2 base OS
    rc_halt "make checkout PROFILE=freenas9"
