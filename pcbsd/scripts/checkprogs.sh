@@ -31,6 +31,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y sysutils/grub2-pcbsd"
 fi
 
+pkg info grub2-efi >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing grub2-efi.."
+  rc_halt "pkg install -y sysutils/grub2-efi"
+fi
+
 which xorriso >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing xorriso.."
