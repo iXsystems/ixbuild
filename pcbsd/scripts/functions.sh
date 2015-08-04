@@ -188,9 +188,6 @@ git_up()
   local lDir=${1}
   local oDir=`pwd`
 
-  if [ -d "${lDir}/src-sh/pcbsd-utils/pc-extractoverlay/ports-overlay/usr/local/etc/pkg" ] ; then
-    rm -rf ${lDir}/src-sh/pcbsd-utils/pc-extractoverlay/ports-overlay/usr/local/etc/pkg >/dev/null 2>/dev/null
-  fi
   cd "${lDir}"
 
   git reset --hard >/dev/null 2>/dev/null
@@ -210,18 +207,6 @@ git_up()
   git pull 
   if [ $? -ne 0 ] ; then
      exit_err "Failed doing a git pull"
-  fi
-
-  # Copy the pkgng config into source tree
-  cp -r ${PROGDIR}/pkg ${lDir}/src-sh/pcbsd-utils/pc-extractoverlay/ports-overlay/usr/local/etc/
-  if [ $? -ne 0 ] ; then
-     exit_err "Failed copying pkgng config"
-  fi
-
-  # Copy the PBI keys / paths
-  cp ${PROGDIR}/pbi/* ${lDir}/src-sh/pbi-manager/repo/
-  if [ $? -ne 0 ] ; then
-     exit_err "Failed copying pbi config"
   fi
 
   cd "${oDir}"
