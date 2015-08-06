@@ -60,6 +60,9 @@ if [ "$TYPE" != "ports-tests" ] ; then
     jail|pkg) WORLDTREL="$POUDRIEREJAILVER" ;;
      *) WORLDTREL="$TARGETREL" ;;
   esac
+  if [ -z "$PKGVERUPLOAD" ] ; then
+    PKGVERUPLOAD="$WORLDTVER"
+  fi
 
   # Poudriere variables
   PBUILD="pcbsd-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
@@ -75,22 +78,22 @@ if [ "$TYPE" != "ports-tests" ] ; then
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
-    PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/amd64"
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
     FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/amd64"
-    WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
-    PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/edge/amd64"
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
     FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/edge/amd64"
-    WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/edge/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
-    PKGSTAGE="${SFTPFINALDIR}/pkg/${WORLDTREL}/enterprise/amd64"
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
     FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/enterprise/amd64"
-    WORKPKG="${SFTPWORKDIR}/pkg/${WORLDTREL}/enterprise/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   else
     echo "Invalid BRANCH"
