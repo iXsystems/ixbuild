@@ -86,6 +86,10 @@ export METAPKGDIR="${PROGDIR}/tmp"
 if [ -z "$POUDRIEREJAILVER" ] ; then
   POUDRIEREJAILVER="$TARGETREL"
 fi
+if [ -z "$PKGVERUPLOAD" ] ; then
+  PKGVERUPLOAD="$POUDRIEREJAILVER"
+fi
+
 
 # Poudriere variables
 if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
@@ -260,7 +264,7 @@ create_pkg_conf()
    fi
    mkdir ${PROGDIR}/tmp/sysrel
 
-   ABIVER=`echo $POUDRIEREJAILVER | cut -d '-' -f 1 | cut -d '.' -f 1`
+   ABIVER=`echo $PKGVERUPLOAD | cut -d '-' -f 1 | cut -d '.' -f 1`
    echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
    echo "ALTABI: freebsd:${ABIVER}:x86:64" >> ${PROGDIR}/tmp/pkg.conf
    echo "ABI: FreeBSD:${ABIVER}:amd64" >> ${PROGDIR}/tmp/pkg.conf
@@ -277,7 +281,7 @@ create_pkg_conf()
 
    # Doing a remote pull from a repo
    cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/local.conf
-   sed -i '' "s|%RELVERSION%|$POUDRIEREJAILVER|g" ${PROGDIR}/tmp/repo/local.conf
+   sed -i '' "s|%RELVERSION%|$PKGVERUPLOAD|g" ${PROGDIR}/tmp/repo/local.conf
    sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/local.conf
    sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/local.conf
 
