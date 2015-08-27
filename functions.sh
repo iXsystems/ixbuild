@@ -61,7 +61,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
      *) WORLDTREL="$TARGETREL" ;;
   esac
   if [ -z "$PKGVERUPLOAD" ] ; then
-    PKGVERUPLOAD="$WORLDTVER"
+    PKGVERUPLOAD="$WORLDTREL"
   fi
 
   # Poudriere variables
