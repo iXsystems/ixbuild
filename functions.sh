@@ -259,6 +259,15 @@ jenkins_pkg()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+  # Check if we have a more current pkg set on the local box
+  remotetime=`ssh ${SFTPUSER}@${SFTPHOST} "cat ${PKGSTAGE}/.started" 2>/dev/null`
+  localtime=`cat ${PPKGDIR}/.started 2>/dev/null`
+  if [ -n "$remotetime" -a -n "$localtime" ] ; then
+    if [ $remotetime -lt $localtime ] ; then
+      push_pkgworkdir
+    fi
+  fi
+
   make ports-update-all
   if [ $? -ne 0 ] ; then exit_clean; fi
 
@@ -267,6 +276,10 @@ jenkins_pkg()
 
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
+
+  # Save the timestamp of when we started this poudriere run
+  if [ ! -d "${PPKGDIR}" ] ; then mkdir -p ${PPKGDIR} ; fi
+  date +"%s" >${PPKGDIR}/.started
 
   make ports
   if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
