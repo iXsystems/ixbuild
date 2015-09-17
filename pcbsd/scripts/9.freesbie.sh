@@ -185,6 +185,9 @@ fi
 # Remove space hogging symbols from install media
 rc_halt "rm ${PDESTDIR9}/boot/kernel/*.symbols"
 
+# Remove freebsd's version of pc-sysinstall
+rc_halt "rm -rf ${PDESTDIR9}/usr/share/pc-sysinstall"
+
 # Make sure GIT is updated
 cd ${GITBRANCH}
 git_up "${GITBRANCH}" "${GITBRANCH}"
