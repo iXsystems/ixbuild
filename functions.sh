@@ -268,6 +268,7 @@ jenkins_pkg()
     fi
   fi
 
+  cd ${TBUILDDIR}
   make ports-update-all
   if [ $? -ne 0 ] ; then exit_clean; fi
 
