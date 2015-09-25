@@ -53,25 +53,69 @@ fi
 export bFile
 
 # Set the pcbsd-media-details file marker on this media
-echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL DVD/USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
+echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL DVD - `date`" > ${PDESTDIR9}/pcbsd-media-details
 touch ${PDESTDIR9}/pcbsd-media-local
 
-# Use GRUB to create the hybrid BIOS/UEFI DVD/USB image
 echo "Creating ISO..."
-grub-mkrescue -o ${PROGDIR}/iso/${bFile}-DVD-USB.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
-if [ $? -ne 0 ] ; then
-   exit_err "Failed running grub-mkrescue"
-fi
+# Stolen from FreeBSD's build scripts
+# This is highly x86-centric and will be used directly below.
+bootable="-o bootimage=i386;$4/boot/cdboot -o no-emul-boot"
+
+# Make EFI system partition (should be done with makefs in the future)
+dd if=/dev/zero of=efiboot.img bs=4k count=100
+device=`mdconfig -a -t vnode -f efiboot.img`
+newfs_msdos -F 12 -m 0xf8 /dev/$device
+mkdir efi
+mount -t msdosfs /dev/$device efi
+mkdir -p efi/efi/boot
+cp ${PDESTDIR9}/boot/loader.efi efi/efi/boot/bootx64.efi
+umount efi
+rmdir efi
+mdconfig -d -u $device
+bootable="-o bootimage=i386;efiboot.img -o no-emul-boot $bootable"
+
+LABEL="PCBSD_INSTALL"
+publisher="The PC-BSD Project.  http://www.pcbsd.org/"
+echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > ${PDESTDIR9}/etc/fstab
+makefs -t cd9660 $bootable -o rockridge -o label=$LABEL -o publisher="$publisher" ${PROGDIR}/iso/${bFile}-DVD.iso ${PDESTDIR9}
+rm ${PDESTDIR9}/etc/fstab
+rm -f efiboot.img
+
 
 # Run MD5 command
 cd ${PROGDIR}/iso
-md5 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.md5
-sha256 -q ${bFile}-DVD-USB.iso >${bFile}-DVD-USB.iso.sha256
+md5 -q ${bFile}-DVD.iso >${bFile}-DVD.iso.md5
+sha256 -q ${bFile}-DVD.iso >${bFile}-DVD.iso.sha256
 if [ ! -e "latest.iso" ] ; then
-  ln -s ${bFile}-DVD-USB.iso latest.iso
-  ln -s ${bFile}-DVD-USB.iso.md5 latest.iso.md5
-  ln -s ${bFile}-DVD-USB.iso.sha256 latest.iso.sha256
+  ln -s ${bFile}-DVD.iso latest.iso
+  ln -s ${bFile}-DVD.iso.md5 latest.iso.md5
+  ln -s ${bFile}-DVD.iso.sha256 latest.iso.sha256
 fi
+
+
+######
+# Create the USB images
+######
+
+# Set the pcbsd-media-details file marker on this media
+echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
+touch ${PDESTDIR9}/pcbsd-media-local
+
+echo "Creating IMG..."
+
+OUTFILE="${PROGDIR}/iso/${bFile}-USB.iso"
+
+
+echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
+makefs -B little -o label=PCBSD_Install ${OUTFILE}.part ${PDESTDIR9}
+if [ $? -ne 0 ]; then
+        echo "makefs failed"
+        exit 1
+fi
+rm ${PDESTDIR9}/etc/fstab
+
+mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}
+rm ${OUTFILE}.part
 
 rc_halt "umount ${ISODISTDIR}/packages"
 
