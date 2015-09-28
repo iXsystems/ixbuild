@@ -126,7 +126,7 @@ setup_usr_uzip() {
     find . -print -depth 2>/dev/null | cpio -dump -v ${USRMNT} 2>/dev/null
 
     # Remove old usrmnt and remount
-    sleep 9
+    sleep 3
     rc_halt "umount -f ${USRDEVICE}"
     rc_halt "cd ${PDESTDIR9}/"
     rm -rf ${PDESTDIR9}/usr 2>/dev/null
@@ -328,6 +328,9 @@ rc_halt "tar cvJf ${PDESTDIR9}/uzip/etc-dist.txz -C ${PDESTDIR9}/etc ."
 # Symlink the /boot/zfs directory
 rm -rf ${PDESTDIR9}/boot/zfs >/dev/null 2>/dev/null
 rc_halt "ln -s /tmp/zfs ${PDESTDIR9}/boot/zfs"
+
+# Remove the debug symbols, saves space on install media
+rc_halt "rm -rf ${PDESTDIR9}/usr/lib/debug"
 
 # Copy over some /usr/bin utilities that we need before mounting /usr
 cp ${PDESTDIR9}/usr/bin/cut ${PDESTDIR9}/bin/
