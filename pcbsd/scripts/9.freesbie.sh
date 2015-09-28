@@ -182,9 +182,6 @@ if [ "$ARCH" = "amd64" ] ; then
   extract_dist "${L32DIST}" "${PDESTDIR9}"
 fi
 
-# Remove space hogging symbols from install media
-rc_halt "rm ${PDESTDIR9}/boot/kernel/*.symbols"
-
 # Remove freebsd's version of pc-sysinstall
 rc_halt "rm -rf ${PDESTDIR9}/usr/share/pc-sysinstall"
 
