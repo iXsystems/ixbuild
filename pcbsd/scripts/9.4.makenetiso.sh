@@ -67,6 +67,7 @@ publisher="The PC-BSD Project.  http://www.pcbsd.org/"
 echo "Running makefs..."
 echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > ${PDESTDIR9}/etc/fstab
 # Set some initial loader.conf values
+cp ${PDESTDIR9}/boot/loader.conf ${PDESTDIR9}/boot/loader.conf.orig
 cat >>${PDESTDIR9}/boot/loader.conf << EOF
 vfs.root.mountfrom="cd9660:/dev/iso9660/$LABEL"
 loader_menu_title="Welcome to $bTitle"
@@ -85,5 +86,45 @@ if [ ! -e "latest.iso" ] ; then
   ln -s ${bFile}-netinstall.iso.md5 latest.iso.md5
   ln -s ${bFile}-netinstall.iso.sha256 latest.iso.sha256
 fi
+
+######
+# Create the USB images
+######
+
+OUTFILE="${PROGDIR}/iso/${bFile}-netinstall-USB.img"
+
+# Set the pcbsd-media-details file marker on this media
+echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
+touch ${PDESTDIR9}/pcbsd-media-local
+
+echo "Creating IMG..."
+echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
+# Set some initial loader.conf values
+cp ${PDESTDIR9}/boot/loader.conf.orig ${PDESTDIR9}/boot/loader.conf
+cat >>${PDESTDIR9}/boot/loader.conf << EOF
+vfs.root.mountfrom="ufs:/dev/ufs/$LABEL"
+loader_menu_title="Welcome to $bTitle"
+loader_brand="$brand"
+EOF
+echo "Running makefs..."
+rc_halt "makefs -B little -o label=${LABEL} ${OUTFILE}.part ${PDESTDIR9}"
+rm ${PDESTDIR9}/etc/fstab
+
+echo "Running mkimg..."
+rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
+rm ${OUTFILE}.part
+
+rc_halt "umount ${ISODISTDIR}/packages"
+
+# Run MD5 command
+cd ${PROGDIR}/iso
+md5 -q ${OUTFILE} >${OUTFILE}.md5
+sha256 -q ${OUTFILE} >${OUTFILE}.sha256
+if [ ! -e "latest.img" ] ; then
+  ln -s ${OUTFILE} latest.img
+  ln -s ${OUTFILE}.md5 latest.img.md5
+  ln -s ${OUTFILE}.sha256 latest.img.sha256
+fi
+
 
 exit 0
