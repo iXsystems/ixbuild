@@ -31,13 +31,6 @@ cp ${DISTDIR}/* ${ISODISTDIR}/
 # Nuke the src.txz, its 110MB~ and 99.9% of users don't need it
 rm ${ISODISTDIR}/src.txz
 
-# Remove the symbols from kernel.txz
-rc_halt "mkdir ${ISODISTDIR}/kerntmp"
-rc_halt "tar xvpf ${ISODISTDIR}/kernel.txz -C ${ISODISTDIR}/kerntmp"
-rc_halt "rm ${ISODISTDIR}/kerntmp/boot/kernel/*.symbols"
-rc_halt "tar cvJf ${ISODISTDIR}/kernel.txz -C ${ISODISTDIR}/kerntmp ."
-rc_halt "rm -rf ${ISODISTDIR}/kerntmp"
-
 rc_halt "mkdir -p ${ISODISTDIR}/packages"
 rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"
 
