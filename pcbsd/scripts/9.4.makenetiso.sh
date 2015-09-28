@@ -32,8 +32,12 @@ fDate="-`date '+%m-%d-%Y'`"
 # Base file name
 if [ "$SYSBUILD" = "trueos" ] ; then
   bFile="TRUEOS${ISOVER}${fDate}-${FARCH}"
+  bTitle="TrueOS"
+  brand="trueos"
 else
   bFile="PCBSD${ISOVER}${fDate}-${FARCH}"
+  bTitle="PC-BSD"
+  brand="pcbsd"
 fi
 export bFile
 
@@ -41,12 +45,36 @@ export bFile
 echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL DVD/USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
 touch ${PDESTDIR9}/pcbsd-media-network
 
-# Use GRUB to create the hybrid BIOS/UEFI DVD/USB image
-echo "Creating ISO..."
-grub-mkrescue -o ${PROGDIR}/iso/${bFile}-netinstall.iso ${PDESTDIR9} -- -volid "PCBSD_INSTALL"
-if [ $? -ne 0 ] ; then
-   exit_err "Failed running grub-mkrescue"
-fi
+# Stolen from FreeBSD's build scripts
+# This is highly x86-centric and will be used directly below.
+bootable="-o bootimage=i386;$4/boot/cdboot -o no-emul-boot"
+
+# Make EFI system partition (should be done with makefs in the future)
+rc_halt "dd if=/dev/zero of=efiboot.img bs=4k count=500"
+device=`mdconfig -a -t vnode -f efiboot.img`
+rc_halt "newfs_msdos -F 12 -m 0xf8 /dev/$device"
+rc_nohalt "mkdir efi"
+rc_halt "mount -t msdosfs /dev/$device efi"
+rc_halt "mkdir -p efi/efi/boot"
+rc_halt "cp ${PDESTDIR9}/boot/loader.efi efi/efi/boot/bootx64.efi"
+rc_halt "umount efi"
+rc_halt "rmdir efi"
+rc_halt "mdconfig -d -u $device"
+bootable="-o bootimage=i386;efiboot.img -o no-emul-boot $bootable"
+
+LABEL="PCBSD_INSTALL"
+publisher="The PC-BSD Project.  http://www.pcbsd.org/"
+echo "Running makefs..."
+echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > ${PDESTDIR9}/etc/fstab
+# Set some initial loader.conf values
+cat >>${PDESTDIR9}/boot/loader.conf << EOF
+vfs.root.mountfrom="cd9660:/dev/iso9660/$LABEL"
+loader_menu_title="Welcome to $bTitle"
+loader_brand="$brand"
+EOF
+makefs -t cd9660 $bootable -o rockridge -o label=$LABEL -o publisher="$publisher" ${PROGDIR}/iso/${bFile}-netinstall.iso ${PDESTDIR9}
+rm ${PDESTDIR9}/etc/fstab
+rm -f efiboot.img
 
 # Run MD5 command
 cd ${PROGDIR}/iso

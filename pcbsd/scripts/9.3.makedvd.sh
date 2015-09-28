@@ -40,8 +40,12 @@ fDate="-`date '+%m-%d-%Y'`"
 # Base file name
 if [ "$SYSBUILD" = "trueos" ] ; then
   bFile="TRUEOS${ISOVER}${fDate}-${FARCH}"
+  bTitle="TrueOS"
+  brand="trueos"
 else
   bFile="PCBSD${ISOVER}${fDate}-${FARCH}"
+  bTitle="PC-BSD"
+  brand="pcbsd"
 fi
 export bFile
 
@@ -55,21 +59,29 @@ echo "Creating ISO..."
 bootable="-o bootimage=i386;$4/boot/cdboot -o no-emul-boot"
 
 # Make EFI system partition (should be done with makefs in the future)
-dd if=/dev/zero of=efiboot.img bs=4k count=100
+rc_halt "dd if=/dev/zero of=efiboot.img bs=4k count=500"
 device=`mdconfig -a -t vnode -f efiboot.img`
-newfs_msdos -F 12 -m 0xf8 /dev/$device
-mkdir efi
-mount -t msdosfs /dev/$device efi
-mkdir -p efi/efi/boot
-cp ${PDESTDIR9}/boot/loader.efi efi/efi/boot/bootx64.efi
-umount efi
-rmdir efi
-mdconfig -d -u $device
+rc_halt "newfs_msdos -F 12 -m 0xf8 /dev/$device"
+rc_nohalt "mkdir efi"
+rc_halt "mount -t msdosfs /dev/$device efi"
+rc_halt "mkdir -p efi/efi/boot"
+rc_halt "cp ${PDESTDIR9}/boot/loader.efi efi/efi/boot/bootx64.efi"
+rc_halt "umount efi"
+rc_halt "rmdir efi"
+rc_halt "mdconfig -d -u $device"
 bootable="-o bootimage=i386;efiboot.img -o no-emul-boot $bootable"
 
 LABEL="PCBSD_INSTALL"
 publisher="The PC-BSD Project.  http://www.pcbsd.org/"
+echo "Running makefs..."
 echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > ${PDESTDIR9}/etc/fstab
+
+# Set some initial loader.conf values
+cat >>${PDESTDIR9}/boot/loader.conf << EOF
+vfs.root.mountfrom="cd9660:/dev/iso9660/$LABEL"
+loader_menu_title="Welcome to $bTitle"
+loader_brand="$brand"
+EOF
 makefs -t cd9660 $bootable -o rockridge -o label=$LABEL -o publisher="$publisher" ${PROGDIR}/iso/${bFile}-DVD.iso ${PDESTDIR9}
 rm ${PDESTDIR9}/etc/fstab
 rm -f efiboot.img
@@ -90,16 +102,15 @@ fi
 # Create the USB images
 ######
 
+OUTFILE="${PROGDIR}/iso/${bFile}-USB.img"
+
 # Set the pcbsd-media-details file marker on this media
 echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL USB - `date`" > ${PDESTDIR9}/pcbsd-media-details
 touch ${PDESTDIR9}/pcbsd-media-local
 
 echo "Creating IMG..."
-
-OUTFILE="${PROGDIR}/iso/${bFile}-USB.iso"
-
-
 echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
+echo "Running makefs..."
 makefs -B little -o label=PCBSD_Install ${OUTFILE}.part ${PDESTDIR9}
 if [ $? -ne 0 ]; then
         echo "makefs failed"
@@ -107,9 +118,21 @@ if [ $? -ne 0 ]; then
 fi
 rm ${PDESTDIR9}/etc/fstab
 
+echo "Running mkimg..."
 mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}
 rm ${OUTFILE}.part
 
 rc_halt "umount ${ISODISTDIR}/packages"
+
+# Run MD5 command
+cd ${PROGDIR}/iso
+md5 -q ${OUTFILE} >${OUTFILE}.md5
+sha256 -q ${OUTFILE} >${OUTFILE}.sha256
+if [ ! -e "latest.img" ] ; then
+  ln -s ${OUTFILE} latest.img
+  ln -s ${OUTFILE}.md5 latest.img.md5
+  ln -s ${OUTFILE}.sha256 latest.img.sha256
+fi
+
 
 exit 0

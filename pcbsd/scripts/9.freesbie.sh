@@ -354,17 +354,20 @@ if [ $? -ne 0 ] ; then
    exit_err "Failed running 9.4.makenetiso.sh"
 fi
 
-# With ISO's done, lets create the docs now
-cd ${GITBRANCH}/src-qt5/docs
-make html
+if [ "$SYSBUILD" != "trueos" ] ; then
+  # With ISO's done, lets create the docs now
+  # Only need to run this once on the pcbsd build, since its same docs
+  cd ${GITBRANCH}/src-qt5/docs
+  make html
 
-# Move over the HTML docs
-if [ -d "${PROGDIR}/iso/docs" ] ; then
-  rm -rf ${PROGDIR}/iso/docs
+  # Move over the HTML docs
+  if [ -d "${PROGDIR}/iso/docs" ] ; then
+    rm -rf ${PROGDIR}/iso/docs
+  fi
+  mkdir ${PROGDIR}/iso/docs
+  mv _build/html ${PROGDIR}/iso/docs/html
+  rm -rf _build
 fi
-mkdir ${PROGDIR}/iso/docs
-mv _build/html ${PROGDIR}/iso/docs/html
-rm -rf _build
 
 umount -f ${PDESTDIR9} 2>/dev/null
 rmdir ${PDESTDIR9}
