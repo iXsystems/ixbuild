@@ -114,8 +114,6 @@ echo "Running mkimg..."
 rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
 rm ${OUTFILE}.part
 
-rc_halt "umount ${ISODISTDIR}/packages"
-
 # Run MD5 command
 cd ${PROGDIR}/iso
 md5 -q ${OUTFILE} >${OUTFILE}.md5
@@ -125,6 +123,5 @@ if [ ! -e "latest.img" ] ; then
   ln -s ${OUTFILE}.md5 latest.img.md5
   ln -s ${OUTFILE}.sha256 latest.img.sha256
 fi
-
 
 exit 0
