@@ -97,18 +97,6 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y archivers/pxz"
 fi
 
-pkg info "grub2-bhyve" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing grub2-bhyve.."
-  rc_halt "pkg install -y sysutils/grub2-bhyve"
-fi
-
-pkg info "misc/compat9x" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing misc/compat9x.."
-  rc_halt "pkg install -y misc/compat9x"
-fi
-
 pkg info "emulators/virtualbox-ose" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing emulators/virtualbox-ose.."
