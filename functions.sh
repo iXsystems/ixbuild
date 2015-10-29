@@ -179,10 +179,10 @@ push_world()
 
 pull_world()
 {
-  # Check if we have any workdirs to re-sync
+  # Check if the world exists
   ssh ${SFTPUSER}@${SFTPHOST} "ls ${WORKWORLD}" >/dev/null 2>/dev/null
   if [ $? -ne 0 ] ; then
-     return 0
+     return 1
   fi
 
   if [ ! -d "${TBUILDDIR}/fbsd-dist" ] ; then
@@ -194,6 +194,7 @@ pull_world()
 
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
+  return 0
 }
 
 pull_iso()
@@ -237,6 +238,13 @@ jenkins_jail()
   create_workdir
 
   pull_world
+  if [ $? -ne 0 ] ; then
+    jenkins_world
+    pull_world
+    if [ $? -ne 0 ] ; then
+       exit_clean "Failed getting world files"
+    fi
+  fi
 
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
@@ -255,6 +263,13 @@ jenkins_pkg()
 
   # Pull in the world directory
   pull_world
+  if [ $? -ne 0 ] ; then
+    jenkins_world
+    pull_world
+    if [ $? -ne 0 ] ; then
+       exit_clean "Failed getting world files"
+    fi
+  fi
 
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
