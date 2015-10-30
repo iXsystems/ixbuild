@@ -229,8 +229,6 @@ jenkins_world()
   push_world
 
   cleanup_workdir
-
-  exit 0
 }
 
 jenkins_jail()
