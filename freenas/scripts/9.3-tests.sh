@@ -171,7 +171,7 @@ do
   check_rest_response_continue "200 OK"
   if [ $? -eq 0 ] ; then break; fi
   echo "Waiting for FreeNAS API to become available: $count"
-  sleep 30
+  sleep 60
   if [ $count -gt 10 ] ; then
      echo "FreeNAS API failed to respond!"
      exit 1
