@@ -160,25 +160,25 @@ iscsi_tests()
 }
 
 
-if [ -z "$1" ] ; then
-  # If we are running in jenkins mode, it make take a while for
-  # FreeNAS to become available, depending upon node speed
-  # Check if disk API call is up, or else wait a bit longer
-  count=0
-  while :
-  do
-    GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
-    check_rest_response_continue "200 OK"
-    if [ $? -eq 0 ] ; then break; fi
-    echo "Waiting for FreeNAS API to respond: $count"
-    sleep 30
-    if [ $count -gt 10 ] ; then
-       echo "FreeNAS API failed to respond!"
-       exit 1
-    fi
-    count=`expr $count + 1`
-  done
-fi
+# When running via Jenkins / ATF mode, it may take a variable
+# time to boot the system and be ready for REST calls. We run
+# an initial test to determine when the interface is up
+echo -e "Testing access to REST API -\c"
+count=0
+while :
+do
+  GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
+  check_rest_response_continue "200 OK"
+  if [ $? -eq 0 ] ; then break; fi
+  echo "Waiting for FreeNAS API to become available: $count"
+  sleep 30
+  if [ $count -gt 10 ] ; then
+     echo "FreeNAS API failed to respond!"
+     exit 1
+  fi
+  count=`expr $count + 1`
+done
+echo -e " OK!"
 
 # Run the storage tests
 storage_tests
