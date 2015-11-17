@@ -145,8 +145,8 @@ fi
 echo "Running Installed System..."
 daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
 
-# Give a few minutes to boot, should be ready for REST calls now
-sleep 600
+# Give a minute to boot, should be ready for REST calls now
+sleep 60
 
 # Run the REST tests now
 cd ${PROGDIR}/scripts
