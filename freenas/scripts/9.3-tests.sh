@@ -64,12 +64,16 @@ check_rest_response_continue()
 # $2 = Command to run if $1 fails
 rc_halt()
 {
-  ${1}
+  ${1} >/tmp/.cmdTest.$$ 2>/.cmdTest.$$
   if [ $? -ne 0 ] ; then
+     echo -e " - FAILED"
      ${2}
      echo "Failed running: $1"
+     cat /tmp/.cmdTest.$$
+     rm /tmp/.cmdTest.$$
      exit 1
   fi
+  rm /tmp/.cmdTest.$$
 }
 
 set_test_group_text()
