@@ -12,7 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 if [ -n "$1" ] ; then
   ip="$1"
 else
-  ip="10.0.0.15"
+  ip="10.0.0.115"
 fi
 
 # Set the username / pass of FreeNAS for REST calls
@@ -82,7 +82,7 @@ echo_test_title()
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Storage Tests" "4"
+  set_test_group_text "Storage tests" "4"
 
   # Check getting disks
   echo_test_title "Disks / API functionality"
@@ -108,7 +108,7 @@ storage_tests()
 nfs_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "NFS Tests" "9"
+  set_test_group_text "NFS tests" "9"
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
@@ -150,7 +150,7 @@ nfs_tests()
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "iSCSI Tests" "1"
+  set_test_group_text "iSCSI tests" "1"
 
   # Enable iSCSI server
   echo_test_title "Creating iSCSI extent"
@@ -159,18 +159,32 @@ iscsi_tests()
 
 }
 
+cifs_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "CIFS tests" "2"
+
+  echo_test_title "Enabling the CIFS service"
+  PUT /services/nfs/ '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+
+  echo_test_title "Creating a CIFS share on /mnt/tank"
+  POST /sharing/cifs/ '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank", "cifs_name": "Test Share", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+}
+
 
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
 # an initial test to determine when the interface is up
-echo -e "Testing access to REST API -\c"
+echo -e "Testing access to REST API\c"
 count=0
 while :
 do
   GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
   check_rest_response_continue "200 OK"
   if [ $? -eq 0 ] ; then break; fi
-  echo "Waiting for FreeNAS API to become available: $count"
+  echo -e ".\c"
   sleep 60
   if [ $count -gt 10 ] ; then
      echo "FreeNAS API failed to respond!"
@@ -178,10 +192,13 @@ do
   fi
   count=`expr $count + 1`
 done
-echo -e " OK!"
+echo -e " - OK!"
 
 # Run the storage tests
 storage_tests
+
+# Run the CIFS tests
+cifs_tests
 
 # Run the iSCSI tests
 iscsi_tests
@@ -190,4 +207,5 @@ iscsi_tests
 nfs_tests
 
 # Made it to the end, exit with success!
+echo "SUCCESS - REST API testing complete!"
 exit 0
