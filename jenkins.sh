@@ -22,6 +22,8 @@ case $TYPE in
      vm) jenkins_vm ;;
 freenas) jenkins_freenas ;;
 freenas-tests) jenkins_freenas_tests ;;
+freenas-combo) jenkins_freenas
+	       jenkins_freenas_tests ;;
 ports-tests) jenkins_ports_tests ;;
       *) echo "Invalid Type: $1" 
          exit 1
