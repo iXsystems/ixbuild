@@ -124,7 +124,7 @@ create_workdir()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   case $TYPE in
-    freenas|freenas-tests) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
+    freenas|freenas-tests|freenas-combo) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
           *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
   esac
 
