@@ -32,8 +32,8 @@ exit_clean()
 
 if [ "$TYPE" != "ports-tests" ] ; then
 
-  if [ -z "$BUILD" -o -z "$BRANCH" ] ; then
-    echo "Missing BUILD / BRANCH"
+  if [ -z "$BUILD" ] ; then
+    echo "Missing BUILD"
     exit_clean
   fi
 
@@ -45,11 +45,19 @@ if [ "$TYPE" != "ports-tests" ] ; then
   # Source build conf and set some vars
   cd ${BDIR}/${BUILD}
 
-  if [ "$TYPE" = "freenas" -o "$TYPE" = "freenas-tests" ] ; then
-    . freenas.cfg
-  else
-    . pcbsd.cfg
-  fi
+  case $TYPE in
+    freenas|freenas-tests|freenas-combo)
+       BRANCH="production"
+       . freenas.cfg
+       ;;
+    *)
+       if [ -z "$BRANCH" ] ; then
+          echo "Missing BRANCH!"
+          exit_clean
+       fi
+       . pcbsd.cfg
+       ;;
+  esac
 
 
   # Set the variables to reference poudrire jail locations
