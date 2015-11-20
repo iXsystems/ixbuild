@@ -49,6 +49,10 @@ if [ -n "$FREENASLEGACY" ] ; then
       cp ${PROGDIR}/scripts/kludges/makeinfo /usr/bin/makeinfo
       chmod 755 /usr/bin/makeinfo
    fi
+   if [ ! -e "/usr/bin/makelocale" ] ; then
+      cp ${PROGDIR}/scripts/kludges/makelocale /usr/bin/makelocale
+      chmod 755 /usr/bin/makelocale
+   fi
    if [ ! -e "/usr/bin/install-info" ] ; then
       cp ${PROGDIR}/scripts/kludges/install-info /usr/bin/install-info
       chmod 755 /usr/bin/install-info
