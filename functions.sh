@@ -400,7 +400,7 @@ jenkins_freenas()
 
   cleanup_workdir
 
-  exit 0
+  return 0
 }
 
 jenkins_freenas_tests()
@@ -429,7 +429,7 @@ jenkins_freenas_tests()
 
   cleanup_workdir
 
-  exit 0
+  return 0
 }
 
 jenkins_ports_tests()
