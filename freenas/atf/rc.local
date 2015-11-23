@@ -13,7 +13,7 @@ if [ -e "/etc/netcli" ] ; then
 
   # Set the IP address we will use for testing
   echo "Changing IP address for REST"
-  /sbin/ifconfig em0 10.0.0.115 255.255.255.0
+  /sbin/ifconfig em0 10.0.0.15 255.255.255.0
 
   # Display ifconfig settings
   /sbin/ifconfig
@@ -21,7 +21,7 @@ else
   echo "FreeNAS 10 detected.."
   # Set the IP address we will use for testing
   echo "Changing IP address for REST"
-  /sbin/ifconfig em0 192.168.0.116 255.255.255.0
+  /sbin/ifconfig em0 10.0.0.16 255.255.255.0
 fi
 
 sleep 5
