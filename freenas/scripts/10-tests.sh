@@ -7,7 +7,7 @@
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 # IP of client we are testing
-ip="192.168.0.116"
+ip="192.168.0.39"
 
 # Source our resty / jsawk functions
 # Resty Docs: https://github.com/micha/resty
