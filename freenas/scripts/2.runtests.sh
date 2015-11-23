@@ -166,10 +166,12 @@ sync
 # Delete the VM
 VBoxManage unregistervm $VM --delete
 
+echo ""
 echo "Output from console during runtime tests:"
 echo "-----------------------------------------"
 cat /tmp/vboxpipe
 
+echo ""
 echo "Output from REST API calls:"
 echo "-----------------------------------------"
 cat /tmp/fnas-tests.log
