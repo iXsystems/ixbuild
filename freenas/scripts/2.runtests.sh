@@ -13,6 +13,14 @@ fi
 # Figure out the ISO name
 ISOFILE=`find /tmp/fnasb/_BE/release | grep \.iso$`
 
+# Is this TrueNAS or FreeNAS?
+echo $ISOFILE | grep -q "TrueNAS"
+if [ $? -eq 0 ] ; then
+   export FLAVOR="TRUENAS"
+else
+   export FLAVOR="FREENAS"
+fi
+
 # Create the automatic ISO installer
 cd ${PROGDIR}/tmp
 ${PROGDIR}/scripts/create-auto-install.sh ${ISOFILE}

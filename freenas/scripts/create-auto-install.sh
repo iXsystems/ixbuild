@@ -144,11 +144,18 @@ rc_halt "mv base.ufs.uzip isodir/data/base.ufs.uzip"
 if [ -e "freenas-auto.iso" ] ; then
   rm freenas-auto.iso
 fi
+
+if [ "$FLAVOR" = "TRUENAS" ] ; then
+  VOLID="TrueNAS"
+else
+  VOLID="FreeNAS"
+fi
+
 if [ -n "$FREENASLEGACY" ] ; then
-  grub-mkrescue -o freenas-auto.iso isodir -- -volid FreeNAS_INSTALL
+  grub-mkrescue -o freenas-auto.iso isodir -- -volid ${VOLID}_INSTALL
   if [ $? -ne 0 ] ; then exit 1; fi
 else
-  grub-mkrescue -o freenas-auto.iso isodir -- -volid FreeNAS
+  grub-mkrescue -o freenas-auto.iso isodir -- -volid ${VOLID}
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
 
