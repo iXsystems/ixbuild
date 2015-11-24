@@ -117,7 +117,7 @@ create_workdir()
 
   MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
-  git clone --depth=1 ${GITREPO} ${MASTERWRKDIR}
+  git clone --depth=1 -b ${GITBRANCH} ${GITREPO} ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   cd ${MASTERWRKDIR}
