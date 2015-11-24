@@ -17,7 +17,7 @@ if [ ! -d "${FNASSRC}" ]; then
    rc_nohalt "chflags -R noschg /tmp/fnasb"
    rc_nohalt "rm -rf /tmp/fnasb"
    rc_nohalt "mkdir `dirname ${FNASSRC}`"
-   rc_halt "git clone --depth=1 ${GITFNASURL} /tmp/fnasb"
+   rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} /tmp/fnasb"
    rc_halt "ln -s /tmp/fnasb ${FNASSRC}"
    git_fnas_up "${FNASSRC}" "${FNASSRC}"
 else
