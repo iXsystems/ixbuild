@@ -117,7 +117,13 @@ create_workdir()
 
   MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
-  git clone --depth=1 -b ${GITBRANCH} ${GITREPO} ${MASTERWRKDIR}
+  if [ -n "$GITFNASBRANCH" ] ; then
+    cocmd="git clone --depth=1 -b ${GITFNASBRANCH} ${GITREPO} ${MASTERWRKDIR}"
+  else
+    cocmd="git clone --depth=1 ${GITREPO} ${MASTERWRKDIR}"
+  fi
+
+  $cocmd
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   cd ${MASTERWRKDIR}
