@@ -123,6 +123,7 @@ create_workdir()
     cocmd="git clone --depth=1 ${GITREPO} ${MASTERWRKDIR}"
   fi
 
+  echo "Cloning with: $cocmd"
   $cocmd
   if [ $? -ne 0 ] ; then exit_clean; fi
 
