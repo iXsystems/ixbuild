@@ -8,7 +8,7 @@ if [ -e "/etc/netcli" ] ; then
   echo "FreeNAS 9 detected.."
 
   # Check for license
-  if [ -d "/atf/truenas-license" ] ; then
+  if [ -e "/atf/truenas-license" ] ; then
     echo "Installing TrueNAS license..."
     cp /atf/truenas-license /data/license
   fi
