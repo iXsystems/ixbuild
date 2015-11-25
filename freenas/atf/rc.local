@@ -10,8 +10,7 @@ if [ -e "/etc/netcli" ] ; then
   # Check for license
   if [ -d "/atf/truenas-license" ] ; then
     echo "Installing TrueNAS license..."
-    mkdir -p /data/license 2>/dev/null
-    cp /atf/truenas-license/* /data/license
+    cp /atf/truenas-license /data/license
   fi
 
   # Set the default password for 9.x

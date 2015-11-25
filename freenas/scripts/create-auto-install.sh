@@ -100,8 +100,8 @@ cp -r ${PROGDIR}/atf uzipdir/
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Check if we have a truenas license dir
-if [ -d "/etc/truenas-license/" ] ; then
-  cp -r /etc/truenas-license uzipdir/atf/
+if [ -d "/etc/truenas-license" ] ; then
+  cp /etc/truenas-license uzipdir/atf/
 fi
 
 echo "#### Creating uzip file ####"
