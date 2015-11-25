@@ -189,7 +189,7 @@ cifs_tests()
   set_test_group_text "CIFS tests" "9"
 
   echo_test_title "Enabling the CIFS service"
-  PUT /services/nfs/ '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }' -v >${RESTYOUT} 2>${RESTYERR}
+  PUT /services/nfs/ '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false, "cifs_srv_netbiosname": "testnas" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
   echo_ok
 
@@ -207,13 +207,7 @@ cifs_tests()
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Mounting CIFS"
   rc_halt "mkdir /tmp/cifs-mnt.$$"
-
-  if [ "$FLAVOR" = "TRUENAS" ] ; then
-    rc_halt "mount_smbfs -N -I ${ip} //guest@truenas/TestShare /tmp/cifs-mnt.$$" "umount -f /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$"
-  else
-    rc_halt "mount_smbfs -N -I ${ip} //guest@freenas/TestShare /tmp/cifs-mnt.$$" "umount -f /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$"
-  fi
-
+  rc_halt "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "umount -f /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$"
   echo_ok
 
   echo_test_title "Creating CIFS file"
