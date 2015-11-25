@@ -160,10 +160,10 @@ sleep 90
 cd ${PROGDIR}/scripts
 
 if [ -n "$FREENASLEGACY" ] ; then
-  ./9.3-tests.sh >/tmp/fnas-tests.log 2>/tmp/fnas-tests.log
+  ./9.3-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
   res=$?
 else
-  ./10-tests.sh >/tmp/fnas-tests.log 2>/tmp/fnas-tests.log
+  ./10-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
   res=$?
 fi
 
