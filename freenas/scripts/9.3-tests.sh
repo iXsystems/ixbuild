@@ -207,7 +207,13 @@ cifs_tests()
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Mounting CIFS"
   rc_halt "mkdir /tmp/cifs-mnt.$$"
-  rc_halt "mount_smbfs -N -I ${ip} //guest@freenas/TestShare /tmp/cifs-mnt.$$" "umount -f /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$"
+
+  if [ "$FLAVOR" = "TRUENAS" ] ; then
+    rc_halt "mount_smbfs -N -I ${ip} //guest@truenas/TestShare /tmp/cifs-mnt.$$" "umount -f /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$"
+  else
+    rc_halt "mount_smbfs -N -I ${ip} //guest@freenas/TestShare /tmp/cifs-mnt.$$" "umount -f /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$"
+  fi
+
   echo_ok
 
   echo_test_title "Creating CIFS file"
