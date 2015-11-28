@@ -236,7 +236,7 @@ cifs_tests()
 set_ip()
 {
   set_test_group_text "Networking Configuration" "1"
-  PUT /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
+  POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 }
