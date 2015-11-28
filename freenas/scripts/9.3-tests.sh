@@ -204,10 +204,13 @@ cifs_tests()
   check_rest_response "200 OK"
   echo_ok
 
+  sleep 3
+
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Mounting CIFS"
   rc_halt "mkdir /tmp/cifs-mnt.$$"
-  rc_halt "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "umount -f /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$"
+  sync
+  rc_halt "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$"
   echo_ok
 
   echo_test_title "Creating CIFS file"
@@ -236,6 +239,8 @@ cifs_tests()
 set_ip()
 {
   set_test_group_text "Networking Configuration" "1"
+
+  echo_test_title "Setting IP address: ${ip}"
   POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
