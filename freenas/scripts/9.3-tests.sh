@@ -86,6 +86,8 @@ set_test_group_text()
 echo_test_title()
 {
   TCOUNT=`expr $TCOUNT + 1`
+  sleep 1
+  sync
   echo -e "Running $GROUPTEXT ($TCOUNT/$TOTALTESTS) - $1\c"
 }
 
