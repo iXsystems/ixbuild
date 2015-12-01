@@ -268,7 +268,7 @@ bootenv_tests() {
   echo_ok
 }
 
-# Run a series of tests on the boot-environments
+# Run a series of tests on the email settings
 email_tests() {
   set_test_group_text "E-Mail Testing" "1"
 
@@ -277,6 +277,32 @@ email_tests() {
   check_rest_response "200 OK"
   echo_ok
 }
+
+# Run a series of tests on jail creation
+jail_tests() {
+  set_test_group_text "Jail Testing" "4"
+
+  echo_test_title "Creating jail"
+  POST /jails/jails/ '{ "jail_host": "testjail", "jail_type": "standard" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Starting jail"
+  POST /jails/jails/testjail/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 ACCEPTED"
+  echo_ok
+
+  echo_test_title "Restarting jail"
+  POST /jails/jails/testjail/restart/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 ACCEPTED"
+  echo_ok
+
+  echo_test_title "Stopping jail"
+  POST /jails/jails/testjail/stop/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 ACCEPTED"
+  echo_ok
+}
+
 
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
@@ -312,6 +338,9 @@ bootenv_tests
 
 # Run the storage tests
 storage_tests
+
+# Run the jail tests
+#jail_tests
 
 # Run the CIFS tests
 cifs_tests
