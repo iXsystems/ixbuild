@@ -191,7 +191,7 @@ cifs_tests()
   set_test_group_text "CIFS tests" "9"
 
   echo_test_title "Enabling the CIFS service"
-  PUT /services/nfs/ '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false, "cifs_srv_netbiosname": "testnas" }' -v >${RESTYOUT} 2>${RESTYERR}
+  PUT /services/cifs/ '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false, "cifs_srv_netbiosname": "testnas" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
   echo_ok
 
@@ -303,6 +303,30 @@ jail_tests() {
   echo_ok
 }
 
+rsyncd_tests() {
+  set_test_group_text "rsync tests" "4"
+
+  echo_test_title "Configuring rsyncd service"
+  PUT /services/rsyncd/ '{ "rsyncd_port": 873 }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+  echo_test_title "Starting rsyncd service"
+  PUT /services/services/rsync/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+  echo_test_title "Creating rsync resource"
+  POST /services/rsyncmod/ '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/tank" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Test rsync
+  echo_test_title "Testing rsync access"
+  rc_halt "rsync -avn ${ip}::testmod"
+  echo_ok
+}
+
 
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
@@ -338,6 +362,9 @@ bootenv_tests
 
 # Run the storage tests
 storage_tests
+
+# Run the rsyncd tests
+rsyncd_tests
 
 # Run the jail tests
 #jail_tests
