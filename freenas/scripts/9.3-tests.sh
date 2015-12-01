@@ -243,8 +243,28 @@ set_ip()
   set_test_group_text "Networking Configuration" "1"
 
   echo_test_title "Setting IP address: ${ip}"
-  POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
+  #POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
+  #check_rest_response "201 CREATED"
+  echo_ok
+}
+
+# Run a series of tests on the boot-environments
+bootenv_tests() {
+  set_test_group_text "Boot-Environment Testing" "3"
+
+  echo_test_title "Creating a new boot-environment: newbe1"
+  POST /system/bootenv/ '{ "name": "newbe1", "source": "default" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Creating a new boot-environment: newbe2"
+  POST /system/bootenv/ '{ "name": "newbe2", "source": "newbe1" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Removing a boot-environment: newbe2"
+  DELETE /system/bootenv/newbe2 '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "204 NO CONTENT"
   echo_ok
 }
 
@@ -268,8 +288,14 @@ do
 done
 echo_ok
 
-# Reset the IP address via REST
-set_ip
+# Skip this if network is already configured
+if [ -z "$1" ] ; then
+  # Reset the IP address via REST
+  set_ip
+fi
+
+# Check boot environment support
+bootenv_tests
 
 # Run the storage tests
 storage_tests
