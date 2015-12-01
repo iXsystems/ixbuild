@@ -268,6 +268,16 @@ bootenv_tests() {
   echo_ok
 }
 
+# Run a series of tests on the boot-environments
+email_tests() {
+  set_test_group_text "E-Mail Testing" "1"
+
+  echo_test_title "Configuring e-mail settings"
+  PUT /system/email/ '{ "em_fromemail": "william.spam@ixsystems.com", "em_outgoingserver": "mail.ixsystems.com", "em_pass": "changeme", "em_port": 25, "em_security": "plain", "em_smtp": true, "em_user": "william.spam@ixsystems.com" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+}
+
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
 # an initial test to determine when the interface is up
@@ -293,6 +303,9 @@ if [ -z "$1" ] ; then
   # Reset the IP address via REST
   set_ip
 fi
+
+# Check e-mail configuration
+email_tests
 
 # Check boot environment support
 bootenv_tests
