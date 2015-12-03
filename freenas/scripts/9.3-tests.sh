@@ -12,7 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 if [ -n "$1" ] ; then
   ip="$1"
 else
-  ip="10.0.0.29"
+  ip="192.168.56.100"
 fi
 
 # Set the username / pass of FreeNAS for REST calls
