@@ -69,6 +69,7 @@ rc_halt "VBoxManage modifyvm $VM --cpus 2 --ioapic on --boot1 disk --memory 4096
 rc_nohalt "VBoxManage hostonlyif remove vboxnet0"
 rc_halt "VBoxManage hostonlyif create"
 rc_halt "VBoxManage modifyvm $VM --nic1 hostonly"
+rc_halt "VBoxManage modifyvm $VM --hostonlyadapter1 vboxnet0"
 rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
 rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
 rc_halt "VBoxManage modifyvm $VM --pae off"
