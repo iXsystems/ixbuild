@@ -11,8 +11,10 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 # IP of client we are testing
 if [ -n "$1" ] ; then
   ip="$1"
+  manualip="YES"
 else
   ip="192.168.56.100"
+  manualip="NO"
 fi
 
 # Set the username / pass of FreeNAS for REST calls
@@ -240,12 +242,15 @@ cifs_tests()
 # Set the IP address of REST
 set_ip()
 {
-  set_test_group_text "Networking Configuration" "1"
+  set_test_group_text "Networking Configuration" "2"
 
   echo_test_title "Setting IP address: ${ip}"
-  #POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
-  #check_rest_response "201 CREATED"
+  if [ "$manualip" = "NO" ] ; then
+    POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
+    check_rest_response "201 CREATED"
+  fi
   echo_ok
+
 }
 
 # Run a series of tests on the boot-environments
@@ -280,25 +285,38 @@ email_tests() {
 
 # Run a series of tests on jail creation
 jail_tests() {
-  set_test_group_text "Jail Testing" "4"
+  set_test_group_text "Jail Testing" "5"
 
-  echo_test_title "Creating jail"
-  POST /jails/jails/ '{ "jail_host": "testjail", "jail_type": "standard" }' -v >${RESTYOUT} 2>${RESTYERR}
+  echo_test_title "Configuring global networking"
+  PUT /network/globalconfiguration/ '{ "gc_ipv4gateway": "192.168.56.1", "gc_nameserver1": "192.168.56.1", "gc_nameserver2": "8.8.8.8" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+  echo_test_title "Configuring jails"
+  PUT /jails/configuration/ '{ "jc_ipv4_network_start": "192.168.56.150", "jc_path": "/mnt/tank" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 
+  echo_test_title "Creating jail"
+  POST /jails/jails/ '{ "jail_host": "testjail" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Disable for now until we get API clarified
+  return 0
+
   echo_test_title "Starting jail"
-  POST /jails/jails/testjail/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  POST /jails/jails/1/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "202 ACCEPTED"
   echo_ok
 
   echo_test_title "Restarting jail"
-  POST /jails/jails/testjail/restart/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  POST /jails/jails/1/restart/ '' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "202 ACCEPTED"
   echo_ok
 
   echo_test_title "Stopping jail"
-  POST /jails/jails/testjail/stop/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  POST /jails/jails/1/stop/ '' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "202 ACCEPTED"
   echo_ok
 }
@@ -348,11 +366,8 @@ do
 done
 echo_ok
 
-# Skip this if network is already configured
-if [ -z "$1" ] ; then
-  # Reset the IP address via REST
-  set_ip
-fi
+# Reset the IP address via REST
+set_ip
 
 # Check e-mail configuration
 email_tests
@@ -366,9 +381,6 @@ storage_tests
 # Run the rsyncd tests
 rsyncd_tests
 
-# Run the jail tests
-#jail_tests
-
 # Run the CIFS tests
 cifs_tests
 
@@ -377,6 +389,9 @@ iscsi_tests
 
 # Run the NFS tests
 nfs_tests
+
+# Run the jail tests
+jail_tests
 
 # Made it to the end, exit with success!
 echo "SUCCESS - REST API testing complete!"
