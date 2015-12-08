@@ -287,11 +287,6 @@ email_tests() {
 jail_tests() {
   set_test_group_text "Jail Testing" "5"
 
-  echo_test_title "Configuring global networking"
-  PUT /network/globalconfiguration/ '{ "gc_ipv4gateway": "192.168.56.1", "gc_nameserver1": "192.168.56.1", "gc_nameserver2": "8.8.8.8" }' -v >${RESTYOUT} 2>${RESTYERR}
-  check_rest_response "200 OK"
-  echo_ok
-
   echo_test_title "Configuring jails"
   PUT /jails/configuration/ '{ "jc_ipv4_network_start": "192.168.56.150", "jc_path": "/mnt/tank" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
@@ -301,9 +296,6 @@ jail_tests() {
   POST /jails/jails/ '{ "jail_host": "testjail" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
-
-  # Disable for now until we get API clarified
-  return 0
 
   echo_test_title "Starting jail"
   POST /jails/jails/1/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
