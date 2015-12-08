@@ -242,20 +242,28 @@ cifs_tests()
 # Set the IP address of REST
 set_ip()
 {
-  set_test_group_text "Networking Configuration" "2"
+  set_test_group_text "Networking Configuration" "4"
 
-  echo_test_title "Setting IP address: ${ip}"
+  echo_test_title "Setting IP address: ${ip} on em0"
   if [ "$manualip" = "NO" ] ; then
-    POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
+    POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
     check_rest_response "201 CREATED"
   fi
   echo_ok
 
   echo_test_title "Setting DHCP on em1"
-  if [ "$manualip" = "NO" ] ; then
-    POST /network/interface/ '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }' -v >${RESTYOUT} 2>${RESTYERR}
-    check_rest_response "201 CREATED"
-  fi
+  POST /network/interface/ '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Rebooting VM"
+  POST /system/reboot/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 ACCEPTED"
+  echo_ok
+
+  echo_test_title "Waiting for reboot"
+  sleep 20
+  wait_for_avail
   echo_ok
 }
 
@@ -303,8 +311,6 @@ jail_tests() {
   check_rest_response "201 CREATED"
   echo_ok
 
-  return 0
-
   echo_test_title "Starting jail"
   POST /jails/jails/1/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "202 ACCEPTED"
@@ -345,25 +351,29 @@ rsyncd_tests() {
   echo_ok
 }
 
+wait_for_avail()
+{
+  count=0
+  while :
+  do
+    GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
+    check_rest_response_continue "200 OK"
+    if [ $? -eq 0 ] ; then break; fi
+    echo -e ".\c"
+    sleep 60
+    if [ $count -gt 10 ] ; then
+       echo "FreeNAS API failed to respond!"
+       exit 1
+    fi
+    count=`expr $count + 1`
+  done
+}
 
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
 # an initial test to determine when the interface is up
 echo -e "Testing access to REST API\c"
-count=0
-while :
-do
-  GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
-  check_rest_response_continue "200 OK"
-  if [ $? -eq 0 ] ; then break; fi
-  echo -e ".\c"
-  sleep 60
-  if [ $count -gt 10 ] ; then
-     echo "FreeNAS API failed to respond!"
-     exit 1
-  fi
-  count=`expr $count + 1`
-done
+wait_for_avail
 echo_ok
 
 # Reset the IP address via REST
