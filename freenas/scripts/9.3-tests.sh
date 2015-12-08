@@ -303,6 +303,8 @@ jail_tests() {
   check_rest_response "201 CREATED"
   echo_ok
 
+  return 0
+
   echo_test_title "Starting jail"
   POST /jails/jails/1/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "202 ACCEPTED"
