@@ -246,11 +246,17 @@ set_ip()
 
   echo_test_title "Setting IP address: ${ip}"
   if [ "$manualip" = "NO" ] ; then
-    POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "ext", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
+    POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
     check_rest_response "201 CREATED"
   fi
   echo_ok
 
+  echo_test_title "Setting DHCP on em1"
+  if [ "$manualip" = "NO" ] ; then
+    POST /network/interface/ '{ "int_dhcp": true, int_name: "ext", "int_interface": "em1" }' -v >${RESTYOUT} 2>${RESTYERR}
+    check_rest_response "201 CREATED"
+  fi
+  echo_ok
 }
 
 # Run a series of tests on the boot-environments
