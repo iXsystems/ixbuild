@@ -253,7 +253,7 @@ set_ip()
 
   echo_test_title "Setting DHCP on em1"
   if [ "$manualip" = "NO" ] ; then
-    POST /network/interface/ '{ "int_dhcp": true, int_name: "ext", "int_interface": "em1" }' -v >${RESTYOUT} 2>${RESTYERR}
+    POST /network/interface/ '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }' -v >${RESTYOUT} 2>${RESTYERR}
     check_rest_response "201 CREATED"
   fi
   echo_ok
