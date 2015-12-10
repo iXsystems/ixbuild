@@ -5,6 +5,9 @@ TYPE="${1}"
 BUILD="${2}"
 BRANCH="${3}"
 
+# Set JENKINS var
+export USING_JENKINS="YES"
+
 # Change directory
 mypath=`realpath $0`
 cd `dirname $mypath`

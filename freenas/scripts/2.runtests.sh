@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Where is the pcbsd-build program installed
-PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
@@ -11,7 +11,16 @@ if [ ! -d "${PROGDIR}/tmp" ] ; then
 fi
 
 # Figure out the ISO name
-ISOFILE=`find /tmp/fnasb/_BE/release | grep \.iso$`
+if [ -n "$USING_JENKINS" ] ; then
+  ISOFILE=`find /tmp/fnasb/_BE/release | grep \.iso$`
+else
+  ISOFILE=`find ${PROGDIR}/../_BE/release | grep \.iso$`
+fi
+
+# If no ISO found
+if [ -z "$ISOFILE" ] ; then
+  exit_err "Failed locating ISO file, did 'make release' work?"
+fi
 
 # Is this TrueNAS or FreeNAS?
 echo $ISOFILE | grep -q "TrueNAS"
