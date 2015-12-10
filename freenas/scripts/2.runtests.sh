@@ -11,6 +11,7 @@ if [ ! -d "${PROGDIR}/tmp" ] ; then
 fi
 
 # Figure out the ISO name
+echo "Finding ISO file..."
 if [ -n "$USING_JENKINS" ] ; then
   ISOFILE=`find /tmp/fnasb/_BE/release | grep \.iso$ | head -n 1`
 else
@@ -33,6 +34,8 @@ if [ $? -eq 0 ] ; then
 else
    export FLAVOR="FREENAS"
 fi
+
+echo "Using ISO: $ISOFILE"
 
 # Create the automatic ISO installer
 cd ${PROGDIR}/tmp
