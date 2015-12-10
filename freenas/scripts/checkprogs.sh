@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# Check if we have sourced the variables yet
-if [ -z $PDESTDIR ]
-then
-  . ../freenas.cfg
-fi
-
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 
@@ -37,67 +31,7 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y sysutils/xorriso"
 fi
 
-which pixz >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing pixz.."
-  rc_halt "pkg install -y archivers/pixz"
-fi
-
-pkg info textproc/py-sphinx >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing py-sphinx.."
-  rc_halt "pkg install -y textproc/py-sphinx"
-fi
-
-pkg info textproc/py-sphinxcontrib-httpdomain >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing py-sphinxcontrib-httpdomain.."
-  rc_halt "pkg install -y textproc/py-sphinxcontrib-httpdomain"
-fi
-
-pkg info textproc/py-sphinx-intl >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing py-sphinx-intl.."
-  rc_halt "pkg install -y textproc/py-sphinx-intl"
-fi
-
-pkg info "print/tex-formats" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing print/tex-formats.."
-  rc_halt "pkg install -y print/tex-formats"
-fi
-
-pkg info "print/tex-dvipsk" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing print/tex-dvipsk.."
-  rc_halt "pkg install -y print/tex-dvipsk"
-fi
-
-pkg info "devel/gmake" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing devel/gmake.."
-  rc_halt "pkg install -y devel/gmake"
-fi
-
-pkg info "lang/python" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing lang/python.."
-  rc_halt "pkg install -y lang/python"
-fi
-
-pkg info "www/npm" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing www/npm.."
-  rc_halt "pkg install -y www/npm"
-fi
-
-pkg info "pxz" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing archivers/pxz.."
-  rc_halt "pkg install -y archivers/pxz"
-fi
-
-pkg info "emulators/virtualbox-ose" >/dev/null 2>/dev/null
+which VBoxManage >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing emulators/virtualbox-ose.."
   rc_halt "pkg install -y emulators/virtualbox-ose"
@@ -109,13 +43,13 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y emulators/virtualbox-ose-kmod"
 fi
 
-pkg info "ftp/curl" >/dev/null 2>/dev/null
+which curl >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing ftp/curl.."
   rc_halt "pkg install -y ftp/curl"
 fi
 
-pkg info "shells/bash" >/dev/null 2>/dev/null
+which bash >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing shells/bash.."
   rc_halt "pkg install -y shells/bash"

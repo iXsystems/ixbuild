@@ -6,13 +6,16 @@ PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 
+# Make sure we have all the required packages installed
+${PROGDIR}/scripts/checkprogs.sh
+
 if [ ! -d "${PROGDIR}/tmp" ] ; then
   mkdir ${PROGDIR}/tmp
 fi
 
 # Figure out the ISO name
 echo "Finding ISO file..."
-if [ -n "$USING_JENKINS" ] ; then
+if [ -d "/tmp/fnasb/_BE/release" ] ; then
   ISOFILE=`find /tmp/fnasb/_BE/release | grep '\.iso$' | head -n 1`
 else
   if [ -n "$1" ] ; then
