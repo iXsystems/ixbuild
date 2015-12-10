@@ -13,12 +13,12 @@ fi
 # Figure out the ISO name
 echo "Finding ISO file..."
 if [ -n "$USING_JENKINS" ] ; then
-  ISOFILE=`find /tmp/fnasb/_BE/release | grep \.iso$ | head -n 1`
+  ISOFILE=`find /tmp/fnasb/_BE/release | grep '\.iso$' | head -n 1`
 else
   if [ -n "$1" ] ; then
-    ISOFILE=`find ${1} | grep \.iso$ | head -n 1`
+    ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`
   else
-    ISOFILE=`find ${PROGDIR}/../objs | grep \.iso$ | head -n 1`
+    ISOFILE=`find ${PROGDIR}/../objs | grep '\.iso$' | head -n 1`
   fi
 fi
 
