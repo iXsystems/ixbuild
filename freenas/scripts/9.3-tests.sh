@@ -32,9 +32,14 @@ fi
 # Source our resty / jsawk functions
 . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
+# Set variable to call jsawk utility
+JSAWK="${PROGDIR}/../utils/jsawk -j js24"
+
 # Log files
 RESTYOUT=/tmp/resty.out
 RESTYERR=/tmp/resty.err
+
+TOTALCOUNT="0"
 
 #################################################################
 # Run the tests now!
@@ -88,7 +93,7 @@ set_test_group_text()
 echo_test_title()
 {
   TCOUNT=`expr $TCOUNT + 1`
-  sleep 1
+  TOTALCOUNT=`expr $TOTALCOUNT + 1`
   sync
   echo -e "Running $GROUPTEXT ($TCOUNT/$TOTALTESTS) - $1\c"
 }
@@ -96,7 +101,7 @@ echo_test_title()
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Storage tests" "4"
+  set_test_group_text "Storage tests" "6"
 
   # Check getting disks
   echo_test_title "Disks / API functionality"
@@ -110,15 +115,27 @@ storage_tests()
   check_rest_response "201 CREATED"
   echo_ok
 
-  # Check creating a dataset
-  echo_test_title "Creating dataset"
-  POST /storage/volume/1/datasets/ '{ "name": "share" }' -v >${RESTYOUT} 2>${RESTYERR}
+  # Check creating a dataset /share
+  echo_test_title "Creating dataset tank/share"
+  POST /storage/volume/tank/datasets/ '{ "name": "share" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Check creating a dataset /jails
+  echo_test_title "Creating dataset tank/jails"
+  POST /storage/volume/tank/datasets/ '{ "name": "jails" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 
   # Set the permissions of the dataset
-  echo_test_title "Changing permissions"
+  echo_test_title "Changing permissions on /mnt/tank"
   PUT /storage/permission/ '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Set the permissions of the dataset
+  echo_test_title "Changing permissions on /mnt/tank/share"
+  PUT /storage/permission/ '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 }
@@ -135,8 +152,8 @@ nfs_tests()
   echo_ok
 
   # Check creating a NFS share
-  echo_test_title "Creating a NFS share on /mnt/tank"
-  POST /sharing/nfs/ '{ "nfs_comment": "My Test Share", "nfs_paths": ["/mnt/tank"], "nfs_security": "sys" }' -v >${RESTYOUT} 2>${RESTYERR}
+  echo_test_title "Creating a NFS share on /mnt/tank/share"
+  POST /sharing/nfs/ '{ "nfs_comment": "My Test Share", "nfs_paths": ["/mnt/tank/share"], "nfs_security": "sys" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 
@@ -149,7 +166,7 @@ nfs_tests()
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Mounting NFS"
   rc_halt "mkdir /tmp/nfs-mnt.$$"
-  rc_halt "mount_nfs ${ip}:/mnt/tank /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$"
+  rc_halt "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$"
   echo_ok
 
   echo_test_title "Creating NFS file"
@@ -192,13 +209,13 @@ cifs_tests()
   # Set the group text and number of tests
   set_test_group_text "CIFS tests" "9"
 
-  echo_test_title "Enabling the CIFS service"
+  echo_test_title "Enabling CIFS service"
   PUT /services/cifs/ '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false, "cifs_srv_netbiosname": "testnas" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
   echo_ok
 
-  echo_test_title "Creating a CIFS share on /mnt/tank"
-  POST /sharing/cifs/ '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }' -v >${RESTYOUT} 2>${RESTYERR}
+  echo_test_title "Creating a CIFS share on /mnt/tank/share"
+  POST /sharing/cifs/ '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/share", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 
@@ -269,7 +286,7 @@ set_ip()
 
 # Run a series of tests on the boot-environments
 bootenv_tests() {
-  set_test_group_text "Boot-Environment Testing" "3"
+  set_test_group_text "Boot-Environment Tests" "3"
 
   echo_test_title "Creating a new boot-environment: newbe1"
   POST /system/bootenv/ '{ "name": "newbe1", "source": "default" }' -v >${RESTYOUT} 2>${RESTYERR}
@@ -289,7 +306,7 @@ bootenv_tests() {
 
 # Run a series of tests on the email settings
 email_tests() {
-  set_test_group_text "E-Mail Testing" "1"
+  set_test_group_text "E-Mail Tests" "1"
 
   echo_test_title "Configuring e-mail settings"
   PUT /system/email/ '{ "em_fromemail": "william.spam@ixsystems.com", "em_outgoingserver": "mail.ixsystems.com", "em_pass": "changeme", "em_port": 25, "em_security": "plain", "em_smtp": true, "em_user": "william.spam@ixsystems.com" }' -v >${RESTYOUT} 2>${RESTYERR}
@@ -299,15 +316,20 @@ email_tests() {
 
 # Run a series of tests on jail creation
 jail_tests() {
-  set_test_group_text "Jail Testing" "5"
+  set_test_group_text "Jail Tests" "6"
 
   echo_test_title "Configuring jails"
-  PUT /jails/configuration/ '{ "jc_ipv4_network_start": "192.168.56.150", "jc_path": "/mnt/tank" }' -v >${RESTYOUT} 2>${RESTYERR}
+  PUT /jails/configuration/ '{ "jc_ipv4_network_start": "192.168.56.150", "jc_path": "/mnt/tank/jails" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 
-  echo_test_title "Creating jail"
-  POST /jails/jails/ '{ "jail_host": "testjail" }' -v >${RESTYOUT} 2>${RESTYERR}
+  echo_test_title "Creating jail - VNET OFF"
+  POST /jails/jails/ '{ "jail_host": "testjail", "jail_defaultrouter_ipv4": "192.168.56.1", "jail_ipv4": "192.168.56.155", "jail_ipv4_netmask": "24", "jail_vnet": false }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Mount tank/share into jail"
+  POST /jails/mountpoints/ '{ "destination": "/mnt", "jail": "testjail", "mounted": true, "readonly": false, "source": "/mnt/tank/share" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 
@@ -328,7 +350,7 @@ jail_tests() {
 }
 
 rsyncd_tests() {
-  set_test_group_text "rsync tests" "4"
+  set_test_group_text "RSYNC tests" "4"
 
   echo_test_title "Configuring rsyncd service"
   PUT /services/rsyncd/ '{ "rsyncd_port": 873 }' -v >${RESTYOUT} 2>${RESTYERR}
@@ -341,7 +363,7 @@ rsyncd_tests() {
   echo_ok
 
   echo_test_title "Creating rsync resource"
-  POST /services/rsyncmod/ '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/tank" }' -v >${RESTYOUT} 2>${RESTYERR}
+  POST /services/rsyncmod/ '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/tank/share" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
   echo_ok
 
@@ -349,6 +371,50 @@ rsyncd_tests() {
   echo_test_title "Testing rsync access"
   rc_halt "rsync -avn ${ip}::testmod"
   echo_ok
+}
+
+ftp_tests() {
+  set_test_group_text "FTP tests" "3"
+
+  echo_test_title "Configuring ftp service"
+  PUT /services/ftp/ '{ "ftp_clients": 10, "ftp_rootlogin": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+  echo_test_title "Starting ftp service"
+  PUT /services/services/ftp/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+  echo_test_title "Fetching file via FTP"
+  rc_halt "ftp -o /tmp/ftpfile ftp://testuser:test@${ip}/.cshrc"
+  echo_ok
+}
+
+user_tests() {
+  set_test_group_text "User tests" "3"
+
+  # Create dataset for the home directory
+  echo_test_title "Creating home dataset tank/testuser"
+  POST /storage/volume/tank/datasets/ '{ "name": "testuser" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Create the testuser
+  echo_test_title "Creating user: testuser"
+  POST /account/users/ '{ "bsdusr_username": "testuser", "bsdusr_creategroup": true, "bsdusr_full_name": "Test User", "bsdusr_password": "test", "bsdusr_uid": 1111, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Get the ID of this user
+  userid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
+
+  # Set the user to part of the 'wheel' / 'ftp' groups
+  echo_test_title "Setting user groups: wheel,ftp"
+  POST /account/users/${userid}/groups/ '["wheel","ftp"]' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 OK"
+  echo_ok
+
 }
 
 wait_for_avail()
@@ -388,21 +454,27 @@ bootenv_tests
 # Run the storage tests
 storage_tests
 
+# Run the user tests
+user_tests
+
 # Run the rsyncd tests
 rsyncd_tests
 
 # Run the CIFS tests
 cifs_tests
 
-# Run the iSCSI tests
-iscsi_tests
+# Run the FTP tests
+ftp_tests
 
 # Run the NFS tests
 nfs_tests
+
+# Run the iSCSI tests
+iscsi_tests
 
 # Run the jail tests
 jail_tests
 
 # Made it to the end, exit with success!
-echo "SUCCESS - REST API testing complete!"
+echo "SUCCESS - $TOTALCOUNT tests run - REST API testing complete!"
 exit 0

@@ -54,3 +54,9 @@ if [ "$?" != "0" ]; then
   echo "Installing shells/bash.."
   rc_halt "pkg install -y shells/bash"
 fi
+
+which js24 >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing lang/spidermonkey24.."
+  rc_halt "pkg install -y lang/spidermonkey24"
+fi
