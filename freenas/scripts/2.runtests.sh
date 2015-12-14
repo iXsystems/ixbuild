@@ -15,7 +15,9 @@ fi
 
 # Figure out the ISO name
 echo "Finding ISO file..."
-if [ -d "/tmp/fnasb/_BE/release" ] ; then
+if [ -d "/tmp/fnasb/objs" ] ; then
+  ISOFILE=`find /tmp/fnasb/objs | grep '\.iso$' | head -n 1`
+elif [ -d "/tmp/fnasb/_BE/release" ] ; then
   ISOFILE=`find /tmp/fnasb/_BE/release | grep '\.iso$' | head -n 1`
 else
   if [ -n "$1" ] ; then
