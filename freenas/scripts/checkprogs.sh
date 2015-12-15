@@ -72,3 +72,9 @@ if [ "$?" != "0" ]; then
   echo "Installing www/node012.."
   rc_halt "pkg install -y www/node012"
 fi
+
+which npm >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing www/npm012.."
+  rc_halt "pkg install -y www/npm012"
+fi
