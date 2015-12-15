@@ -1,18 +1,29 @@
 #!/usr/local/bin/bash
 # Author: Kris Moore
 # License: BSD
-# Location for tests into REST API of FreeNAS 10.x
+# Location for tests into API of FreeNAS 10.x
 
 # Where is the pcbsd-build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 # IP of client we are testing
-ip="192.168.0.39"
+if [ -n "$1" ] ; then
+  ip="$1"
+  manualip="YES"
+else
+  ip="192.168.56.100"
+  manualip="NO"
+fi
 
-# Source our resty / jsawk functions
-# Resty Docs: https://github.com/micha/resty
-# jsawk: https://github.com/micha/jsawk
-. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u root:testing
+# Set the username / pass of FreeNAS for REST calls
+if [ -n "$2" ] ; then
+  fuser="$2"
+else
+  fuser="root"
+fi
+if [ -n "$3" ] ; then
+  fpass="$3"
+else
+  fpass="testing"
+fi
 
-RESTYOUT=/tmp/resty.out
-RESTYERR=/tmp/resty.err
