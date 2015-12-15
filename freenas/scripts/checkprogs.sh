@@ -60,3 +60,9 @@ if [ "$?" != "0" ]; then
   echo "Installing lang/spidermonkey24.."
   rc_halt "pkg install -y lang/spidermonkey24"
 fi
+
+which python3 >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing python3.."
+  rc_halt "pkg install -y python3"
+fi
