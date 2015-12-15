@@ -124,7 +124,7 @@ rm ${PDESTDIR9}/etc/fstab
 # Make EFI system partition (should be done with makefs in the future)
 cd ${PROGDIR}/iso
 FAT_FILE="${PDESTDIR9}/efiboot.fatimg"
-rc_halt "dd if=/dev/zero of=efiboot.img bs=4k count=500"
+rc_halt "dd if=/dev/zero of=${FAT_FILE} bs=4k count=500"
 device=`mdconfig -a -t vnode -f ${FAT_FILE}`
 rc_halt "newfs_msdos -F 12 -m 0xf8 /dev/$device"
 rc_nohalt "mkdir efi"
