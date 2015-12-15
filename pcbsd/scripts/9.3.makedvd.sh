@@ -121,8 +121,28 @@ echo "Running makefs..."
 rc_halt "makefs -B little -o label=${LABEL} ${OUTFILE}.part ${PDESTDIR9}"
 rm ${PDESTDIR9}/etc/fstab
 
+# Lets create the custom FAT partition for EFI boot
+# Generate 800K FAT image
+FAT_FILE=${PDESTDIR9}/boot/bootx64.efifat
+
+dd if=/dev/zero of=$FAT_FILE bs=512 count=1600
+DEVICE=`mdconfig -a -f $FAT_FILE`
+newfs_msdos -F 12 -L EFI $DEVICE
+cd ${PROGDIR}/iso
+mkdir stub
+mount -t msdosfs /dev/$DEVICE stub
+
+# Create and bless a directory for the boot loader
+mkdir -p stub/efi/boot
+cp ${PDESTDIR9}/boot/boot1.efi stub/efi/boot/bootx64.efi
+
+umount stub
+mdconfig -d -u $DEVICE
+rmdir stub
+
+
 echo "Running mkimg..."
-rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
+rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${FAT_FILE} -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
 rm ${OUTFILE}.part
 
 rc_halt "umount ${ISODISTDIR}/packages"
