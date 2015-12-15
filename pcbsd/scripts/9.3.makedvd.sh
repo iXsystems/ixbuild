@@ -110,20 +110,11 @@ touch ${PDESTDIR9}/pcbsd-media-local
 
 echo "Creating IMG..."
 echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
-# Set some initial loader.conf values
-cp ${PDESTDIR9}/boot/loader.conf.orig ${PDESTDIR9}/boot/loader.conf
-cat >>${PDESTDIR9}/boot/loader.conf << EOF
-vfs.root.mountfrom="ufs:/dev/ufs/$LABEL"
-loader_menu_title="Welcome to $bTitle"
-loader_brand="$brand"
-EOF
-echo "Running makefs..."
-rc_halt "makefs -B little -o label=${LABEL} ${OUTFILE}.part ${PDESTDIR9}"
-rm ${PDESTDIR9}/etc/fstab
 
 # Make EFI system partition (should be done with makefs in the future)
 cd ${PROGDIR}/iso
-FAT_FILE="${PDESTDIR9}/efiboot.fatimg"
+FAT_FILE="${PDESTDIR9}/boot/efiboot.fatimg"
+if [ -e "$FAT_FILE" ] ; then rm $FAT_FILE; fi
 rc_halt "dd if=/dev/zero of=${FAT_FILE} bs=4k count=500"
 device=`mdconfig -a -t vnode -f ${FAT_FILE}`
 rc_halt "newfs_msdos -F 12 -m 0xf8 /dev/$device"
@@ -135,6 +126,18 @@ rc_halt "umount efi"
 rc_halt "rmdir efi"
 rc_halt "mdconfig -d -u $device"
 
+# Set some initial loader.conf values
+cp ${PDESTDIR9}/boot/loader.conf.orig ${PDESTDIR9}/boot/loader.conf
+cat >>${PDESTDIR9}/boot/loader.conf << EOF
+vfs.root.mountfrom="ufs:/dev/ufs/$LABEL"
+loader_menu_title="Welcome to $bTitle"
+loader_brand="$brand"
+EOF
+echo "Running makefs..."
+rc_halt "makefs -B little -o label=${LABEL} ${OUTFILE}.part ${PDESTDIR9}"
+rm ${PDESTDIR9}/etc/fstab
+
+# Create the USB image now
 echo "Running mkimg..."
 rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${FAT_FILE} -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
 rm ${OUTFILE}.part
