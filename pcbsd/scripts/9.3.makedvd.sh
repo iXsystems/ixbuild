@@ -77,10 +77,10 @@ echo "Running makefs..."
 echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > ${PDESTDIR9}/etc/fstab
 
 # Set some initial loader.conf values
-cp ${PDESTDIR9}/boot/loader.conf ${PDESTDIR9}/boot/loader.conf.orig
-cat >>${PDESTDIR9}/boot/loader.conf << EOF
+cat >${PDESTDIR9}/boot/loader.conf << EOF
 vfs.root.mountfrom="cd9660:/dev/iso9660/$LABEL"
 loader_menu_title="Welcome to $bTitle"
+loader_logo="$brand"
 loader_brand="$brand"
 EOF
 makefs -t cd9660 $bootable -o rockridge -o label=$LABEL -o publisher="$publisher" ${PROGDIR}/iso/${bFile}-DVD.iso ${PDESTDIR9}
@@ -115,9 +115,10 @@ echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
 cd ${PROGDIR}/iso
 
 # Set some initial loader.conf values
-cat >>${PDESTDIR9}/boot/loader.conf << EOF
+cat >${PDESTDIR9}/boot/loader.conf << EOF
 vfs.root.mountfrom="ufs:/dev/ufs/$LABEL"
 loader_menu_title="Welcome to $bTitle"
+loader_logo="$brand"
 loader_brand="$brand"
 EOF
 echo "Running makefs..."
