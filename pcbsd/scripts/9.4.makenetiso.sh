@@ -67,10 +67,10 @@ publisher="The PC-BSD Project.  http://www.pcbsd.org/"
 echo "Running makefs..."
 echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > ${PDESTDIR9}/etc/fstab
 # Set some initial loader.conf values
-cp ${PDESTDIR9}/boot/loader.conf ${PDESTDIR9}/boot/loader.conf.orig
-cat >>${PDESTDIR9}/boot/loader.conf << EOF
+cat >${PDESTDIR9}/boot/loader.conf << EOF
 vfs.root.mountfrom="cd9660:/dev/iso9660/$LABEL"
 loader_menu_title="Welcome to $bTitle"
+loader_logo="$brand"
 loader_brand="$brand"
 EOF
 makefs -t cd9660 $bootable -o rockridge -o label=$LABEL -o publisher="$publisher" ${PROGDIR}/iso/${bFile}-netinstall.iso ${PDESTDIR9}
@@ -100,10 +100,10 @@ touch ${PDESTDIR9}/pcbsd-media-local
 echo "Creating IMG..."
 echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
 # Set some initial loader.conf values
-cp ${PDESTDIR9}/boot/loader.conf.orig ${PDESTDIR9}/boot/loader.conf
-cat >>${PDESTDIR9}/boot/loader.conf << EOF
+cat >${PDESTDIR9}/boot/loader.conf < EOF
 vfs.root.mountfrom="ufs:/dev/ufs/$LABEL"
 loader_menu_title="Welcome to $bTitle"
+loader_logo="$brand"
 loader_brand="$brand"
 EOF
 echo "Running makefs..."
@@ -111,7 +111,7 @@ rc_halt "makefs -B little -o label=${LABEL} ${OUTFILE}.part ${PDESTDIR9}"
 rm ${PDESTDIR9}/etc/fstab
 
 echo "Running mkimg..."
-rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
+rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PROGDIR}/kludges/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
 rm ${OUTFILE}.part
 
 # Run MD5 command
