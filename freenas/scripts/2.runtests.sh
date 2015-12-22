@@ -76,7 +76,11 @@ VBoxManage unregistervm $VM >/dev/null 2>/dev/null
 rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
 
 # Copy ISO over to /root in case we need to grab it from jenkins node later
-cp ${PROGDIR}/tmp/freenas-auto.iso /root/
+if [ "$FLAVOR" = "TRUENAS" ] ; then
+  cp ${PROGDIR}/tmp/freenas-auto.iso /root/truenas-auto.iso
+else
+  cp ${PROGDIR}/tmp/freenas-auto.iso /root/freenas-auto.iso
+fi
 
 # Remove from the vbox registry
 VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
