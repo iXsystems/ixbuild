@@ -17,10 +17,18 @@ if [ -e "/etc/netcli" ] ; then
   echo "Setting ROOT password for REST"
   /etc/netcli reset_root_pw "testing"
 
-  # Set the IP address we will use for testing
-  echo "Changing IP address for REST"
-  /sbin/ifconfig em0 192.168.56.100 255.255.255.0
-  /sbin/dhclient em1
+  # Check if we are running in virtualbox
+  /sbin/ifconfig em0 2>/dev/null >/dev/null
+  if [ $? -eq 0 ] ; then
+    /sbin/ifconfig em0 192.168.56.100 255.255.255.0
+    /sbin/dhclient em1
+  fi
+
+  # Check if we are running in bhyve
+  /sbin/ifconfig vtnet0 2>/dev/null >/dev/null
+  if [ $? -eq 0 ] ; then
+    /sbin/ifconfig vtnet0 192.168.56.100 255.255.255.0
+  fi
 
   # Display ifconfig settings
   /sbin/ifconfig
