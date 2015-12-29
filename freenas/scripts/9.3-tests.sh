@@ -304,6 +304,23 @@ bootenv_tests() {
   echo_ok
 }
 
+# Run a series of tests on the ssh settings
+# We also leave it enabled, so we have access to VM if something hangs / goes wrong
+ssh_tests() {
+  set_test_group_text "SSH Tests" "2"
+
+  echo_test_title "Configuring SSH settings"
+  PUT /services/ssh/ '{ "ssh_rootlogin": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+  echo_test_title "Enabling SSH Service"
+  PUT /services/services/ssh/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+}
+
 # Run a series of tests on the email settings
 email_tests() {
   set_test_group_text "E-Mail Tests" "1"
@@ -444,6 +461,9 @@ echo_ok
 
 # Reset the IP address via REST
 set_ip
+
+# Setup SSH access
+ssh_tests
 
 # Check e-mail configuration
 email_tests
