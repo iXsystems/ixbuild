@@ -147,7 +147,8 @@ nfs_tests()
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
-  PUT /services/nfs/ '{ "nfs_srv_bindip": "'"${ip}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": true, "nfs_srv_v4_krb": true, "id": 1 }' -v >${RESTYOUT} 2>${RESTYERR}
+  #PUT /services/nfs/ '{ "nfs_srv_bindip": "'"${ip}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": true, "nfs_srv_v4_krb": true, "id": 1 }' -v >${RESTYOUT} 2>${RESTYERR}
+  PUT /services/nfs/ '{ "nfs_srv_bindip": "'"${ip}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
   echo_ok
 
