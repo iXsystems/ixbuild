@@ -69,18 +69,59 @@ check_rest_response_continue()
 
 # $1 = Command to run
 # $2 = Command to run if $1 fails
+# $3 = Optional timeout
 rc_halt()
 {
-  ${1} >/tmp/.cmdTest.$$ 2>/.cmdTest.$$
-  if [ $? -ne 0 ] ; then
-     echo -e " - FAILED"
-     ${2}
-     echo "Failed running: $1"
-     cat /tmp/.cmdTest.$$
-     rm /tmp/.cmdTest.$$
-     exit 1
+  if [ -z "$3" ] ; then
+    ${1} >/tmp/.cmdTest.$$ 2>/.cmdTest.$$
+    if [ $? -ne 0 ] ; then
+       echo -e " - FAILED"
+       ${2}
+       echo "Failed running: $1"
+       cat /tmp/.cmdTest.$$
+       rm /tmp/.cmdTest.$$
+       exit 1
+    fi
+    rm /tmp/.cmdTest.$$
+    return 0
   fi
+
+
+  # Running with timeout
+  ( ${1} >/tmp/.cmdTest.$$ 2>/.cmdTest.$$ ; echo $? > /tmp/.rc-result.$$ ) &
+  echo "$!" > /tmp/.rc-pid.$$
+  timeout=0
+  while :
+  do
+    # See if the process stopped yet
+    pgrep -F /tmp/.rc-pid.$$ >/dev/null 2>/dev/null
+    if [ $? -ne 0 ] ; then
+      # Check if it was 0
+      if [ "$(cat /tmp/.rc-result.$$)" = "0" ] ; then
+        rm /tmp/.rc-result.$$
+        return 0
+      fi
+      rm /tmp/.rc-result.$$
+      break
+    fi
+
+    # Check the timeout
+    sleep 1
+    timeout=$(expr $timeout + 1)
+    if [ $timeout -gt $3 ] ; then break; fi
+  done
+
+  rm /tmp/.rc-pid.$$ 2>/dev/null
+  rm /tmp/.rc-result.$$ 2>/dev/null
+
+  kill -9 $(cat /tmp/.rc-pid.$$)
+  rm /tmp/.rc-pid.$$
+  echo -e " - FAILED"
+  ${2}
+  echo "Timeout running: $1"
+  cat /tmp/.cmdTest.$$
   rm /tmp/.cmdTest.$$
+  exit 1
 }
 
 set_test_group_text()
@@ -167,7 +208,7 @@ nfs_tests()
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Mounting NFS"
   rc_halt "mkdir /tmp/nfs-mnt.$$"
-  rc_halt "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$"
+  rc_halt "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60"
   echo_ok
 
   echo_test_title "Creating NFS file"
