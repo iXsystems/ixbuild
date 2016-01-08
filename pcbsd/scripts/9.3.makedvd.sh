@@ -77,12 +77,18 @@ echo "Running makefs..."
 echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > ${PDESTDIR9}/etc/fstab
 
 # Set some initial loader.conf values
+cp ${PDESTDIR9}/boot/loader.conf ${PDESTDIR9}/boot/loader.conf.orig
+
 cat >${PDESTDIR9}/boot/loader.conf << EOF
 vfs.root.mountfrom="cd9660:/dev/iso9660/$LABEL"
 loader_menu_title="Welcome to $bTitle"
 loader_logo="$brand"
 loader_brand="$brand"
 EOF
+
+# Throw back in the pre-supplied settings
+cat ${PDESTDIR9}/boot/loader.conf.orig >> ${PDESTDIR9}/boot/loader.conf
+
 makefs -t cd9660 $bootable -o rockridge -o label=$LABEL -o publisher="$publisher" ${PROGDIR}/iso/${bFile}-DVD.iso ${PDESTDIR9}
 rm ${PDESTDIR9}/etc/fstab
 rm -f efiboot.img
@@ -121,6 +127,10 @@ loader_menu_title="Welcome to $bTitle"
 loader_logo="$brand"
 loader_brand="$brand"
 EOF
+
+# Throw back in the pre-supplied settings
+cat ${PDESTDIR9}/boot/loader.conf.orig >> ${PDESTDIR9}/boot/loader.conf
+
 echo "Running makefs..."
 rc_halt "makefs -B little -o label=${LABEL} ${OUTFILE}.part ${PDESTDIR9}"
 rm ${PDESTDIR9}/etc/fstab
