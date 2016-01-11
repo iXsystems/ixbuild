@@ -1,0 +1,50 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+user_tests() {
+  set_test_group_text "User tests" "3"
+
+  # Create dataset for the home directory
+  echo_test_title "Creating home dataset tank/testuser"
+  POST /storage/volume/tank/datasets/ '{ "name": "testuser" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Create the testuser
+  echo_test_title "Creating user: testuser"
+  POST /account/users/ '{ "bsdusr_username": "testuser", "bsdusr_creategroup": true, "bsdusr_full_name": "Test User", "bsdusr_password": "test", "bsdusr_uid": 1111, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  # Get the ID of this user
+  userid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
+
+  # Set the user to part of the 'wheel' / 'ftp' groups
+  echo_test_title "Setting user groups: wheel,ftp"
+  POST /account/users/${userid}/groups/ '["wheel","ftp"]' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 OK"
+  echo_ok
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+user_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) user_tests ;;
+     COMPLETE) user_tests ;;
+    BENCHMARK) ;;
+            *) user_tests ;;
+  esac
+}

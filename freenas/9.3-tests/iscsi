@@ -1,0 +1,37 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+iscsi_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "iSCSI tests" "1"
+
+  # Enable iSCSI server
+  echo_test_title "Creating iSCSI extent"
+  POST /services/iscsi/extent/ '{ "iscsi_target_extent_type": "File", "iscsi_target_extent_name": "extent", "iscsi_target_extent_filesize": "50MB", "iscsi_target_extent_path": "/mnt/tank/iscsi" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+iscsi_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) iscsi_tests ;;
+     COMPLETE) iscsi_tests ;;
+    BENCHMARK) ;;
+            *) iscsi_tests ;;
+  esac
+}

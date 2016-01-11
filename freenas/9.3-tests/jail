@@ -1,0 +1,59 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+# Run a series of tests on jail creation
+jail_tests() {
+  set_test_group_text "Jail Tests" "6"
+
+  echo_test_title "Configuring jails"
+  PUT /jails/configuration/ '{ "jc_ipv4_network_start": "192.168.56.150", "jc_path": "/mnt/tank/jails" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Creating jail - VNET OFF"
+  POST /jails/jails/ '{ "jail_host": "testjail", "jail_defaultrouter_ipv4": "192.168.56.1", "jail_ipv4": "192.168.56.155", "jail_ipv4_netmask": "24", "jail_vnet": false }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Mount tank/share into jail"
+  POST /jails/mountpoints/ '{ "destination": "/mnt", "jail": "testjail", "mounted": true, "readonly": false, "source": "/mnt/tank/share" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "201 CREATED"
+  echo_ok
+
+  echo_test_title "Starting jail"
+  POST /jails/jails/1/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 ACCEPTED"
+  echo_ok
+
+  echo_test_title "Restarting jail"
+  POST /jails/jails/1/restart/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 ACCEPTED"
+  echo_ok
+
+  echo_test_title "Stopping jail"
+  POST /jails/jails/1/stop/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "202 ACCEPTED"
+  echo_ok
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+jail_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) jail_tests ;;
+     COMPLETE) jail_tests ;;
+    BENCHMARK) ;;
+            *) jail_tests ;;
+  esac
+}
