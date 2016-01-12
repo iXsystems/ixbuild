@@ -8,30 +8,6 @@
 # Where is the pcbsd-build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
-# IP of client we are testing
-if [ -n "$1" ] ; then
-  ip="$1"
-  manualip="YES"
-else
-  ip="192.168.56.100"
-  manualip="NO"
-fi
-
-# Set the username / pass of FreeNAS for REST calls
-if [ -n "$2" ] ; then
-  fuser="$2"
-else
-  fuser="root"
-fi
-if [ -n "$3" ] ; then
-  fpass="$3"
-else
-  fpass="testing"
-fi
-
-# Source our resty / jsawk functions
-. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
-
 # Set variable to call jsawk utility
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 
@@ -255,6 +231,38 @@ read_module_dir() {
   done
 }
 
+# Set the defaults for connecting to the VM
+ip="192.168.56.100"
+manualip="NO"
+fuser="root"
+fpass="testing"
+
+
+while [ $# -gt 0 ] ; do
+  # Parse the CLI args
+  key=`echo $1 | cut -d '=' -f 1`
+  val=`echo $1 | cut -d '=' -f 2`
+
+  case "$key" in
+    testset|TESTSET) case "$val" in
+			SMOKE|smoke) export TESTSET="SMOKE" ;;
+	  	  COMPLETE|complete) export TESTSET="COMPLETE" ;;
+		BENCHMARK|benchmark) export TESTSET="BENCHMARK" ;;
+			*) ;;
+                     esac
+                     ;; 
+     module|MODULE) runmod="$val $runmod" ;;
+     ip|IP) ip="$val" ; manualip="YES" ;;
+     user|USER) fuser="$val" ;;
+     pass|PASS) fpass="$val" ;;
+    *) ;;
+  esac
+  shift
+done
+
+# Source our resty / jsawk functions
+. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
+
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
 # an initial test to determine when the interface is up
@@ -265,8 +273,16 @@ echo_ok
 # Reset the IP address via REST
 set_ip
 
-# Now start going through our test modules
-read_module_dir
+if [ -n "$runmod" ] ; then
+  for mod in $runmod
+  do
+    # Run a specific module
+    run_module "$mod"
+  done
+else
+  # Now start going through our test modules
+  read_module_dir
+fi
 
 # Made it to the end, exit with success!
 echo "SUCCESS - $TOTALCOUNT tests run - REST API testing complete!"
