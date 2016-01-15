@@ -1,0 +1,41 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+dyndns_tests() {
+
+  if [ -z "$NOIPUSERNAME" -o -z "$NOIPPASSWORD" -o -z "$NOIPHOST" ] ; then
+     echo "Missing the NOIPUSERNAME / NOIPPASSWORD / NOIPHOST settings, test skipped.."
+     return 0
+  fi
+  set_test_group_text "DynDns tests" "1"
+
+  # Create dataset for the home directory
+  # Create the testuser
+  echo_test_title "Updating Settings for NO-IP.."
+  PUT /services/dynamicdns/ '{ "ddns_password": "'${NOIPPASSWORD}'", "ddns_username": "'${NOIPUSERNAME}'", "ddns_provider": "default@no-ip.com", "ddns_domain": "'${NOIPHOST}'" }' -v >${RESTYOUT} 2>${RESTYERR}
+  check_rest_response "200 OK"
+  echo_ok
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+dyndns_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) dyndns_tests ;;
+     COMPLETE) dyndns_tests ;;
+    BENCHMARK) ;;
+            *) dyndns_tests ;;
+  esac
+}
