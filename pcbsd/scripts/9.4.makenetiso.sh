@@ -116,7 +116,7 @@ rc_halt "makefs -B little -o label=${LABEL} ${OUTFILE}.part ${PDESTDIR9}"
 rm ${PDESTDIR9}/etc/fstab
 
 echo "Running mkimg..."
-rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PROGDIR}/kludges/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
+rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
 rm ${OUTFILE}.part
 
 # Run MD5 command
