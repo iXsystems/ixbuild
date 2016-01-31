@@ -137,9 +137,7 @@ rm ${PDESTDIR9}/etc/fstab
 
 # Create the USB image now
 echo "Running mkimg..."
-# KPM 12-17-2015 - Use kluges/boot1.efifat, which does NOT have the ZFS/UEFI boot patch
-# that patch currently breaks booting from UFS / USB
-rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PROGDIR}/kludges/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
+rc_halt "mkimg -s gpt -b ${PDESTDIR9}/boot/pmbr -p efi:=${PDESTDIR9}/boot/boot1.efifat -p freebsd-boot:=${PDESTDIR9}/boot/gptboot -p freebsd-ufs:=${OUTFILE}.part -p freebsd-swap::1M -o ${OUTFILE}"
 rm ${OUTFILE}.part
 rm ${FAT_FILE}
 

@@ -71,12 +71,22 @@ if [ -n "$FREENASLEGACY" ] ; then
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
 fi
 
-make release 2>&1 | tee ${FNASSRC}/.auto-log
+if [ -e "pipelog" ] ; then
+  rm pipelog
+fi
+mkfifo pipelog
+tee ${FNASSRC}/.auto-log < pipelog &
+make release >pipelog 2>pipelog
 if [ $? -ne 0 ] ; then
 
   # Try to provide some context to the failure right in the summary e-mail
   grep -m 1 -C 8 "Error code" ${FNASSRC}/.auto-log
 
   rm ${FNASSRC}/.auto-log
-  exit_err "Failed running 'make release'"
+  rm pipelog
+  echo "ERROR: Failed running 'make release'"
+  exit 1
 fi
+
+rm pipelog
+exit 0
