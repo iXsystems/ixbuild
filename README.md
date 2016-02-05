@@ -63,6 +63,7 @@ by pointing them at a FreeNAS instance with the following syntax:
  # cd freenas/scripts && ./9.3-tests.sh
 ```
 
+```
  *Optional* arguments to 9.3-tests.sh
 
  testset={smoke|complete|benchmark}
@@ -87,6 +88,7 @@ tests will be run.
  password=<FreeNASpassword>
 
  FreeNAS password for REST auth
+```
 
 all
 ---
