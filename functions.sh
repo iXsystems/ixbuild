@@ -238,7 +238,9 @@ jenkins_world()
 
   push_world
 
-  cleanup_workdir
+  if [ -z "$1" ] ; then
+    cleanup_workdir
+  fi
 }
 
 jenkins_jail()
@@ -247,7 +249,7 @@ jenkins_jail()
 
   pull_world
   if [ $? -ne 0 ] ; then
-    jenkins_world
+    jenkins_world "1"
     pull_world
     if [ $? -ne 0 ] ; then
        exit_clean "Failed getting world files"
@@ -272,7 +274,7 @@ jenkins_pkg()
   # Pull in the world directory
   pull_world
   if [ $? -ne 0 ] ; then
-    jenkins_world
+    jenkins_world "1"
     pull_world
     if [ $? -ne 0 ] ; then
        exit_clean "Failed getting world files"

@@ -61,9 +61,9 @@ cd ${WORLDSRC}/release
 make clean
 
 # Create the FTP files
-make ftp NOPORTS=yes NOSRC=yes TARGET=$ARCH
+make ftp NOPORTS=yes TARGET=$ARCH
 if [ $? -ne 0 ] ; then
-   echo "Failed running: make ftp NOPORTS=yes NOSRC=yes TARGET=$ARCH"
+   echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH"
    exit 1 
 fi
 rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
@@ -83,10 +83,10 @@ cd ${WORLDSRC}/release
 make clean
 
 # Make src
-rm -rf ${PROGDIR}/tmp/usr >/dev/null 2>/dev/null
-mkdir -p ${PROGDIR}/tmp/usr
-ln -s ${WORLDSRC} ${PROGDIR}/tmp/usr/src
-rc_halt "tar cLvJf ${DISTDIR}/src.txz --exclude .git -C ${PROGDIR}/tmp ./usr"
-rm -rf ${PROGDIR}/tmp/usr >/dev/null 2>/dev/null
+#rm -rf ${PROGDIR}/tmp/usr >/dev/null 2>/dev/null
+#mkdir -p ${PROGDIR}/tmp/usr
+#ln -s ${WORLDSRC} ${PROGDIR}/tmp/usr/src
+#rc_halt "tar cLvJf ${DISTDIR}/src.txz --exclude .git -C ${PROGDIR}/tmp ./usr"
+#rm -rf ${PROGDIR}/tmp/usr >/dev/null 2>/dev/null
 
 exit 0
