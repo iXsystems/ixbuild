@@ -59,7 +59,32 @@ Tests are located in the freenas/scripts/9.3-tests.sh and
 freenas/scripts/10-tests.sh files. These scripts can also be run directly
 by pointing them at a FreeNAS instance with the following syntax:
 
- cd freenas/scripts && ./9.3-tests.sh IP username password
+ cd freenas/scripts && ./9.3-tests.sh
+
+ *Optional* arguments to 9.3-tests.sh
+
+ testset={smoke|complete|benchmark}
+
+    smoke - Basic tests to check core functionality
+ complete - More in-depth testing to check edge cases
+benchmark - Run tests which measure speeds
+
+ module={smb|nfs|ftp|etc|etc}
+
+   The various modules you want to run, multiple module= lines allowed. If not specified all
+tests will be run.
+
+ ip=<hostip>
+
+ FreeNAS host/IP address
+
+ user=<FreeNASUsername>
+
+ FreeNAS username for REST auth
+
+ password=<FreeNASpassword>
+
+ FreeNAS password for REST auth
 
 all
 ---
