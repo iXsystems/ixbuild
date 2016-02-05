@@ -394,7 +394,8 @@ update_poudriere_jail()
   poudriere jail -d -j $PBUILD >/dev/null 2>/dev/null
 
 
-  poudriere jail -c -j $PBUILD -v ${POUDRIEREJAILVER} -a $ARCH
+  export EXTRA_DISTS="src"
+  poudriere jail -c -m ftp -j $PBUILD -v ${POUDRIEREJAILVER} -a $ARCH
   if [ $? -ne 0 ] ; then
     cat /usr/local/etc/poudriere.conf | grep -v "^FREEBSD_HOST=file:///fakeftp/" >/tmp/.pconf.$$
     mv /tmp/.pconf.$$ /usr/local/etc/poudriere.conf
