@@ -59,15 +59,17 @@ Tests are located in the freenas/scripts/9.3-tests.sh and
 freenas/scripts/10-tests.sh files. These scripts can also be run directly
 by pointing them at a FreeNAS instance with the following syntax:
 
- cd freenas/scripts && ./9.3-tests.sh
+```
+ # cd freenas/scripts && ./9.3-tests.sh
+```
 
  *Optional* arguments to 9.3-tests.sh
 
  testset={smoke|complete|benchmark}
 
-    smoke - Basic tests to check core functionality
- complete - More in-depth testing to check edge cases
-benchmark - Run tests which measure speeds
+     smoke - Basic tests to check core functionality
+  complete - More in-depth testing to check edge cases
+ benchmark - Run tests which measure speeds
 
  module={smb|nfs|ftp|etc|etc}
 
