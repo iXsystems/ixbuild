@@ -88,6 +88,7 @@ tests will be run.
  password=<FreeNASpassword>
 
  FreeNAS password for REST auth
+```
 
 
 Adding New tests
@@ -100,6 +101,7 @@ https://github.com/iXsystems/ix-tests/tree/master/freenas/9.3-tests
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
 
+
 Where are tests run?
 ---
 
@@ -108,9 +110,6 @@ an e-mail with results and log files on testing failures.
 
 Tests / log output can be viewed at the following location:
 https://builds.pcbsd.org/jenkins/view/FreeNAS%20ATF/
-
-
-
 
 
 all
