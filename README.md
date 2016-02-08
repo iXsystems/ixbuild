@@ -5,8 +5,11 @@
 - [Test scripts and build framework for iX projects](#test-scripts-and-build-framework-for-ix-projects)
 - [FreeNAS Builds](#freenas-builds)
   - [iso](#iso)
-  - [tests](#tests)
   - [all](#all)
+  - [tests](#tests)
+- [FreeNAS Testing Framework](#freenas-testing-framework)
+  - [Adding New tests](#adding-new-tests)
+  - [Where are tests run?](#where-are-tests-run)
 - [PC-BSD Builds](#pc-bsd-builds)
   - [all](#all-1)
   - [world](#world)
@@ -93,6 +96,7 @@ tests will be run.
 
  FreeNAS password for REST auth
 ```
+
 
 FreeNAS Testing Framework
 ============
