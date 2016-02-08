@@ -50,6 +50,10 @@ iso
 ---
 Build FreeNAS ISOs / update files from sources, this may take a while.
 
+all
+---
+Create the ISO files and run the testing framework to check for regressions
+
 tests
 ---
 Run the regression testing framework. Will generate auto-install ISOs and
@@ -90,6 +94,8 @@ tests will be run.
  FreeNAS password for REST auth
 ```
 
+FreeNAS Testing Framework
+============
 
 Adding New tests
 ---
@@ -110,11 +116,6 @@ an e-mail with results and log files on testing failures.
 
 Tests / log output can be viewed at the following location:
 https://builds.pcbsd.org/jenkins/view/FreeNAS%20ATF/
-
-
-all
----
-Create the ISO files and run the testing framework to check for regressions
 
 
 
