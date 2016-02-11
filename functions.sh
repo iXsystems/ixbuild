@@ -141,6 +141,7 @@ push_pkgworkdir()
 
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKPKG}" >/dev/null 2>/dev/null
 
+  echo "Pushing cached pkgs..."
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
@@ -161,6 +162,7 @@ pull_pkgworkdir()
   cd ${PPKGDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+  echo "Pulling cached pkgs..."
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
 
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
