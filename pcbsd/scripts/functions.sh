@@ -105,10 +105,12 @@ else
     POUDPORTS="pcbsdports" ; export POUDPORTS
   fi
 fi
-PJDIR="$POUD/jails/$PBUILD"
-PPKGDIR="$POUD/data/packages/$PBUILD-$POUDPORTS"
-PJPORTSDIR="$POUD/ports/$POUDPORTS"
-export PBUILD PJDIR PJPORTSDIR PPKGDIR
+PPKGDIR="/synth/pkg/$PBUILD-$POUDPORTS"
+PJPORTSDIR="/synth/ports"
+export PBUILD JPORTSDIR PPKGDIR
+if [ ! -e "$PPKGDIR" ] ; then
+  mkdir -p ${PPKGDIR}
+fi
 
 # Check for required dirs
 rDirs="/log /git /iso /fbsd-dist /tmp"
@@ -254,37 +256,35 @@ rtn()
 
 create_pkg_conf()
 {
+  if [ -d "${PROGDIR}/tmp/repo" ] ; then
+    rm -rf ${PROGDIR}/tmp/repo
+  fi
+  mkdir ${PROGDIR}/tmp/repo
+  if [ -d "${PROGDIR}/tmp/sysrel" ] ; then
+    rm -rf ${PROGDIR}/tmp/sysrel
+  fi
+  mkdir ${PROGDIR}/tmp/sysrel
 
-   if [ -d "${PROGDIR}/tmp/repo" ] ; then
-      rm -rf ${PROGDIR}/tmp/repo
-   fi
-   mkdir ${PROGDIR}/tmp/repo
-   if [ -d "${PROGDIR}/tmp/sysrel" ] ; then
-     rm -rf ${PROGDIR}/tmp/sysrel
-   fi
-   mkdir ${PROGDIR}/tmp/sysrel
-
-   ABIVER=`echo $PKGVERUPLOAD | cut -d '-' -f 1 | cut -d '.' -f 1`
-   echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
-   echo "ALTABI: freebsd:${ABIVER}:x86:64" >> ${PROGDIR}/tmp/pkg.conf
-   echo "ABI: FreeBSD:${ABIVER}:amd64" >> ${PROGDIR}/tmp/pkg.conf
+  ABIVER=`echo $PKGVERUPLOAD | cut -d '-' -f 1 | cut -d '.' -f 1`
+  echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
+  echo "ALTABI: freebsd:${ABIVER}:x86:64" >> ${PROGDIR}/tmp/pkg.conf
+  echo "ABI: FreeBSD:${ABIVER}:amd64" >> ${PROGDIR}/tmp/pkg.conf
 
 
-   # Doing a local package build
-   if [ "$PKGREPO" = "local" ]; then
-      echo "localrepo: {
-               url: \"file://${PPKGDIR}\",
-               enabled: true
-              }" >  ${PROGDIR}/tmp/repo/local.conf
-	return
-   fi
+  # Doing a local package build
+  if [ "$PKGREPO" = "local" ]; then
+     echo "localrepo: {
+              url: \"file://${PPKGDIR}\",
+              enabled: true
+             }" >  ${PROGDIR}/tmp/repo/local.conf
+     return
+  fi
 
-   # Doing a remote pull from a repo
-   cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/local.conf
-   sed -i '' "s|%RELVERSION%|$PKGVERUPLOAD|g" ${PROGDIR}/tmp/repo/local.conf
-   sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/local.conf
-   sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/local.conf
-
+  # Doing a remote pull from a repo
+  cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/local.conf
+  sed -i '' "s|%RELVERSION%|$PKGVERUPLOAD|g" ${PROGDIR}/tmp/repo/local.conf
+  sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/local.conf
+  sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/local.conf
 }
 
 create_installer_pkg_conf()
@@ -371,43 +371,23 @@ cp_iso_pkg_files()
     create_installer_pkg_conf
 }
 
-update_poudriere_jail()
+update_synth_world()
 {
-  if [ -z "$POUDRIEREJAILVER" ] ; then
-    POUDRIEREJAILVER="$PCBSDVER"
-  fi
+  echo "Extrating synth world..."
 
-  # Setup fake poudriere file URL
-  mkdir -p /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/$POUDRIEREJAILVER >/dev/null 2>/dev/null
-  dfiles="MANIFEST src.txz base.txz doc.xz kernel.txz"
+  # Setup fake synth world dir
+  if [ ! -d "/synth" ] ; then
+    mkdir /synth
+  fi
+  rm -rf /synth/world >/dev/null 2>/dev/null
+  mkdir -p /synth/world
+  dfiles="base.txz doc.txz"
   if [ "$ARCH" = "amd64" ] ; then dfiles="$dfiles lib32.txz" ; fi
-  if [ -e "${DISTDIR}/games.txz" ] ; then dfiles="$dfiles games.txz" ; fi
 
   for i in $dfiles
   do
-    ln -sf "${DISTDIR}/$i" /fakeftp/pub/FreeBSD/releases/${ARCH}/${ARCH}/${POUDRIEREJAILVER}/$i
+    tar xvpf "${DISTDIR}/$i" -C /synth/world
   done
-
-  echo "FREEBSD_HOST=file:///fakeftp/" >> /usr/local/etc/poudriere.conf
-
-  # Clean old poudriere dir
-  poudriere jail -d -j $PBUILD >/dev/null 2>/dev/null
-
-
-  export EXTRA_DISTS="src"
-  poudriere jail -c -m ftp -j $PBUILD -v ${POUDRIEREJAILVER} -a $ARCH
-  if [ $? -ne 0 ] ; then
-    cat /usr/local/etc/poudriere.conf | grep -v "^FREEBSD_HOST=file:///fakeftp/" >/tmp/.pconf.$$
-    mv /tmp/.pconf.$$ /usr/local/etc/poudriere.conf
-    echo "Failed to create poudriere jail"
-    exit 1
-  fi
-
-  # Cleanup the hostname
-  cat /usr/local/etc/poudriere.conf | grep -v "^FREEBSD_HOST=file:///fakeftp/" >/tmp/.pconf.$$
-  mv /tmp/.pconf.$$ /usr/local/etc/poudriere.conf
-
-  rm -rf /fakeftp
 }
 
 get_last_rev()
@@ -430,21 +410,6 @@ check_essential_pkgs()
    haveWarn=0
 
    local eP="${PCONFDIR}/essential-packages"
-
-   # Make sure we have the file we need
-   if [ ! -e "${eP}" ] ; then
-      echo "WARNING: Missing ${eP}"
-      if [ "$1" != "NO" ] ; then
-        echo "Warning: Packages are missing! Continue?"
-        echo -e "(Y/N)\c"
-        read tmp
-        if [ "$tmp" != "y" -a "$tmp" != "Y" ] ; then
-           rtn
-           exit 1
-        fi
-        return 1
-      fi
-   fi
 
    chkList=""
    # Build the list of packages to check
@@ -469,7 +434,7 @@ check_essential_pkgs()
 
      # Get the pkgname
      pkgName=""
-     pkgName=`make -C ${i} -V PKGNAME PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/$PBUILD-make.conf`
+     pkgName=`make -C ${i} -V PKGNAME PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/synth/PCBSD-make.conf`
      if [ -z "${pkgName}" ] ; then
         echo "Could not get PKGNAME for ${i}"
         haveWarn=1

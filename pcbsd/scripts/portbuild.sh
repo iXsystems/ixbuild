@@ -20,17 +20,11 @@ if [ $cStat -ne 0 ] ; then exit $cStat; fi
 
 merge_pcbsd_src_ports()
 {
-   if [ "$ARCH" == "i386" ] ; then return 0 ; fi
-
    local mcwd=`pwd`
    local gitdir="$1"
    local portsdir="$2"
-   local distCache=`grep '^DISTFILES_CACHE=' /usr/local/etc/poudriere.conf | cut -d '=' -f 2`
-   if [ -z "$distCache" ] ; then
-      exit_err "Need a DISTFILES_CACHE in poudriere.conf"
-   fi
+   distCache="/synth/distfiles"
 
-   if [ ! -d "$distCache" ] ; then rc_halt "mkdir -p ${distCache}" ; fi
    git_up "$gitdir" "$gitdir"
    rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
      
@@ -49,47 +43,101 @@ mk_metapkg_bulkfile()
    rc_halt "cp ${PCONFDIR}/essential-packages-nonrel $bulkList"
 }
 
+mk_synth_config()
+{
+
+if [ ! -d "/synth" ] ; then
+  mkdir /synth
+fi
+if [ ! -d "/synth/ports-db" ] ; then
+  mkdir /synth/ports-db
+fi
+if [ ! -d "/synth/distfiles" ] ; then
+  mkdir /synth/distfiles
+fi
+if [ ! -d "/synth/log" ] ; then
+  mkdir /synth/log
+fi
+
+# Get the memory in MB on system
+MEM=$(sysctl -n hw.physmem)
+MEM=$(expr $MEM / 1024)
+MEM=$(expr $MEM / 1024)
+
+CPUS=$(sysctl -n kern.smp.cpus)
+if [ $CPUS -gt 2 ] ; then
+  JOBS="2"
+else
+  JOBS="1"
+fi
+
+# Determine TMPFS usage based upon Memory to CPUs ratio
+MEMPERBUILDER=$(expr $MEM / $CPUS)
+if [ $MEMPERBUILDER -gt 4000 ]; then
+  TMPWRK="true"
+  TMPLB="true"
+elif [ $MEMPERBUILDER -gt 2000 ] ; then
+  TMPWRK="false"
+  TMPLB="true"
+else
+  TMPWRK="false"
+  TMPLB="false"
+fi
+
+cat >/usr/local/etc/synth/synth.ini << EOF
+[Global Configuration]
+profile_selected= PCBSD
+
+[PCBSD]
+Operating_system= FreeBSD
+Directory_packages= $PPKGDIR
+Directory_repository= $PPKGDIR
+Directory_portsdir= /synth/ports
+Directory_options= /synth/ports-db
+Directory_distfiles= /synth/distfiles
+Directory_buildbase= /usr/obj/synth-live
+Directory_logs= /synth/log
+Directory_ccache= disabled
+Directory_system= /synth/world
+Number_of_builders= $CPUS
+Max_jobs_per_builder= $JOBS
+Tmpfs_workdir= $TMPWRK
+Tmpfs_localbase= $TMPLB
+Display_with_ncurses= false
+leverage_prebuilt= false
+EOF
+
+}
+
 do_portsnap()
 {
-   cp /usr/local/etc/poudriere.conf /tmp/.poudriere.conf.$$
-   cat /usr/local/etc/poudriere.conf | grep -v "GIT_URL" > /tmp/.poud.tmp.$$
-   echo "GIT_URL=\"$PORTS_GIT_URL\" ; export GIT_URL" >> /tmp/.poud.tmp.$$
-   mv /tmp/.poud.tmp.$$ /usr/local/etc/poudriere.conf
+  echo "Removing old ports dir..."
+  rm -rf /synth/ports 2>/dev/null >/dev/null
+  mkdir /synth/ports
 
-   echo "Updating ports collection..."
-   poudriere ports -l | grep -q -w "^${POUDPORTS}" 
-   if [ $? -eq 0 ] ; then
+  echo "Cloning ports repo..."
+  if [ -n "${PORTS_GIT_URL}" ] ; then
+    git clone ${PORTS_GIT_URL} /synth/ports
+  else
+    git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports
+  fi
 
-     # Stop the jail in case its running
-     poudriere jail -k -j $PBUILD -p $POUDPORTS
+  # Need to checkout src as well
+  echo "Preparing /usr/src..."
+  rm -rf /usr/src 2>/dev/null
+  mkdir /usr/src 2>/dev/null
+  if [ -n "$GITFBSDURL" ] ; then
+    git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /usr/src
+  else
+    git clone --depth=1 https://github.com/pcbsd/freebsd.git /usr/src
+  fi
 
-     echo "Removing old ports tree ${POUDPORTS}"
-     poudriere ports -d -p "$POUDPORTS"
-     if [ $? -ne 0 ] ; then
-       echo "Failed to delete ports $POUDPORTS"
-       mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
-       exit 1
-     fi
-
-     if [ -d "$PJPORTSDIR" ] ; then
-	echo "Removing old $PJPORTSDIR"
-	rm -rf $PJPORTSDIR
-     fi
-   fi
-   sleep 4
-   poudriere ports -c -m git -p "$POUDPORTS" >/dev/null 2>/dev/null
-   if [ $? -ne 0 ] ; then
-     echo "Failed to create ports $POUDPORTS"
-     mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
-     exit 1
-   fi
-   mv /tmp/.poudriere.conf.$$ /usr/local/etc/poudriere.conf
 }
 
 do_pcbsd_portmerge()
 {
    # Copy our PCBSD port files
-   merge_pcbsd_src_ports "${GITBRANCH}" "${PJPORTSDIR}"
+   merge_pcbsd_src_ports "${GITBRANCH}" "/synth/ports"
 }
 
 do_pbi-index()
@@ -129,107 +177,65 @@ fi
 
 cd ${PROGDIR}
 
-# Copy over our custom make options
-if [ ! -d "/usr/local/etc/poudriere.d" ]; then
- mkdir -p /usr/local/etc/poudriere.d
-fi
 if [ ! -d "${GITBRANCH}" ]; then
    rc_halt "git clone ${GITPCBSDURL} ${GITBRANCH}"
 fi
 git_up "${GITBRANCH}" "${GITBRANCH}"
 rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
-cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/$PBUILD-make.conf
-if [ -e "/usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere" ] ; then
-  cat /usr/local/etc/poudriere.d/$PBUILD-make.conf.poudriere >> /usr/local/etc/poudriere.d/$PBUILD-make.conf
-fi
-
-# Running poudriere in verbose mode?
-pV=""
-if [ "$POUD_VERBOSE" = "YES" ] ; then
-  pV="-vv"
-fi
+cp ${PCONFDIR}/port-make.conf /usr/local/etc/synth/PCBSD-make.conf
 
 if [ "$target" = "all" ] ; then
-   # Set cleanup var
-   pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
-   export pCleanup
 
-   # Remove old PBI-INDEX.txz files
-   rm ${PPKGDIR}/PBI-INDEX.txz* 2>/dev/null
+  # Remove old PBI-INDEX.txz files
+  rm ${PPKGDIR}/PBI-INDEX.txz* 2>/dev/null
 
-   # Make sure this builder isn't already going
-   poudriere jail -k -j $PBUILD -p $POUDPORTS
+  # Create the synth config
+  mk_synth_config
 
-   # Build entire ports tree
-   poudriere bulk -a ${pV} -j $PBUILD -p $POUDPORTS | tee ${PROGDIR}/log/poudriere.log
-   if [ $? -ne 0 ] ; then
-      echo "Failed poudriere build..."
-   fi
+  # Extract the world for this synth build
+  update_synth_world
 
-   # Make sure the essentials built, exit now if not
-   check_essential_pkgs "NO"
-   if [ $? -ne 0 ] ; then
-      exit 1
-   fi
+  # Make sure this builder isn't already going
+  pgrep -q synth
+  if [ $? -eq 0 ] ; then
+    # Kill old synth processes and wait / cleanup
+    echo "Stopping old synth"
+    killall -9 synth
+    sleep 60
+    synth status >/dev/null 2>/dev/null
+  fi
 
-   # Update the PBI index file
-   do_pbi-index
+  # Clean distfiles
+  synth purge-distfiles
 
-   # Unset cleanup var
-   pCleanup=""
-   export pCleanup
+  # Build entire ports tree
+  synth everything
+  if [ $? -ne 0 ] ; then
+     echo "Failed synth build..."
+  fi
 
-   exit 0
-elif [ "$target" = "meta" ] ; then
-   bList="/tmp/.bulkList.$$"
+  # Sign the packages
+  pkg repo ${PPKGDIR} signing_command: /etc/ssl/sign-pkgs.sh
+  if [ $? -ne 0 ] ; then
+     echo "Failed signing pkg repo!"
+     exit 1
+  fi
 
-   # Build specific meta-pkg list
-   mk_metapkg_bulkfile "$bList"
+  # Make sure the essentials built, exit now if not
+  check_essential_pkgs "NO"
+  if [ $? -ne 0 ] ; then
+     exit 1
+  fi
 
-   # Set cleanup var
-   pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
-   export pCleanup
 
-   # Make sure this builder isn't already going
-   poudriere jail -k -j $PBUILD -p $POUDPORTS
+  # Update the PBI index file
+  do_pbi-index
 
-   # Start the build
-   poudriere bulk ${pV} -j $PBUILD -p $POUDPORTS -f $bList | tee ${PROGDIR}/log/poudriere.log
-   if [ $? -ne 0 ] ; then
-      echo "Failed poudriere build..."
-   fi
+  # Unset cleanup var
+  pCleanup=""
+  export pCleanup
 
-   # Make sure the essentials built, exit now if not
-   check_essential_pkgs "NO"
-   if [ $? -ne 0 ] ; then
-      exit 1
-   fi
-
-   # Unset cleanup var
-   pCleanup=""
-   export pCleanup
-
-   exit 0
-elif [ "$target" = "i386" ] ; then
-   bList="${PROGDIR}/scripts/i386-pkgs"
-
-   # Set cleanup var
-   pCleanup="-j ${PBUILD} -p ${POUDPORTS}"
-   export pCleanup
-
-   # Make sure this builder isn't already going
-   poudriere jail -k -j $PBUILD -p $POUDPORTS
-
-   # Start the build
-   poudriere bulk ${pV} -j $PBUILD -p $POUDPORTS -f $bList | tee ${PROGDIR}/log/poudriere.log
-   if [ $? -ne 0 ] ; then
-      echo "Failed poudriere build..."
-   fi
-
-   # Unset cleanup var
-   pCleanup=""
-   export pCleanup
-
+  exit 0
 elif [ "$1" = "portsnap" ] ; then
    do_portsnap
    do_pcbsd_portmerge

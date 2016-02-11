@@ -78,11 +78,9 @@ if [ "$TYPE" != "ports-tests" ] ; then
   if [ -z "$POUDPORTS" ] ; then
     POUDPORTS="pcbsdports" ; export POUDPORTS
   fi
-  POUD="/usr/local/poudriere"
-  PJDIR="$POUD/jails/$PBUILD"
-  PPKGDIR="$POUD/data/packages/$PBUILD-$POUDPORTS"
-  PJPORTSDIR="$POUD/ports/$POUDPORTS"
-  export PBUILD PJDIR PJPORTSDIR PPKGDIR
+  PPKGDIR="/synth/pkg/$PBUILD-$POUDPORTS"
+  PJPORTSDIR="/synth/ports"
+  export PBUILD PJPORTSDIR PPKGDIR
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then

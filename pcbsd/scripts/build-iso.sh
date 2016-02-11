@@ -41,13 +41,6 @@ do_world() {
   fi
 }
 
-do_jail() {
-  if [ ! -e "${DISTDIR}/base.txz" ] ; then
-     exit_err "You must create a world before running poudriere"
-  fi
-  update_poudriere_jail
-}
-
 do_iso() 
 {
   if [ "$ARCH" = "i386" ] ; then return 0; fi
@@ -106,46 +99,8 @@ do_clean()
   rm ${PROGDIR}/tmp/All/* 2>/dev/null
 }
 
-do_ports_i386()
-{
-  echo "Building i386 ports"
-
-  if [ ! -e "${DISTDIR}/base.txz" ] ; then
-     exit_err "You must create a world before running poudriere"
-  fi
-
-  # Make sure the jail is created
-  poudriere jail -l | grep -q $PBUILD
-  if [ $? -ne 0 ] ; then
-    update_poudriere_jail
-     sync ; sleep 1
-  fi
-
-  # Check if we have a portstree to build
-  poudriere ports -l | grep -q "^$POUDPORTS"
-  if [ $? -ne 0 ] ; then
-     sh ${PROGDIR}/scripts/portbuild.sh portsnap
-     sync ; sleep 1
-  fi
-
-  sh ${PROGDIR}/scripts/portbuild.sh i386
-  if [ $? -ne 0 ] ; then
-    echo "Script failed!"
-    exit 1
-  fi
-
-  return 0
-}
-
-
 do_ports()
 {
-  # Doing a selective i386 ports build
-  if [ "$ARCH" = "i386" ] ; then
-    do_ports_i386
-    return $?
-  fi
-
   echo "Building ports"
 
   if [ ! -e "${DISTDIR}/base.txz" ] ; then
@@ -153,51 +108,7 @@ do_ports()
      exit 1
   fi
 
-  # Make sure the jail is created
-  poudriere jail -l | grep -q $PBUILD
-  if [ $? -ne 0 ] ; then
-    update_poudriere_jail
-     sync ; sleep 1
-  fi
-
-  # Check if we have a portstree to build
-  poudriere ports -l | grep -q "^$POUDPORTS"
-  if [ $? -ne 0 ] ; then
-     sh ${PROGDIR}/scripts/portbuild.sh portsnap
-     sync ; sleep 1
-  fi
-
   sh ${PROGDIR}/scripts/portbuild.sh all
-  if [ $? -ne 0 ] ; then
-    echo "Script failed!"
-    exit 1
-  fi
-}
-
-do_ports_meta()
-{
-
-  echo "Building ports"
-
-  if [ ! -e "${DISTDIR}/base.txz" ] ; then
-     exit_err "You must create a world before running poudriere"
-  fi
-
-  # Make sure the jail is created
-  poudriere jail -l | grep -q $PBUILD
-  if [ $? -ne 0 ] ; then
-    update_poudriere_jail
-     sync ; sleep 1
-  fi
-
-  # Check if we have a portstree to build
-  poudriere ports -l | grep -q "^$POUDPORTS"
-  if [ $? -ne 0 ] ; then
-     sh ${PROGDIR}/scripts/portbuild.sh portsnap
-     sync ; sleep 1
-  fi
-
-  sh ${PROGDIR}/scripts/portbuild.sh meta
   if [ $? -ne 0 ] ; then
     echo "Script failed!"
     exit 1
@@ -254,11 +165,7 @@ case $TARGET in
    ports) do_ports
           exit $?
           ;;
-    jail) do_jail
-          exit $?
-          ;;
 check-ports) do_check_ports ;;
-ports-meta-only) do_ports_meta ;;
 ports-update-all) do_ports_all ;;
 ports-update-pcbsd) do_ports_pcbsd ;;
 pbi-index) do_pbi-index ;;

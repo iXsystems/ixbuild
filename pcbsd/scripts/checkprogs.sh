@@ -92,9 +92,9 @@ if [ "$?" != "0" ]; then
 fi
 
 if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
-  which poudriere >/dev/null 2>/dev/null
+  which synth >/dev/null 2>/dev/null
   if [ "$?" != "0" ]; then
-    echo "Installing poudriere.."
-    rc_halt "pkg install -y ports-mgmt/poudriere"
+    echo "Installing synth.."
+    rc_halt "pkg install -y ports-mgmt/synth"
   fi
 fi
