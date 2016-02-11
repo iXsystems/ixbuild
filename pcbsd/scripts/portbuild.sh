@@ -91,7 +91,7 @@ profile_selected= PCBSD
 [PCBSD]
 Operating_system= FreeBSD
 Directory_packages= $PPKGDIR
-Directory_repository= $PPKGDIR
+Directory_repository= ${PPKGDIR}/All
 Directory_portsdir= /synth/ports
 Directory_options= /synth/ports-db
 Directory_distfiles= /synth/distfiles
