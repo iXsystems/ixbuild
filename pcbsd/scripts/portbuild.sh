@@ -202,7 +202,7 @@ if [ "$target" = "all" ] ; then
   # Workaround bug in synth which doesn't set UNAME_r properly
   BVER=$(/synth/world/bin/freebsd-version)
   cat >/usr/local/etc/synth/PCBSD-environment << EOF
-  UNAME_r=${BVER}
+UNAME_r=${BVER}
 EOF
 
   # Make sure this builder isn't already going
