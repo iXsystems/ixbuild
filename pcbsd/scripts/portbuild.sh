@@ -58,6 +58,9 @@ fi
 if [ ! -d "/synth/log" ] ; then
   mkdir /synth/log
 fi
+if [ ! -d "/synth/log/${PBUILD}" ] ; then
+  mkdir /synth/log/${PBUILD}
+fi
 
 # Get the memory in MB on system
 MEM=$(sysctl -n hw.physmem)
@@ -96,7 +99,7 @@ Directory_portsdir= /synth/ports
 Directory_options= /synth/ports-db
 Directory_distfiles= /synth/distfiles
 Directory_buildbase= /usr/obj/synth-live
-Directory_logs= /synth/log
+Directory_logs= /synth/log/$PBUILD
 Directory_ccache= disabled
 Directory_system= /synth/world
 Number_of_builders= $CPUS
