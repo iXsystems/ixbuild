@@ -107,11 +107,6 @@ Display_with_ncurses= false
 leverage_prebuilt= false
 EOF
 
-# Workaround bug in synth which doesn't set UNAME_r properly
-BVER=$(/synth/world/bin/freebsd-version)
-cat >/usr/local/etc/synth/PCBSD-environment << EOF
-UNAME_r=${BVER}
-EOF
 
 }
 
@@ -203,6 +198,12 @@ if [ "$target" = "all" ] ; then
 
   # Extract the world for this synth build
   update_synth_world
+
+  # Workaround bug in synth which doesn't set UNAME_r properly
+  BVER=$(/synth/world/bin/freebsd-version)
+  cat >/usr/local/etc/synth/PCBSD-environment << EOF
+  UNAME_r=${BVER}
+EOF
 
   # Make sure this builder isn't already going
   pgrep -q synth
