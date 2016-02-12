@@ -200,10 +200,10 @@ if [ "$target" = "all" ] ; then
   update_synth_world
 
   # Workaround bug in synth which doesn't set UNAME_r properly
-#  BVER=$(/synth/world/bin/freebsd-version)
-#  cat >/usr/local/etc/synth/PCBSD-environment << EOF
-#UNAME_r=${BVER}
-#EOF
+  BVER=$(/synth/world/bin/freebsd-version)
+  cat >/usr/local/etc/synth/PCBSD-environment << EOF
+UNAME_r=${BVER}
+EOF
 
   # Make sure this builder isn't already going
   pgrep -q synth
