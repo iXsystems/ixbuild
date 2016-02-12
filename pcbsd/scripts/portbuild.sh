@@ -188,6 +188,9 @@ if [ ! -d "${GITBRANCH}" ]; then
 fi
 git_up "${GITBRANCH}" "${GITBRANCH}"
 rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
+if [ ! -d "/usr/local/etc/synth" ] ; then
+  mkdir -p /usr/local/etc/synth
+fi
 cp ${PCONFDIR}/port-make.conf /usr/local/etc/synth/PCBSD-make.conf
 
 if [ "$target" = "all" ] ; then
