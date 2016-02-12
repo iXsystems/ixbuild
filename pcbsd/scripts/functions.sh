@@ -380,6 +380,8 @@ update_synth_world()
     mkdir /synth
   fi
   rm -rf /synth/world >/dev/null 2>/dev/null
+  chflags -R noschg /synth/world >/dev/null 2>/dev/null
+  rm -rf /synth/world >/dev/null 2>/dev/null
   mkdir -p /synth/world
   dfiles="base.txz doc.txz"
   if [ "$ARCH" = "amd64" ] ; then dfiles="$dfiles lib32.txz" ; fi
