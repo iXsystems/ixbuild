@@ -68,9 +68,11 @@ MEM=$(expr $MEM / 1024)
 MEM=$(expr $MEM / 1024)
 
 CPUS=$(sysctl -n kern.smp.cpus)
-if [ $CPUS -gt 2 ] ; then
+if [ $CPUS -gt 12 ] ; then
+  BUILDERS="12"
   JOBS="2"
 else
+  BUILDERS="$CPUS"
   JOBS="1"
 fi
 
@@ -87,6 +89,28 @@ else
   TMPLB="false"
 fi
 
+# Allow these defaults to be overridden
+BCONF="/usr/local/etc/synth/builders.conf"
+if [ -e "$BCONF" ] ; then
+  grep -q "^BUILDERS=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    BUILDERS=$(grep "^BUILDERS=" ${BCONF} | cut -d '=' -f 2)
+  fi
+  grep -q "^JOBS=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    JOBS=$(grep "^JOBS=" ${BCONF} | cut -d '=' -f 2)
+  fi
+  grep -q "^TMPFSWORK=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    TMPWRK=$(grep "^TMPFSWORK=" ${BCONF} | cut -d '=' -f 2)
+  fi
+  grep -q "^TMPFSLB=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    TMPLB=$(grep "^TMPFSLB=" ${BCONF} | cut -d '=' -f 2)
+  fi
+fi
+
+
 cat >/usr/local/etc/synth/synth.ini << EOF
 [Global Configuration]
 profile_selected= PCBSD
@@ -102,7 +126,7 @@ Directory_buildbase= /usr/obj/synth-live
 Directory_logs= /synth/log/$PBUILD
 Directory_ccache= disabled
 Directory_system= /synth/world
-Number_of_builders= $CPUS
+Number_of_builders= $BUILDERS
 Max_jobs_per_builder= $JOBS
 Tmpfs_workdir= $TMPWRK
 Tmpfs_localbase= $TMPLB
