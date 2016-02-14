@@ -254,12 +254,17 @@ if [ "$target" = "all" ] ; then
      echo "Failed synth build..."
   fi
 
-  # Sign the packages
-  pkg repo ${PPKGDIR} signing_command: /etc/ssl/sign-pkgs.sh
+  # Get the static version of pkgng
+  get_pkgstatic "EXTRACTONLY"
+
+  # Create the repo / sign the packages
+  ${PKGSTATIC} repo ${PPKGDIR} signing_command: /etc/ssl/sign-pkgs.sh
   if [ $? -ne 0 ] ; then
      echo "Failed signing pkg repo!"
+     rm ${PKGSTATIC}
      exit 1
   fi
+  rm ${PKGSTATIC}
 
   # Make sure the essentials built, exit now if not
   check_essential_pkgs "NO"

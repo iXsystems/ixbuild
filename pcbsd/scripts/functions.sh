@@ -467,11 +467,14 @@ check_essential_pkgs()
 
 get_pkgstatic()
 {
-  create_pkg_conf
+  if [ "$1" = "EXTRACTONLY" ] ; then
+    echo "Extracting pkg-static..."
+  else
+    echo "Setting up pkg-static.."
+    create_pkg_conf
+  fi
 
-  echo "Setting up pkg-static"
-  if [ -e "/tmp/pkg-static" ] ; then rm /tmp/pkg-static; fi
-
+  rm /tmp/pkg-static >/dev/null 2>/dev/null
   if [ "$PKGREPO" = "local" ]; then
     rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
   else
@@ -484,6 +487,7 @@ get_pkgstatic()
   rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$" >/dev/null 2>/dev/null
 
   PKGSTATIC="/tmp/pkg-static.$$" ; export PKGSTATIC
+  if [ "$1" = "EXTRACTONLY" ] ; then return; fi
 
   # Update the repo schema files before using
   rc_halt "${PKGSTATIC} -C ${PROGDIR}/tmp/pkg.conf -R ${PROGDIR}/tmp/repo/ update -f"
