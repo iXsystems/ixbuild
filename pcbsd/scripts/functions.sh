@@ -469,6 +469,7 @@ get_pkgstatic()
 {
   if [ "$1" = "EXTRACTONLY" ] ; then
     echo "Extracting pkg-static..."
+    PKGREPO="local"
   else
     echo "Setting up pkg-static.."
     create_pkg_conf
