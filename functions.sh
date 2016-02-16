@@ -372,7 +372,7 @@ jenkins_ports_tests()
 }
 
 # Set the builds directory
-BDIR="${mypath}/builds"
+BDIR="./builds"
 export BDIR
 
 if [ "$TYPE" != "ports-tests" ] ; then
