@@ -145,7 +145,7 @@ do_portsnap()
 
   echo "Cloning ports repo..."
   if [ -n "${PORTS_GIT_URL}" ] ; then
-    git clone ${PORTS_GIT_URL} /synth/ports
+    git clone --depth=1 ${PORTS_GIT_URL} /synth/ports
   else
     git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports
   fi
@@ -165,7 +165,7 @@ do_portsnap()
 do_pcbsd_portmerge()
 {
    # Copy our PCBSD port files
-   merge_pcbsd_src_ports "${GITBRANCH}" "/synth/ports"
+   merge_pcbsd_src_ports "${PCBSDSRC}" "/synth/ports"
 }
 
 do_pbi-index()
@@ -173,7 +173,7 @@ do_pbi-index()
    if [ -z "$PBI_REPO_KEY" ] ; then return ; fi
 
    # See if we can create the PBI index files for this repo
-   if [ ! -d "$GITBRANCH/pbi-modules" ] ; then
+   if [ ! -d "${PCBSDSRC}/pbi-modules" ] ; then
       echo "No pbi-modules in this GIT branch"
       return 1
    fi
@@ -181,7 +181,6 @@ do_pbi-index()
    echo "Building new PBI-INDEX"
 
    # Lets update the PBI-INDEX
-   PKGREPO='local' ; export PKGREPO
    create_pkg_conf
    REPOS_DIR="${PROGDIR}/tmp/repo" ; export REPOS_DIR
    PKG_DBDIR="${PROGDIR}/tmp/repodb" ; export PKG_DBDIR
@@ -190,7 +189,7 @@ do_pbi-index()
    ABIVER=`echo $TARGETREL | cut -d '-' -f 1 | cut -d '.' -f 1`
    PBI_PKGCFLAG="-o ABI=freebsd:${ABIVER}:x86:64" ; export PBI_PKGCFLAG
 
-   rc_halt "cd ${GITBRANCH}/pbi-modules" >/dev/null 2>/dev/null
+   rc_halt "cd ${PCBSDSRC}/pbi-modules" >/dev/null 2>/dev/null
    rc_halt "pbi_makeindex ${PBI_REPO_KEY}"
    rc_nohalt "rm PBI-INDEX" >/dev/null 2>/dev/null
    rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/" >/dev/null 2>/dev/null
@@ -205,10 +204,12 @@ fi
 
 cd ${PROGDIR}
 
-if [ ! -d "${GITBRANCH}" ]; then
-   rc_halt "git clone ${GITPCBSDURL} ${GITBRANCH}"
+if [ -d "${PCBSDSRC}" ]; then
+  rm -rf ${PCBSDSRC}
 fi
-git_up "${GITBRANCH}" "${GITBRANCH}"
+mkdir -p ${PCBSDSRC}
+rc_halt "git clone --depth=1 ${GITPCBSDURL} ${PCBSDSRC}"
+
 rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
 if [ ! -d "/usr/local/etc/synth" ] ; then
   mkdir -p /usr/local/etc/synth
@@ -257,8 +258,15 @@ if [ "$target" = "all" ] ; then
   # Get the static version of pkgng
   get_pkgstatic "EXTRACTONLY"
 
+  # Signing script
+  if [ -n "$PKGSIGNCMD" ] ; then
+    SIGNARGS="signing_command: $PKGSIGNCMD"
+  else
+    SIGNARGS=""
+  fi
+
   # Create the repo / sign the packages
-  ${PKGSTATIC} repo ${PPKGDIR} signing_command: /etc/ssl/sign-pkgs.sh
+  ${PKGSTATIC} repo ${PPKGDIR} ${SIGNARGS}
   if [ $? -ne 0 ] ; then
      echo "Failed signing pkg repo!"
      rm ${PKGSTATIC}

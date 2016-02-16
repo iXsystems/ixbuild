@@ -17,25 +17,16 @@ cd ${PROGDIR}/scripts
 
 
 # Make sure we have our freebsd sources
-if [ ! -d "${WORLDSRC}" ]; then
-   rc_halt "git clone ${GITFBSDURL} ${WORLDSRC}"
-   git_fbsd_up "${WORLDSRC}" "${WORLDSRC}"
-else
-  if [ -d "${WORLDSRC}/.git" ]; then
-    echo "Updating FreeBSD sources..."
-    git_fbsd_up "${WORLDSRC}" "${WORLDSRC}"
-  fi
+if [ -d "${WORLDSRC}" ]; then
+  rm -rf ${WORLDSRC}
 fi
+mkdir -p ${WORLDSRC}
+rc_halt "git clone --depth=1 ${GITFBSDURL} ${WORLDSRC}"
 
 # Make sure we have our pcbsd sources
-if [ ! -d "${GITBRANCH}" ] ; then
-   rc_halt "git clone ${GITPCBSDURL} ${GITBRANCH}"
-else
-  if [ -d "${GITBRANCH}/.git" ] ; then
-    echo "Updating PC-BSD sources..."
-    git_up "${GITBRANCH}" "${GITBRANCH}"
-  fi
-fi
+if [ -d "${PCBSDSRC}" ] ; then rm -rf "${PCBSDSRC}"; fi
+mkdir -p ${PCBSDSRC}
+rc_halt "git clone --depth=1 ${GITPCBSDURL} ${PCBSDSRC}"
 
 # create_vnode ${UFSFILE} ${PARTITION} 
 #
@@ -185,10 +176,6 @@ fi
 # Remove freebsd's version of pc-sysinstall
 rc_halt "rm -rf ${PDESTDIR9}/usr/share/pc-sysinstall"
 
-# Make sure GIT is updated
-cd ${GITBRANCH}
-git_up "${GITBRANCH}" "${GITBRANCH}"
-
 # Lets install the packages we will be needing
 mkdir ${PDESTDIR9}/mnt >/dev/null 2>/dev/null
 rc_halt "mount_nullfs ${METAPKGDIR} ${PDESTDIR9}/mnt"
@@ -246,7 +233,7 @@ fi
 
 # Copy over the overlays/install-overlay directory to the pcbsd directory
 ##########################################################################
-tar cvf - -C ${GITBRANCH}/overlays/install-overlay --exclude .svn . 2>/dev/null | tar xvpf - -C ${PDESTDIR9}/ 2>/dev/null
+tar cvf - -C ${PCBSDSRC}/overlays/install-overlay --exclude .svn . 2>/dev/null | tar xvpf - -C ${PDESTDIR9}/ 2>/dev/null
 
 # Copy over the default pkgng template
 cp -r ${PROGDIR}/pkg ${PDESTDIR9}/root/pkg-template
@@ -275,7 +262,7 @@ mkdir ${PDESTDIR9}/uzip 2>/dev/null
 # Copy over the amd64 overlays if we need to
 ##########################################################################
 if [ "$ARCH" = "amd64" ] ; then
-  tar cvf - -C ${GITBRANCH}/overlays/install-overlay64 --exclude .svn . 2>/dev/null | tar xvpf - -C ${PDESTDIR9} 2>/dev/null
+  tar cvf - -C ${PCBSDSRC}/overlays/install-overlay64 --exclude .svn . 2>/dev/null | tar xvpf - -C ${PDESTDIR9} 2>/dev/null
 fi
 
 # Set the PCBSDVERSION on the install disk
@@ -305,7 +292,7 @@ rm ${PDESTDIR9}/.setPass.sh
 prune_fs
 
 # Copy over the config.sh to install medium
-rc_halt "cp ${GITBRANCH}/src-sh/config.sh ${PDESTDIR9}/root/config.sh"
+rc_halt "cp ${PCBSDSRC}/src-sh/config.sh ${PDESTDIR9}/root/config.sh"
 rc_halt "chmod 755 ${PDESTDIR9}/root/config.sh"
 
 # Compress the /root directory for extraction into a memory fs
@@ -360,7 +347,7 @@ fi
 if [ "$SYSBUILD" != "trueos" ] ; then
   # With ISO's done, lets create the docs now
   # Only need to run this once on the pcbsd build, since its same docs
-  cd ${GITBRANCH}/src-qt5/docs
+  cd ${PCBSDSRC}/src-qt5/docs
   make html
 
   # Move over the HTML docs

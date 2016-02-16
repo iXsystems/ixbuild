@@ -10,13 +10,8 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 . ${PROGDIR}/pcbsd.cfg
 
 # Where on disk is the PCBSD GIT branch
-if [ -n "$PCBSDGITDIR" ] ; then
-  GITBRANCH="${PCBSDGITDIR}"
-  export GITBRANCH
-else
-  GITBRANCH="${PROGDIR}/git/pcbsd"
-  export GITBRANCH
-fi
+PCBSDSRC="${PROGDIR}/git/pcbsd"
+export PCBSDSRC
 
 # Where are the dist files
 DISTDIR="${PROGDIR}/fbsd-dist" ; export DISTDIR
@@ -27,18 +22,12 @@ KERNDIST="$DISTDIR/kernel.txz"
 L32DIST="$DISTDIR/lib32.txz"
 export BASEDIST KERNDIST L32DIST
 
-
 # Kernel Config
 PCBSDKERN="GENERIC" ; export PCBSDKERN
 
-# Set where we wish to copy our checked out FreeBSD source
-if [ -n "$FREEBSDGITDIR" ] ; then
-  WORLDSRC="${FREEBSDGITDIR}"
-  export WORLDSRC
-else
-  WORLDSRC="${PROGDIR}/git/freebsd"
-  export WORLDSRC
-fi
+# Location of FreeBSD sources
+WORLDSRC="${PROGDIR}/git/freebsd"
+export WORLDSRC
 
 # Where to build the world directory
 PDESTDIR="${PROGDIR}/buildworld" ; export PDESTDIR
@@ -64,9 +53,9 @@ if [ -z "$ISOVER" ] ; then
 fi
 
 # Where are the config files
-PCONFDIR="${GITBRANCH}/build-files/conf" ; export PCONFDIR
+PCONFDIR="${PCBSDSRC}/build-files/conf" ; export PCONFDIR
 if [ "$SYSBUILD" = "trueos" ] ; then
-  PCONFDIR="${GITBRANCH}/build-files/conf/trueos" ; export PCONFDIR
+  PCONFDIR="${PCBSDSRC}/build-files/conf/trueos" ; export PCONFDIR
 fi
 
 # Where do we place the log files
@@ -83,29 +72,22 @@ esac
 # Set the location of packages needed for our Meta-Packages
 export METAPKGDIR="${PROGDIR}/tmp"
 
-if [ -z "$POUDRIEREJAILVER" ] ; then
-  POUDRIEREJAILVER="$TARGETREL"
+if [ -z "$JAILVER" ] ; then
+  JAILVER="$TARGETREL"
 fi
 if [ -z "$PKGVERUPLOAD" ] ; then
-  PKGVERUPLOAD="$POUDRIEREJAILVER"
+  PKGVERUPLOAD="$JAILVER"
 fi
 
-
-# Poudriere variables
+# Synth variables
 if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
-  PBUILD="trueos-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
+  PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
-  if [ -z "$POUDPORTS" ] ; then
-    POUDPORTS="trueosports" ; export POUDPORTS
-  fi
 else
-  PBUILD="pcbsd-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
+  PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
-  if [ -z "$POUDPORTS" ] ; then
-    POUDPORTS="pcbsdports" ; export POUDPORTS
-  fi
 fi
-PPKGDIR="/synth/pkg/$PBUILD-$POUDPORTS"
+PPKGDIR="/synth/pkg/$PBUILD-$GITPCBSDBRANCH"
 PJPORTSDIR="/synth/ports"
 export PBUILD JPORTSDIR PPKGDIR
 if [ ! -e "$PPKGDIR" ] ; then
@@ -272,19 +254,10 @@ create_pkg_conf()
 
 
   # Doing a local package build
-  if [ "$PKGREPO" = "local" ]; then
-     echo "localrepo: {
-              url: \"file://${PPKGDIR}\",
-              enabled: true
-             }" >  ${PROGDIR}/tmp/repo/local.conf
-     return
-  fi
-
-  # Doing a remote pull from a repo
-  cp ${PROGDIR}/repo.conf ${PROGDIR}/tmp/repo/local.conf
-  sed -i '' "s|%RELVERSION%|$PKGVERUPLOAD|g" ${PROGDIR}/tmp/repo/local.conf
-  sed -i '' "s|%ARCH%|$ARCH|g" ${PROGDIR}/tmp/repo/local.conf
-  sed -i '' "s|%PROGDIR%|$PROGDIR|g" ${PROGDIR}/tmp/repo/local.conf
+  echo "localrepo: {
+           url: \"file://${PPKGDIR}\",
+           enabled: true
+        }" >  ${PROGDIR}/tmp/repo/local.conf
 }
 
 create_installer_pkg_conf()
@@ -344,14 +317,14 @@ cp_iso_pkg_files()
 
     # Create a list of deps for the meta-pkgs
     mkdir ${PROGDIR}/tmp/dep-list
-    for plist in `find ${GITBRANCH}/overlays/install-overlay/root/pkgset | grep pkg-list`
+    for plist in `find ${PCBSDSRC}/overlays/install-overlay/root/pkgset | grep pkg-list`
     do
        targets=""
        while read line
        do
 	 targets="$targets $line"
        done < $plist
-       tfile=`echo $plist | sed "s|${GITBRANCH}/overlays/install-overlay/root/pkgset/||g" | sed "s|/pkg-list||g"`
+       tfile=`echo $plist | sed "s|${PCBSDSRC}/overlays/install-overlay/root/pkgset/||g" | sed "s|/pkg-list||g"`
        tfile=`basename $tfile`
        echo "Saving deps for $tfile"
        ${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ rquery '%dn-%dv' $targets | sort | uniq > ${PROGDIR}/tmp/dep-list/${tfile}.deps
@@ -469,22 +442,13 @@ get_pkgstatic()
 {
   if [ "$1" = "EXTRACTONLY" ] ; then
     echo "Extracting pkg-static..."
-    PKGREPO="local"
   else
     echo "Setting up pkg-static.."
     create_pkg_conf
   fi
 
   rm /tmp/pkg-static >/dev/null 2>/dev/null
-  if [ "$PKGREPO" = "local" ]; then
-    rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
-  else
-    PSITE=`grep 'url' ${PROGDIR}/tmp/repo/local.conf | awk '{print $2}' | sed 's|"||g' | sed 's|,||g'`
-    rc_halt "fetch -o /tmp/.pkg.txz.$$ ${PSITE}/Latest/pkg.txz" 
-    rc_halt "tar xv --strip-components 4 -f /tmp/.pkg.txz.$$ -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
-    rc_halt "rm /tmp/.pkg.txz.$$" >/dev/null 2>/dev/null
-  fi
-
+  rc_halt "tar xv --strip-components 4 -f ${PPKGDIR}/Latest/pkg.txz -C /tmp /usr/local/sbin/pkg-static" >/dev/null 2>/dev/null
   rc_halt "mv /tmp/pkg-static /tmp/pkg-static.$$" >/dev/null 2>/dev/null
 
   PKGSTATIC="/tmp/pkg-static.$$" ; export PKGSTATIC

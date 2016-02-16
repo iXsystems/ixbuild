@@ -16,15 +16,13 @@ LOADER_ZFS_SUPPORT="YES"
 export LOADER_ZFS_SUPPORT
 
 # Make sure we have our freebsd sources
-if [ ! -d "${WORLDSRC}" ]; then 
-   rc_halt "git clone ${GITFBSDURL} ${WORLDSRC}"
-   git_fbsd_up "${WORLDSRC}" "${WORLDSRC}"
-else
-  if [ -d "${WORLDSRC}/.git" ]; then 
-    echo "Updating FreeBSD sources..."
-    git_fbsd_up "${WORLDSRC}" "${WORLDSRC}"
-  fi
+if [ -d "${WORLDSRC}" ]; then 
+  rm -rf ${WORLDSRC}
+  chflags -R noschg ${WORLDSRC} >/dev/null 2>/dev/null
+  rm -rf ${WORLDSRC} >/dev/null 2>/dev/null
 fi
+mkdir -p ${WORLDSRC}
+rc_halt "git clone --depth=1 ${GITFBSDURL} ${WORLDSRC}"
 
 # Now create the world / kernel / distribution
 cd ${WORLDSRC}

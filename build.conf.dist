@@ -1,15 +1,44 @@
-
-# Location of the build sub-directories, organized by version/buildnames
-# Each directory in here should have a pcbsd.cfg / repo.conf file configured
-# for that particular build
-BDIR=""
+###########################################################################
+# Generic settings
+###########################################################################
 
 # User / hostname to ssh / sftp into for storing work and finished builds
+# (Optional)
 SFTPUSER=""
 SFTPHOST=""
+export SFTPUSER SFTPHOST
 
 # Set the remote dirs to store finshed ISO/PKGS
+# (Optional)
 SFTPFINALDIR=""
+export SFTPFINALDIR
 
 # Set the remote dir to use for storing temp build data
+# (Optional)
 SFTPWORKDIR=""
+export SFTPWORKDIR
+
+###########################################################################
+# FreeNAS specific settings
+###########################################################################
+
+# Set the account information for dns testing we do with noip.com
+# If this is NOT set, the test will be skipped
+NOIPUSERNAME=""
+NOIPPASSWORD=""
+NOIPHOST=""
+export NOIPPASSWORD NOIPUSERNAME NOIPHOST
+
+###########################################################################
+# PC-BSD specific settings
+###########################################################################
+
+# Set PBI signing key
+# This key is used to sign your PBI repo
+PBI_REPO_KEY=""
+export PBI_REPO_KEY
+
+# Command used in 'pkg repo' to sign (I.E. signing_command: <cmd>)
+PKGSIGNCMD=""
+export PKGSIGNCMD
+
