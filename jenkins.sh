@@ -20,6 +20,31 @@ BRANCH="${3}"
 # Set JENKINS var
 export USING_JENKINS="YES"
 
+display_usage() {
+
+	 cat << EOF
+Available Commands:
+
+-- FreeNAS Commands --
+      freenas - Builds FreeNAS release
+freenas-tests - Runs FreeNAS tests against built release
+freenas-combo - Build release and run API tests against it automatically
+
+-- PC-BSD Commands --
+  world - Build FreeBSD world
+   jail - Prep the jail for package build
+    pkg - Build packages
+    iso - Assemble PC-BSD ISO files
+     vm - Assemble PC-BSD VM images
+EOF
+
+}
+
+if [ -z "$1" ] ; then
+  display_usage
+  exit 1
+fi
+ 
 # Source our functions
 . build.conf
 . functions.sh
@@ -37,21 +62,7 @@ freenas-combo) jenkins_freenas
 	       jenkins_freenas_tests ;;
 ports-tests) jenkins_ports_tests ;;
       *) echo "Invalid command: $1" 
-	 cat << EOF
-Available Commands:
-
--- FreeNAS Commands --
-      freenas - Builds FreeNAS release
-freenas-tests - Runs FreeNAS tests against built release
-freenas-combo - Build release and run API tests against it automatically
-
--- PC-BSD Commands --
-  world - Build FreeBSD world
-   jail - Prep the jail for package build
-    pkg - Build packages
-    iso - Assemble PC-BSD ISO files
-     vm - Assemble PC-BSD VM images
-EOF
+         display_usage
          exit 1
          ;;
 esac
