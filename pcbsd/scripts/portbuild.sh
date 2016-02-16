@@ -25,7 +25,6 @@ merge_pcbsd_src_ports()
    local portsdir="$2"
    distCache="/synth/distfiles"
 
-   git_up "$gitdir" "$gitdir"
    rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
      
    # Now use the git script to create source ports

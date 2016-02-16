@@ -151,56 +151,6 @@ cp_overlay()
   tar cvf - --exclude .svn -C ${1} .  2>/dev/null | tar xvmf - -C ${2} 2>/dev/null
 }
 
-git_fbsd_up()
-{
-  local lDir=${1}
-  local rDir=${2}
-  local oDir=`pwd`
-  cd "${lDir}"
-
-  echo "GIT checkout $GITFBSDBRANCH"
-  git checkout ${GITFBSDBRANCH}
-
-  echo "GIT pull: ${GITFBSDBRANCH}"
-  git pull origin ${GITFBSDBRANCH}
-  if [ $? -ne 0 ] ; then
-     exit_err "Failed doing a git pull"
-  fi
-
-  cd "${oDir}"
-  return 0
-}
-
-git_up()
-{
-  local lDir=${1}
-  local oDir=`pwd`
-
-  cd "${lDir}"
-
-  git reset --hard >/dev/null 2>/dev/null
-
-  local gbranch="$GITPCBSDBRANCH"
-  if [ -z "$gbranch" ] ; then
-     gbranch="master"
-  fi
-
-  echo "GIT checkout: ${gbranch}"
-  git checkout ${gbranch}
-  if [ $? -ne 0 ] ; then
-     exit_err "Failed doing a git checkout"
-  fi
-
-  echo "GIT pull: ${1}"
-  git pull 
-  if [ $? -ne 0 ] ; then
-     exit_err "Failed doing a git pull"
-  fi
-
-  cd "${oDir}"
-  return 0
-}
-
 # Run-command, don't halt if command exits with non-0
 rc_nohalt()
 {
