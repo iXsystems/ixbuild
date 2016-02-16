@@ -265,6 +265,7 @@ if [ "$target" = "all" ] ; then
   fi
 
   # Create the repo / sign the packages
+  echo "Creating pkg repo..."
   ${PKGSTATIC} repo ${PPKGDIR} ${SIGNARGS}
   if [ $? -ne 0 ] ; then
      echo "Failed signing pkg repo!"
@@ -274,6 +275,7 @@ if [ "$target" = "all" ] ; then
   rm ${PKGSTATIC}
 
   # Make sure the essentials built, exit now if not
+  echo "Checking essential packages..."
   check_essential_pkgs "NO"
   if [ $? -ne 0 ] ; then
      exit 1
