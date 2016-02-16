@@ -46,9 +46,8 @@ fi
 cp ./sudo-ixbuild /usr/local/etc/sudoers.d/ixbuild
 chmod 644 /usr/local/etc/sudoers.d/ixbuild
 
-if [ ! -d "/ixbuild/build.conf" ] ; then
-  cp ../build.conf.dist ../build.conf
-fi
+# Copy over the build.conf defaults
+cp /ixbuild/build.conf.dist /ixbuild/build.conf
 
 echo ""
 echo "**************************************************************"
