@@ -397,8 +397,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
        ;;
     *)
        if [ -z "$BRANCH" ] ; then
-          echo "Missing BRANCH!"
-          exit_clean
+         BRANCH="production"
        fi
        . pcbsd.cfg
        ;;
