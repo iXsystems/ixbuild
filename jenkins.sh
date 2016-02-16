@@ -36,7 +36,22 @@ freenas-tests) jenkins_freenas_tests ;;
 freenas-combo) jenkins_freenas
 	       jenkins_freenas_tests ;;
 ports-tests) jenkins_ports_tests ;;
-      *) echo "Invalid Type: $1" 
+      *) echo "Invalid command: $1" 
+	 cat << EOF
+Available Commands:
+
+-- FreeNAS Commands --
+      freenas - Builds FreeNAS release
+freenas-tests - Runs FreeNAS tests against built release
+freenas-combo - Build release and run API tests against it automatically
+
+-- PC-BSD Commands --
+  world - Build FreeBSD world
+   jail - Prep the jail for package build
+    pkg - Build packages
+    iso - Assemble PC-BSD ISO files
+     vm - Assemble PC-BSD VM images
+EOF
          exit 1
          ;;
 esac
