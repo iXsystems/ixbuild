@@ -47,11 +47,11 @@ cp ./sudo-ixbuild /usr/local/etc/sudoers.d/ixbuild
 chmod 644 /usr/local/etc/sudoers.d/ixbuild
 
 if [ ! -d "/ixbuild/build.conf" ] ; then
-  echo "Created new /ixbuild/build.conf file!"
-  echo "This will need to be adjusted to use optional settings"
   cp ../build.conf.dist ../build.conf
 fi
 
+echo ""
+echo "**************************************************************"
 echo "Jenkins node is ready to begin builds. Use sudo /ixbuild/jenkins.sh <cmd> <build target> {production|edge}"
 echo "Build targets in /ixbuild/builds/"
 echo "Run /ixbuild/jenkins.sh for list of build commands"
