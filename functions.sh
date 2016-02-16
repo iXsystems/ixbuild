@@ -406,11 +406,11 @@ if [ "$TYPE" != "ports-tests" ] ; then
 
 
   # Set the variables to reference poudrire jail locations
-  if [ -z "$POUDRIEREJAILVER" ] ; then
-    POUDRIEREJAILVER="$TARGETREL"
+  if [ -z "$JAILVER" ] ; then
+    JAILVER="$TARGETREL"
   fi
   case $TYPE in
-    jail|pkg) WORLDTREL="$POUDRIEREJAILVER" ;;
+    jail|pkg) WORLDTREL="$JAILVER" ;;
      *) WORLDTREL="$TARGETREL" ;;
   esac
   if [ -z "$PKGVERUPLOAD" ] ; then
@@ -418,12 +418,9 @@ if [ "$TYPE" != "ports-tests" ] ; then
   fi
 
   # Poudriere variables
-  PBUILD="pcbsd-`echo $POUDRIEREJAILVER | sed 's|\.||g'`"
+  PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
-  if [ -z "$POUDPORTS" ] ; then
-    POUDPORTS="pcbsdports" ; export POUDPORTS
-  fi
-  PPKGDIR="/synth/pkg/$PBUILD-$POUDPORTS"
+  PPKGDIR="/synth/pkg/$PBUILD"
   PJPORTSDIR="/synth/ports"
   export PBUILD PJPORTSDIR PPKGDIR
 
