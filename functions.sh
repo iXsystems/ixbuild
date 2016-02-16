@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Set the repo we pull for build / tests
-GITREPO="https://github.com/iXsystems/ix-tests.git"
+GITREPO="https://github.com/iXsystems/ixbuild.git"
 
 cleanup_workdir()
 {

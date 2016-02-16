@@ -34,7 +34,7 @@ if [ -d "/ixbuild" ] ; then
   exit 1
 fi
 
-git clone --depth=1 https://github.com/iXsystems/ix-tests.git /ixbuild
+git clone --depth=1 https://github.com/iXsystems/ixbuild.git /ixbuild
 if [ $? -ne 0 ] ; then
   echo "Failed cloning into /ixbuild"
   exit 1

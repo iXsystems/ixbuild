@@ -2,16 +2,18 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Test scripts and build framework for iX projects](#test-scripts-and-build-framework-for-ix-projects)
+- [Jenkins build framework for iX projects](#jenkins-build-framework-for-ix-projects)
+- [Getting Started](#getting-started)
 - [FreeNAS Builds](#freenas-builds)
-  - [iso](#iso)
-  - [all](#all)
-  - [tests](#tests)
+  - [freenas](#freenas)
+  - [freenas-combo](#freenas-combo)
+  - [freenas-tests](#freenas-tests)
+- [Manually running test framework](#manually-running-test-framework)
 - [FreeNAS Testing Framework](#freenas-testing-framework)
   - [Adding New tests](#adding-new-tests)
   - [Where are tests run?](#where-are-tests-run)
 - [PC-BSD Builds](#pc-bsd-builds)
-  - [all](#all-1)
+  - [all](#all)
   - [world](#world)
   - [ports](#ports)
   - [ports-meta-only](#ports-meta-only)
@@ -21,46 +23,71 @@
   - [menu](#menu)
   - [clean](#clean)
   - [vm](#vm)
-- [Jenkins Automation](#jenkins-automation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Test scripts and build framework for iX projects
+Jenkins build framework for iX projects
 ===========
 
-Scripts for the following
+The scripts in this repo will allow you to build PC-BSD or FreeNAS, either
+as an automated job from Jenkins or manually. It includes support to build
+the following:
 
- * PC-BSD Builds -  ISO / regression test
- * FreeNAS Builds - ISO / regression test
+ * PC-BSD Builds -  world/pkg/iso/vm
+ * FreeNAS Builds - iso/test
  * Jenkins automation
+
+
+Getting Started
+============
+
+To prep a new system for building, first download the repo and install with
+the following:
+
+```
+% git clone --depth=1 https://github.com/iXsystems/ixbuild.git
+% cd ixbuild
+% sudo make jenkins
+```
+
+With the install complete, you can now start builds of PC-BSD or FreeNAS with
+the following commands:
+
+ "/ixbuild/jenkins.sh <command> <target>"
+
+A list of the possible build targets are located in the [builds directory.](https://github.com/iXsystems/ixbuild/tree/master/builds)
+
+The various commands which can be called are listed in their respective FreeNAS
+or PC-BSD sections below.
+
+Example: (As root)
+```
+# /ixbuild/jenkins.sh freenas freenas-9 (Build FreeNAS 9.x)
+or
+# /ixbuild/jenkins.sh pkg pcbsd-current (Build PC-BSD -CURRENT)
+```
+
 
 FreeNAS Builds
 ============
 
-Getting Started:
+The following commands are available to build FreeNAS:
 
-First, cd to the "freenas" sub-directory and make a copy of the following:
-
-freenas.cfg.dist -> freenas.cfg
-
-Next, you will want to edit freenas.cfg and check that the options are correct
-for the version of FreeNAS you plan on building.
-
-Once that file is created with the correct values, you can run the following
-"make" commands to start a build:
-
-iso
+freenas
 ---
 Build FreeNAS ISOs / update files from sources, this may take a while.
 
-all
+freenas-combo
 ---
 Create the ISO files and run the testing framework to check for regressions
 
-tests
+freenas-tests
 ---
 Run the regression testing framework. Will generate auto-install ISOs and
 install them into a VM for testing purposes.
+
+Manually running test framework
+=======
 
 Tests are located in the freenas/scripts/9.3-tests.sh and
 freenas/scripts/10-tests.sh files. These scripts can also be run directly
@@ -106,7 +133,7 @@ Adding New tests
 
 New tests can be written for FreeNAS 9.3.X by adding a test "module" to the 9.3 testing directory:
 
-https://github.com/iXsystems/ix-tests/tree/master/freenas/9.3-tests
+https://github.com/iXsystems/ixbuild/tree/master/freenas/9.3-tests
 
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
@@ -126,47 +153,7 @@ https://builds.pcbsd.org/jenkins/view/FreeNAS%20ATF/
 PC-BSD Builds
 ============
 
-This program will do the compile of a FreeBSD world / kernel, 
-fetch packages from the PC-BSD PKGNG CDN and assemble an ISO file. 
-
-Requirements:
-
- - FreeBSD 10.1 or higher
- - A PKGNG repo for the target version / arch
- - git
- - zip
- - grub-mkrescue
- - xorriso
- - poudriere (optional)
- - unicode.pf2 (required for grub-mkrescue)
-
-Getting Started:
-
-First, cd to the "pcbsd" sub-directory and make a copy of the following:
-
-```
-# cp pcbsd.cfg.dist pcbsd.cfg
-# cp -R pkg-dist/ pkg/
-# cp -R pbi-dist/ pbi/
-```
-
-Next, you will want to edit pcbsd.cfg and check that the options are correct
-for the version of PC-BSD you plan on building.
-
-If you will be building the entire pkg repo (default) then the system will
-need to have poudriere installed and configured to be ready for building.
-If you are building a custom PC-BSD, you may wish to replace the pkg/pbi
-paths and keys in pkg/ and pbi/ directories. 
-
-To start a build, run "make" in the source directory. FreeBSD sources will be 
-downloaded from GIT automatically, and then a world / kernel built. Once
-this build finishes, the builder will begin compiling packages with poudriere.
-Lastly the ISO will be built in the ~/iso directory.
-
-
-Advanced Usage:
-
-The following "make" targets are available:
+The following commands are available to build PC-BSD:
 
 all
 ---
@@ -224,19 +211,3 @@ vm
 
 Will create VM images of PC-BSD / TrueOS for VirtualBox / VMWare and raw disk
 
-
-
-Jenkins Automation
-============
-
-Jenkins helper automation scripts, these are used by PC-BSD to handle
-the running of jobs from Jenkins on any random builder, while storing
-temp files and finished products on another system for easy access.
-
-Usage:
-
-Copy build.conf.dist -> build.conf and set the values for your storage server
-to allow nodes to run sftp and sync data between them. Your nodes will need
-to have SSH setup to access this system already. 
-
-./jenkins.sh world/jail/ports/iso/vm/freenas/freenas-tests version edge/production
