@@ -36,7 +36,8 @@ nfs_tests()
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Mounting NFS"
   rc_halt "mkdir /tmp/nfs-mnt.$$"
-  rc_halt "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60"
+  #rc_halt "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60"
+  rc_halt "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$"
   echo_ok
 
   echo_test_title "Creating NFS file"
