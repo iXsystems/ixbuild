@@ -94,11 +94,9 @@ rc_halt()
     if [ $timeout -gt $3 ] ; then break; fi
   done
 
-  rm /tmp/.rc-pid.$$ 2>/dev/null
-  rm /tmp/.rc-result.$$ 2>/dev/null
-
   kill -9 $(cat /tmp/.rc-pid.$$)
   rm /tmp/.rc-pid.$$
+  rm /tmp/.rc-result.$$ 2>/dev/null
   echo -e " - FAILED"
   eval "${2}"
   echo "Timeout running: $1"
