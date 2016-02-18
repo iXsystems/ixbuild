@@ -110,7 +110,7 @@ UFSFILE=base.ufs
 sync
 cd uzipdir
 DIRSIZE=$(($(du -kd 0 | cut -f 1)))
-FSSIZE=$(($DIRSIZE + $DIRSIZE + 100000))
+FSSIZE=$(($DIRSIZE + $DIRSIZE + 300000))
 cd ..
 rc_halt "dd if=/dev/zero of=${UFSFILE} bs=1k count=${FSSIZE}"
 
