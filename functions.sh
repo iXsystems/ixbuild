@@ -447,7 +447,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   PPKGDIR="/synth/pkg/${BUILD}-${BRANCH}"
   PJPORTSDIR="/synth/ports"
-  export PBUILD PJPORTSDIR PPKGDIR BUILD BRANCH
+  export PBUILD PJPORTSDIR PPKGDIR
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
