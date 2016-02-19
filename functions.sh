@@ -445,9 +445,9 @@ if [ "$TYPE" != "ports-tests" ] ; then
   # Poudriere variables
   PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
-  PPKGDIR="/synth/pkg/$PBUILD"
+  PPKGDIR="/synth/pkg/${BUILD}-${BRANCH}"
   PJPORTSDIR="/synth/ports"
-  export PBUILD PJPORTSDIR PPKGDIR
+  export PBUILD PJPORTSDIR PPKGDIR BUILD BRANCH
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
