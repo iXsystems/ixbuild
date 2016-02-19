@@ -87,7 +87,9 @@ else
   PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
 fi
-PPKGDIR="/synth/pkg/$PBUILD"
+if [ -z "$PPKGDIR" ] ; then
+  PPKGDIR="/synth/pkg/$PBUILD"
+fi
 PJPORTSDIR="/synth/ports"
 export PBUILD JPORTSDIR PPKGDIR
 if [ ! -e "$PPKGDIR" ] ; then
