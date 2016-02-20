@@ -78,3 +78,15 @@ if [ "$?" != "0" ]; then
   echo "Installing www/npm012.."
   rc_halt "pkg install -y www/npm012"
 fi
+
+which pxz >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing archivers/pxz"
+  rc_halt "pkg install -y archivers/pxz"
+fi
+
+which poudriere >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing ports-mgmt/poudriere-devel"
+  rc_halt "pkg install -y ports-mgmt/poudriere-devel"
+fi
