@@ -298,8 +298,6 @@ cp_iso_pkg_files()
 
 update_synth_world()
 {
-  echo "Extrating synth world..."
-
   # Setup fake synth world dir
   if [ ! -d "/synth" ] ; then
     mkdir /synth
@@ -313,7 +311,11 @@ update_synth_world()
 
   for i in $dfiles
   do
-    tar xvpf "${DISTDIR}/$i" -C /synth/world
+    echo "Extracting synth world ($i)..."
+    tar xvpf "${DISTDIR}/$i" -C /synth/world 2>/dev/null >/dev/null
+    if [ $? -ne 0 ] ; then
+      echo "WARNING: Non-0 returned!"
+    fi
   done
 }
 
