@@ -226,15 +226,6 @@ if [ "$target" = "all" ] ; then
   # Extract the world for this synth build
   update_synth_world
 
-  # Workaround bug in synth which doesn't set UNAME_r properly
-#  BVER=$(/synth/world/bin/freebsd-version)
-#  cat >/usr/local/etc/synth/PCBSD-environment << EOF
-#UNAME_r=$BVER
-#UNAME_v=FreeBSD\ $BVER
-#UNAME_M=amd64
-#UNAME_P=amd64
-#EOF
-
   # Make sure this builder isn't already going
   pgrep -q synth
   if [ $? -eq 0 ] ; then
@@ -242,8 +233,10 @@ if [ "$target" = "all" ] ; then
     echo "Stopping old synth"
     killall -9 synth
     sleep 60
-    synth status >/dev/null 2>/dev/null
   fi
+
+  # Display the synth configuration
+  echo "" | synth configure
 
   # Clean distfiles
   synth purge-distfiles
