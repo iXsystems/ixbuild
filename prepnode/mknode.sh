@@ -5,6 +5,18 @@ if [ $(id -u) != "0" ] ; then
   exit 1
 fi
 
+echo "How do you wish to prep this system?"
+echo "node   - Builder to connect to existing Jenkins server"
+echo "master - Deploy Jenkins server and run local node"
+echo "node>"
+read ans
+if [ -z "$ans" ] ; then ans="node"; fi
+case $ans in
+  node|NODE) PREPTYPE="NODE";;
+  master|MASTER) PREPTYPE="MASTER";;
+  *) ;;
+esac
+
 which sudo >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sudo.."
@@ -28,7 +40,6 @@ if [ "$?" != "0" ]; then
   echo "Failed installing git!"
   exit 1
 fi
-
 if [ -d "/ixbuild" ] ; then
   echo "/ixbuild already exists! Remove this directory to continue!"
   exit 1
@@ -49,10 +60,58 @@ chmod 644 /usr/local/etc/sudoers.d/ixbuild
 # Copy over the build.conf defaults
 cp /ixbuild/build.conf.dist /ixbuild/build.conf
 
-echo ""
-echo "**************************************************************"
-echo "Jenkins node is ready to begin builds. Use sudo /ixbuild/jenkins.sh <cmd> <build target> {production|edge}"
-echo "Build targets in /ixbuild/builds/"
-echo "Run /ixbuild/jenkins.sh for list of build commands"
-echo " "
-echo "EXAMPLE: % sudo /ixbuild/jenkins.sh freenas-combo freenas-9 production"
+if [ "$PREPTYPE" = "MASTER" ] ; then
+  pkg info -q jenkins >/dev/null 2>/dev/null
+  if [ "$?" != "0" ]; then
+    pkg install -y jenkins
+    if [ "$?" != "0" ]; then
+      echo "Failed installing jenkins!"
+      exit 1
+    fi
+  fi
+
+  # Get the pre-built jenkins config
+  rm -rf /usr/local/jenkins >/dev/null 2>/dev/null
+  echo "Downloading Jenkins config..."
+  fetch -o /tmp/jenkins-master.txz http://update.cdn.pcbsd.org/jenkins-config/master.txz
+  if [ $? -ne 0 ] ; then
+     echo "Failed downloading Jenkins config!"
+     exit 1
+  fi
+  tar xvpf /tmp/jenkins-master.txz -C /usr/local >/dev/null 2>/dev/null
+  if [ $? -ne 0 ] ; then
+     echo "Failed extracting Jenkins config!"
+     exit 1
+  fi
+  rm /tmp/jenkins-master.txz
+  chown -R jenkins:jenkins /usr/local/jenkins
+
+  # Enable Jenkins
+  sysrc -f /etc/rc.conf jenkins_enable="YES"
+
+  # Start Jenkins
+  service jenkins start
+  if [ $? -ne 0 ] ; then
+     echo "Failed starting Jenkins!"
+     exit 1
+  fi
+
+  echo ""
+  echo "**************************************************************"
+  echo "Jenkins is started and running on http://localhost:8180/jenkins/"
+  echo "You should connect and setup a username / password!"
+  echo "**************************************************************"
+
+else
+  echo ""
+  echo "**************************************************************"
+  echo "Jenkins node is ready to begin builds."
+  echo " "
+  echo "Build targets in /ixbuild/builds/"
+  echo "Run /ixbuild/jenkins.sh for list of build commands"
+  echo " "
+  echo "EXAMPLE:"
+  echo "sudo /ixbuild/jenkins.sh freenas-combo freenas-9"
+fi
+
+
