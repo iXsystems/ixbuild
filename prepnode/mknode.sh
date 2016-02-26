@@ -8,7 +8,7 @@ fi
 echo "How do you wish to prep this system?"
 echo "node   - Builder to connect to existing Jenkins server"
 echo "master - Deploy Jenkins server and run local node"
-echo "node>"
+echo -e "node>\c"
 read ans
 if [ -z "$ans" ] ; then ans="node"; fi
 case $ans in
