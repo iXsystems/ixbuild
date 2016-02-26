@@ -22,6 +22,7 @@ cleanup_workdir()
     chflags -R noschg ${MASTERWRKDIR} 2>/dev/null
     rm -rf ${MASTERWRKDIR}
   fi
+  cd
 }
 
 exit_clean()
@@ -35,6 +36,7 @@ create_workdir()
   if [ ! -d "/tmp/build" ] ; then
      mkdir /tmp/build
   fi
+  cd /tmp/build
 
   MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
