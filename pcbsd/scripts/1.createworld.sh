@@ -22,7 +22,7 @@ if [ -d "${WORLDSRC}" ]; then
   rm -rf ${WORLDSRC} >/dev/null 2>/dev/null
 fi
 mkdir -p ${WORLDSRC}
-rc_halt "git clone --depth=1 ${GITFBSDURL} ${WORLDSRC}"
+rc_halt "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} ${WORLDSRC}"
 
 # Now create the world / kernel / distribution
 cd ${WORLDSRC}
