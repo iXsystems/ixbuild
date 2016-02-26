@@ -11,14 +11,17 @@ cd ${PROGDIR}/scripts
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 
+FNASBDIR="/freenas"
+export FNASBDIR
+
 # Make sure we have our freenas sources
 if [ ! -d "${FNASSRC}" ]; then 
-   rc_nohalt "rm -rf /tmp/fnasb"
-   rc_nohalt "chflags -R noschg /tmp/fnasb"
-   rc_nohalt "rm -rf /tmp/fnasb"
+   rc_nohalt "rm -rf ${FNASBDIR}"
+   rc_nohalt "chflags -R noschg ${FNASBDIR}"
+   rc_nohalt "rm -rf ${FNASBDIR}"
    rc_nohalt "mkdir `dirname ${FNASSRC}`"
-   rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} /tmp/fnasb"
-   rc_halt "ln -s /tmp/fnasb ${FNASSRC}"
+   rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+   rc_halt "ln -s ${FNASBDIR} ${FNASSRC}"
    git_fnas_up "${FNASSRC}" "${FNASSRC}"
 else
   if [ -d "${GITBRANCH}/.git" ]; then 

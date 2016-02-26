@@ -13,12 +13,15 @@ if [ ! -d "${PROGDIR}/tmp" ] ; then
   mkdir ${PROGDIR}/tmp
 fi
 
+FNASBDIR="/freenas"
+export FNASBDIR
+
 # Figure out the ISO name
 echo "Finding ISO file..."
-if [ -d "/tmp/fnasb/objs" ] ; then
-  ISOFILE=`find /tmp/fnasb/objs | grep '\.iso$' | head -n 1`
-elif [ -d "/tmp/fnasb/_BE/release" ] ; then
-  ISOFILE=`find /tmp/fnasb/_BE/release | grep '\.iso$' | head -n 1`
+if [ -d "${FNASBDIR}/objs" ] ; then
+  ISOFILE=`find ${FNASBDIR}/objs | grep '\.iso$' | head -n 1`
+elif [ -d "${FNASBDIR}/_BE/release" ] ; then
+  ISOFILE=`find ${FNASBDIR}/_BE/release | grep '\.iso$' | head -n 1`
 else
   if [ -n "$1" ] ; then
     ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`

@@ -329,16 +329,16 @@ jenkins_freenas()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Now lets sync the ISOs
-  if [ -n "$FREENASLEGACY" ] ; then
-    cd /tmp/fnasb/objs
-    if [ $? -ne 0 ] ; then exit_clean ; fi
-    rm -rf os-base
-  else
-    cd /tmp/fnasb/_BE/release/
-    if [ $? -ne 0 ] ; then exit_clean ; fi
-  fi
-
   if [ -n "$SFTPHOST" ] ; then
+    if [ -n "$FREENASLEGACY" ] ; then
+      cd ${FNASBDIR}/objs
+      if [ $? -ne 0 ] ; then exit_clean ; fi
+      rm -rf os-base
+    else
+      cd ${FNASBDIR}/_BE/release/
+      if [ $? -ne 0 ] ; then exit_clean ; fi
+    fi
+
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
     rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
     if [ $? -ne 0 ] ; then exit_clean; fi
@@ -358,22 +358,29 @@ jenkins_freenas_tests()
 
   if [ -n "$SFTPHOST" ] ; then
     # Now lets sync the ISOs
-    if [ -d "/tmp/fnasb/_BE/release" ] ; then
-      rm -rf /tmp/fnasb/_BE/release
+    if [ -d "${FNASBDIR}/_BE/release" ] ; then
+      rm -rf ${FNASBDIR}/_BE/release
     fi
 
-    mkdir -p /tmp/fnasb/_BE/release
-    cd /tmp/fnasb/_BE/release
+    mkdir -p ${FNASBDIR}/_BE/release
+    cd ${FNASBDIR}/_BE/release
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} /tmp/fnasb/_BE/release/
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${FNASBDIR}/_BE/release/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
-  if [ ! -d "/tmp/fnasb/_BE/release" ] ; then
-    echo "Missing FreeNAS ISO, have you done the freenas build yet?"
-    exit 1
+  if [ -n "$FREENASLEGACY" ] ; then
+    if [ ! -d "${FNASBDIR}/objs" ] ; then
+      echo "Missing FreeNAS ISO, have you done the freenas build yet?"
+      exit 1
+    fi
+  else
+    if [ ! -d "${FNASBDIR}/_BE/release" ] ; then
+      echo "Missing FreeNAS ISO, have you done the freenas build yet?"
+      exit 1
+    fi
   fi
 
   cd ${TBUILDDIR}
@@ -400,6 +407,10 @@ jenkins_ports_tests()
 # Set the builds directory
 BDIR="./builds"
 export BDIR
+
+# Set location of FreeNAS builds
+FNASBDIR="/freenas"
+export FNASBDIR
 
 if [ "$TYPE" != "ports-tests" ] ; then
 
