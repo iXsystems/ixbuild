@@ -11,8 +11,15 @@ cd ${PROGDIR}/scripts
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 
+# Set local location of FreeNAS build
 FNASBDIR="/freenas"
 export FNASBDIR
+
+# Check if grub2-efi is on the builder, remove it so
+pkg info -q grub2-efi
+if [ $? -eq 0 ] ; then
+  pkg delete -y grub2-efi
+fi
 
 # Make sure we have our freenas sources
 if [ ! -d "${FNASSRC}" ]; then 
