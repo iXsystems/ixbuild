@@ -26,11 +26,11 @@ A system running PC-BSD/FreeBSD 11.0-CURRENT, with at minimum 16GB of memory.
 (Building PC-BSD packages in a reasonable time works best with 48GB or more)
 
 Recommended:
-CPU: 8 Cores or more
-Memory: 16GB (For FreeNAS) 48GB (For PC-BSD)
-Disk: 20GB (For FreeNAS) 200GB (For PC-BSD)
+* CPU: 8 Cores or more
+* Memory: 16GB (For FreeNAS) 48GB (For PC-BSD)
+* Disk: 20GB (For FreeNAS) 200GB (For PC-BSD)
 
-[PC-BSD Download](http://download.pcbsd.org/iso/)
+[PC-BSD Download Site](http://download.pcbsd.org/iso/)
 
 
 Getting Started
