@@ -258,8 +258,13 @@ if [ "$target" = "all" ] ; then
   fi
 
   # Create the repo / sign the packages
+  cd ${PPKGDIR}
+  rm meta.txz >/dev/null 2>/dev/null
+  rm digests.txz >/dev/null 2>/dev/null
+  rm packagesite.txz >/dev/null 2>/dev/null
+
   echo "Creating pkg repo..."
-  ${PKGSTATIC} repo ${PPKGDIR} ${SIGNARGS}
+  ${PKGSTATIC} repo . ${SIGNARGS}
   if [ $? -ne 0 ] ; then
      echo "Failed signing pkg repo!"
      rm ${PKGSTATIC}
