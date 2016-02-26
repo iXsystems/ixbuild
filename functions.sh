@@ -99,8 +99,16 @@ push_world()
   cd ${TBUILDDIR}/fbsd-dist
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  if [ -z "$SFTPHOST" ] ; then return 0; fi
+  # Pushing to a local directory?
+  if [ -z "$SFTPHOST" ] ; then
+    if [ ! -d "${PCBSDBDIR}/fbsd-dist/${WORLDTREL}" ] ; then mkdir -p ${PCBSDBDIR}/fbsd-dist/${WORLDTREL}; fi
+    rm ${PCBSDBDIR}/fbsd-dist/${WORLDTREL}/* 2>/dev/null
+    echo "Saving FreeBSD dist files -> ${PCBSDBDIR}/fbsd-dist/${WORLDTREL}"
+    cp * ${PCBSDBDIR}/fbsd-dist/${WORLDTREL}/
+    return 0
+  fi
 
+  # Pushing to a remote directory?
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
 
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
@@ -117,16 +125,26 @@ push_world()
 
 pull_world()
 {
-  if [ -z "$SFTPHOST" ] ; then return 0; fi
+  if [ ! -d "${TBUILDDIR}/fbsd-dist" ] ; then
+    mkdir -p ${TBUILDDIR}/fbsd-dist
+  fi
+
+  # Pulling from a local dist set
+  if [ -z "$SFTPHOST" ] ; then
+    if [ ! -d "${PCBSDBDIR}/fbsd-dist/${WORLDTREL}" ] ; then return 1; fi
+    cp ${PCBSDBDIR}/fbsd-dist/${WORLDTREL}/* ${TBUILDDIR}/fbsd-dist/
+    if [ $? -ne 0 ] ; then
+      return 1
+    fi
+    return 0
+  fi
+
+  # Pulling from a remote dist set
 
   # Check if the world exists
   ssh ${SFTPUSER}@${SFTPHOST} "ls ${WORKWORLD}" >/dev/null 2>/dev/null
   if [ $? -ne 0 ] ; then
      return 1
-  fi
-
-  if [ ! -d "${TBUILDDIR}/fbsd-dist" ] ; then
-    mkdir -p ${TBUILDDIR}/fbsd-dist
   fi
 
   cd ${TBUILDDIR}/fbsd-dist
@@ -237,7 +255,7 @@ jenkins_pkg()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  # Save the timestamp of when we started this poudriere run
+  # Save the timestamp of when we started this synth run
   if [ ! -d "${PPKGDIR}" ] ; then mkdir -p ${PPKGDIR} ; fi
   date +"%s" >${PPKGDIR}/.started
 
@@ -408,9 +426,13 @@ jenkins_ports_tests()
 BDIR="./builds"
 export BDIR
 
-# Set location of FreeNAS builds
+# Set location of local FreeNAS build data
 FNASBDIR="/freenas"
 export FNASBDIR
+
+# Set location of local PC-BSD build data
+PCBSDBDIR="/pcbsd"
+export PCBSDBDIR
 
 if [ "$TYPE" != "ports-tests" ] ; then
 
