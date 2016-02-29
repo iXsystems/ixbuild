@@ -48,6 +48,12 @@ create_workdir()
   cd ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+  # Copy over user builds
+  if [ -d "/ixbuild/builds" ] ; then
+    rm -rf ${MASTERWRKDIR}/builds
+    cp -r /ixbuild/builds ${MASTERWRKDIR}/builds
+  fi
+
   case $TYPE in
     freenas|freenas-tests|freenas-combo) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
           *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
