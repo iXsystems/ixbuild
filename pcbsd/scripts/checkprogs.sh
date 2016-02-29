@@ -91,10 +91,8 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y textproc/libucl"
 fi
 
-if [ "$PKGREPO" = "local" -o "$PKGREPO" = "localpkg" ] ; then
-  which synth >/dev/null 2>/dev/null
-  if [ "$?" != "0" ]; then
-    echo "Installing synth.."
-    rc_halt "pkg install -y ports-mgmt/synth"
-  fi
+which synth >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing synth.."
+  rc_halt "pkg install -y ports-mgmt/synth"
 fi
