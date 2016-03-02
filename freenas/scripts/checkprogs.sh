@@ -103,6 +103,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y textproc/py-sphinxcontrib-httpdomain"
 fi
 
+pkg info -q misc/compat9x >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing misc/compat9x.."
+  rc_halt "pkg install -y misc/compat9x"
+fi
+
 which node >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing www/node012.."
