@@ -37,7 +37,7 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y emulators/virtualbox-ose"
 fi
 
-pkg info "emulators/virtualbox-ose-kmod" >/dev/null 2>/dev/null
+pkg info -q emulators/virtualbox-ose-kmod
 if [ "$?" != "0" ]; then
   echo "Installing emulators/virtualbox-ose-kmod.."
   rc_halt "pkg install -y emulators/virtualbox-ose-kmod"

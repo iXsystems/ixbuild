@@ -64,8 +64,14 @@ ifconfig tap0 destroy >/dev/null 2>/dev/null
 iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 
 # Load up VBOX
-kldload vboxdrv >/dev/null 2>/dev/null
-service vboxnet onestart >/dev/null 2>/dev/null
+kldstat | grep -q vboxdrv
+if [ $? -eq 0 ] ; then
+  kldload vboxdrv
+fi
+kldstat | grep -q vboxnet
+if [ $? -eq 0 ] ; then
+  service vboxnet onestart
+fi
 
 # Now lets spin-up vbox and do an installation
 ######################################################
