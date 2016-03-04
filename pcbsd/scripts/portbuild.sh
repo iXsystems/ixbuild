@@ -144,8 +144,10 @@ do_portsnap()
 
   echo "Cloning ports repo..."
   if [ -n "${PORTS_GIT_URL}" ] ; then
+    echo "git clone --depth=1 ${PORTS_GIT_URL} /synth/ports"
     git clone --depth=1 ${PORTS_GIT_URL} /synth/ports
   else
+    echo "git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports"
     git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports
   fi
 
@@ -154,8 +156,10 @@ do_portsnap()
   rm -rf /usr/src 2>/dev/null
   mkdir /usr/src 2>/dev/null
   if [ -n "$GITFBSDURL" ] ; then
+    echo "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /usr/src"
     git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /usr/src
   else
+    echo "git clone --depth=1 https://github.com/pcbsd/freebsd.git /usr/src"
     git clone --depth=1 https://github.com/pcbsd/freebsd.git /usr/src
   fi
 
