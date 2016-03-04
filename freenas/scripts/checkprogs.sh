@@ -61,6 +61,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y lang/spidermonkey24"
 fi
 
+pkg info -q lang/python27 >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing lang/python27.."
+  rc_halt "pkg install -y lang/python27"
+fi
+
 which python3 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing python3.."
