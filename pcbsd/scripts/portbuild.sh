@@ -133,6 +133,14 @@ Display_with_ncurses= false
 leverage_prebuilt= false
 EOF
 
+  # Signing script
+  if [ -n "$PKGSIGNCMD" ] ; then
+    cp ${PKGSIGNCMD} /usr/local/etc/synth/PCBSD-signing_command
+    cp ${PKGSIGNCMD}.fingerprint /usr/local/etc/synth/PCBSD-fingerprint
+  else
+    rm /usr/local/etc/synth/PCBSD-signing_command 2>/dev/null >/dev/null
+    rm /usr/local/etc/synth/PCBSD-fingerprint 2>/dev/null >/dev/null
+  fi
 
 }
 
@@ -150,19 +158,6 @@ do_portsnap()
     echo "git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports"
     git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports
   fi
-
-  # Need to checkout src as well
-  echo "Preparing /usr/src..."
-  rm -rf /usr/src 2>/dev/null
-  mkdir /usr/src 2>/dev/null
-  if [ -n "$GITFBSDURL" ] ; then
-    echo "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /usr/src"
-    git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /usr/src
-  else
-    echo "git clone --depth=1 https://github.com/pcbsd/freebsd.git /usr/src"
-    git clone --depth=1 https://github.com/pcbsd/freebsd.git /usr/src
-  fi
-
 }
 
 do_pcbsd_portmerge()

@@ -317,6 +317,16 @@ update_synth_world()
       echo "WARNING: Non-0 returned!"
     fi
   done
+
+  # Need to checkout src as well
+  echo "Preparing /synth/world/usr/src..."
+  if [ -n "$GITFBSDURL" ] ; then
+    echo "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /synth/world/usr/src"
+    git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /synth/world/usr/src
+  else
+    echo "git clone --depth=1 https://github.com/pcbsd/freebsd.git /synth/world/usr/src"
+    git clone --depth=1 https://github.com/pcbsd/freebsd.git /synth/world/usr/src
+  fi
 }
 
 get_last_rev()
