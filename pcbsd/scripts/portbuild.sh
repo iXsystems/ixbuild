@@ -246,31 +246,6 @@ if [ "$target" = "all" ] ; then
      echo "Failed synth build..."
   fi
 
-  # Get the static version of pkgng
-  get_pkgstatic "EXTRACTONLY"
-
-  # Signing script
-  if [ -n "$PKGSIGNCMD" ] ; then
-    SIGNARGS="signing_command: $PKGSIGNCMD"
-  else
-    SIGNARGS=""
-  fi
-
-  # Create the repo / sign the packages
-  cd ${PPKGDIR}
-  rm meta.txz >/dev/null 2>/dev/null
-  rm digests.txz >/dev/null 2>/dev/null
-  rm packagesite.txz >/dev/null 2>/dev/null
-
-  echo "Creating pkg repo..."
-  ${PKGSTATIC} repo . ${SIGNARGS}
-  if [ $? -ne 0 ] ; then
-     echo "Failed signing pkg repo!"
-     rm ${PKGSTATIC}
-     exit 1
-  fi
-  rm ${PKGSTATIC}
-
   # Make sure the essentials built, exit now if not
   echo "Checking essential packages..."
   check_essential_pkgs "NO"
