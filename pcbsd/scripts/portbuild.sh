@@ -105,6 +105,7 @@ NOHANG_TIME=7200
 ATOMIC_PACKAGE_REPOSITORY=no
 BUILDER_HOSTNAME=builds.pcbsd.org
 PRIORITY_BOOST="pypy openoffice*"
+GIT_URL=${PORTS_GIT_URL}
 USE_COLORS=no
 EOF
 
@@ -121,8 +122,6 @@ do_portsnap()
 
   echo "Removing old ports dir..."
   poudriere ports -p ${PPORTS} -d
-
-  export GIT_URL="${PORTS_GIT_URL}"
 
   echo "Pulling ports from ${GIT_URL} - ${PORTS_GIT_BRANCH}"
   poudriere ports -c -p ${PPORTS} -B ${PORTS_GIT_BRANCH} -m git
