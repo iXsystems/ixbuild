@@ -300,10 +300,11 @@ cp_iso_pkg_files()
 
 update_poud_world()
 {
-  echo "Removing old jail"
+  echo "Removing old jail - $PJAILNAME"
   poudriere jail -d -j $PJAILNAME
   rm -rf /poud/jails/$PJAILNAME
 
+  echo "Creating new jail: $PJAILNAME - $JAILVER"
   poudriere jail -c -j $PJAILNAME -v $JAILVER -m url=file://${DISTDIR}
   if [ $? -eq 0 ] ; then
     exit_err "Failed creating poudriere jail"
