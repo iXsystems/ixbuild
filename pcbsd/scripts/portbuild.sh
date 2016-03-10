@@ -51,8 +51,8 @@ MEM=$(expr $MEM / 1024)
 MEM=$(expr $MEM / 1024)
 
 CPUS=$(sysctl -n kern.smp.cpus)
-if [ $CPUS -gt 12 ] ; then
-  BUILDERS="12"
+if [ $CPUS -gt 16 ] ; then
+  BUILDERS="16"
   JOBS="YES"
 else
   BUILDERS="$CPUS"
@@ -61,9 +61,9 @@ fi
 
 # Determine TMPFS usage based upon Memory to CPUs ratio
 MEMPERBUILDER=$(expr $MEM / $CPUS)
-if [ $MEMPERBUILDER -gt 4000 ]; then
+if [ $MEMPERBUILDER -gt 2000 ]; then
   TMPWRK="all"
-elif [ $MEMPERBUILDER -gt 2000 ] ; then
+elif [ $MEMPERBUILDER -gt 1000 ] ; then
   TMPWRK="wrkdirs"
 else
   TMPWRK="no"
