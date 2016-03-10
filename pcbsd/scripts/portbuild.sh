@@ -23,7 +23,7 @@ merge_pcbsd_src_ports()
    local mcwd=`pwd`
    local gitdir="$1"
    local portsdir="$2"
-   distCache="/synth/distfiles"
+   distCache="/usr/ports/distfiles"
 
    rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
      
@@ -42,24 +42,8 @@ mk_metapkg_bulkfile()
    rc_halt "cp ${PCONFDIR}/essential-packages-nonrel $bulkList"
 }
 
-mk_synth_config()
+mk_poud_config()
 {
-
-if [ ! -d "/synth" ] ; then
-  mkdir /synth
-fi
-if [ ! -d "/synth/ports-db" ] ; then
-  mkdir /synth/ports-db
-fi
-if [ ! -d "/synth/distfiles" ] ; then
-  mkdir /synth/distfiles
-fi
-if [ ! -d "/synth/log" ] ; then
-  mkdir /synth/log
-fi
-if [ ! -d "/synth/log/${PBUILD}" ] ; then
-  mkdir /synth/log/${PBUILD}
-fi
 
 # Get the memory in MB on system
 MEM=$(sysctl -n hw.physmem)
@@ -69,27 +53,24 @@ MEM=$(expr $MEM / 1024)
 CPUS=$(sysctl -n kern.smp.cpus)
 if [ $CPUS -gt 12 ] ; then
   BUILDERS="12"
-  JOBS="2"
+  JOBS="YES"
 else
   BUILDERS="$CPUS"
-  JOBS="1"
+  JOBS="NO"
 fi
 
 # Determine TMPFS usage based upon Memory to CPUs ratio
 MEMPERBUILDER=$(expr $MEM / $CPUS)
 if [ $MEMPERBUILDER -gt 4000 ]; then
-  TMPWRK="true"
-  TMPLB="true"
+  TMPWRK="all"
 elif [ $MEMPERBUILDER -gt 2000 ] ; then
-  TMPWRK="false"
-  TMPLB="true"
+  TMPWRK="wrkdirs"
 else
-  TMPWRK="false"
-  TMPLB="false"
+  TMPWRK="no"
 fi
 
 # Allow these defaults to be overridden
-BCONF="/usr/local/etc/synth/builders.conf"
+BCONF="/usr/local/etc/poudriere-builders.conf"
 if [ -e "$BCONF" ] ; then
   grep -q "^BUILDERS=" ${BCONF}
   if [ $? -eq 0 ] ; then
@@ -103,67 +84,56 @@ if [ -e "$BCONF" ] ; then
   if [ $? -eq 0 ] ; then
     TMPWRK=$(grep "^TMPFSWORK=" ${BCONF} | cut -d '=' -f 2)
   fi
-  grep -q "^TMPFSLB=" ${BCONF}
-  if [ $? -eq 0 ] ; then
-    TMPLB=$(grep "^TMPFSLB=" ${BCONF} | cut -d '=' -f 2)
-  fi
 fi
 
-
-cat >/usr/local/etc/synth/synth.ini << EOF
-[Global Configuration]
-profile_selected= PCBSD
-
-[PCBSD]
-Operating_system= FreeBSD
-Directory_packages= $PPKGDIR
-Directory_repository= ${PPKGDIR}/All
-Directory_portsdir= /synth/ports
-Directory_options= /synth/ports-db
-Directory_distfiles= /synth/distfiles
-Directory_buildbase= /usr/obj/synth-live
-Directory_logs= /synth/log/$PBUILD
-Directory_ccache= disabled
-Directory_system= /synth/world
-Number_of_builders= $BUILDERS
-Max_jobs_per_builder= $JOBS
-Tmpfs_workdir= $TMPWRK
-Tmpfs_localbase= $TMPLB
-Display_with_ncurses= false
-leverage_prebuilt= false
+cat >/usr/local/etc/poudriere.conf << EOF
+NO_ZFS=YES
+FREEBSD_HOST=file://${DISTDIR}
+RESOLV_CONF=/etc/resolv.conf
+BASEFS=/poud
+USE_PORTLINT=no
+USE_TMPFS=${TMPWRK}
+DISTFILES_CACHE=/usr/ports/distfiles
+CHECK_CHANGED_OPTIONS=verbose
+CHECK_CHANGED_DEPS=yes
+PARALLEL_JOBS=${BUILDERS}
+WRKDIR_ARCHIVE_FORMAT=txz
+ALLOW_MAKE_JOBS=${JOBS}
+ALLOW_MAKE_JOBS_PACKAGES="pkg ccache py*"
+MAX_EXECUTION_TIME=86400
+NOHANG_TIME=7200
+ATOMIC_PACKAGE_REPOSITORY=no
+BUILDER_HOSTNAME=builds.pcbsd.org
+PRIORITY_BOOST="pypy openoffice*"
+USE_COLORS=no
 EOF
 
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
-    cp ${PKGSIGNCMD} /usr/local/etc/synth/PCBSD-signing_command
-    cp ${PKGSIGNCMD}.fingerprint /usr/local/etc/synth/PCBSD-fingerprint
-  else
-    rm /usr/local/etc/synth/PCBSD-signing_command 2>/dev/null >/dev/null
-    rm /usr/local/etc/synth/PCBSD-fingerprint 2>/dev/null >/dev/null
+    echo "SIGNING_COMMAND=${PKGSIGNCMD}" >> /usr/local/etc/poudriere.conf
   fi
 
 }
 
 do_portsnap()
 {
-  echo "Removing old ports dir..."
-  rm -rf /synth/ports 2>/dev/null >/dev/null
-  mkdir /synth/ports
 
-  echo "Cloning ports repo..."
-  if [ -n "${PORTS_GIT_URL}" ] ; then
-    echo "git clone --depth=1 ${PORTS_GIT_URL} /synth/ports"
-    git clone --depth=1 ${PORTS_GIT_URL} /synth/ports
-  else
-    echo "git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports"
-    git clone --depth=1 https://github.com/pcbsd/freebsd-ports.git /synth/ports
+  echo "Removing old ports dir..."
+  poudriere ports -p ${PPORTS} -d
+
+  export GIT_URL="${PORTS_GIT_URL}"
+
+  echo "Pulling ports from $PORTS_GIT_BRANCH - $PORTS_GIT_BRANCH"
+  poudriere ports -p ${PPORTS} -B ${PORTS_GIT_BRANCH} -m git
+  if [ $? -ne 0 ] ; then
+    exit_err "Failed pulling ports tree"
   fi
 }
 
 do_pcbsd_portmerge()
 {
    # Copy our PCBSD port files
-   merge_pcbsd_src_ports "${PCBSDSRC}" "/synth/ports"
+   merge_pcbsd_src_ports "${PCBSDSRC}" "/poud/ports/${PPORTS}"
 }
 
 do_pbi-index()
@@ -209,41 +179,23 @@ mkdir -p ${PCBSDSRC}
 rc_halt "git clone --depth=1 -b ${GITPCBSDBRANCH} ${GITPCBSDURL} ${PCBSDSRC}"
 
 rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
-if [ ! -d "/usr/local/etc/synth" ] ; then
-  mkdir -p /usr/local/etc/synth
-fi
-cp ${PCONFDIR}/port-make.conf /usr/local/etc/synth/PCBSD-make.conf
+cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/${JAILVER}-make.conf
 
 if [ "$target" = "all" ] ; then
 
   # Remove old PBI-INDEX.txz files
   rm ${PPKGDIR}/PBI-INDEX.txz* 2>/dev/null
 
-  # Create the synth config
-  mk_synth_config
+  # Create the poud config
+  mk_poud_config
 
-  # Extract the world for this synth build
-  update_synth_world
-
-  # Make sure this builder isn't already going
-  pgrep -q synth
-  if [ $? -eq 0 ] ; then
-    # Kill old synth processes and wait / cleanup
-    echo "Stopping old synth"
-    killall -9 synth
-    sleep 60
-  fi
-
-  # Display the synth configuration
-  echo "" | synth configure
-
-  # Clean distfiles
-  synth purge-distfiles
+  # Extract the world for this poud build
+  update_poud_world
 
   # Build entire ports tree
-  synth everything
+  poudriere bulk -a -j ${JAILVER} -p ${PPORTS}
   if [ $? -ne 0 ] ; then
-     echo "Failed synth build..."
+     echo "Failed poudriere build..."
   fi
 
   # Make sure the essentials built, exit now if not
@@ -252,7 +204,6 @@ if [ "$target" = "all" ] ; then
   if [ $? -ne 0 ] ; then
      exit 1
   fi
-
 
   # Update the PBI index file
   do_pbi-index

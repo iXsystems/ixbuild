@@ -87,11 +87,12 @@ else
   PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
 fi
+PPORTS="pcbsdports"
 if [ -z "$PPKGDIR" ] ; then
-  PPKGDIR="/synth/pkg/$PBUILD"
+  PPKGDIR="$POUD/data/packages/${JAILVER}-${PPORTS}"
 fi
-PJPORTSDIR="/synth/ports"
-export PBUILD JPORTSDIR PPKGDIR
+PJPORTSDIR="/poud/ports/${PPORTS}"
+export PBUILD JPORTSDIR PPKGDIR PPORTS
 if [ ! -e "$PPKGDIR" ] ; then
   mkdir -p ${PPKGDIR}
 fi
@@ -296,36 +297,14 @@ cp_iso_pkg_files()
     create_installer_pkg_conf
 }
 
-update_synth_world()
+update_poud_world()
 {
-  # Setup fake synth world dir
-  if [ ! -d "/synth" ] ; then
-    mkdir /synth
-  fi
-  rm -rf /synth/world >/dev/null 2>/dev/null
-  chflags -R noschg /synth/world >/dev/null 2>/dev/null
-  rm -rf /synth/world >/dev/null 2>/dev/null
-  mkdir -p /synth/world
-  dfiles="base.txz doc.txz"
-  if [ "$ARCH" = "amd64" ] ; then dfiles="$dfiles lib32.txz" ; fi
+  echo "Removing old jail"
+  poudriere jail -d -j $JAILVER
 
-  for i in $dfiles
-  do
-    echo "Extracting synth world ($i)..."
-    tar xvpf "${DISTDIR}/$i" -C /synth/world 2>/dev/null >/dev/null
-    if [ $? -ne 0 ] ; then
-      echo "WARNING: Non-0 returned!"
-    fi
-  done
-
-  # Need to checkout src as well
-  echo "Preparing /synth/world/usr/src..."
-  if [ -n "$GITFBSDURL" ] ; then
-    echo "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /synth/world/usr/src"
-    git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} /synth/world/usr/src
-  else
-    echo "git clone --depth=1 https://github.com/pcbsd/freebsd.git /synth/world/usr/src"
-    git clone --depth=1 https://github.com/pcbsd/freebsd.git /synth/world/usr/src
+  poudriere jail -c -j $JAILVER -v $JAILVER -m url=file://${DISTDIR}
+  if [ $? -eq 0 ] ; then
+    exit_err "Failed creating poudriere jail"
   fi
 }
 
@@ -373,7 +352,7 @@ check_essential_pkgs()
 
      # Get the pkgname
      pkgName=""
-     pkgName=`make -C ${i} -V PKGNAME PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/synth/PCBSD-make.conf`
+     pkgName=`make -C ${i} -V PKGNAME PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/${JAILVER}-make.conf`
      if [ -z "${pkgName}" ] ; then
         echo "Could not get PKGNAME for ${i}"
         haveWarn=1

@@ -115,8 +115,8 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y textproc/libucl"
 fi
 
-which synth >/dev/null 2>/dev/null
+which poudriere >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing synth.."
-  rc_halt "pkg install -y ports-mgmt/synth"
+  echo "Installing poudriere.."
+  rc_halt "pkg install -y ports-mgmt/poudriere"
 fi

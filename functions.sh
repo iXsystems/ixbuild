@@ -263,7 +263,7 @@ jenkins_pkg()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  # Save the timestamp of when we started this synth run
+  # Save the timestamp of when we started this poud run
   if [ ! -d "${PPKGDIR}" ] ; then mkdir -p ${PPKGDIR} ; fi
   date +"%s" >${PPKGDIR}/.started
 
@@ -486,8 +486,8 @@ if [ "$TYPE" != "ports-tests" ] ; then
   # Poudriere variables
   PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
-  PPKGDIR="/synth/pkg/${BUILD}-${BRANCH}"
-  PJPORTSDIR="/synth/ports"
+  PPKGDIR="/poud/pkg/${JAILVER}-pcbsdports"
+  PJPORTSDIR="/poud/ports/pcbsdports"
   export PBUILD PJPORTSDIR PPKGDIR
 
   # Set all the stage / work dirs
