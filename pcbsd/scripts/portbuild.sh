@@ -194,7 +194,7 @@ if [ "$target" = "all" ] ; then
   update_poud_world
 
   # Build entire ports tree
-  poudriere bulk -a -j ${JAILVER} -p ${PPORTS}
+  poudriere bulk -a -j ${PJAILNAME} -p ${PPORTS}
   if [ $? -ne 0 ] ; then
      echo "Failed poudriere build..."
   fi
