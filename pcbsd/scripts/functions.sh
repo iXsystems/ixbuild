@@ -91,7 +91,7 @@ PPORTS="pcbsdports"
 if [ -z "$PPKGDIR" ] ; then
   PPKGDIR="$POUD/data/packages/${JAILVER}-${PPORTS}"
 fi
-PJAILNAME="`echo $JAILVER | sed 's|.||g'`"
+PJAILNAME="`echo $JAILVER | sed 's|\.||g'`"
 PJPORTSDIR="/poud/ports/${PPORTS}"
 export PBUILD JPORTSDIR PPKGDIR PPORTS PJAILNAME
 if [ ! -e "$PPKGDIR" ] ; then
