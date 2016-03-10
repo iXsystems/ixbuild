@@ -304,6 +304,9 @@ update_poud_world()
   poudriere jail -d -j $PJAILNAME
   rm -rf /poud/jails/$PJAILNAME
 
+  # Nuke the built-in manifests from poudriere, since they don't match ours
+  rm /usr/local/share/poudriere/MANIFESTS/* 2>/dev/null
+
   echo "Creating new jail: $PJAILNAME - $JAILVER"
   poudriere jail -c -j $PJAILNAME -v $JAILVER -m url=file://${DISTDIR}
   if [ $? -ne 0 ] ; then
