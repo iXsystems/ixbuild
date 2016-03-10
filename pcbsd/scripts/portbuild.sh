@@ -180,7 +180,7 @@ mkdir -p ${PCBSDSRC}
 rc_halt "git clone --depth=1 -b ${GITPCBSDBRANCH} ${GITPCBSDURL} ${PCBSDSRC}"
 
 rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
-cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/${JAILVER}-make.conf
+cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/${PJAILNAME}-make.conf
 
 if [ "$target" = "all" ] ; then
 
