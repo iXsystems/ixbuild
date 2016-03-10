@@ -306,7 +306,7 @@ update_poud_world()
 
   echo "Creating new jail: $PJAILNAME - $JAILVER"
   poudriere jail -c -j $PJAILNAME -v $JAILVER -m url=file://${DISTDIR}
-  if [ $? -eq 0 ] ; then
+  if [ $? -ne 0 ] ; then
     exit_err "Failed creating poudriere jail"
   fi
 }
