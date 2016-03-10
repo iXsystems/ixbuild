@@ -79,7 +79,7 @@ if [ -z "$PKGVERUPLOAD" ] ; then
   PKGVERUPLOAD="$JAILVER"
 fi
 
-# Synth variables
+# Poud variables
 if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
   PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
@@ -91,8 +91,9 @@ PPORTS="pcbsdports"
 if [ -z "$PPKGDIR" ] ; then
   PPKGDIR="$POUD/data/packages/${JAILVER}-${PPORTS}"
 fi
+PJAILNAME="`echo $JAILVER | sed 's|.||g'`"
 PJPORTSDIR="/poud/ports/${PPORTS}"
-export PBUILD JPORTSDIR PPKGDIR PPORTS
+export PBUILD JPORTSDIR PPKGDIR PPORTS PJAILNAME
 if [ ! -e "$PPKGDIR" ] ; then
   mkdir -p ${PPKGDIR}
 fi
@@ -300,9 +301,9 @@ cp_iso_pkg_files()
 update_poud_world()
 {
   echo "Removing old jail"
-  poudriere jail -d -j $JAILVER
+  poudriere jail -d -j $PJAILNAME
 
-  poudriere jail -c -j $JAILVER -v $JAILVER -m url=file://${DISTDIR}
+  poudriere jail -c -j $PJAILNAME -v $JAILVER -m url=file://${DISTDIR}
   if [ $? -eq 0 ] ; then
     exit_err "Failed creating poudriere jail"
   fi
@@ -352,7 +353,7 @@ check_essential_pkgs()
 
      # Get the pkgname
      pkgName=""
-     pkgName=`make -C ${i} -V PKGNAME PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/${JAILVER}-make.conf`
+     pkgName=`make -C ${i} -V PKGNAME PORTSDIR=${PJPORTSDIR} __MAKE_CONF=/usr/local/etc/poudriere.d/${PJAILNAME}-make.conf`
      if [ -z "${pkgName}" ] ; then
         echo "Could not get PKGNAME for ${i}"
         haveWarn=1

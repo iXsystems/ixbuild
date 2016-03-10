@@ -123,7 +123,7 @@ do_portsnap()
   echo "Removing old ports dir..."
   poudriere ports -p ${PPORTS} -d
 
-  echo "Pulling ports from ${GIT_URL} - ${PORTS_GIT_BRANCH}"
+  echo "Pulling ports from ${PORTS_GIT_URL} - ${PORTS_GIT_BRANCH}"
   poudriere ports -c -p ${PPORTS} -B ${PORTS_GIT_BRANCH} -m git
   if [ $? -ne 0 ] ; then
     exit_err "Failed pulling ports tree"
