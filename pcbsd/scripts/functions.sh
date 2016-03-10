@@ -302,6 +302,7 @@ update_poud_world()
 {
   echo "Removing old jail"
   poudriere jail -d -j $PJAILNAME
+  rm -rf /poud/jails/$PJAILNAME
 
   poudriere jail -c -j $PJAILNAME -v $JAILVER -m url=file://${DISTDIR}
   if [ $? -eq 0 ] ; then

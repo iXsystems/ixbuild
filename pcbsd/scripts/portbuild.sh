@@ -122,6 +122,7 @@ do_portsnap()
 
   echo "Removing old ports dir..."
   poudriere ports -p ${PPORTS} -d
+  rm -rf /poud/ports/${PPORTS}
 
   echo "Pulling ports from ${PORTS_GIT_URL} - ${PORTS_GIT_BRANCH}"
   poudriere ports -c -p ${PPORTS} -B ${PORTS_GIT_BRANCH} -m git
