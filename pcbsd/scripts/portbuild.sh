@@ -120,6 +120,9 @@ do_portsnap()
 {
   mk_poud_config
 
+  # Kill any previous running jail
+  poudriere jail -k -j ${PJAILNAME} -p ${PPORTS} 2>/dev/null
+
   echo "Removing old ports dir..."
   poudriere ports -p ${PPORTS} -d
   rm -rf /poud/ports/${PPORTS}
@@ -183,6 +186,9 @@ rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
 cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/${PJAILNAME}-make.conf
 
 if [ "$target" = "all" ] ; then
+
+  # Kill any previous running jail
+  poudriere jail -k -j ${PJAILNAME} -p ${PPORTS} 2>/dev/null
 
   # Remove old PBI-INDEX.txz files
   rm ${PPKGDIR}/PBI-INDEX.txz* 2>/dev/null
