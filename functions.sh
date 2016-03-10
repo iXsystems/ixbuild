@@ -486,7 +486,8 @@ if [ "$TYPE" != "ports-tests" ] ; then
   # Poudriere variables
   PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
-  PPKGDIR="/poud/data/packages/${JAILVER}-pcbsdports"
+  PJAILNAME="`echo $JAILVER | sed 's|\.||g'`"
+  PPKGDIR="/poud/data/packages/${PJAILNAME}-pcbsdports"
   PJPORTSDIR="/poud/ports/pcbsdports"
   export PBUILD PJPORTSDIR PPKGDIR
 
