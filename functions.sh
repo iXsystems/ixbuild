@@ -295,6 +295,9 @@ jenkins_iso()
 
   pull_world
 
+  # Pull the workdir from the cache
+  pull_pkgworkdir
+
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
