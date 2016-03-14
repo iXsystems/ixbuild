@@ -40,10 +40,14 @@ fi
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
 
-rc_halt "make checkout"
+if [ "$FREENASLEGACY" = "910" ] ; then
+  PROFILEARGS="PROFILE=freenas9"
+fi
+
+rc_halt "make checkout ${PROFILEARGS}"
 
 # Ugly hack to get freenas 9.x to build on CURRENT
-if [ -n "$FREENASLEGACY" ] ; then
+if [ "$FREENASLEGACY" = "YES" ] ; then
 
    # Add all the fixes to use a 9.3 version of mtree
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/Makefile.inc1
@@ -86,7 +90,7 @@ if [ -e "pipelog" ] ; then
 fi
 mkfifo pipelog
 tee ${FNASSRC}/.auto-log < pipelog &
-make release >pipelog 2>pipelog
+make release ${PROFILEARGS} >pipelog 2>pipelog
 if [ $? -ne 0 ] ; then
 
   # Try to provide some context to the failure right in the summary e-mail

@@ -359,7 +359,7 @@ jenkins_freenas()
 
   # Now lets sync the ISOs
   if [ -n "$SFTPHOST" ] ; then
-    if [ -n "$FREENASLEGACY" ] ; then
+    if [ "$FREENASLEGACY" = "YES" ] ; then
       cd ${FNASBDIR}/objs
       if [ $? -ne 0 ] ; then exit_clean ; fi
       rm -rf os-base
@@ -400,7 +400,7 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
-  if [ -n "$FREENASLEGACY" ] ; then
+  if [ "$FREENASLEGACY" = "YES" ] ; then
     if [ ! -d "${FNASBDIR}/objs" ] ; then
       echo "Missing FreeNAS ISO, have you done the freenas build yet?"
       exit 1
