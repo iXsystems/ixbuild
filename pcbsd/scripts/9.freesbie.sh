@@ -21,12 +21,14 @@ if [ -d "${WORLDSRC}" ]; then
   rm -rf ${WORLDSRC}
 fi
 mkdir -p ${WORLDSRC}
-rc_halt "git clone --depth=1 ${GITFBSDURL} ${WORLDSRC}"
+echo "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} ${WORLDSRC}"
+rc_halt "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} ${WORLDSRC}"
 
 # Make sure we have our pcbsd sources
 if [ -d "${PCBSDSRC}" ] ; then rm -rf "${PCBSDSRC}"; fi
 mkdir -p ${PCBSDSRC}
-rc_halt "git clone --depth=1 ${GITPCBSDURL} ${PCBSDSRC}"
+echo "git clone --depth=1 -b ${GITPCBSDBRANCH} ${GITPCBSDURL} ${PCBSDSRC}"
+rc_halt "git clone --depth=1 -b ${GITPCBSDBRANCH} ${GITPCBSDURL} ${PCBSDSRC}"
 
 # create_vnode ${UFSFILE} ${PARTITION} 
 #
