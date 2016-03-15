@@ -156,7 +156,7 @@ else
   VOLID="FreeNAS"
 fi
 
-if [ -n "$FREENASLEGACY" ] ; then
+if [ "$FREENASLEGACY" = "YES" ] ; then
   grub-mkrescue -o freenas-auto.iso isodir -- -volid ${VOLID}_INSTALL
   if [ $? -ne 0 ] ; then exit 1; fi
 else
