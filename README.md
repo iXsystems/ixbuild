@@ -5,6 +5,10 @@
 - [Jenkins build framework for iX projects](#jenkins-build-framework-for-ix-projects)
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
+- [Manually running test framework](#manually-running-test-framework)
+- [FreeNAS Testing Framework](#freenas-testing-framework)
+  - [Adding New tests](#adding-new-tests)
+  - [Where are tests run?](#where-are-tests-run)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -53,3 +57,67 @@ your existing Jenkins service.
 Once a new "master" is deployed, you can access your Jenkins interface from:
 
 [http://localhost:8180/jenkins/](http://localhost:8180/jenkins/)
+
+
+Manually running test framework
+=======
+
+Tests are located in the freenas/scripts/9.3-tests.sh and
+freenas/scripts/10-tests.sh files. These scripts can also be run directly
+by pointing them at a FreeNAS instance with the following syntax:
+
+```
+ # cd freenas/scripts && ./9.3-tests.sh
+```
+
+```
+ *Optional* arguments to 9.3-tests.sh
+
+ testset={smoke|complete|benchmark}
+
+     smoke - Basic tests to check core functionality
+  complete - More in-depth testing to check edge cases
+ benchmark - Run tests which measure speeds
+
+ module={smb|nfs|ftp|etc|etc}
+
+   The various modules you want to run, multiple module= lines allowed. If not specified all
+tests will be run.
+
+ ip=<hostip>
+
+ FreeNAS host/IP address
+
+ user=<FreeNASUsername>
+
+ FreeNAS username for REST auth
+
+ password=<FreeNASpassword>
+
+ FreeNAS password for REST auth
+```
+
+
+FreeNAS Testing Framework
+============
+
+Adding New tests
+---
+
+New tests can be written for FreeNAS 9.3.X by adding a test "module" to the 9.3 testing directory:
+
+https://github.com/iXsystems/ixbuild/tree/master/freenas/9.3-tests
+
+By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
+may be required to setup a zpool / dataset to perform testing of shares.
+
+
+Where are tests run?
+---
+
+The tests for FreeNAS 9.3.X are currently being run on-commit. Committers will automatically get
+an e-mail with results and log files on testing failures.
+
+Tests / log output can be viewed at the following location:
+https://builds.pcbsd.org/jenkins/view/FreeNAS%20ATF/
+
