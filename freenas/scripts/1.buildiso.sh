@@ -26,7 +26,8 @@ if [ ! -d "${FNASSRC}" ]; then
    rc_nohalt "rm -rf ${FNASBDIR}.previous"
    rc_nohalt "chflags -R noschg ${FNASBDIR}.previous"
    rc_nohalt "rm -rf ${FNASBDIR}.previous"
-   rc_halt "mv ${FNASSRC} ${FNASBDIR}.previous"
+   rc_halt "mkdir ${FNASBDIR}.previous"
+   mv ${FNASBDIR}/* ${FNASBDIR}.previous/
    rc_nohalt "rm -rf ${FNASBDIR}"
    rc_nohalt "mkdir `dirname ${FNASSRC}`"
    rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
