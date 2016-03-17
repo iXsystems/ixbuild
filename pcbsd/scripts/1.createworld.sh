@@ -11,6 +11,56 @@ cd ${PROGDIR}/scripts
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 
+create_dist_files() {
+
+  # Create the FreeBSD Dist Files
+  mkdir ${DISTDIR} 2>/dev/null
+  rm ${DISTDIR}/*.txz 2>/dev/null
+  rm ${DISTDIR}/MANIFEST 2>/dev/null
+
+  # cd to release dir, and clean and make
+  cd ${WORLDSRC}/release
+  make clean
+
+  # Create the FTP files
+  make ftp NOPORTS=yes TARGET=$ARCH
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH"
+     exit 1
+  fi
+  rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
+
+  # Create the CD images
+  rm -rf ${PROGDIR}/fbsd-iso >/dev/null 2>/dev/null
+  mkdir ${PROGDIR}/fbsd-iso
+  make cdrom
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: make cdrom"
+     exit 1
+  fi
+  mv *.iso ${PROGDIR}/fbsd-iso
+
+  # Cleanup old .txz files
+  cd ${WORLDSRC}/release
+  make clean
+
+}
+
+create_base_pkg_files()
+{
+  cd ${WORLDSRC}
+  make package
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: make package"
+     exit 1
+  fi
+
+  ## TODO
+  ## Verify / Sign new package repo
+  ## Stage / Update pkgs
+  ## Fix other parts of builder to use new PKGS in place of dist files
+}
+
 # Added support for ZFS booting in boot/loader
 LOADER_ZFS_SUPPORT="YES"
 export LOADER_ZFS_SUPPORT
@@ -43,48 +93,16 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Make the standard kernel
-make -j $CPUS buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}
+make -j $CPUS buildkernel TARGET=$ARCH
 if [ $? -ne 0 ] ; then
-   echo "Failed running: make buildkernel TARGET=$ARCH KERNCONF=${PCBSDKERN}"
+   echo "Failed running: make buildkernel TARGET=$ARCH"
    exit 1 
 fi
 
-# Create the FreeBSD Dist Files
-mkdir ${DISTDIR} 2>/dev/null
-rm ${DISTDIR}/*.txz 2>/dev/null
-rm ${DISTDIR}/MANIFEST 2>/dev/null
-
-# cd to release dir, and clean and make
-cd ${WORLDSRC}/release
-make clean
-
-# Create the FTP files
-make ftp NOPORTS=yes TARGET=$ARCH
-if [ $? -ne 0 ] ; then
-   echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH"
-   exit 1 
+if [ -n "$PKGBASE" ] ; then
+  create_base_pkg_files
+else
+  create_dist_files
 fi
-rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
-
-# Create the CD images
-rm -rf ${PROGDIR}/fbsd-iso >/dev/null 2>/dev/null
-mkdir ${PROGDIR}/fbsd-iso
-make cdrom
-if [ $? -ne 0 ] ; then
-   echo "Failed running: make cdrom"
-   exit 1 
-fi
-mv *.iso ${PROGDIR}/fbsd-iso
-
-# Cleanup old .txz files
-cd ${WORLDSRC}/release
-make clean
-
-# Make src
-#rm -rf ${PROGDIR}/tmp/usr >/dev/null 2>/dev/null
-#mkdir -p ${PROGDIR}/tmp/usr
-#ln -s ${WORLDSRC} ${PROGDIR}/tmp/usr/src
-#rc_halt "tar cLvJf ${DISTDIR}/src.txz --exclude .git -C ${PROGDIR}/tmp ./usr"
-#rm -rf ${PROGDIR}/tmp/usr >/dev/null 2>/dev/null
 
 exit 0

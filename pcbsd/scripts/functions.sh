@@ -22,9 +22,6 @@ KERNDIST="$DISTDIR/kernel.txz"
 L32DIST="$DISTDIR/lib32.txz"
 export BASEDIST KERNDIST L32DIST
 
-# Kernel Config
-PCBSDKERN="GENERIC" ; export PCBSDKERN
-
 # Location of FreeBSD sources
 WORLDSRC="${PROGDIR}/git/freebsd"
 export WORLDSRC
