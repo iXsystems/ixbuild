@@ -445,6 +445,10 @@ export FNASBDIR
 PCBSDBDIR="/pcbsd"
 export PCBSDBDIR
 
+# Set the build tag
+BUILDTAG="$BUILD"
+export BUILDTAG
+
 if [ "$TYPE" != "ports-tests" ] ; then
 
   if [ -z "$BUILD" ] ; then

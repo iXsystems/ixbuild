@@ -21,23 +21,31 @@ if [ $? -eq 0 ] ; then
   pkg delete -y grub2-efi
 fi
 
-# Make sure we have our freenas sources
-if [ ! -d "${FNASSRC}" ]; then 
-   rc_nohalt "rm -rf ${FNASBDIR}.previous"
-   rc_nohalt "chflags -R noschg ${FNASBDIR}.previous"
-   rc_nohalt "rm -rf ${FNASBDIR}.previous"
-   rc_halt "mkdir ${FNASBDIR}.previous"
-   mv ${FNASBDIR}/* ${FNASBDIR}.previous/
-   rc_nohalt "rm -rf ${FNASBDIR}"
-   rc_nohalt "mkdir `dirname ${FNASSRC}`"
-   rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
-   rc_halt "ln -s ${FNASBDIR} ${FNASSRC}"
-   git_fnas_up "${FNASSRC}" "${FNASSRC}"
+if [ -z "$BUILDTAG" ] ; then
+  PREVEXT="previous"
 else
+  PREVEXT="$BUILDTAG"
+fi
+
+# Rotate an old build
+if [ -d "${FNASBDIR}" ] ; then
+  rc_nohalt "rm -rf ${FNASBDIR}.${PREVEXT}"
+  rc_nohalt "chflags -R noschg ${FNASBDIR}.${PREVEXT}"
+  rc_nohalt "rm -rf ${FNASBDIR}.${PREVEXT}"
+  mv ${FNASBDIR} ${FNASBDIR}.${PREVEXT}
+fi
+
+# Make sure we have our freenas sources
+if [ -d "${FNASSRC}" ]; then
   if [ -d "${GITBRANCH}/.git" ]; then 
     echo "Updating FreeNAS sources..."
     git_fnas_up "${FNASSRC}" "${FNASSRC}"
   fi
+else
+  rc_nohalt "mkdir `dirname ${FNASSRC}`"
+  rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+  rc_halt "ln -s ${FNASBDIR} ${FNASSRC}"
+  git_fnas_up "${FNASSRC}" "${FNASSRC}"
 fi
 
 # Now create the world / kernel / distribution
