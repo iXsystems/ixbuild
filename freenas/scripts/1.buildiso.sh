@@ -32,7 +32,7 @@ if [ -d "${FNASBDIR}" ] ; then
   rc_nohalt "rm -rf ${FNASBDIR}.${PREVEXT}"
   rc_nohalt "chflags -R noschg ${FNASBDIR}.${PREVEXT}"
   rc_nohalt "rm -rf ${FNASBDIR}.${PREVEXT}"
-  mv ${FNASBDIR} ${FNASBDIR}.${PREVEXT}
+  rc_halt "mv ${FNASBDIR} ${FNASBDIR}.${PREVEXT}"
 fi
 
 # Make sure we have our freenas sources
