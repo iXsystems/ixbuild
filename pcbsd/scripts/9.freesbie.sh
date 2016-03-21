@@ -320,6 +320,7 @@ rc_halt "ln -s /tmp/zfs ${PDESTDIR9}/boot/zfs"
 
 # Remove the debug symbols, saves space on install media
 rc_halt "rm -rf ${PDESTDIR9}/usr/lib/debug"
+rc_nohalt "rm -rf ${PDESTDIR9}/boot/kernel/*.symbols"
 
 # Copy over some /usr/bin utilities that we need before mounting /usr
 cp ${PDESTDIR9}/usr/bin/cut ${PDESTDIR9}/bin/
