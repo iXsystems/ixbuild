@@ -56,9 +56,9 @@ create_base_pkg_files()
   mkdir -p ${PROGDIR}/base-pkg
 
   # Create the package files now
-  make package ${DESTDIR}=${PROGDIR}/base-pkg
+  make packages ${DESTDIR}=${PROGDIR}/base-pkg
   if [ $? -ne 0 ] ; then
-     echo "Failed running: make package"
+     echo "Failed running: make packages"
      exit 1
   fi
 
