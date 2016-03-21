@@ -49,16 +49,24 @@ create_dist_files() {
 create_base_pkg_files()
 {
   cd ${WORLDSRC}
-  make package
+
+  if [ -d "${PROGDIR}/base-pkg" ] ; then
+    rm -rf ${PROGDIR}/base-pkg
+  fi
+  mkdir -p ${PROGDIR}/base-pkg
+
+  # Create the package files now
+  make package ${DESTDIR}=${PROGDIR}/base-pkg
   if [ $? -ne 0 ] ; then
      echo "Failed running: make package"
      exit 1
   fi
 
-  ## TODO
-  ## Verify / Sign new package repo
-  ## Stage / Update pkgs
-  ## Fix other parts of builder to use new PKGS in place of dist files
+  # Signing script
+  if [ -n "$PKGSIGNCMD" ] ; then
+    rc_halt "cd ${PROGDIR}/base-pkg"
+    rc_halt "pkg repo . signing_command: ${PKGSIGNCMD}"
+  fi
 }
 
 # Added support for ZFS booting in boot/loader
@@ -101,8 +109,8 @@ fi
 
 if [ -n "$PKGBASE" ] ; then
   create_base_pkg_files
-else
-  create_dist_files
 fi
+
+create_dist_files
 
 exit 0
