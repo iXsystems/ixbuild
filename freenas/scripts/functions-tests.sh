@@ -44,11 +44,12 @@ EOF
   sed -i '' "s|TOTALTESTS|$1|g" /tmp/results.xml.$$
 
   # Move results to pre-defined location
-  if [ -n "$BUILD_TAG" ] ; then
-    if [ ! -d "/ixbuild/results" ] ; then
-      mkdir -p /ixbuild/results
+  if [ -n "$WORKSPACE" ] ; then
+    if [ ! -d "${WORKSPACE}/results" ] ; then
+      mkdir -p ${WORKSPACE}/results
     fi
-    mv /tmp/results.xml.$$ /ixbuild/results/${BUILD_TAG}.xml
+    mv /tmp/results.xml.$$ ${WORKSPACE}/results/test-results.xml
+    chown jenkins:jenkins ${WORKSPACE}/results/test-results.xml
   else
     mv /tmp/results.xml.$$ /tmp/test-results.xml
   fi
