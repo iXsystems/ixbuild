@@ -17,12 +17,10 @@ ssh_tests() {
   echo_test_title "Configuring SSH settings"
   PUT /services/ssh/ '{ "ssh_rootlogin": true }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
-  echo_ok
 
   echo_test_title "Enabling SSH Service"
   PUT /services/services/ssh/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
-  echo_ok
 
 }
 

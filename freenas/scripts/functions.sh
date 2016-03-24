@@ -65,4 +65,3 @@ rc_halt()
     exit_err "Error ${STATUS}: ${CMD}"
   fi
 };
-

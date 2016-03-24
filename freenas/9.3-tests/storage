@@ -17,38 +17,34 @@ storage_tests()
   # Check getting disks
   echo_test_title "Disks / API functionality"
   GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
-  check_rest_response "200 OK"
-  echo_ok
+  check_rest_response "200 OK" || return 1
 
   # Check creating a zpool
   echo_test_title "Creating volume"
   POST /storage/volume/ '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "ada1", "ada2" ] } ] }' -v >${RESTYOUT} 2>${RESTYERR}
-  check_rest_response "201 CREATED"
-  echo_ok
+  check_rest_response "201 CREATED" || return 1
 
   # Check creating a dataset /share
   echo_test_title "Creating dataset tank/share"
   POST /storage/volume/tank/datasets/ '{ "name": "share" }' -v >${RESTYOUT} 2>${RESTYERR}
-  check_rest_response "201 CREATED"
-  echo_ok
+  check_rest_response "201 CREATED" || return 1
 
   # Check creating a dataset /jails
   echo_test_title "Creating dataset tank/jails"
   POST /storage/volume/tank/datasets/ '{ "name": "jails" }' -v >${RESTYOUT} 2>${RESTYERR}
-  check_rest_response "201 CREATED"
-  echo_ok
+  check_rest_response "201 CREATED" || return 1
 
   # Set the permissions of the dataset
   echo_test_title "Changing permissions on /mnt/tank"
   PUT /storage/permission/ '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }' -v >${RESTYOUT} 2>${RESTYERR}
-  check_rest_response "201 CREATED"
-  echo_ok
+  check_rest_response "201 CREATED" || return 1
 
   # Set the permissions of the dataset
   echo_test_title "Changing permissions on /mnt/tank/share"
   PUT /storage/permission/ '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }' -v >${RESTYOUT} 2>${RESTYERR}
-  check_rest_response "201 CREATED"
-  echo_ok
+  check_rest_response "201 CREATED" || return 1
+
+  return 0
 }
 
 # Init function, this is called after module is sourced
@@ -58,9 +54,9 @@ storage_init()
 {
   # Run all the storage tests
   case $TESTSET in
-        SMOKE) storage_tests ;;
-     COMPLETE) storage_tests ;;
-    BENCHMARK) storage_tests ;;
-            *) storage_tests ;;
+        SMOKE) storage_tests ; return $? ;;
+     COMPLETE) storage_tests ; return $? ;;
+    BENCHMARK) storage_tests ; return $? ;;
+            *) storage_tests ; return $? ;;
   esac
 }

@@ -15,16 +15,13 @@ ftp_tests() {
   echo_test_title "Configuring ftp service"
   PUT /services/ftp/ '{ "ftp_clients": 10, "ftp_rootlogin": true }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
-  echo_ok
 
   echo_test_title "Starting ftp service"
   PUT /services/services/ftp/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
-  echo_ok
 
   echo_test_title "Fetching file via FTP"
-  rc_halt "ftp -o /tmp/ftpfile ftp://testuser:test@${ip}/.cshrc"
-  echo_ok
+  rc_test "ftp -o /tmp/ftpfile ftp://testuser:test@${ip}/.cshrc"
 }
 
 # Init function, this is called after module is sourced

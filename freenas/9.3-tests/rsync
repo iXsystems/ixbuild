@@ -15,22 +15,18 @@ rsync_tests() {
   echo_test_title "Configuring rsyncd service"
   PUT /services/rsyncd/ '{ "rsyncd_port": 873 }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
-  echo_ok
 
   echo_test_title "Starting rsyncd service"
   PUT /services/services/rsync/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "200 OK"
-  echo_ok
 
   echo_test_title "Creating rsync resource"
   POST /services/rsyncmod/ '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/tank/share" }' -v >${RESTYOUT} 2>${RESTYERR}
   check_rest_response "201 CREATED"
-  echo_ok
 
   # Test rsync
   echo_test_title "Testing rsync access"
-  rc_halt "rsync -avn ${ip}::testmod"
-  echo_ok
+  rc_test "rsync -avn ${ip}::testmod" || return 1
 }
 
 # Init function, this is called after module is sourced

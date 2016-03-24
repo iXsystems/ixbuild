@@ -21,9 +21,9 @@ dyndns_tests() {
   # Create the testuser
   echo_test_title "Updating Settings for NO-IP.."
   PUT /services/dynamicdns/ '{ "ddns_password": "'${NOIPPASSWORD}'", "ddns_username": "'${NOIPUSERNAME}'", "ddns_provider": "default@no-ip.com", "ddns_domain": "'${NOIPHOST}'" }' -v >${RESTYOUT} 2>${RESTYERR}
-  check_rest_response "200 OK"
-  echo_ok
+  check_rest_response "200 OK" || return 1
 
+  return 0
 }
 
 # Init function, this is called after module is sourced
@@ -33,9 +33,9 @@ dyndns_init()
 {
   # Run all the tests
   case $TESTSET in
-        SMOKE) dyndns_tests ;;
-     COMPLETE) dyndns_tests ;;
+        SMOKE) dyndns_tests ; return $? ;;
+     COMPLETE) dyndns_tests ; return $? ;;
     BENCHMARK) ;;
-            *) dyndns_tests ;;
+            *) dyndns_tests ; return $? ;;
   esac
 }
