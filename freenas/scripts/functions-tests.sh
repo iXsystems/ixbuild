@@ -1,7 +1,7 @@
 start_xml_results() {
   cat >/tmp/results.xml.$$ << EOF
 <?xml version="1.0" encoding="UTF-8"?>
-  <testsuite tests="TOTALTESTS">
+  <testsuite tests="TOTALTESTS" name="FreeNAS QA Tests">
 EOF
 }
 
