@@ -48,8 +48,8 @@ EOF
     if [ ! -d "${WORKSPACE}/results" ] ; then
       mkdir -p ${WORKSPACE}/results
     fi
-    mv /tmp/results.xml.$$ ${WORKSPACE}/results/test-results.xml
-    chown jenkins:jenkins ${WORKSPACE}/results/test-results.xml
+    mv /tmp/results.xml.$$ ${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml
+    chown jenkins:jenkins ${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml
   else
     mv /tmp/results.xml.$$ /tmp/test-results.xml
   fi
