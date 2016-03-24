@@ -10,12 +10,15 @@ REQUIRES=""
 export REQUIRES
 
 dyndns_tests() {
+  set_test_group_text "DynDns tests" "1"
 
   if [ -z "$NOIPUSERNAME" -o -z "$NOIPPASSWORD" -o -z "$NOIPHOST" ] ; then
      echo "Missing the NOIPUSERNAME / NOIPPASSWORD / NOIPHOST settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing NOIPUSERNAME settings"
      return 0
   fi
-  set_test_group_text "DynDns tests" "1"
+
 
   # Create dataset for the home directory
   # Create the testuser

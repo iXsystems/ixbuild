@@ -10,14 +10,24 @@ EOF
 # 3 = stdout
 # 4 = stderr
 add_xml_result() {
+
+  if [ -n "$TIMESTART" -a "$TIMESTART" != "0" ] ; then
+    TIMEEND=`date +%s`
+    TIMEELAPSED=`expr $TIMEEND - $TIMESTART`
+  fi
+
   if [ "$1" = "true" ] ; then
     cat >>/tmp/results.xml.$$ << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME"/>
+    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED"/>
+EOF
+  elif [ "$1" = "skipped" ] ; then
+    cat >>/tmp/results.xml.$$ << EOF
+    <testcase classname="$CLASSNAME" name="$TESTNAME"><skipped/></testcase>
 EOF
   else
     # Failed!
     cat >>/tmp/results.xml.$$ << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME">
+    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
         <failure type="failure">$2</failure>
 EOF
     # Optional stdout / stderr logs
@@ -123,6 +133,11 @@ echo_fail()
   echo -e " - FAILED"
 }
 
+echo_skipped()
+{
+  echo -e " - SKIPPED"
+}
+
 # Check for $1 REST response, error out if not found
 check_rest_response()
 { 
@@ -159,6 +174,7 @@ echo_test_title()
   TESTNAME="$1"
   TCOUNT=`expr $TCOUNT + 1`
   TOTALCOUNT=`expr $TOTALCOUNT + 1`
+  TIMESTART=`date +%s`
   sync
   echo -e "Running $GROUPTEXT ($TCOUNT/$TOTALTESTS) - $1\c"
 }
@@ -234,9 +250,10 @@ run_module() {
       if [ $? -eq 0 ] ; then
 	CLASSNAME="$1"
 	TESTNAME="all"
+	TIMESTART="0"
         TOTALCOUNT=`expr $TOTALCOUNT + 1`
         echo "***** Skipping test module: $1 ($i failed) *****"
-        add_xml_result "false" "Skipped due to $i requirement failing"
+        add_xml_result "skipped" "Skipped due to $i requirement failing"
         FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
         return 1
       fi
@@ -253,9 +270,10 @@ run_module() {
   if [ "$nofails" = "false" ] ; then
     CLASSNAME="$1"
     TESTNAME="all"
+    TIMESTART="0"
     TOTALCOUNT=`expr $TOTALCOUNT + 1`
     echo "***** Skipping test module: $1 (Dep failed) *****"
-    add_xml_result "false" "Skipped test module: $i requirement failing"
+    add_xml_result "skipped" "Skipped test module: $i requirement failing"
     return 1
   fi
 
