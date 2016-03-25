@@ -60,8 +60,8 @@ EOF
       chown jenkins:jenkins ${WORKSPACE}/results
     fi
     echo "Saving jUnit results to: ${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml"
-    mv /tmp/results.xml.$$ ${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml
-    chown jenkins:jenkins ${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml
+    mv /tmp/results.xml.$$ "${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml"
+    chown jenkins:jenkins "${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml"
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
     mv /tmp/results.xml.$$ /tmp/test-results.xml
