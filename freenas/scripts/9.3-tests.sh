@@ -69,7 +69,7 @@ done
 # an initial test to determine when the interface is up
 echo -e "Testing access to REST API\c"
 wait_for_avail
-echo_ok
+echo_ok "1"
 
 start_xml_results
 

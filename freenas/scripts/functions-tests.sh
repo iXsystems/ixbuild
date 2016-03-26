@@ -128,6 +128,10 @@ rc_test()
 echo_ok()
 {
   echo -e " - OK"
+  # If $1 is unset, add xml results
+  if [ -z "$1" ] ; then
+    add_xml_result "true" "Valid test response"
+  fi
 }
 
 echo_fail()
@@ -153,7 +157,7 @@ check_rest_response()
   fi
 
   add_xml_result "true" "Valid REST response" "$RESTYOUT" "$RESTYERR"
-  echo_ok
+  echo_ok "1"
   return 0
 }
 
