@@ -101,7 +101,7 @@ echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL USB - `date`" > ${PDESTDIR9}/pcbsd-medi
 touch ${PDESTDIR9}/pcbsd-media-local
 
 echo "Creating IMG..."
-echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
+echo '/dev/ufs/PCBSD_INSTALL / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
 # Set some initial loader.conf values
 cat >${PDESTDIR9}/boot/loader.conf < EOF
 vfs.root.mountfrom="ufs:/dev/ufs/$LABEL"

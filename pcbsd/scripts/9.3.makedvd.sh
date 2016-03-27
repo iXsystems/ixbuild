@@ -115,7 +115,7 @@ echo "TrueOS ${PCBSDVER} "$ARCH" INSTALL USB - `date`" > ${PDESTDIR9}/pcbsd-medi
 touch ${PDESTDIR9}/pcbsd-media-local
 
 echo "Creating IMG..."
-echo '/dev/ufs/PCBSD_Install / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
+echo '/dev/ufs/PCBSD_INSTALL / ufs ro,noatime 1 1' > ${PDESTDIR9}/etc/fstab
 
 # Make EFI system partition (should be done with makefs in the future)
 cd ${PROGDIR}/iso
