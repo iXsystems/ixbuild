@@ -37,13 +37,13 @@ EOF
 EOF
   fi
 
-  # Optional stdout / stderr logs
-  if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo "         <system-out>`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | awk '{printf "%s<br>",$0} END {print ""}' | tr -d '\r\n'`</system-out>" >> /tmp/results.xml.$$
-  fi
-  if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
-    echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | awk '{printf "%s<br>",$0} END {print ""}' | tr -d '\r\n'`</system-err>" >> /tmp/results.xml.$$
-  fi
+# Optional stdout / stderr logs
+#  if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
+#   echo "         <system-out>`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | awk '{printf "%s<br>",$0} END {print ""}' | tr -d '\r\n'`</system-out>" >> /tmp/results.xml.$$
+#  fi
+#  if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
+#    echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | awk '{printf "%s<br>",$0} END {print ""}' | tr -d '\r\n'`</system-err>" >> /tmp/results.xml.$$
+#  fi
 
   # Close the error tag
   cat >>/tmp/results.xml.$$ << EOF
