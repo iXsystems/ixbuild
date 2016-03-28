@@ -36,32 +36,30 @@ smb_tests()
   check_rest_response "201 CREATED"
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Mounting CIFS"
+  echo_test_title "Creating CIFS mountpoint"
   rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
   sync
+
+  echo_test_title "Mounting CIFS"
   rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
-  echo_ok
 
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
-  echo_ok
 
   echo_test_title "Moving CIFS file"
   rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
-  echo_ok
 
   echo_test_title "Copying CIFS file"
   rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
-  echo_ok
 
   echo_test_title "Deleting CIFS file"
   rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
-  echo_ok
 
   echo_test_title "Unmounting CIFS"
   rc_test "umount /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
-  echo_ok
 }
 
 # Init function, this is called after module is sourced

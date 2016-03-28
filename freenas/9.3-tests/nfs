@@ -31,31 +31,29 @@ nfs_tests()
   check_rest_response "200 OK"
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Mounting NFS"
+  echo_test_title "Creating NFS mountpoint"
   rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Mounting NFS"
   rc_test "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
-  echo_ok
 
   echo_test_title "Creating NFS file"
   rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
-  echo_ok
 
   echo_test_title "Moving NFS file"
   rc_test "mv /tmp/nfs-mnt.$$/testfile /tmp/nfs-mnt.$$/testfile2" || return 1
-  echo_ok
 
   echo_test_title "Copying NFS file"
   rc_test "cp /tmp/nfs-mnt.$$/testfile2 /tmp/nfs-mnt.$$/testfile" || return 1
-  echo_ok
 
   echo_test_title "Deleting NFS file"
   rc_test "rm /tmp/nfs-mnt.$$/testfile2" || return 1
-  echo_ok
 
   echo_test_title "Unmounting NFS"
   rc_test "umount /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Removing NFS mountpoint"
   rc_test "rmdir /tmp/nfs-mnt.$$" || return 1
-  echo_ok
 }
 
 # Init function, this is called after module is sourced

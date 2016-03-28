@@ -5,11 +5,16 @@ start_xml_results() {
 EOF
 }
 
-# 1 = true/false
-# 2 = error message
-# 3 = stdout
-# 4 = stderr
+#          $1 = true/false
+#          $2 = error message
+#  $CLASSNAME = Sub class of test results
+#   $TESTNAME = Specific test name
+# $TESTSTDOUT = stdout file of test results
+# $TESTSTDERR = stderr file of test results
 add_xml_result() {
+
+  # If called when no tests have been setup, we can safely return
+  if [ -z "$TESTNAME" ] ; then return 0 ; fi
 
   if [ -n "$TIMESTART" -a "$TIMESTART" != "0" ] ; then
     TIMEEND=`date +%s`
@@ -18,11 +23,11 @@ add_xml_result() {
 
   if [ "$1" = "true" ] ; then
     cat >>/tmp/results.xml.$$ << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED"/>
+    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
 EOF
   elif [ "$1" = "skipped" ] ; then
     cat >>/tmp/results.xml.$$ << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME"><skipped/></testcase>
+    <testcase classname="$CLASSNAME" name="$TESTNAME"><skipped/>
 EOF
   else
     # Failed!
@@ -30,19 +35,22 @@ EOF
     <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
         <failure type="failure">$2</failure>
 EOF
-    # Optional stdout / stderr logs
-if [ -n "$3" ] ; then
-  echo "         <system-out>`cat $3`</system-out>" >> /tmp/results.xml.$$
-fi
-if [ -n "$4" ] ; then
-  echo "         <system-err>`cat $4`</system-err>" >> /tmp/results.xml.$$
-fi
+  fi
 
-    # Close the error tag
-    cat >>/tmp/results.xml.$$ << EOF
+  # Optional stdout / stderr logs
+  if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
+    echo "         <system-out>`cat $TESTSTDOUT`</system-out>" >> /tmp/results.xml.$$
+  fi
+  if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
+    echo "         <system-err>`cat $TESTSTDERR`</system-err>" >> /tmp/results.xml.$$
+  fi
+
+  # Close the error tag
+  cat >>/tmp/results.xml.$$ << EOF
     </testcase>
 EOF
-  fi
+
+  unset TESTNAME TESTSTDOUT TESTSTDERR
 }
 
 finish_xml_results() {
@@ -74,23 +82,26 @@ EOF
 # $3 = Optional timeout
 rc_test()
 {
+  export TESTSTDOUT="/tmp/.cmdTestStdOut"
+  export TESTSTDERR="/tmp/.cmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
   if [ -z "$3" ] ; then
-    ${1} >/tmp/.cmdTest.$$ 2>/.cmdTest.$$
+    ${1} >${TESTSTDOUT} 2>${TESTSTDERR}
     if [ $? -ne 0 ] ; then
-       echo -e " - FAILED"
+       echo_failed 
        eval "${2}"
        echo "Failed running: $1"
-       cat /tmp/.cmdTest.$$
-       rm /tmp/.cmdTest.$$
        return 1
     fi
-    rm /tmp/.cmdTest.$$
+    echo_ok
     return 0
   fi
 
 
   # Running with timeout
-  ( ${1} >/tmp/.cmdTest.$$ 2>/.cmdTest.$$ ; echo $? > /tmp/.rc-result.$$ ) &
+  ( ${1} >${TESTSTDOUT} 2>${TESTSTDERR} ; echo $? > /tmp/.rc-result.$$ ) &
   echo "$!" > /tmp/.rc-pid.$$
   timeout=0
   while :
@@ -100,6 +111,7 @@ rc_test()
     if [ $? -ne 0 ] ; then
       # Check if it was 0
       if [ "$(cat /tmp/.rc-result.$$)" = "0" ] ; then
+        echo_ok
         rm /tmp/.rc-result.$$
         return 0
       fi
@@ -117,47 +129,44 @@ rc_test()
   rm /tmp/.rc-pid.$$
   rm /tmp/.rc-result.$$ 2>/dev/null
   echo_failed
-  add_xml_result "false" "Timeout running command: $1" "/tmp/.cmdTest.$$" "$RESTYERR"
   eval "${2}"
   echo "Timeout running: $1"
-  cat /tmp/.cmdTest.$$
-  rm /tmp/.cmdTest.$$
   return 1
 }
 
 echo_ok()
 {
   echo -e " - OK"
-  # If $1 is unset, add xml results
-  if [ -z "$1" ] ; then
-    add_xml_result "true" "Valid test response"
-  fi
+  add_xml_result "true" "Valid test response"
 }
 
 echo_fail()
 {
   echo -e " - FAILED"
+  add_xml_result "false" "Invalid test response!"
 }
 
 echo_skipped()
 {
   echo -e " - SKIPPED"
+  add_xml_result "skipped" "Skipped test!"
 }
 
 # Check for $1 REST response, error out if not found
 check_rest_response()
 { 
+  export TESTSTDOUT="$RESTYOUT"
+  export TESTSTDERR="$RESTYERR"
+
   grep -q "$1" ${RESTYERR}
   if [ $? -ne 0 ] ; then
     cat ${RESTYERR}
     cat ${RESTYOUT}
-    add_xml_result  "false" "Invalid REST response" "$RESTYOUT" "$RESTYERR"
     echo_fail
     return 1
   fi
 
-  add_xml_result "true" "Valid REST response" "$RESTYOUT" "$RESTYERR"
-  echo_ok "1"
+  echo_ok
   return 0
 }
 
