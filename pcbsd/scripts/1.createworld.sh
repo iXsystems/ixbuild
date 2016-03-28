@@ -69,10 +69,6 @@ create_base_pkg_files()
   fi
 }
 
-# Added support for ZFS booting in boot/loader
-LOADER_ZFS_SUPPORT="YES"
-export LOADER_ZFS_SUPPORT
-
 # Make sure we have our freebsd sources
 if [ -d "${WORLDSRC}" ]; then 
   rm -rf ${WORLDSRC}
