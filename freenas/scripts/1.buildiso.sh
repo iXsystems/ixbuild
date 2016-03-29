@@ -21,10 +21,11 @@ if [ $? -eq 0 ] ; then
   pkg delete -y grub2-efi
 fi
 
-if [ -z "$BUILDTAG" ] ; then
-  PREVEXT="previous"
+# Figure out extenstion to label this old build
+if [ -e "${FNASBDIR}/btag" ] ; then
+  PREVEXT="`cat ${FNASBDIR}/btag`"
 else
-  PREVEXT="$BUILDTAG"
+  PREVEXT="previous"
 fi
 
 # Rotate an old build
@@ -46,6 +47,11 @@ else
   rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
   rc_halt "ln -s ${FNASBDIR} ${FNASSRC}"
   git_fnas_up "${FNASSRC}" "${FNASSRC}"
+fi
+
+# Save the build tag for this release
+if [ -n "$BUILDTAG" ] ; then
+  echo "$BUILDTAG" > ${FNASBDIR}/btag
 fi
 
 # Now create the world / kernel / distribution
