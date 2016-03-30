@@ -90,7 +90,7 @@ rc_test()
   if [ -z "$3" ] ; then
     ${1} >${TESTSTDOUT} 2>${TESTSTDERR}
     if [ $? -ne 0 ] ; then
-       echo_failed 
+       echo_fail 
        eval "${2}"
        echo "Failed running: $1"
        return 1
@@ -128,7 +128,7 @@ rc_test()
   kill -9 $(cat /tmp/.rc-pid.$$)
   rm /tmp/.rc-pid.$$
   rm /tmp/.rc-result.$$ 2>/dev/null
-  echo_failed
+  echo_fail
   eval "${2}"
   echo "Timeout running: $1"
   return 1
