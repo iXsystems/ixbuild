@@ -111,6 +111,8 @@ https://github.com/iXsystems/ixbuild/tree/master/freenas/9.3-tests
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
 
+For more details, click the link above and checkout the README file.
+
 
 Where are tests run?
 ---
