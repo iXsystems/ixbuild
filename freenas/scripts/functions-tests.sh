@@ -323,6 +323,7 @@ read_module_dir() {
   do
     # Skip the README, other files should be valid though
     if [ "$module" = "README" ] ; then continue ; fi
+    if [ "$module" = "example" ] ; then continue ; fi
 
     # Check if this module has already been run
     echo $RUNMODULES | grep -q ":::${module}:::"
