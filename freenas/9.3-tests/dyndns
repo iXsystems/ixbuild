@@ -23,7 +23,7 @@ dyndns_tests() {
   # Create dataset for the home directory
   # Create the testuser
   echo_test_title "Updating Settings for NO-IP.."
-  PUT /services/dynamicdns/ '{ "ddns_password": "'${NOIPPASSWORD}'", "ddns_username": "'${NOIPUSERNAME}'", "ddns_provider": "default@no-ip.com", "ddns_domain": "'${NOIPHOST}'" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/services/dynamicdns/" '{ "ddns_password": "'${NOIPPASSWORD}'", "ddns_username": "'${NOIPUSERNAME}'", "ddns_provider": "default@no-ip.com", "ddns_domain": "'${NOIPHOST}'" }'
   check_rest_response "200 OK" || return 1
 
   return 0

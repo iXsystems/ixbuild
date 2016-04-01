@@ -15,11 +15,11 @@ ssh_tests() {
   set_test_group_text "SSH Tests" "2"
 
   echo_test_title "Configuring SSH settings"
-  PUT /services/ssh/ '{ "ssh_rootlogin": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/services/ssh/" '{ "ssh_rootlogin": true }'
   check_rest_response "200 OK"
 
   echo_test_title "Enabling SSH Service"
-  PUT /services/services/ssh/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/services/services/ssh/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
 
 }

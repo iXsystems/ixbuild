@@ -14,12 +14,12 @@ user_tests() {
 
   # Create dataset for the home directory
   echo_test_title "Creating home dataset tank/testuser"
-  POST /storage/volume/tank/datasets/ '{ "name": "testuser" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "testuser" }'
   check_rest_response "201 CREATED"
 
   # Create the testuser
   echo_test_title "Creating user: testuser"
-  POST /account/users/ '{ "bsdusr_username": "testuser", "bsdusr_creategroup": true, "bsdusr_full_name": "Test User", "bsdusr_password": "test", "bsdusr_uid": 1111, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/account/users/" '{ "bsdusr_username": "testuser", "bsdusr_creategroup": true, "bsdusr_full_name": "Test User", "bsdusr_password": "test", "bsdusr_uid": 1111, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }'
   check_rest_response "201 CREATED"
 
   # Get the ID of this user
@@ -27,7 +27,7 @@ user_tests() {
 
   # Set the user to part of the 'wheel' / 'ftp' groups
   echo_test_title "Setting user groups: wheel,ftp"
-  POST /account/users/${userid}/groups/ '["wheel","ftp"]' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/account/users/${userid}/groups/" '["wheel","ftp"]'
   check_rest_response "202 OK"
 
 }

@@ -15,24 +15,24 @@ afp_tests()
   set_test_group_text "AFP tests" "5"
 
   echo_test_title "Creating AFP dataset"
-  PUT /storage/permission/ '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
 
   echo_test_title "Enabling AFP service"
-  PUT /services/afp/ '{ "afp_srv_guest": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true }'
   check_rest_response "200 OK" || return 1
 
   echo_test_title "Creating a AFP share on /mnt/tank/afp"
-  POST /sharing/afp/ '{ "afp_name": "My AFP share", "afp_path": "/mnt/tank/afp" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/sharing/afp/" '{ "afp_name": "My AFP share", "afp_path": "/mnt/tank/afp" }'
   check_rest_response "201 CREATED" || return 1
 
   # Now start the service
   echo_test_title "Starting AFP service"
-  PUT /services/services/afp/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/services/services/afp/" '{ "srv_enable": true }'
   check_rest_response "200 OK" || return 1
 
   echo_test_title "Changing permissions on /mnt/tank/afp"
-  PUT /storage/permission/ '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
 
   # At this time I'm not sure how to mount AFP on FreeBSD for testing

@@ -16,17 +16,17 @@ nfs_tests()
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
-  PUT /services/nfs/ '{ "nfs_srv_bindip": "'"${ip}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${ip}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
   check_rest_response "200 OK"
 
   # Check creating a NFS share
   echo_test_title "Creating a NFS share on /mnt/tank/share"
-  POST /sharing/nfs/ '{ "nfs_comment": "My Test Share", "nfs_paths": ["/mnt/tank/share"], "nfs_security": "sys" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["/mnt/tank/share"], "nfs_security": "sys" }'
   check_rest_response "201 CREATED"
 
   # Now start the service
   echo_test_title "Starting NFS service"
-  PUT /services/services/nfs/ '{ "srv_enable": true }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount

@@ -39,7 +39,8 @@ EOF
 
 # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo "         <system-out>`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-out>" >> /tmp/results.xml.$$
+    echo -e "         <system-out>Command Run:\n$TESTCMD\n\nResponse:\n" >> /tmp/results.xml.$$
+    echo "`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-out>" >> /tmp/results.xml.$$
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
     echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-err>" >> /tmp/results.xml.$$
@@ -50,7 +51,7 @@ EOF
     </testcase>
 EOF
 
-  unset TESTNAME TESTSTDOUT TESTSTDERR
+  unset TESTNAME TESTSTDOUT TESTSTDERR TESTCMD
 }
 
 finish_xml_results() {
@@ -76,12 +77,33 @@ EOF
   fi
 }
 
+# $1 = RESTY type to run 
+# $2 = RESTY URL
+# $3 = JSON to pass to RESTY
+rest_request()
+{
+  export TESTCMD="$2 $3"
+
+  case $1 in
+  DELETE) DELETE ${2} "${3}" -v >${RESTYOUT} 2>${RESTYERR} ; return $? ;;
+     GET) GET ${2} "$3" -v >${RESTYOUT} 2>${RESTYERR} ; return $? ;;
+   PATCH) PATCH ${2} "$3" -v >${RESTYOUT} 2>${RESTYERR} ; return $? ;;
+     PUT) PUT ${2} "$3" -v >${RESTYOUT} 2>${RESTYERR} ; return $? ;;
+    POST) POST ${2} "$3" -v >${RESTYOUT} 2>${RESTYERR} ; return $? ;;
+   TRACE) POST ${2} "$3" -v >${RESTYOUT} 2>${RESTYERR} ; return $? ;;
+       *) echo "Unknown RESTY command: $1" ; return 1 ;;
+  esac
+
+  # Shouldn't get here
+  return 1;
+}
 
 # $1 = Command to run
 # $2 = Command to run if $1 fails
 # $3 = Optional timeout
 rc_test()
 {
+  export TESTCMD="$1"
   export TESTSTDOUT="/tmp/.cmdTestStdOut"
   export TESTSTDERR="/tmp/.cmdTestStdErr"
   touch $TESTSTDOUT
@@ -201,18 +223,18 @@ set_ip()
 
   echo_test_title "Setting IP address: ${ip} on em0"
   if [ "$manualip" = "NO" ] ; then
-    POST /network/interface/ '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }' -v >${RESTYOUT} 2>${RESTYERR}
+    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
     check_rest_response "201 CREATED"
   else
     echo_ok
   fi
 
   echo_test_title "Setting DHCP on em1"
-  POST /network/interface/ '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
   check_rest_response "201 CREATED"
 
   echo_test_title "Rebooting VM"
-  POST /system/reboot/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/system/reboot/" "''"
   # Disabled the response check, seems the reboot happens fast enough to
   # prevent a valid response sometimes
   #check_rest_response "202 ACCEPTED"

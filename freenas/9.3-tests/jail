@@ -14,27 +14,27 @@ jail_tests() {
   set_test_group_text "Jail Tests" "6"
 
   echo_test_title "Configuring jails"
-  PUT /jails/configuration/ '{ "jc_ipv4_network_start": "192.168.56.150", "jc_path": "/mnt/tank/jails" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/jails/configuration/" '{ "jc_ipv4_network_start": "192.168.56.150", "jc_path": "/mnt/tank/jails" }'
   check_rest_response "201 CREATED"
 
   echo_test_title "Creating jail - VNET OFF"
-  POST /jails/jails/ '{ "jail_host": "testjail", "jail_defaultrouter_ipv4": "192.168.56.1", "jail_ipv4": "192.168.56.155", "jail_ipv4_netmask": "24", "jail_vnet": false }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/jails/jails/" '{ "jail_host": "testjail", "jail_defaultrouter_ipv4": "192.168.56.1", "jail_ipv4": "192.168.56.155", "jail_ipv4_netmask": "24", "jail_vnet": false }'
   check_rest_response "201 CREATED"
 
   echo_test_title "Mount tank/share into jail"
-  POST /jails/mountpoints/ '{ "destination": "/mnt", "jail": "testjail", "mounted": true, "readonly": false, "source": "/mnt/tank/share" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/jails/mountpoints/" '{ "destination": "/mnt", "jail": "testjail", "mounted": true, "readonly": false, "source": "/mnt/tank/share" }'
   check_rest_response "201 CREATED"
 
   echo_test_title "Starting jail"
-  POST /jails/jails/1/start/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/jails/jails/1/start/" ''
   check_rest_response "202 ACCEPTED"
 
   echo_test_title "Restarting jail"
-  POST /jails/jails/1/restart/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/jails/jails/1/restart/" ''
   check_rest_response "202 ACCEPTED"
 
   echo_test_title "Stopping jail"
-  POST /jails/jails/1/stop/ '' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/jails/jails/1/stop/" ''
   check_rest_response "202 ACCEPTED"
 }
 

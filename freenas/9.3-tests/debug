@@ -14,7 +14,7 @@ debug_tests() {
   set_test_group_text "Debugging Tests" "1"
 
   echo_test_title "Creating diagnostic file"
-  POST /system/debug/ '{ "name": "newbe1", "source": "default" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "POST" "/system/debug/" '{ "name": "newbe1", "source": "default" }'
   check_rest_response "200 OK" || return 1
 
   # Get the URL of the debug file
