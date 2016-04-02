@@ -54,6 +54,18 @@ if [ -n "$BUILDTAG" ] ; then
   echo "$BUILDTAG" > ${FNASBDIR}/btag
 fi
 
+# Lets keep our distfiles around and use previous ones
+if [ ! -d "/freenas-distfiles" ] ; then
+  mkdir -p /freenas-distfiles
+fi
+if [ -e "${FNASSRC}/build/config/env.pyd" ] ; then
+  # FreeNAS 9.10 / 10
+  sed -i '' 's|${OBJDIR}/ports/distfiles|/freenas-distfiles|g' ${FNASSRC}/build/config/env.pyd
+else
+  # FreeNAS / TrueNAS 9
+  export PORTS_DISTFILES_CACHE="/freenas-distfiles"
+fi
+
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
 
