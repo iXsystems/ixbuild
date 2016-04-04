@@ -13,6 +13,14 @@ if [ ! -d "${PROGDIR}/tmp" ] ; then
   mkdir ${PROGDIR}/tmp
 fi
 
+
+# Set the default FreeNAS testing IP address
+if [ -z "${FNASTESTIP}" ] ; then
+  FNASTESTIP="192.168.56.100"
+  export FNASTESTIP
+fi
+
+# Set the default build directory
 FNASBDIR="/freenas"
 export FNASBDIR
 

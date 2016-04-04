@@ -29,6 +29,10 @@ NOIPPASSWORD=""
 NOIPHOST=""
 export NOIPPASSWORD NOIPUSERNAME NOIPHOST
 
+# Set this to the IP address to use in VirtualBox for testing
+FNASTESTIP=""
+export FNASTESTIP
+
 ###########################################################################
 # PC-BSD specific settings
 ###########################################################################

@@ -99,6 +99,9 @@ if [ $? -ne 0 ] ; then exit 1; fi
 cp -r ${PROGDIR}/atf uzipdir/
 if [ $? -ne 0 ] ; then exit 1; fi
 
+# Set the IP address in rc.local
+sed -i '' "s|%%IP%%|${FNASTESTIP}|g" uzipdir/rc.local
+
 # Check if we have a truenas license dir
 if [ -e "/etc/truenas-license" ] ; then
   cp /etc/truenas-license uzipdir/atf/

@@ -33,6 +33,7 @@ do_iso() {
 }
 
 do_tests() {
+
   echo "Starting FreeNAS regression testing"
   ${PROGDIR}/scripts/2.runtests.sh
   if [ $? -ne 0 ] ; then
