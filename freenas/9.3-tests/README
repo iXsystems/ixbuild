@@ -20,9 +20,8 @@ Example #1
   echo_test_title "Example API test"
   
   # This is the RESTY call when doing API requests of FreeNAS
-  # NOTE: The re-directs to ${RESTYOUT} and ${RESTYERR} are required
   # RESTY Docs: https://github.com/micha/resty
-  PUT /storage/permission/ '{ "mp_path": "/mnt/tank", "mp_acl": "unix" }' -v >${RESTYOUT} 2>${RESTYERR}
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix" }'
 
   # This is where we confirm the specific REST call returned a proper response
   check_rest_response "201 CREATED" || return 1
