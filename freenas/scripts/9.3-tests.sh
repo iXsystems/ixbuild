@@ -70,14 +70,15 @@ done
 # Source our resty / jsawk functions
 . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
+start_xml_results
+
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
 # an initial test to determine when the interface is up
-echo -e "Testing access to REST API\c"
+set_test_group_text "Testing Connectivity" "1"
+echo_test_title "Testing access to REST API"
 wait_for_avail
 echo_ok
-
-start_xml_results
 
 # Reset the IP address via REST
 set_ip

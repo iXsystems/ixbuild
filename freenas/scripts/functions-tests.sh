@@ -275,7 +275,7 @@ wait_for_avail()
     echo -e ".\c"
     sleep 60
     if [ $count -gt 10 ] ; then
-       echo "FreeNAS API failed to respond!"
+       echo_fail
        exit 1
     fi
     count=`expr $count + 1`
