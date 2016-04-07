@@ -1,7 +1,15 @@
+#   $1 = Test Description
 start_xml_results() {
-  cat >/tmp/results.xml.$$ << EOF
+  if [ -n "${1}" ] ; then
+    tnick="${1}"
+  else
+    tnick="FreeNAS QA Tests"
+  fi
+
+  export XMLRESULTS="/tmp/.results.xml.$$"
+  cat >${XMLRESULTS} << EOF
 <?xml version="1.0" encoding="UTF-8"?>
-  <testsuite tests="TOTALTESTS" name="FreeNAS QA Tests">
+  <testsuite tests="TOTALTESTS" name="${tnick}">
 EOF
 }
 
@@ -22,16 +30,16 @@ add_xml_result() {
   fi
 
   if [ "$1" = "true" ] ; then
-    cat >>/tmp/results.xml.$$ << EOF
+    cat >>${XMLRESULTS} << EOF
     <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
 EOF
   elif [ "$1" = "skipped" ] ; then
-    cat >>/tmp/results.xml.$$ << EOF
+    cat >>${XMLRESULTS} << EOF
     <testcase classname="$CLASSNAME" name="$TESTNAME"><skipped/>
 EOF
   else
     # Failed!
-    cat >>/tmp/results.xml.$$ << EOF
+    cat >>${XMLRESULTS} << EOF
     <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
         <failure type="failure">$2</failure>
 EOF
@@ -39,15 +47,15 @@ EOF
 
 # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo -e "         <system-out>Command Run:\n$TESTCMD\n\nResponse:\n" >> /tmp/results.xml.$$
-    echo "`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-out>" >> /tmp/results.xml.$$
+    echo -e "         <system-out>Command Run:\n$TESTCMD\n\nResponse:\n" >> ${XMLRESULTS}
+    echo "`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
-    echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-err>" >> /tmp/results.xml.$$
+    echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-err>" >> ${XMLRESULTS}
   fi
 
   # Close the error tag
-  cat >>/tmp/results.xml.$$ << EOF
+  cat >> ${XMLRESULTS} << EOF
     </testcase>
 EOF
 
@@ -55,12 +63,12 @@ EOF
 }
 
 finish_xml_results() {
-  cat >>/tmp/results.xml.$$ << EOF
+  cat >>${XMLRESULTS} << EOF
 </testsuite>
 EOF
 
   # Set the total number of tests run
-  sed -i '' "s|TOTALTESTS|$1|g" /tmp/results.xml.$$
+  sed -i '' "s|TOTALTESTS|$1|g" ${XMLRESULTS}
 
   # Move results to pre-defined location
   if [ -n "$WORKSPACE" ] ; then
@@ -68,12 +76,13 @@ EOF
       mkdir -p "${WORKSPACE}/results"
       chown jenkins:jenkins "${WORKSPACE}/results"
     fi
-    echo "Saving jUnit results to: ${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml"
-    mv "/tmp/results.xml.$$" "${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml"
-    chown jenkins:jenkins "${WORKSPACE}/results/freenas-${BUILD_TAG}-results.xml"
+    tStamp=$(date +%s)
+    echo "Saving jUnit results to: ${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
+    mv "${XMLRESULTS}" "${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
+    chown jenkins:jenkins "${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
-    mv /tmp/results.xml.$$ /tmp/test-results.xml
+    mv ${XMLRESULTS} /tmp/test-results.xml
   fi
 }
 
@@ -109,21 +118,30 @@ rc_test()
   touch $TESTSTDOUT
   touch $TESTSTDERR
 
+  # If building from Jenkins
+  if [ -n "$WORKSPACE" ] ; then
+    # Display the output
+    (tail -f ${TESTSTDOUT}) &
+    TPID="$!"
+  fi
+
   if [ -z "$3" ] ; then
-    ${1} >${TESTSTDOUT} 2>${TESTSTDERR}
+    ${1} >>${TESTSTDOUT} 2>>${TESTSTDERR}
     if [ $? -ne 0 ] ; then
+       if [ -n "$TPID" ] ; then kill -9 $TPID; fi
        echo_fail 
        eval "${2}"
        echo "Failed running: $1"
        return 1
     fi
+    if [ -n "$TPID" ] ; then kill -9 $TPID; fi
     echo_ok
     return 0
   fi
 
 
   # Running with timeout
-  ( ${1} >${TESTSTDOUT} 2>${TESTSTDERR} ; echo $? > /tmp/.rc-result.$$ ) &
+  ( ${1} >>${TESTSTDOUT} 2>>${TESTSTDERR} ; echo $? > /tmp/.rc-result.$$ ) &
   echo "$!" > /tmp/.rc-pid.$$
   timeout=0
   while :

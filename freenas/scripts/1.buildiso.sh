@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/local/bin/bash
 
 # Where is the pcbsd-build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
@@ -10,6 +10,7 @@ cd ${PROGDIR}/scripts
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
+. ${PROGDIR}/scripts/functions-tests.sh
 
 # Set local location of FreeNAS build
 FNASBDIR="/freenas"
@@ -73,7 +74,16 @@ if [ "$FREENASLEGACY" = "910" ] ; then
   PROFILEARGS="PROFILE=freenas9"
 fi
 
-rc_halt "make checkout ${PROFILEARGS}"
+# Start the XML reporting
+start_xml_results "FreeNAS Build Process"
+set_test_group_text "Build phase tests" "2"
+
+echo_test_title "make checkout ${PROFILEARGS}"
+rc_test "make checkout ${PROFILEARGS}"
+if [ $? -ne 0 ] ; then
+  finish_xml_results
+  exit 1
+fi
 
 # Ugly hack to get freenas 9.x to build on CURRENT
 if [ "$FREENASLEGACY" = "YES" ] ; then
@@ -114,22 +124,12 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
 fi
 
-if [ -e "pipelog" ] ; then
-  rm pipelog
-fi
-mkfifo pipelog
-tee ${FNASSRC}/.auto-log < pipelog &
-make release ${PROFILEARGS} >pipelog 2>pipelog
+echo_test_title "make release ${PROFILEARGS}"
+rc_test "make release ${PROFILEARGS}"
 if [ $? -ne 0 ] ; then
-
-  # Try to provide some context to the failure right in the summary e-mail
-  grep -m 1 -C 8 "Error code" ${FNASSRC}/.auto-log
-
-  rm ${FNASSRC}/.auto-log
-  rm pipelog
+  finish_xml_results
   echo "ERROR: Failed running 'make release'"
   exit 1
 fi
 
-rm pipelog
 exit 0
