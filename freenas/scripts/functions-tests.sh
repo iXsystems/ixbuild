@@ -1,5 +1,13 @@
+
+# Log files
+export RESTYOUT=/tmp/resty.out
+export RESTYERR=/tmp/resty.err
+
 #   $1 = Test Description
 start_xml_results() {
+  # Set total number of tests
+  export TOTALCOUNT="0"
+
   if [ -n "${1}" ] ; then
     tnick="${1}"
   else

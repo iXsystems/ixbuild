@@ -17,12 +17,6 @@ TDIR="${PROGDIR}/9.3-tests"
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions-tests.sh
 
-# Log files
-RESTYOUT=/tmp/resty.out
-RESTYERR=/tmp/resty.err
-
-TOTALCOUNT="0"
-
 #################################################################
 # Run the tests now!
 #################################################################
