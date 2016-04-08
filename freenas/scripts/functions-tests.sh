@@ -86,7 +86,7 @@ EOF
     fi
     tStamp=$(date +%s)
     echo "Saving jUnit results to: ${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
-    mv "${XMLRESULTS}" "${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
+    perl -CSDA -pe' s/[^\x9\xA\xD\x20-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+//g; ' "${XMLRESULTS}" > "${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
     chown jenkins:jenkins "${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
@@ -129,7 +129,7 @@ rc_test()
   # If building from Jenkins
   if [ -n "$WORKSPACE" ] ; then
     # Display the output
-    (tail -f ${TESTSTDOUT}) &
+    (tail -f ${TESTSTDOUT} 2>/dev/null) &
     TPID="$!"
   fi
 
