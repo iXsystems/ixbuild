@@ -70,7 +70,14 @@ EOF
   unset TESTNAME TESTSTDOUT TESTSTDERR TESTCMD
 }
 
+# $1 = Optional tag for results file
 finish_xml_results() {
+  if [ -z "$1" ] ; then
+    rTag="tests"
+  else
+    rTag="$1"
+  fi
+
   cat >>${XMLRESULTS} << EOF
 </testsuite>
 EOF
@@ -85,9 +92,9 @@ EOF
       chown jenkins:jenkins "${WORKSPACE}/results"
     fi
     tStamp=$(date +%s)
-    echo "Saving jUnit results to: ${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
-    mv "${XMLRESULTS}" "${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
-    chown jenkins:jenkins "${WORKSPACE}/results/freenas-${BUILD_TAG}-results-${tStamp}.xml"
+    echo "Saving jUnit results to: ${WORKSPACE}/results/freenas-results-${rTag}.xml"
+    mv "${XMLRESULTS}" "${WORKSPACE}/results/freenas-results-${rTag}.xml"
+    chown jenkins:jenkins "${WORKSPACE}/results/freenas-results-${rTag}.xml"
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
     mv ${XMLRESULTS} /tmp/test-results.xml
@@ -190,8 +197,14 @@ echo_ok()
 
 echo_fail()
 {
+  if [ -z "$1" ] ; then
+    errStr="Invalid test repsonse!"
+  else
+    errStr="$1"
+  fi
+
   echo -e " - FAILED"
-  add_xml_result "false" "Invalid test response!"
+  add_xml_result "false" "$errStr"
 }
 
 echo_skipped()
