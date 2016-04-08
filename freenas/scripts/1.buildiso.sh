@@ -79,11 +79,13 @@ start_xml_results "FreeNAS Build Process"
 set_test_group_text "Build phase tests" "2"
 
 echo_test_title "make checkout ${PROFILEARGS}"
-rc_test "make checkout ${PROFILEARGS}"
+make checkout ${PROFILEARGS} 2>&1 | tee /tmp/fnas-build.log
 if [ $? -ne 0 ] ; then
+  add_xml_result "false" "Failed running make checkout"
   finish_xml_results
   exit 1
 fi
+add_xml_result "true"
 
 # Ugly hack to get freenas 9.x to build on CURRENT
 if [ "$FREENASLEGACY" = "YES" ] ; then
@@ -125,11 +127,15 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
 fi
 
 echo_test_title "make release ${PROFILEARGS}"
-rc_test "make release ${PROFILEARGS}"
+make release ${PROFILEARGS} 2>&1 | tee /tmp/fnas-build.log
 if [ $? -ne 0 ] ; then
+  add_xml_result "false" "Failed running make release"
   finish_xml_results
   echo "ERROR: Failed running 'make release'"
   exit 1
 fi
+
+add_xml_result "true"
+finish_xml_results
 
 exit 0
