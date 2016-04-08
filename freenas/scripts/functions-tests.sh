@@ -133,30 +133,21 @@ rc_test()
   touch $TESTSTDOUT
   touch $TESTSTDERR
 
-  # If building from Jenkins
-  if [ -n "$WORKSPACE" ] ; then
-    # Display the output
-    (tail -f ${TESTSTDOUT} 2>/dev/null) &
-    TPID="$!"
-  fi
-
   if [ -z "$3" ] ; then
-    ${1} >>${TESTSTDOUT} 2>>${TESTSTDERR}
+    ${1} >${TESTSTDOUT} 2>${TESTSTDERR}
     if [ $? -ne 0 ] ; then
-       if [ -n "$TPID" ] ; then kill -9 $TPID; fi
        echo_fail 
        eval "${2}"
        echo "Failed running: $1"
        return 1
     fi
-    if [ -n "$TPID" ] ; then kill -9 $TPID; fi
     echo_ok
     return 0
   fi
 
 
   # Running with timeout
-  ( ${1} >>${TESTSTDOUT} 2>>${TESTSTDERR} ; echo $? > /tmp/.rc-result.$$ ) &
+  ( ${1} >${TESTSTDOUT} 2>${TESTSTDERR} ; echo $? > /tmp/.rc-result.$$ ) &
   echo "$!" > /tmp/.rc-pid.$$
   timeout=0
   while :
