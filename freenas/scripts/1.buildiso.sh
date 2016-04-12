@@ -16,7 +16,7 @@ cd ${PROGDIR}/scripts
 parse_checkout_error()
 {
   ### TODO - Add error detection of checkout failures
-
+  echo '' > ${LOUT}
 }
 
 # Look through the output log and try to determine the failure
