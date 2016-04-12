@@ -12,9 +12,48 @@ cd ${PROGDIR}/scripts
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
 
+# Look through the output log and try to determine the failure
+parse_checkout_error()
+{
+  ### TODO - Add error detection of checkout failures
+
+}
+
+# Look through the output log and try to determine the failure
+parse_build_error()
+{
+  echo '' > ${LOUT}
+  export TESTSTDERR=${LOUT}
+
+  # Look for some of the common error messages
+
+  # port failed to compile
+  grep -q "ERROR: Packages installation failed" ${1}
+  if [ $? -eq 0 ] ; then
+    grep "====>> Failed" ${1} >> ${LOUT}
+    grep "====>> Skipped" ${1} >> ${LOUT}
+    grep "====>> Ignored" ${1} >> ${LOUT}
+    return 0
+  fi
+
+  ### TODO - Add various error detection as they occur
+
+  # Look for generic error
+  grep -q "^ERROR: " ${1}
+  if [ $? -eq 0 ] ; then
+    # Use the search function to get some context
+    ${PROGDIR}/../utils/search -s5 "ERROR: " ${1} >>${LOUT}
+    return 0
+  fi
+}
+
 # Set local location of FreeNAS build
 FNASBDIR="/freenas"
 export FNASBDIR
+
+# Error output log
+LOUT="/tmp/fnas-error-debug.txt"
+touch ${LOUT}
 
 # Check if grub2-efi is on the builder, remove it so
 pkg info -q grub2-efi
@@ -78,13 +117,20 @@ fi
 start_xml_results "FreeNAS Build Process"
 set_test_group_text "Build phase tests" "2"
 
+# Display output to stdout
+touch /tmp/fnas-build.out
+(tail -f /tmp/fnas-build.out 2>/dev/null) &
+TPID=$!
+
 echo_test_title "make checkout ${PROFILEARGS}"
-make checkout ${PROFILEARGS} >/tmp/fnas-build.out 2>/tmp/fnas-build.err
+make checkout ${PROFILEARGS} >/tmp/fnas-build.out 2>/tmp/fnas-build.out
 if [ $? -ne 0 ] ; then
+  kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make checkout"
   finish_xml_results "make"
   exit 1
 fi
+kill -9 $TPID 2>/dev/null
 echo_ok
 
 # Ugly hack to get freenas 9.x to build on CURRENT
@@ -126,14 +172,24 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
 fi
 
+
+# Display output to stdout
+touch /tmp/fnas-build.out
+(sleep 5 ; tail -f /tmp/fnas-build.out 2>/dev/null) &
+TPID=$!
+
 echo_test_title "make release ${PROFILEARGS}"
-make release ${PROFILEARGS} >/tmp/fnas-build.out 2>/tmp/fnas-build.err
+make release ${PROFILEARGS} >/tmp/fnas-build.out 2>/tmp/fnas-build.out
 if [ $? -ne 0 ] ; then
+  kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make release"
+  parse_build_error "/tmp/fnas-build.out"
   finish_xml_results "make"
   exit 1
 fi
+kill -9 $TPID 2>/dev/null
 echo_ok
 finish_xml_results "make"
 
+rm /tmp/fnas-build.out
 exit 0
