@@ -2,6 +2,10 @@
 
 # Set the repo we pull for build / tests
 GITREPO="https://github.com/iXsystems/ixbuild.git"
+# Set the branch to use for above repo
+if [ -z "$IXBUILDBRANCH" ] ; then
+  IXBUILDBRANCH="master"
+fi
 
 cleanup_workdir()
 {
@@ -40,7 +44,7 @@ create_workdir()
 
   MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
-  cocmd="git clone --depth=1 ${GITREPO} ${MASTERWRKDIR}"
+  cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
   echo "Cloning with: $cocmd"
   $cocmd
   if [ $? -ne 0 ] ; then exit_clean; fi

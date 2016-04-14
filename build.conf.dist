@@ -18,6 +18,11 @@ export SFTPFINALDIR
 SFTPWORKDIR=""
 export SFTPWORKDIR
 
+# Select which branch of ixbuild repo testing framework to use
+# (Optional)
+IXBUILDBRANCH=""
+export IXBUILDBRANCH
+
 ###########################################################################
 # FreeNAS specific settings
 ###########################################################################
