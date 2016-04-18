@@ -143,13 +143,10 @@ do_pcbsd_portmerge()
 
 do_pbi-index()
 {
-   if [ -z "$PBI_REPO_KEY" ] ; then return ; fi
+   if [ -z "$PBI_REPO_KEY" ] ; then return 0; fi
 
    # See if we can create the PBI index files for this repo
-   if [ ! -d "${PCBSDSRC}/pbi-modules" ] ; then
-      echo "No pbi-modules in this GIT branch"
-      return 1
-   fi
+   if [ ! -d "${PCBSDSRC}/pbi-modules" ] ; then return 0; fi
 
    echo "Building new PBI-INDEX"
 
