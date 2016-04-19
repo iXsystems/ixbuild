@@ -12,3 +12,5 @@ iso:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh iso
 tests:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh tests
+livetests:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh livetests

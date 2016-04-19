@@ -27,8 +27,10 @@ Available Commands:
 
 -- FreeNAS Commands --
       freenas - Builds FreeNAS release
-freenas-tests - Runs FreeNAS tests against built release
-freenas-combo - Build release and run API tests against it automatically
+freenas-tests - Runs FreeNAS VM API tests against built release
+freenas-combo - Build release and run VM API tests against it automatically
+freenas-ltest - Runs the FreeNAS "live" tests against a target system
+
 
 -- PC-BSD Commands --
   world - Build FreeBSD world
@@ -58,6 +60,7 @@ case $TYPE in
      vm) jenkins_vm ;;
 freenas) jenkins_freenas ;;
 freenas-tests) jenkins_freenas_tests ;;
+freenas-ltest) jenkins_freenas_live_tests ;;
 freenas-combo) jenkins_freenas
 	       jenkins_freenas_tests ;;
 ports-tests) jenkins_ports_tests ;;

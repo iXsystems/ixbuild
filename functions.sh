@@ -382,6 +382,54 @@ jenkins_freenas()
   return 0
 }
 
+jenkins_freenas_live_tests()
+{
+  create_workdir
+
+  if [ -z "$LIVEHOST" ] ; then echo "Missing LIVEHOST!" ; exit_clean ; fi
+  if [ -z "$LIVEUSER" ] ; then echo "Missing LIVEUSER!" ; exit_clean ; fi
+  if [ -z "$LIVEPASS" ] ; then echo "Missing LIVEPASS!" ; exit_clean ; fi
+
+  cd ${TBUILDDIR}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  if [ -n "$SFTPHOST" ] ; then
+    # Now lets sync the ISOs
+    if [ -d "${FNASBDIR}/_BE/release" ] ; then
+      rm -rf ${FNASBDIR}/_BE/release
+    fi
+
+    mkdir -p ${FNASBDIR}/_BE/release
+    cd ${FNASBDIR}/_BE/release
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${FNASBDIR}/_BE/release/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+  fi
+
+  if [ "$FREENASLEGACY" = "YES" ] ; then
+    if [ ! -d "${FNASBDIR}/objs" ] ; then
+      echo "Missing FreeNAS ISO, have you done the freenas build yet?"
+      exit 1
+    fi
+  else
+    if [ ! -d "${FNASBDIR}/_BE/release" ] ; then
+      echo "Missing FreeNAS ISO, have you done the freenas build yet?"
+      exit 1
+    fi
+  fi
+
+  cd ${TBUILDDIR}
+  make livetests
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  cleanup_workdir
+
+  return 0
+}
+
+
 jenkins_freenas_tests()
 {
   create_workdir
@@ -472,6 +520,15 @@ if [ "$TYPE" != "ports-tests" ] ; then
     freenas|freenas-tests|freenas-combo)
        BRANCH="production"
        . freenas.cfg
+       ;;
+    freenas-ltest)
+       BRANCH="production"
+       . freenas.cfg
+       if [ ! -e "freenas-ltest.cfg" ] ; then
+         echo "Missing Live Test host settings!"
+         exit_clean
+       fi
+       . freenas-ltest.cfg
        ;;
     *)
        if [ -z "$BRANCH" ] ; then
