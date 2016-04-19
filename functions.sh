@@ -528,6 +528,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
          echo "Missing Live Test host settings!"
          exit_clean
        fi
+       echo "Using `pwd`/freenas-ltest.cfg for Live Test host configuration"
        . freenas-ltest.cfg
        ;;
     *)
