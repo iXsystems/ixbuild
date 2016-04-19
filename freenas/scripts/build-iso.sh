@@ -32,6 +32,17 @@ do_iso() {
   fi
 }
 
+do_live_tests() {
+
+  echo "Starting FreeNAS Live regression testing"
+  ${PROGDIR}/scripts/3.runlivetests.sh
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
+}
+
+
 do_tests() {
 
   echo "Starting FreeNAS regression testing"
@@ -51,6 +62,7 @@ case $TARGET in
      all) do_iso ; do_tests ;;
      iso) do_iso ;;
    tests) do_tests ;;
+   livetests) do_live_tests ;;
        *) ;;
 esac
 
