@@ -110,6 +110,11 @@ GIT_URL=${PORTS_GIT_URL}
 USE_COLORS=no
 EOF
 
+  # Check if we have a ccache dir to be used
+  if [ -e "/ccache" ] ; then
+    echo "CCACHE_DIR=/ccache" >> /usr/local/etc/poudriere.conf
+  fi
+
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
     echo "SIGNING_COMMAND=${PKGSIGNCMD}" >> /usr/local/etc/poudriere.conf
