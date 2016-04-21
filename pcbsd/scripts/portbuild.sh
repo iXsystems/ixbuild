@@ -61,9 +61,9 @@ fi
 
 # Determine TMPFS usage based upon Memory to CPUs ratio
 MEMPERBUILDER=$(expr $MEM / $CPUS)
-if [ $MEMPERBUILDER -gt 2000 ]; then
+if [ $MEMPERBUILDER -gt 1500 ]; then
   TMPWRK="all"
-elif [ $MEMPERBUILDER -gt 1000 ] ; then
+elif [ $MEMPERBUILDER -gt 750 ] ; then
   TMPWRK="wrkdirs"
 else
   TMPWRK="no"
