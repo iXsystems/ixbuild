@@ -14,9 +14,10 @@ cd ${PROGDIR}/scripts
 create_dist_files() {
 
   # Create the FreeBSD Dist Files
+  if [ -n "${DISTDIR}" -a -d "${DISTDIR}" ] ; then
+    rm -rf ${DISTDIR}
+  fi
   mkdir ${DISTDIR} 2>/dev/null
-  rm ${DISTDIR}/*.txz 2>/dev/null
-  rm ${DISTDIR}/MANIFEST 2>/dev/null
 
   # cd to release dir, and clean and make
   cd ${WORLDSRC}/release
@@ -50,10 +51,10 @@ create_base_pkg_files()
 {
   cd ${WORLDSRC}
 
-  if [ -d "${PROGDIR}/base-pkg" ] ; then
-    rm -rf ${PROGDIR}/base-pkg
+  if [ -n "${DISTDIR}" -a -d "${DISTDIR}" ] ; then
+    rm -rf ${DISTDIR}
   fi
-  mkdir -p ${PROGDIR}/base-pkg
+  mkdir ${DISTDIR} 2>/dev/null
 
   # Create the package files now
   make packages
@@ -62,12 +63,30 @@ create_base_pkg_files()
      exit 1
   fi
 
+  # Move the package files and prep them
+  mv /usr/obj/usr/src/repo/*/latest/* ${DISTDIR}/
+  if [ $? -ne 0 ] ; then
+     echo "Failed moving packages"
+     exit 1
+  fi
+  make clean
+
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
-    rc_halt "cd ${PROGDIR}/base-pkg"
+    rc_halt "cd ${DISTDIR}"
     rc_halt "pkg repo . signing_command: ${PKGSIGNCMD}"
   fi
 }
+
+if [ -z "$DISTDIR" ] ; then
+  DISTDIR="${PROGDIR}/fbsd-dist"
+fi
+
+# Ugly, but freebsd packages like to be built here for now
+if [ -n "$PKGBASE" ] ; then
+  WORLDSRC="/usr/src"
+  rm -rf /usr/obj/usr/src/repo/ >/dev/null 2>/dev/null
+fi
 
 # Make sure we have our freebsd sources
 if [ -d "${WORLDSRC}" ]; then 
@@ -90,23 +109,16 @@ if [ "$CPUS" -gt 8 ] ; then
   CPUS=8
 fi
 
-make -j $CPUS buildworld TARGET=$ARCH
+make -j $CPUS buildworld buildkernel
 if [ $? -ne 0 ] ; then
-   echo "Failed running: make buildworld TARGET=$ARCH"
-   exit 1 
-fi
-
-# Make the standard kernel
-make -j $CPUS buildkernel TARGET=$ARCH
-if [ $? -ne 0 ] ; then
-   echo "Failed running: make buildkernel TARGET=$ARCH"
+   echo "Failed running: make buildworld buildkernel"
    exit 1 
 fi
 
 if [ -n "$PKGBASE" ] ; then
   create_base_pkg_files
+else
+  create_dist_files
 fi
-
-create_dist_files
 
 exit 0
