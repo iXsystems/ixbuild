@@ -172,6 +172,12 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
 fi
 
+# Set to use TMPFS for everything
+if [ -e "build/config/templates/poudriere.conf" ] ; then
+  echo "Enabling USE_TMPFS=all"
+  sed -i '' 's|USE_TMPFS=yes|USE_TMPFS=all|g' build/conf/templates/poudriere.conf
+fi
+
 
 # Display output to stdout
 touch /tmp/fnas-build.out
