@@ -56,12 +56,21 @@ create_base_pkg_files()
   fi
   mkdir ${DISTDIR} 2>/dev/null
 
+  # Unset some variables which may be getting in the way
+  ODISTDIR="$DISTDIR"
+  OWORLDSRC="$WORLDSRC"
+  unset DISTDIR WORLDSRC
+
   # Create the package files now
   make packages
   if [ $? -ne 0 ] ; then
+     env
      echo "Failed running: make packages"
      exit 1
   fi
+
+  DISTDIR="$ODISTDIR"
+  WORLDSRC="$OWORLDSRC"
 
   # Move the package files and prep them
   mv /usr/obj/usr/src/repo/*/latest/* ${DISTDIR}/
