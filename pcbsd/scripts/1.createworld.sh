@@ -99,9 +99,6 @@ rc_halt "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} ${WORLDSRC}"
 
 # Now create the world / kernel / distribution
 cd ${WORLDSRC}
-MACHINE_ARCH="$REALARCH"
-MACHINE="$REALARCH"
-export MACHINE_ARCH MACHINE
 
 # We only really need to go up to 8 CPUS for building world
 CPUS=`sysctl -n kern.smp.cpus`
