@@ -120,18 +120,15 @@ push_world()
     return 0
   fi
 
-  # Pushing to a remote directory?
+  # Push world packages to work directory
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
 
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 
-  cd ${TBUILDDIR}/fbsd-iso
-  if [ $? -ne 0 ] ; then exit_clean; fi
-
-  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${FBSDISOSTAGE}" >/dev/null 2>/dev/null
-
-  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${FBSDISOSTAGE}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  # Push packages to dist directory
+  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}/dist" >/dev/null 2>/dev/null
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/dist/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
@@ -564,19 +561,16 @@ if [ "$TYPE" != "ports-tests" ] ; then
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
-    FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/amd64"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
-    FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/edge/amd64"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
-    FBSDISOSTAGE="${SFTPFINALDIR}/freebsd-iso/${TARGETREL}/enterprise/amd64"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   else
