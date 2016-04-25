@@ -175,7 +175,7 @@ fi
 # Set to use TMPFS for everything
 if [ -e "build/config/templates/poudriere.conf" ] ; then
   echo "Enabling USE_TMPFS=all"
-  sed -i '' 's|USE_TMPFS=yes|USE_TMPFS=all|g' build/conf/templates/poudriere.conf
+  sed -i '' 's|USE_TMPFS=yes|USE_TMPFS=all|g' build/config/templates/poudriere.conf
 fi
 
 
