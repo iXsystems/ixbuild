@@ -82,6 +82,7 @@ create_base_pkg_files()
 
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
+    echo "Signing base packages..."
     rc_halt "cd ${DISTDIR}"
     rc_halt "pkg repo . signing_command: ${PKGSIGNCMD}"
   fi
