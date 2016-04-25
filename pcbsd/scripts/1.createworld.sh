@@ -51,10 +51,10 @@ create_base_pkg_files()
 {
   cd ${WORLDSRC}
 
-  if [ -n "${DISTDIR}" -a -d "${DISTDIR}" ] ; then
-    rm -rf ${DISTDIR}
+  if [ -n "${PROGDIR}/fbsd-pkg" -a -d "${PROGDIR}/fbsd-pkg" ] ; then
+    rm -rf ${PROGDIR}/fbsd-pkg
   fi
-  mkdir ${DISTDIR} 2>/dev/null
+  mkdir ${PROGDIR}/fbsd-pkg 2>/dev/null
 
   # Unset some variables which may be getting in the way
   ODISTDIR="$DISTDIR"
@@ -73,7 +73,7 @@ create_base_pkg_files()
   WORLDSRC="$OWORLDSRC"
 
   # Move the package files and prep them
-  mv /usr/obj/usr/src/repo/*/latest/* ${DISTDIR}/
+  mv /usr/obj/usr/src/repo/*/latest/* ${PROGDIR}/fbsd-pkg/
   if [ $? -ne 0 ] ; then
      echo "Failed moving packages"
      exit 1
@@ -83,7 +83,7 @@ create_base_pkg_files()
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
     echo "Signing base packages..."
-    rc_halt "cd ${DISTDIR}"
+    rc_halt "cd ${PROGDIR}/fbsd-pkg/"
     rc_halt "pkg repo . signing_command: ${PKGSIGNCMD}"
   fi
 }
@@ -124,6 +124,7 @@ fi
 
 if [ -n "$PKGBASE" ] ; then
   create_base_pkg_files
+  create_dist_files
 else
   create_dist_files
 fi

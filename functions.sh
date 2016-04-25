@@ -126,16 +126,17 @@ push_world()
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 
-  if [ -e "./meta.txz" ] ; then
+  if [ -n "$PKGBASE" ] ; then
     # Push packages to base directory
+    cd ${TBUILDDIR}/fbsd-pkg
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}/base" >/dev/null 2>/dev/null
     rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/base/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
-  if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
-  else
-    # Dist files to dist directory
-    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}/dist" >/dev/null 2>/dev/null
-    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/dist/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
+
+  # Dist files to dist directory
+  cd ${TBUILDDIR}/fbsd-dist
+  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}/dist" >/dev/null 2>/dev/null
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/dist/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
 }
 
 pull_world()
