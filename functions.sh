@@ -163,6 +163,14 @@ pull_world()
      return 1
   fi
 
+  if [ -n "$PKGBASE" ] ; then
+    # Push packages to base directory
+    mkdir ${TBUILDDIR}/fbsd-pkg
+    cd ${TBUILDDIR}/fbsd-pkg
+    if [ $? -ne 0 ] ; then exit_clean; fi
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  fi
+
   cd ${TBUILDDIR}/fbsd-dist
   if [ $? -ne 0 ] ; then exit_clean; fi
 

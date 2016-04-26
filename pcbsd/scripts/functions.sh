@@ -210,7 +210,7 @@ create_pkg_conf()
            enabled: true
         }" >  ${PROGDIR}/tmp/repo/local.conf
   echo "localbase: {
-           url: \"file://${PPKGDIR}/base\",
+           url: \"file://${PROGDIR}/fbsd-pkg\",
            enabled: true
         }" >>  ${PROGDIR}/tmp/repo/local.conf
 }
