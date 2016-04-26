@@ -26,11 +26,6 @@ if [ -d "${ISODISTDIR}" ] ; then
 fi
 mkdir ${ISODISTDIR}
 
-echo "Copying dist files.."
-cp ${DISTDIR}/* ${ISODISTDIR}/
-# Nuke the src.txz, its 110MB~ and 99.9% of users don't need it
-rm ${ISODISTDIR}/src.txz
-
 rc_halt "mkdir -p ${ISODISTDIR}/packages"
 rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"
 

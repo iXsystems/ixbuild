@@ -209,6 +209,10 @@ create_pkg_conf()
            url: \"file://${PPKGDIR}\",
            enabled: true
         }" >  ${PROGDIR}/tmp/repo/local.conf
+  echo "localbase: {
+           url: \"file://${PPKGDIR}/base\",
+           enabled: true
+        }" >>  ${PROGDIR}/tmp/repo/local.conf
 }
 
 create_installer_pkg_conf()
@@ -280,6 +284,9 @@ cp_iso_pkg_files()
        echo "Saving deps for $tfile"
        ${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ rquery '%dn-%dv' $targets | sort | uniq > ${PROGDIR}/tmp/dep-list/${tfile}.deps
     done
+
+    # Grab all the FreeBSD base packages
+    rc_halt "${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp $localFlg -d -g 'FreeBSD-*'"
 
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
