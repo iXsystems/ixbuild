@@ -78,7 +78,6 @@ create_base_pkg_files()
      echo "Failed moving packages"
      exit 1
   fi
-  make clean
 
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
@@ -124,9 +123,7 @@ fi
 
 if [ -n "$PKGBASE" ] ; then
   create_base_pkg_files
-  create_dist_files
-else
-  create_dist_files
 fi
+create_dist_files
 
 exit 0
