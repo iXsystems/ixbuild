@@ -52,7 +52,7 @@ while [ $# -gt 0 ] ; do
                      esac
                      ;; 
      module|MODULE) runmod="$val $runmod" ;;
-     ip|IP) ip="$val" ; manualip="YES" ;;
+     ip|IP) ip="$val" ;;
      user|USER) fuser="$val" ;;
      pass|PASS) fpass="$val" ;;
     *) ;;
