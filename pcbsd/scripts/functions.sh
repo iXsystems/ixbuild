@@ -209,10 +209,6 @@ create_pkg_conf()
            url: \"file://${PPKGDIR}\",
            enabled: true
         }" >  ${PROGDIR}/tmp/repo/local.conf
-  echo "localbase: {
-           url: \"file://${PROGDIR}/fbsd-pkg\",
-           enabled: true
-        }" >>  ${PROGDIR}/tmp/repo/local.conf
 }
 
 create_installer_pkg_conf()
@@ -286,7 +282,7 @@ cp_iso_pkg_files()
     done
 
     # Grab all the FreeBSD base packages
-    rc_halt "${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ fetch -y -o ${PROGDIR}/tmp $localFlg -d -g 'FreeBSD-*'"
+    rc_halt "cp ${PROGDIR}/fbsd-pkg/* ${PROGDIR}/tmp/All/"
 
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
