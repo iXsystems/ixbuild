@@ -129,8 +129,8 @@ push_world()
   if [ -n "$PKGBASE" ] ; then
     # Push packages to base directory
     cd ${TBUILDDIR}/fbsd-pkg
-    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}/base" >/dev/null 2>/dev/null
-    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/base/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}-base" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
 
   # Dist files to dist directory
@@ -168,7 +168,7 @@ pull_world()
     mkdir ${TBUILDDIR}/fbsd-pkg
     cd ${TBUILDDIR}/fbsd-pkg
     if [ $? -ne 0 ] ; then exit_clean; fi
-    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
 
   cd ${TBUILDDIR}/fbsd-dist
