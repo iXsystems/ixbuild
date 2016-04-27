@@ -252,12 +252,8 @@ set_ip()
   set_test_group_text "Networking Configuration" "4"
 
   echo_test_title "Setting IP address: ${ip} on em0"
-  if [ "$manualip" = "NO" ] ; then
-    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
-    check_rest_response "201 CREATED"
-  else
-    echo_ok
-  fi
+  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
+  check_rest_response "201 CREATED"
 
   echo_test_title "Setting DHCP on em1"
   rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
