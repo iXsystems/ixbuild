@@ -4,7 +4,11 @@
 #########################################################
 
 # Source vars
-. ${PROGDIR}/freenas.cfg
+if [ -z "${PROGDIR}" ] ; then
+  . ../freenas.cfg
+else
+  . ${PROGDIR}/freenas.cfg
+fi
 
 # Where on disk is the FreeNAS GIT branch
 if [ -n "$FNASGITDIR" ] ; then
