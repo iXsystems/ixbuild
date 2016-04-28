@@ -62,6 +62,14 @@ Once a new "master" is deployed, you can access your Jenkins interface from:
 Manually running test framework
 =======
 
+To prep a new system for running tests manually, first create a freenas.cfg 
+before executing checkprogs:
+
+```
+ # cp freenas/freenas.cfg.dist freenas/freenas.cfg
+ # cd freenas/scripts && ./checkprogs.sh
+```
+
 Tests are located in the freenas/scripts/9.3-tests.sh and
 freenas/scripts/10-tests.sh files. These scripts can also be run directly
 by pointing them at a FreeNAS instance with the following syntax:

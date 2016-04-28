@@ -168,6 +168,7 @@ pull_world()
     mkdir ${TBUILDDIR}/fbsd-pkg
     cd ${TBUILDDIR}/fbsd-pkg
     if [ $? -ne 0 ] ; then exit_clean; fi
+    echo "Pulling base packages..."
     rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
 
