@@ -255,9 +255,22 @@ set_ip()
   rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
   check_rest_response "201 CREATED"
 
-  echo_test_title "Setting DHCP on em1"
-  rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
-  check_rest_response "201 CREATED"
+  if [ -n "$BRIDGEIP" ] ; then
+    # Using the bridged adapter settings
+    echo_test_title "Setting bridged IP on em1"
+    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENET}"'", "int_interface": "em1" }'
+    check_rest_response "201 CREATED"
+
+    # Set the global config stuff
+    echo_test_title "Setting default route and DNS"
+    rest_request "PUT" "/network/globalconfiguration/" '{ "gc_domain": "'"${BRIDGEDOMAIN}"'", "gc_ipv4gateway": "'"${BRIDGEGW}"'", "gc_hostname": "'"${BRIDGEHOST}"'", "gc_nameserver1": "'"${BRIDGEDNS}"'" }'
+    check_rest_response "200 OK"
+  else
+    # Using the NAT mode
+    echo_test_title "Setting DHCP on em1"
+    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
+    check_rest_response "201 CREATED"
+  fi
 
   echo_test_title "Rebooting VM"
   rest_request "POST" "/system/reboot/" "''"

@@ -113,8 +113,17 @@ rc_halt "VBoxManage hostonlyif create"
 rc_halt "VBoxManage modifyvm $VM --nic1 hostonly"
 rc_halt "VBoxManage modifyvm $VM --hostonlyadapter1 vboxnet0"
 rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
-rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
-rc_halt "VBoxManage modifyvm $VM --nic2 nat"
+if [ -n "$BRIDGEIP" ] ; then
+  # Switch to bridged mode
+  DEFAULTNIC=`netstat -nr | grep "^default" | awk '{print $4}'`
+  rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
+  rc_halt "VBoxManage modifyvm $VM --nic2 bridged"
+  rc_halt "VBoxManage modifyvm $VM --bridgeadapter2 ${DEFAULTNIC}"
+else
+  # Fallback to NAT
+  rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
+  rc_halt "VBoxManage modifyvm $VM --nic2 nat"
+fi
 rc_halt "VBoxManage modifyvm $VM --macaddress2 auto"
 rc_halt "VBoxManage modifyvm $VM --nictype2 82540EM"
 rc_halt "VBoxManage modifyvm $VM --pae off"
