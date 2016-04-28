@@ -42,6 +42,8 @@ export FNASTESTIP
 ADUSERNAME=""
 ADPASSWORD=""
 ADREALM=""
+ADDNS=""
+ADHOSTDOMAIN=""
 
 ###########################################################################
 # PC-BSD specific settings
