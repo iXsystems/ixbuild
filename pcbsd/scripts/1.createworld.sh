@@ -69,9 +69,6 @@ create_base_pkg_files()
      exit 1
   fi
 
-  DISTDIR="$ODISTDIR"
-  WORLDSRC="$OWORLDSRC"
-
   # Move the package files and prep them
   mv /usr/obj/usr/src/repo/*/latest/* ${PROGDIR}/fbsd-pkg/
   if [ $? -ne 0 ] ; then
@@ -85,6 +82,19 @@ create_base_pkg_files()
     rc_halt "cd ${PROGDIR}/fbsd-pkg/"
     rc_halt "pkg repo . signing_command: ${PKGSIGNCMD}"
   fi
+
+  # This is super ugly, remove it once they properly fix pkg
+  # grab all the distrib files
+  cd ${WORLDSRC}
+  rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
+  rc_halt "make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib"
+  rc_halt "make distribution DESTDIR=${PROGDIR}/fbsd-distrib"
+  rc_halt "tar cvJf ${PROGDIR}/fbsd-pkg/fbsd-distrib.txz -C ${PROGDIR}/fbsd-distrib ."
+  rm -rf ${PROGDIR}/fbsd-distrib
+
+  DISTDIR="$ODISTDIR"
+  WORLDSRC="$OWORLDSRC"
+
 }
 
 if [ -z "$DISTDIR" ] ; then
