@@ -38,6 +38,11 @@ export NOIPPASSWORD NOIPUSERNAME NOIPHOST
 FNASTESTIP=""
 export FNASTESTIP
 
+# Set this to be the AD information for testing Active Directory
+ADUSERNAME=""
+ADPASSWORD=""
+ADREALM=""
+
 ###########################################################################
 # PC-BSD specific settings
 ###########################################################################
