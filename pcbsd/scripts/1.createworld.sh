@@ -85,6 +85,7 @@ create_base_pkg_files()
 
   # This is super ugly, remove it once they properly fix pkg
   # grab all the distrib files
+  WORLDSRC="$OWORLDSRC"
   cd ${WORLDSRC}
   rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
   rc_halt "make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib"
@@ -93,8 +94,7 @@ create_base_pkg_files()
   rm -rf ${PROGDIR}/fbsd-distrib
 
   DISTDIR="$ODISTDIR"
-  WORLDSRC="$OWORLDSRC"
-
+  return 0
 }
 
 if [ -z "$DISTDIR" ] ; then
