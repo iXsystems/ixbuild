@@ -47,11 +47,10 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
   sleep 20
   wait_for_avail
   echo_ok
-
 else
   # For TrueNAS we have to do the update in two stages, one for each head
+  foo=1
 
 fi
-
 
 finish_xml_results
