@@ -258,7 +258,7 @@ set_ip()
   if [ -n "$BRIDGEIP" ] ; then
     # Using the bridged adapter settings
     echo_test_title "Setting bridged IP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENET}"'", "int_interface": "em1" }'
+    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
     check_rest_response "201 CREATED"
 
     # Set the global config stuff
