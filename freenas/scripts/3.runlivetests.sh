@@ -39,7 +39,7 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
 
   # Checking for updates
   echo_test_title "Checking for available updates"
-  rest_request "POST" "/system/update/check/" "''"
+  rest_request "GET" "/system/update/check/" "''"
   check_rest_response "200 OK"
 
   # Do the update now
