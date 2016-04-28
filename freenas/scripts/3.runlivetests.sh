@@ -37,6 +37,11 @@ echo_ok
 if [ "$FLAVOR" = "FREENAS" ] ; then
   set_test_group_text "Upgrade Test" "2"
 
+  # Checking for updates
+  echo_test_title "Checking for available updates"
+  rest_request "POST" "/system/update/check/" "''"
+  check_rest_response "200 OK"
+
   # Do the update now
   echo_test_title "Performing upgrade of system"
   rest_request "POST" "/system/update/update/" "''"
