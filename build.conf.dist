@@ -27,6 +27,15 @@ export IXBUILDBRANCH
 # FreeNAS specific settings
 ###########################################################################
 
+# Set this be the network information assigned to the bridged interface
+
+BRIDGEIP=""
+BRIDGENETMASK=""
+BRIDGEGW=""
+BRIDGEDNS=""
+BRIDGEHOST=""
+BRIDGEDOMAIN=""
+
 # Set the account information for dns testing we do with noip.com
 # If this is NOT set, the test will be skipped
 NOIPUSERNAME=""
@@ -42,8 +51,6 @@ export FNASTESTIP
 ADUSERNAME=""
 ADPASSWORD=""
 ADREALM=""
-ADDNS=""
-ADHOSTDOMAIN=""
 
 ###########################################################################
 # PC-BSD specific settings
