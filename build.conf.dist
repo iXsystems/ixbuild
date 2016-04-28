@@ -35,6 +35,7 @@ BRIDGEGW=""
 BRIDGEDNS=""
 BRIDGEHOST=""
 BRIDGEDOMAIN=""
+export BRIDGEIP BRIDGENETMASK BRIDGEGW BRIDGEDNS BRIDGEHOST BRIDGEDOMAIN
 
 # Set the account information for dns testing we do with noip.com
 # If this is NOT set, the test will be skipped
@@ -51,6 +52,7 @@ export FNASTESTIP
 ADUSERNAME=""
 ADPASSWORD=""
 ADREALM=""
+export ADUSERNAME ADPASSWORD ADREALM
 
 ###########################################################################
 # PC-BSD specific settings
