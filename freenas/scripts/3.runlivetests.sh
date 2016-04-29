@@ -35,7 +35,7 @@ wait_for_avail
 echo_ok
 
 if [ "$FLAVOR" = "FREENAS" ] ; then
-  set_test_group_text "Upgrade Test" "2"
+  set_test_group_text "Upgrade Test" "4"
 
   # Checking for updates
   echo_test_title "Checking for available updates"
@@ -44,8 +44,12 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
 
   # Do the update now
   echo_test_title "Performing upgrade of system"
-  rest_request "POST" "/system/update/update/"
+  rest_request "POST" "/system/update/update/" "{}"
   check_rest_response "200 OK"
+
+  echo_test_title "Rebooting VM"
+  rest_request "POST" "/system/reboot/" "''"
+  echo_ok
 
   # Wait for system to reboot
   echo_test_title "Waiting for reboot"
