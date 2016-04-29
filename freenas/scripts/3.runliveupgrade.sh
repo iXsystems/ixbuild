@@ -81,7 +81,7 @@ else
   echo_ok
 
   # Wait for HA to come back up (Replace this with some better check)
-  sleep 180
+  sleep 360
 
   # Checking for updates
   echo_test_title "Checking for available updates"
