@@ -76,6 +76,14 @@ if [ -d "${FNASBDIR}" ] ; then
   rc_halt "mv ${FNASBDIR} ${FNASBDIR}.${PREVEXT}"
 fi
 
+# Figure out the flavor for this test
+echo $BUILDTAG | grep -q "truenas"
+if [ $? -eq 0 ] ; then
+  FLAVOR="TRUENAS"
+else
+  FLAVOR="FREENAS"
+fi
+
 # Make sure we have our freenas sources
 if [ -d "${FNASSRC}" ]; then
   if [ -d "${GITBRANCH}/.git" ]; then 
@@ -111,6 +119,10 @@ cd ${FNASSRC}
 
 if [ "$FREENASLEGACY" = "910" ] ; then
   PROFILEARGS="PROFILE=freenas9"
+fi
+
+if [ "$FLAVOR" = "TRUENAS" ] ; then
+  PROFILEARGS="PRODUCT=TrueNAS ${PROFILEARGS}"
 fi
 
 # Start the XML reporting
