@@ -22,7 +22,7 @@ cleanup_workdir()
   # Should be done with unmounts
   mount | grep -q "on ${MASTERWRKDIR}/"
   if [ $? -ne 0 ] ; then
-    rm -rf ${MASTERWRKDIR}
+    rm -rf ${MASTERWRKDIR} 2>/dev/null
     chflags -R noschg ${MASTERWRKDIR} 2>/dev/null
     rm -rf ${MASTERWRKDIR}
   fi
