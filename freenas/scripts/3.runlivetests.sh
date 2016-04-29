@@ -44,7 +44,7 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
 
   # Do the update now
   echo_test_title "Performing upgrade of system"
-  rest_request "POST" "/system/update/update/" ""
+  rest_request "POST" "/system/update/update/"
   check_rest_response "200 OK"
 
   # Wait for system to reboot
