@@ -119,10 +119,9 @@ cd ${FNASSRC}
 
 if [ "$FREENASLEGACY" = "910" ] ; then
   PROFILEARGS="PROFILE=freenas9"
-fi
-
-if [ "$FLAVOR" = "TRUENAS" ] ; then
-  PROFILEARGS="PRODUCT=TrueNAS ${PROFILEARGS}"
+  if [ "$FLAVOR" = "TRUENAS" ] ; then
+    PROFILEARGS="PRODUCT=TrueNAS ${PROFILEARGS}"
+  fi
 fi
 
 # Start the XML reporting
