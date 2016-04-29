@@ -35,7 +35,7 @@ wait_for_avail
 echo_ok
 
 if [ "$FLAVOR" = "FREENAS" ] ; then
-  set_test_group_text "Upgrade Test" "2"
+  set_test_group_text "FreeNAS Upgrade Test" "4"
 
   # Checking for updates
   echo_test_title "Checking for available updates"
@@ -44,8 +44,12 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
 
   # Do the update now
   echo_test_title "Performing upgrade of system"
-  rest_request "POST" "/system/update/update/" ""
+  rest_request "POST" "/system/update/update/" "{}"
   check_rest_response "200 OK"
+
+  echo_test_title "Rebooting VM"
+  rest_request "POST" "/system/reboot/" "''"
+  echo_ok
 
   # Wait for system to reboot
   echo_test_title "Waiting for reboot"
@@ -54,8 +58,50 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
   echo_ok
 else
   # For TrueNAS we have to do the update in two stages, one for each head
-  foo=1
+  set_test_group_text "TrueNAS Upgrade Test" "8"
 
+  # Checking for updates
+  echo_test_title "Checking for available updates"
+  rest_request "GET" "/system/update/check/" ""
+  check_rest_response "200 OK"
+
+  # Do the update now
+  echo_test_title "Performing upgrade of system"
+  rest_request "POST" "/system/update/update/" "{}"
+  check_rest_response "200 OK"
+
+  echo_test_title "Rebooting VM"
+  rest_request "POST" "/system/reboot/" "''"
+  echo_ok
+
+  # Wait for system to reboot
+  echo_test_title "Waiting for reboot"
+  sleep 20
+  wait_for_avail
+  echo_ok
+
+  # Wait for HA to come back up (Replace this with some better check)
+  sleep 360
+
+  # Checking for updates
+  echo_test_title "Checking for available updates"
+  rest_request "GET" "/system/update/check/" ""
+  check_rest_response "200 OK"
+
+  # Do the update now
+  echo_test_title "Performing upgrade of system"
+  rest_request "POST" "/system/update/update/" "{}"
+  check_rest_response "200 OK"
+
+  echo_test_title "Rebooting VM"
+  rest_request "POST" "/system/reboot/" "''"
+  echo_ok
+
+  # Wait for system to reboot
+  echo_test_title "Waiting for reboot"
+  sleep 20
+  wait_for_avail
+  echo_ok
 fi
 
 finish_xml_results

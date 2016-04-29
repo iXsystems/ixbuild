@@ -14,3 +14,5 @@ tests:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh tests
 livetests:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh livetests
+liveupgrade:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh liveupgrade

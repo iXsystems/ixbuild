@@ -9,6 +9,7 @@
 - [FreeNAS Testing Framework](#freenas-testing-framework)
   - [Adding New tests](#adding-new-tests)
   - [Where are tests run?](#where-are-tests-run)
+- [Use Jenkins FreeNAS or TrueNAS update servers (iX Internal only)](#use-jenkins-freenas-or-truenas-update-servers-ix-internal-only)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -129,5 +130,19 @@ The tests for FreeNAS 9.3.X are currently being run on-commit. Committers will a
 an e-mail with results and log files on testing failures.
 
 Tests / log output can be viewed at the following location:
-https://builds.pcbsd.org/jenkins/view/FreeNAS%20ATF/
+https://builds.ixsystems.com/jenkins/view/FreeNAS%20ATF/
 
+
+Use Jenkins FreeNAS or TrueNAS update servers (iX Internal only)
+=======
+
+If you are on the iXsystems corporate network you can switch to using
+the FreeNAS or TrueNAS update servers with the following files:
+
+https://github.com/iXsystems/ixbuild/blob/master/prepnode/truenas-update.conf
+
+https://github.com/iXsystems/ixbuild/blob/master/prepnode/freenas-update.conf
+
+Simply download and rename the file to "update.conf" and upload it to the /data/
+directory on your FreeNAS or TrueNAS box. The next time you check for updates it
+will begin pulling from the Jenkins builds. 

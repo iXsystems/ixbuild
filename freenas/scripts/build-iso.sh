@@ -42,6 +42,16 @@ do_live_tests() {
   fi
 }
 
+do_live_upgrade() {
+
+  echo "Starting FreeNAS Live upgrade testing"
+  ${PROGDIR}/scripts/3.runliveupgrade.sh
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
+}
+
 
 do_tests() {
 
@@ -63,6 +73,7 @@ case $TARGET in
      iso) do_iso ;;
    tests) do_tests ;;
    livetests) do_live_tests ;;
+   liveupgrade) do_live_upgrade ;;
        *) ;;
 esac
 

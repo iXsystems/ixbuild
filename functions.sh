@@ -22,7 +22,7 @@ cleanup_workdir()
   # Should be done with unmounts
   mount | grep -q "on ${MASTERWRKDIR}/"
   if [ $? -ne 0 ] ; then
-    rm -rf ${MASTERWRKDIR}
+    rm -rf ${MASTERWRKDIR} 2>/dev/null
     chflags -R noschg ${MASTERWRKDIR} 2>/dev/null
     rm -rf ${MASTERWRKDIR}
   fi
@@ -59,7 +59,7 @@ create_workdir()
   fi
 
   case $TYPE in
-    freenas|freenas-tests|freenas-ltest|freenas-combo) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
+    freenas|freenas-tests|freenas-ltest|freenas-lupgrade|freenas-combo) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
           *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
   esac
 
@@ -395,6 +395,23 @@ jenkins_freenas()
   return 0
 }
 
+jenkins_freenas_live_upgrade()
+{
+  create_workdir
+
+  if [ -z "$LIVEHOST" ] ; then echo "Missing LIVEHOST!" ; exit_clean ; fi
+  if [ -z "$LIVEUSER" ] ; then echo "Missing LIVEUSER!" ; exit_clean ; fi
+  if [ -z "$LIVEPASS" ] ; then echo "Missing LIVEPASS!" ; exit_clean ; fi
+
+  cd ${TBUILDDIR}
+  make liveupgrade
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  cleanup_workdir
+
+  return 0
+}
+
 jenkins_freenas_live_tests()
 {
   create_workdir
@@ -504,7 +521,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
        BRANCH="production"
        . freenas.cfg
        ;;
-    freenas-ltest)
+    freenas-ltest|freenas-lupgrade)
        BRANCH="production"
        . freenas.cfg
        if [ ! -e "freenas-ltest.cfg" ] ; then
