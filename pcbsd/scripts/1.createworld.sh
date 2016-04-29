@@ -79,6 +79,7 @@ create_base_pkg_files()
   # This is super ugly, remove it once they properly fix pkg
   # grab all the distrib files
   rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
+  cd /usr/src
   rc_halt "make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib"
   rc_halt "make distribution DESTDIR=${PROGDIR}/fbsd-distrib"
 
