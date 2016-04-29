@@ -102,7 +102,6 @@ else
   sleep 20
   wait_for_avail
   echo_ok
-
 fi
 
 finish_xml_results
