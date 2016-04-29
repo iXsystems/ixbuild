@@ -80,8 +80,18 @@ create_base_pkg_files()
   # grab all the distrib files
   rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
   cd /usr/src
-  rc_halt "make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib"
-  rc_halt "make distribution DESTDIR=${PROGDIR}/fbsd-distrib"
+  make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib
+  if [ $? -ne 0 ] ; then
+     env
+     echo "Failed running: make distrib-dirs"
+     exit 1
+  fi
+  make distribution DESTDIR=${PROGDIR}/fbsd-distrib
+  if [ $? -ne 0 ] ; then
+     env
+     echo "Failed running: make distribution"
+     exit 1
+  fi
 
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
