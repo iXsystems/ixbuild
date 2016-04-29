@@ -76,6 +76,12 @@ create_base_pkg_files()
      exit 1
   fi
 
+  # This is super ugly, remove it once they properly fix pkg
+  # grab all the distrib files
+  rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
+  rc_halt "make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib"
+  rc_halt "make distribution DESTDIR=${PROGDIR}/fbsd-distrib"
+
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
     echo "Signing base packages..."
@@ -83,16 +89,10 @@ create_base_pkg_files()
     rc_halt "pkg repo . signing_command: ${PKGSIGNCMD}"
   fi
 
-  # This is super ugly, remove it once they properly fix pkg
-  # grab all the distrib files
-  WORLDSRC="$OWORLDSRC"
-  cd ${WORLDSRC}
-  rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
-  rc_halt "make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib"
-  rc_halt "make distribution DESTDIR=${PROGDIR}/fbsd-distrib"
   rc_halt "tar cvJf ${PROGDIR}/fbsd-pkg/fbsd-distrib.txz -C ${PROGDIR}/fbsd-distrib ."
   rm -rf ${PROGDIR}/fbsd-distrib
 
+  WORLDSRC="$OWORLDSRC"
   DISTDIR="$ODISTDIR"
   return 0
 }
