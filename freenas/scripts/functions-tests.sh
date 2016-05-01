@@ -295,7 +295,7 @@ wait_for_avail()
     if [ $? -eq 0 ] ; then break; fi
     echo -e ".\c"
     sleep 60
-    if [ $count -gt 10 ] ; then
+    if [ $count -gt 12 ] ; then
        echo_fail
        exit 1
     fi
