@@ -99,6 +99,9 @@ if [ ! -e "latest.iso" ] ; then
   ln -s ${bFile}-DVD.iso.sha256 latest.iso.sha256
 fi
 
+# Create the .torrent
+mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.pcbsd.org/iso/${ISOVER}/amd64/${bFile}-DVD.iso ${bFile}-DVD.iso
+
 ######
 # Create the USB images
 ######
@@ -148,5 +151,7 @@ if [ ! -e "latest.img" ] ; then
   ln -s ${OUTFILE}.sha256 latest.img.sha256
 fi
 
+# Create the .torrent
+mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.pcbsd.org/iso/${ISOVER}/amd64/${OUTFILE} ${OUTFILE}
 
 exit 0

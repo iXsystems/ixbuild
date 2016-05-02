@@ -255,6 +255,9 @@ set_ip()
   rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
   check_rest_response "201 CREATED"
 
+  # Wait 30 seconds before trying more REST queries again
+  sleep 30
+
   if [ -n "$BRIDGEIP" ] ; then
     # Using the bridged adapter settings
     echo_test_title "Setting bridged IP on em1"

@@ -120,3 +120,9 @@ if [ "$?" != "0" ]; then
   echo "Installing poudriere.."
   rc_halt "pkg install -y ports-mgmt/poudriere"
 fi
+
+which mktorrent >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing mktorrent.."
+  rc_halt "pkg install -y net-p2p/mktorrent"
+fi
