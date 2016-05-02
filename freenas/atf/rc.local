@@ -34,7 +34,7 @@ if [ -e "/etc/netcli" ] ; then
   /sbin/ifconfig
 
   # Nuke this file, don't need it after reboot
-  echo "" > /conf/default/etc/rc.local
+  #echo "" > /conf/default/etc/rc.local
 else
   echo "FreeNAS 10 detected.."
   # Set the IP address we will use for testing
