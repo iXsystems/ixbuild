@@ -1,0 +1,37 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+storage_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "Storage tests" "7"
+
+  # TODO
+  # 
+  # Check if storage is provisioned and the 'tank/qa' dataset exists
+  # If not, do the initial setup
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+storage_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) storage_tests ; return $? ;;
+     COMPLETE) storage_tests ; return $? ;;
+    BENCHMARK) storage_tests ; return $? ;;
+            *) storage_tests ; return $? ;;
+  esac
+}
