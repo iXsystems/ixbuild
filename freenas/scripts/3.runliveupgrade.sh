@@ -102,6 +102,10 @@ else
   sleep 20
   wait_for_avail
   echo_ok
+
+  # Wait for HA to come back up (Replace this with some better check)
+  sleep 360
+
 fi
 
 finish_xml_results
