@@ -85,7 +85,7 @@ else
   while : 
   do
     # Check the status of each node to make sure all nodes are online
-    rest_request "GET" "/system/status/" ""
+    rest_request "GET" "/system/alert/" ""
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
     if [ "$NODESTATUS" = '"OK","OK"' ] ; then
       break  
