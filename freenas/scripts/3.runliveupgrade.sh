@@ -80,8 +80,27 @@ else
   wait_for_avail
   echo_ok
 
-  # Wait for HA to come back up (Replace this with some better check)
-  sleep 360
+  # Wait for HA to come back up
+  count=0
+  while : 
+  do
+    # Check the status of each node to make sure all nodes are online
+    rest_request "GET" "/system/status/" ""
+    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
+    if [ "$NODESTATUS" = '"OK","OK"' ] ; then
+      break  
+    # Command to continue goes here
+    else
+      sleep 30
+    fi
+    count=$(expr $count + 1)
+    if [ $count -gt 20 ] ;
+    then
+      echo_fail
+      finish_xml_results
+      exit 1
+    fi
+  done
 
   # Checking for updates
   echo_test_title "Checking for available updates"
