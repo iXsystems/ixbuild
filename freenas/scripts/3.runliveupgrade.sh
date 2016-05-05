@@ -90,7 +90,7 @@ else
     # Check the status of each node to make sure all nodes are online
     echo_test_title "Checking to make sure each node is online to continue upgrade"
     rest_request "GET" "/system/alert/" ""
-    check_rest_response "201 CREATED"
+    check_rest_response "200 OK"
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
     echo "NODESTATUS: $NODESTATUS"
     if [ "$NODESTATUS" = 'TrueNAS versions mismatch in failover. Update both nodes to the same version.' ] ; then
@@ -134,7 +134,7 @@ else
     # Check the status of each node to make sure all nodes upgraded
     echo_test_title "Checking the alert level for each node"
     rest_request "GET" "/system/alert/" ""
-    check_rest_response "201 CREATED"
+    check_rest_response "200 OK"
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
     echo "NODESTATUS: $NODESTATUS"
     if [ "$NODESTATUS" = '"OK","OK"' ] ; then
