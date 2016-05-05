@@ -10,6 +10,9 @@ ${PROGDIR}/scripts/checkprogs.sh
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
 
+# Set variable to call jsawk utility
+JSAWK="${PROGDIR}/../utils/jsawk -j js24"
+
 if [ ! -d "${PROGDIR}/tmp" ] ; then
   mkdir ${PROGDIR}/tmp
 fi
