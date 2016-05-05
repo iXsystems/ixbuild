@@ -26,7 +26,8 @@ else
 fi
 
 # Source our resty / jsawk functions
-. ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
+. ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u 
+${LIVEUSER}:${LIVEPASS}
 
 # Start the XML reporting
 start_xml_results "Live Testing"
@@ -63,7 +64,7 @@ else
   # For TrueNAS we have to do the update in two stages, one for each head
   set_test_group_text "TrueNAS Upgrade Test" "8"
 
-  # Checking for updates
+  # Checking for updates on nodeA
   echo_test_title "Checking for available updates"
   rest_request "GET" "/system/update/check/" ""
   check_rest_response "200 OK"
@@ -88,11 +89,11 @@ else
   while : 
   do
     # Check the status of each node to make sure all nodes are online
-    echo_test_title "Checking the alert level for each node"
+    echo_test_title "Checking to make sure each node is online to continue upgrade"
     rest_request "GET" "/system/alert/" ""
     check_rest_response "201 CREATED"
-    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
-    if [ "$NODESTATUS" = '"OK","OK"' ] ; then
+    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
+    if [ "$NODESTATUS" = '"TrueNAS versions mismatch in failover. Update both nodes to the same version."' ] ; then
       break  
     else
       sleep 30
@@ -106,7 +107,7 @@ else
     fi
   done
 
-  # Checking for updates
+  # Checking for updates on nodeB
   echo_test_title "Checking for available updates"
   rest_request "GET" "/system/update/check/" ""
   check_rest_response "200 OK"
@@ -126,8 +127,28 @@ else
   wait_for_avail
   echo_ok
 
-  # Wait for HA to come back up (Replace this with some better check)
-  sleep 360
+  # Verify each node is now in a normal state
+  count=0
+  while :
+  do
+    # Check the status of each node to make sure all nodes upgraded
+    echo_test_title "Checking the alert level for each node"
+    rest_request "GET" "/system/alert/" ""
+    check_rest_response "201 CREATED"
+    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
+    if [ "$NODESTATUS" = '"OK","OK"' ] ; then
+      break
+    else
+      sleep 30
+    fi
+    count=$(expr $count + 1)
+    if [ $count -gt 20 ] ;
+    then
+      echo_fail
+      finish_xml_results
+      exit 1
+    fi
+  done
 
 fi
 
