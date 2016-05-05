@@ -92,7 +92,8 @@ else
     rest_request "GET" "/system/alert/" ""
     check_rest_response "201 CREATED"
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
-    if [ "$NODESTATUS" = '"TrueNAS versions mismatch in failover. Update both nodes to the same version."' ] ; then
+    echo "NODESTATUS: $NODESTATUS"
+    if [ "$NODESTATUS" = 'TrueNAS versions mismatch in failover. Update both nodes to the same version.' ] ; then
       break  
     else
       sleep 30
@@ -135,6 +136,7 @@ else
     rest_request "GET" "/system/alert/" ""
     check_rest_response "201 CREATED"
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
+    echo "NODESTATUS: $NODESTATUS"
     if [ "$NODESTATUS" = '"OK","OK"' ] ; then
       break
     else
