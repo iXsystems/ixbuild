@@ -93,7 +93,8 @@ else
     check_rest_response "200 OK"
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
     echo "NODESTATUS: $NODESTATUS"
-    if [ "$NODESTATUS" = 'TrueNAS versions mismatch in failover. Update both nodes to the same version.' ] ; then
+    echo $NODESTATUS | grep -q 'TrueNAS versions mismatch in failover. Update both nodes to the same version.'
+    if [ $? -eq 0 ]
       break  
     else
       sleep 30
@@ -137,7 +138,8 @@ else
     check_rest_response "200 OK"
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
     echo "NODESTATUS: $NODESTATUS"
-    if [ "$NODESTATUS" = '"OK","OK"' ] ; then
+    echo $NODESTATUS | grep -q '"OK","OK"'
+    if [ $? -eq 0 ]
       break
     else
       sleep 30
