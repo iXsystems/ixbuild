@@ -40,7 +40,7 @@ merge_pcbsd_src_ports()
    for repo in pcbsd/pcbsd-libsh pcbsd/lpreserver
    do
      dname=$(basename $repo)
-     rc_halt "git clone --depth=1 https://github.com/${repo}/.git"
+     rc_halt "git clone --depth=1 https://github.com/${repo}.git"
      rc_halt "cd $dname"
      rc_halt "./mkport.sh ${portsdir} ${distCache}"
      rc_halt "cd $mcwd" >/dev/null 2>/dev/null
