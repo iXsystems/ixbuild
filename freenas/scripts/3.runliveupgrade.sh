@@ -91,7 +91,6 @@ else
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
     if [ "$NODESTATUS" = '"OK","OK"' ] ; then
       break  
-    # Command to continue goes here
     else
       sleep 30
     fi
