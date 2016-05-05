@@ -32,6 +32,19 @@ merge_pcbsd_src_ports()
 
    # Jump back to where we belong
    rc_halt "cd $mcwd" >/dev/null 2>/dev/null
+
+   # If on 10.x we can stop now
+   if [ -n "$PCBSDLEGACY" ] ; then return 0 ; fi
+
+   # Now add all the additional ports not apart of the main pcbsd repo
+   for repo in pcbsd/pcbsd-libsh pcbsd/lpreserver
+   do
+     dname=$(basename $repo)
+     rc_halt "git clone --depth=1 https://github.com/${repo}/.git"
+     rc_halt "cd $dname"
+     rc_halt "./mkport.sh ${portsdir} ${distCache}"
+     rc_halt "cd $mcwd" >/dev/null 2>/dev/null
+   done
 }
 
 mk_metapkg_bulkfile()
