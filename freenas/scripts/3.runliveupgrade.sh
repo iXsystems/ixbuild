@@ -85,7 +85,9 @@ else
   while : 
   do
     # Check the status of each node to make sure all nodes are online
+    echo_test_title "Checking the alert level for each node"
     rest_request "GET" "/system/alert/" ""
+    check_rest_response "201 CREATED"
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
     if [ "$NODESTATUS" = '"OK","OK"' ] ; then
       break  
