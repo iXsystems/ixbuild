@@ -124,7 +124,7 @@ else
 
   # Wait for system to reboot
   echo_test_title "Waiting for reboot"
-  sleep 20
+  sleep 60
   wait_for_avail
   echo_ok
 
