@@ -136,9 +136,9 @@ else
     echo_test_title "Checking the alert level for each node"
     rest_request "GET" "/system/alert/" ""
     check_rest_response "200 OK"
-    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.level')
+    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
     echo "NODESTATUS: $NODESTATUS"
-    echo $NODESTATUS | grep -q '"OK","OK"'
+    echo $NODESTATUS | grep -q 'Failed to check failover status with the other node: timed out'
     if [ $? -eq 0 ] ; then
       break
     else
