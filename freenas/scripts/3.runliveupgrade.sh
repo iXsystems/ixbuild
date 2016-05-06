@@ -139,7 +139,7 @@ else
     NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
     echo "NODESTATUS: $NODESTATUS"
     echo $NODESTATUS | grep -q 'Failed to check failover status with the other node: timed out'
-    if [ $? -eq 0 ] ; then
+    if [ $? -ne 0 ] ; then
       break
     else
       sleep 30
