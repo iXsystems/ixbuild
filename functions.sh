@@ -489,10 +489,6 @@ jenkins_ports_tests()
 BDIR="./builds"
 export BDIR
 
-# Set location of local FreeNAS build data
-FNASBDIR="/freenas"
-export FNASBDIR
-
 # Set location of local PC-BSD build data
 PCBSDBDIR="/pcbsd"
 export PCBSDBDIR
@@ -500,6 +496,10 @@ export PCBSDBDIR
 # Set the build tag
 BUILDTAG="$BUILD"
 export BUILDTAG
+
+# Set location of local FreeNAS build data
+FNASBDIR="/$BUILDTAG"
+export FNASBDIR
 
 if [ "$TYPE" != "ports-tests" ] ; then
 

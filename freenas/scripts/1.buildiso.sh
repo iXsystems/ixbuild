@@ -48,7 +48,11 @@ parse_build_error()
 }
 
 # Set local location of FreeNAS build
-FNASBDIR="/freenas"
+if [ -n "$BUILDTAG" ] ; then
+  FNASBDIR="/$BUILDTAG"
+else
+  FNASBDIR="/freenas"
+fi
 export FNASBDIR
 
 # Error output log
@@ -61,19 +65,12 @@ if [ $? -eq 0 ] ; then
   pkg delete -y grub2-efi
 fi
 
-# Figure out extenstion to label this old build
-if [ -e "${FNASBDIR}/btag" ] ; then
-  PREVEXT="`cat ${FNASBDIR}/btag`"
-else
-  PREVEXT="previous"
-fi
-
 # Rotate an old build
-if [ -d "${FNASBDIR}" ] ; then
-  rc_nohalt "rm -rf ${FNASBDIR}.${PREVEXT}"
-  rc_nohalt "chflags -R noschg ${FNASBDIR}.${PREVEXT}"
-  rc_nohalt "rm -rf ${FNASBDIR}.${PREVEXT}"
-  rc_halt "mv ${FNASBDIR} ${FNASBDIR}.${PREVEXT}"
+if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
+  rc_nohalt "rm -rf ${FNASBDIR}.previous" 2>/dev/null
+  rc_nohalt "chflags -R noschg ${FNASBDIR}.previous" 2>/dev/null
+  rc_nohalt "rm -rf ${FNASBDIR}.previous"
+  rc_halt "mv ${FNASBDIR} ${FNASBDIR}.previous"
 fi
 
 # Figure out the flavor for this test
@@ -85,21 +82,13 @@ else
 fi
 
 # Make sure we have our freenas sources
-if [ -d "${FNASSRC}" ]; then
-  if [ -d "${GITBRANCH}/.git" ]; then 
-    echo "Updating FreeNAS sources..."
-    git_fnas_up "${FNASSRC}" "${FNASSRC}"
-  fi
-else
-  rc_nohalt "mkdir `dirname ${FNASSRC}`"
-  rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
-  rc_halt "ln -s ${FNASBDIR} ${FNASSRC}"
+if [ -d "${FNASBDIR}" ]; then
+  rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
   git_fnas_up "${FNASSRC}" "${FNASSRC}"
-fi
-
-# Save the build tag for this release
-if [ -n "$BUILDTAG" ] ; then
-  echo "$BUILDTAG" > ${FNASBDIR}/btag
+else
+  rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+  rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
+  git_fnas_up "${FNASSRC}" "${FNASSRC}"
 fi
 
 # Lets keep our distfiles around and use previous ones
