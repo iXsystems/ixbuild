@@ -56,7 +56,7 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
 
   # Wait for system to reboot
   echo_test_title "Waiting for reboot"
-  sleep 20
+  sleep 120
   wait_for_avail
   echo_ok
 else
@@ -79,7 +79,7 @@ else
 
   # Wait for system to reboot
   echo_test_title "Waiting for reboot"
-  sleep 20
+  sleep 120
   wait_for_avail
   echo_ok
 
@@ -124,7 +124,7 @@ else
 
   # Wait for system to reboot
   echo_test_title "Waiting for reboot"
-  sleep 60
+  sleep 120
   wait_for_avail
   echo_ok
 
