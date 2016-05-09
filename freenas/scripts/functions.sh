@@ -26,12 +26,15 @@ git_fnas_up()
   local oDir=`pwd`
   cd "${lDir}"
 
+  git reset --hard
+
   echo "GIT pull"
   git pull
   if [ $? -ne 0 ] ; then
      exit_err "Failed doing a git pull"
   fi
 
+  echo "Done with git_fnas_up()"
   cd "${oDir}"
   return 0
 }
