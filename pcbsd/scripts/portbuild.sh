@@ -99,8 +99,13 @@ if [ -e "$BCONF" ] ; then
   fi
 fi
 
+# Figure out ZFS settings
+ZPOOL=$(mount | grep 'on / ' | cut -d '/' -f 1)
+ZROOT="/poud"
+
 cat >/usr/local/etc/poudriere.conf << EOF
-NO_ZFS=YES
+ZPOOL=$ZPOOL
+ZROOTFS=$ZROOT
 FREEBSD_HOST=file://${DISTDIR}
 RESOLV_CONF=/etc/resolv.conf
 BASEFS=/poud
@@ -120,7 +125,7 @@ PKG_REPO_FROM_HOST=yes
 BUILDER_HOSTNAME=builds.pcbsd.org
 PRIORITY_BOOST="pypy openoffice*"
 GIT_URL=${PORTS_GIT_URL}
-USE_COLORS=no
+USE_COLORS=yes
 EOF
 
   # Check if we have a ccache dir to be used
