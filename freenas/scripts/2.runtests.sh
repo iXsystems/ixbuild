@@ -21,7 +21,7 @@ if [ -z "${FNASTESTIP}" ] ; then
 fi
 
 # Set the default build directory
-FNASBDIR="/freenas"
+FNASBDIR="/${BUILDTAG}"
 export FNASBDIR
 
 # Figure out the ISO name
