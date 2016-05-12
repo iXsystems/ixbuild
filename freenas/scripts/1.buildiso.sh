@@ -73,6 +73,14 @@ if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
   rc_halt "mv ${FNASBDIR} ${FNASBDIR}.previous"
 fi
 
+if [ -n "$BUILDINCREMENTAL" ] ; then
+  cd ${FNASBDIR}
+  rc_halt "git reset --hard"
+
+  # Nuke old ISO's / builds
+  rm -rf _BE/release 2>/dev/null
+fi
+
 # Figure out the flavor for this test
 echo $BUILDTAG | grep -q "truenas"
 if [ $? -eq 0 ] ; then
