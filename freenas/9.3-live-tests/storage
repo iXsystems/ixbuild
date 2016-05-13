@@ -42,8 +42,7 @@ storage_tests()
       
       # Check creating a dataset /jails
       echo_test_title "Creating dataset tank/jails"
-      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": 
-      "jails" }'
+      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
       check_rest_response "201 CREATED" || return 1
     
     then
