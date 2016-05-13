@@ -15,9 +15,58 @@ storage_tests()
   set_test_group_text "Storage tests" "7"
 
   # TODO
-  # 
+  #
   # Check if storage is provisioned and the 'tank/qa' dataset exists
   # If not, do the initial setup
+
+  # Check to make sure datasets exist
+  echo_test_title "Checking for datasets"
+  rest_request "GET" "/storage/volume/tank/datasets"
+  check_rest_response "200 OK" || return 1
+  DATASET=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
+  echo "DATASET: $DATASET"
+  echo $DATASET | grep -q 'qa'
+    if [ $? -eq 0 ] ; then
+      echo_ok
+    else
+      
+      # Check creating a dataset /qa
+      echo_test_title "Creating dataset tank/share"
+      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "qa" }'
+      check_rest_response "201 CREATED" || return 1
+      
+      # Check creating a dataset /share
+      echo_test_title "Creating dataset tank/share"
+      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "share" }'
+      check_rest_response "201 CREATED" || return 1
+      
+      # Check creating a dataset /jails
+      echo_test_title "Creating dataset tank/jails"
+      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": 
+      "jails" }'
+      check_rest_response "201 CREATED" || return 1
+    
+    then
+      echo_ok
+    fi
+  done
+
+  # Set the permissions of the dataset
+  echo_test_title "Changing permissions on /mnt/tank"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset
+  echo_test_title "Changing permissions on /mnt/tank/share"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a ZFS snapshot
+  echo_test_title "Creating a ZFS snapshot tank@test"
+  rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
+  check_rest_response "201 CREATED" || return 1
+  
+
 
   return 0
 }
