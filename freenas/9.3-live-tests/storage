@@ -26,29 +26,27 @@ storage_tests()
   DATASET=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
   echo "DATASET: $DATASET"
   echo $DATASET | grep -q 'qa'
-    if [ $? -eq 0 ] ; then
-      echo_ok
-    else
-      
-      # Check creating a dataset /qa
-      echo_test_title "Creating dataset tank/share"
-      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "qa" }'
-      check_rest_response "201 CREATED" || return 1
-      
-      # Check creating a dataset /share
-      echo_test_title "Creating dataset tank/share"
-      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "share" }'
-      check_rest_response "201 CREATED" || return 1
-      
-      # Check creating a dataset /jails
-      echo_test_title "Creating dataset tank/jails"
-      rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
-      check_rest_response "201 CREATED" || return 1
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
     
-    then
-      echo_ok
-    fi
-  done
+    # Check creating a dataset /qa
+    echo_test_title "Creating dataset tank/share"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "qa" }'
+    check_rest_response "201 CREATED" || return 1
+    
+    # Check creating a dataset /share
+    echo_test_title "Creating dataset tank/share"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "share" }'
+    check_rest_response "201 CREATED" || return 1
+    
+    # Check creating a dataset /jails
+    echo_test_title "Creating dataset tank/jails"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
+    check_rest_response "201 CREATED" || return 1
+  
+    echo_ok
+  fi
 
   # Set the permissions of the dataset
   echo_test_title "Changing permissions on /mnt/tank"
