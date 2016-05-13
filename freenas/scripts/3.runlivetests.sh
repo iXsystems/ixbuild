@@ -67,9 +67,6 @@ echo_test_title "Testing access to REST API"
 wait_for_avail
 echo_ok
 
-# Reset the IP address via REST
-set_ip
-
 RESULT="SUCCESS"
 
 if [ -n "$runmod" ] ; then
