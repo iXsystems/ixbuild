@@ -409,3 +409,37 @@ read_module_dir() {
   if [ "$ANYFAILS" = "true" ] ; then return 1; fi
   return 0 
 }
+
+# Do a TrueNAS HA failover
+# $1 = reboot/panic
+trigger_ha_failover() {
+  case $1 in
+    reboot) do_ha_reboot ;;
+     panic) do_ha_panic ;;
+         *) do_ha_reboot ;;
+  esac
+}
+
+do_ha_panic() {
+  export SSHPASS="$LIVEPASS"
+  echo_test_title "Simulating kernel panic"
+  sshpass -e ssh -o StrictHostKeyChecking=no ${LIVEUSER}@${LIVEHOST} sysctl debug.kdb.panic=1
+  echo_ok
+  sleep 10
+
+  echo_test_title "Waiting for active node response"
+  sleep 20
+  wait_for_avail
+  echo_ok
+}
+
+do_ha_reboot() {
+  echo_test_title "Rebooting to promote passive node to active"
+  rest_request "POST" "/system/reboot/" "''"
+  echo_ok
+
+  echo_test_title "Waiting for active node response"
+  sleep 20
+  wait_for_avail
+  echo_ok
+}
