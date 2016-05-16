@@ -26,7 +26,7 @@ smb_tests()
   else
 
     echo_test_title "Creating CIFS dataset tank/cifs"
-    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs", "pool": "tank" }'
     check_rest_response "201 CREATED" || return 1
     
     echo_ok
