@@ -42,7 +42,7 @@ smb_tests()
   else
 
     echo_test_title "Enabling CIFS service"
-    rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false, "cifs_srv_netbiosname": "testnas" }'
+    rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
     check_rest_response "200 OK"
 
     # Now start the service

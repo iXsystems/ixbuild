@@ -30,16 +30,16 @@ storage_tests()
     rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "qa", "pool": "tank"  }'
     check_rest_response "201 CREATED" || return 1
 
-    echo_test_title "Creating CIFS dataset tank/cifs"
+    echo_test_title "Creating dataset tank/cifs"
     rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs", "pool": "tank" }'
     check_rest_response "201 CREATED" || return 1
     
-    # Check creating a dataset /nfs
+    # Check creating a dataset tank/nfs
     echo_test_title "Creating dataset tank/nfs"
     rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "nfs", "pool": "tank" }'
     check_rest_response "201 CREATED" || return 1
     
-    # Check creating a dataset /jails
+    # Check creating a dataset tank/jails
     echo_test_title "Creating dataset tank/jails"
     rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
     check_rest_response "201 CREATED" || return 1
