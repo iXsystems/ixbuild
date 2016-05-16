@@ -50,7 +50,7 @@ smb_tests()
   fi
 
   echo_test_title "Checking to see if CIFS services is enabled"
-  rest_request "GET" /services/services/cifs/"
+  rest_request "GET" "/services/services/cifs/"
   check_rest_response "200 OK" || return 1
   CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
   echo "CIFSSTATUS: $CIFSSTATUS"
