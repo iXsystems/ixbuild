@@ -37,7 +37,7 @@ smb_tests()
   check_rest_response "200 OK" || return 1
   CIFSSHARE=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cifs_name')
   echo "CIFSSHARE: $CIFSSHARE"
-  echo $CIFSSHARE | grep -q 'cifs'
+  echo $CIFSSHARE | grep -q 'TestShare'
   if [ $? -eq 0 ] ; then
     echo_ok
   else
