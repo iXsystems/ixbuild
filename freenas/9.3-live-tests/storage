@@ -58,17 +58,28 @@ storage_tests()
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
 
-  # Check deleting a ZFS snapshot
-  echo_test_title "Deleting a ZFS snapshot tank@test"
-  rest_request "DELETE" "/storage/snapshot/tank@test/"
-  check_rest_response "204" || return 1
+  # Check to make see if tank@test snapshot exists
+  echo_test_title "Checking for snapshots"
+  rest_request "GET" "/storage/snapshot/"
+  check_rest_response "200 OK" || return1
+  SNAPSHOT=$(cat ${RESTYOUT} | ${JSAWK} 'return this.fullname')
+  echo "SNAPSHOT: $SNAPSHOT"
+  echo $SNAPSHOT | grep -q 'test'
+  if [ $? -eq 0 ] ; then
+    # Check deleting a ZFS snapshot
+    echo_test_title "Deleting a ZFS snapshot tank@test"
+    rest_request "DELETE" "/storage/snapshot/tank@test/"
+    check_rest_response "204" || return 1
+    echo_ok
+  else
 
-  # Check creating a ZFS snapshot
-  echo_test_title "Creating a ZFS snapshot tank@test"
-  rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
-  check_rest_response "201 CREATED" || return 1
+    # Check creating a ZFS snapshot
+    echo_test_title "Creating a ZFS snapshot tank@test"
+    rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
+    check_rest_response "201 CREATED" || return 1
   
-
+    echo_ok
+  fi
 
   return 0
 }
