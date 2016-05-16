@@ -12,17 +12,99 @@ export REQUIRES
 smb_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Samba tests" "12"
+  set_test_group_text "Samba tests" "16"
 
-  # TODO
-  # 
-  # Write series of tests to do the following:
-  # 
-  # Check if an SMB share is created and service started
-  # If NOT, then provision the node 
-  #
-  # If services exist, use existing
-  #
+  # Check to make sure CIFS dataset exists
+  echo_test_title "Checking for datasets"
+  rest_request "GET" "/storage/volume/tank/datasets"
+  check_rest_response "200 OK" || return 1
+  DATASET=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
+  echo "DATASET: $DATASET"
+  echo $DATASET | grep -q 'cifs'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+
+    echo_test_title "Creating CIFS dataset"
+    rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+    check_rest_response "201 CREATED"
+    
+    echo_ok
+  fi
+
+  echo_test_title "Checking to see if CIFS share is enabled"
+  rest_request "GET" /sharing/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSHARE=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cifs_name')
+  echo "CIFSSHARE: $CIFSSHARE"
+  echo $CIFSSHARE | grep -q 'cifs'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+
+    echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
+    rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+    check_rest_response "201 CREATED"
+  
+    echo_ok
+  fi
+
+  echo_test_title "Checking to see if CIFS services is enabled"
+  rest_request "GET" /service/service/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo $CIFSSTATUS | grep -q 'true'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+
+    echo_test_title "Enabling CIFS service"
+    rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false, "cifs_srv_netbiosname": "testnas" }'
+    check_rest_response "200 OK"
+
+    # Now start the service
+    echo_test_title "Starting CIFS service"
+    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
+    check_rest_response "200 OK"
+
+    echo_ok
+  fi
+   
+  echo_test_title "Changing permissions on /mnt/tank/cifs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED"
+
+  # Wait a moment for samba to spin up
+  sleep 4
+
+  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  echo_test_title "Creating CIFS mountpoint"
+  rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
+  sync
+
+  sleep 10
+
+  echo_test_title "Mounting CIFS"
+  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Creating CIFS file"
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Moving CIFS file"
+  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting CIFS"
+  rc_test "umount /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS mountpoint"
+  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
 
 }
 
@@ -39,4 +121,3 @@ smb_init()
             *) smb_tests ;;
   esac
 }
-
