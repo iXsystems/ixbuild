@@ -12,7 +12,7 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Storage tests" "7"
+  set_test_group_text "Storage tests" "8"
 
   # TODO
   #
