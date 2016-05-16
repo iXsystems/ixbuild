@@ -61,7 +61,7 @@ storage_tests()
   # Check deleting a ZFS snapshot
   echo_test_title "Deleting a ZFS snapshot tank@test"
   rest_request "DELETE" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }
-  check_rest_response "204 - DELETED" || return 1
+  check_rest_response "204 - No Response" || return 1
 
   # Check creating a ZFS snapshot
   echo_test_title "Creating a ZFS snapshot tank@test"
