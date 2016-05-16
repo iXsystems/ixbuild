@@ -12,12 +12,7 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Storage tests" "8"
-
-  # TODO
-  #
-  # Check if storage is provisioned and the 'tank/qa' dataset exists
-  # If not, do the initial setup
+  set_test_group_text "Storage tests" "11"
 
   # Check to make sure datasets exist
   echo_test_title "Checking for datasets"
@@ -32,12 +27,16 @@ storage_tests()
     
     # Check creating a dataset /qa
     echo_test_title "Creating dataset tank/qa"
-    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "qa" }'
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "qa", "pool": "tank"  }'
+    check_rest_response "201 CREATED" || return 1
+
+    echo_test_title "Creating CIFS dataset tank/cifs"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs", "pool": "tank" }'
     check_rest_response "201 CREATED" || return 1
     
-    # Check creating a dataset /share
-    echo_test_title "Creating dataset tank/share"
-    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "share" }'
+    # Check creating a dataset /nfs
+    echo_test_title "Creating dataset tank/nfs"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "nfs", "pool": "tank" }'
     check_rest_response "201 CREATED" || return 1
     
     # Check creating a dataset /jails
@@ -48,14 +47,19 @@ storage_tests()
     echo_ok
   fi
 
-  # Set the permissions of the dataset
+  # Set the permissions of tank
   echo_test_title "Changing permissions on /mnt/tank"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
 
-  # Set the permissions of the dataset
-  echo_test_title "Changing permissions on /mnt/tank/share"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  # Set the permissions of the tank/cifs
+  echo_test_title "Changing permissions on /mnt/tank/nfs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/nfs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the tank/nfs
+  echo_test_title "Changing permissions on /mnt/tank/nfs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/nfs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
 
   # Check to make see if tank@test snapshot exists
