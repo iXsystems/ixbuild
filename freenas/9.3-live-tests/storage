@@ -53,8 +53,8 @@ storage_tests()
   check_rest_response "201 CREATED" || return 1
 
   # Set the permissions of the tank/cifs
-  echo_test_title "Changing permissions on /mnt/tank/nfs"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/nfs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  echo_test_title "Changing permissions on /mnt/tank/cifs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
 
   # Set the permissions of the tank/nfs
