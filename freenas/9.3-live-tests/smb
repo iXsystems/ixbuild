@@ -33,11 +33,11 @@ smb_tests()
   fi
 
   echo_test_title "Checking to see if CIFS share is enabled"
-  rest_request "GET" /sharing/cifs/"
+  rest_request "GET" "/sharing/cifs/"
   check_rest_response "200 OK" || return 1
   CIFSSHARE=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cifs_name')
   echo "CIFSSHARE: $CIFSSHARE"
-  echo $CIFSSHARE | grep -q 'cifs'
+  echo $CIFSSHARE | grep -q 'TestShare'
   if [ $? -eq 0 ] ; then
     echo_ok
   else
@@ -86,7 +86,7 @@ smb_tests()
   sleep 10
 
   echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/cifs /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
@@ -105,7 +105,6 @@ smb_tests()
 
   echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
-
 }
 
 # Init function, this is called after module is sourced
