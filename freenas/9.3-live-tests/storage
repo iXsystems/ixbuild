@@ -58,9 +58,14 @@ storage_tests()
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
 
+  # Check deleting a ZFS snapshot
+  echo_test_title "Deleting a ZFS snapshot tank@test"
+  rest_request "DELETE" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }
+  check_rest_response "204 - DELETED" || return 1
+
   # Check creating a ZFS snapshot
   echo_test_title "Creating a ZFS snapshot tank@test"
-  rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
+  rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }
   check_rest_response "201 CREATED" || return 1
   
 
