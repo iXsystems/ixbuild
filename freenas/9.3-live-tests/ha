@@ -77,7 +77,7 @@ ha_tests()
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-iscsi_init()
+ha_init()
 {
   # Run all the storage tests
   case $TESTSET in
