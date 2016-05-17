@@ -1,0 +1,89 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage ssh smb nfs iscsi"
+export REQUIRES
+
+ha_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "High Availability tests" "4"
+
+  # Simulate HA Panic
+  trigger_ha_failover "panic"
+  echo_ok
+
+  # Verify each node is now in a normal state
+  count=0
+  while :
+  do
+    # Check the status of each node to make sure all nodes online
+    echo_test_title "Checking the alert level for each node"
+    rest_request "GET" "/system/alert/" ""
+    check_rest_response "200 OK"
+    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
+    echo "NODESTATUS: $NODESTATUS"
+    echo $NODESTATUS | grep -q 'Failed to check failover status with the other node: timed out'
+    if [ $? -ne 0 ] ; then
+      break
+    else
+      sleep 30
+    fi
+    count=$(expr $count + 1)
+    if [ $count -gt 20 ] ;
+    then
+      echo_fail
+      finish_xml_results
+      exit 1
+    fi
+  done
+
+  # Simulate HA Reboot
+  trigger_ha_failover "reboot"
+  echo_ok
+
+  # Verify each node is now in a normal state
+  count=0
+  while :
+  do
+    # Check the status of each node to make sure all nodes are online
+    echo_test_title "Checking the alert level for each node"
+    rest_request "GET" "/system/alert/" ""
+    check_rest_response "200 OK"
+    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
+    echo "NODESTATUS: $NODESTATUS"
+    echo $NODESTATUS | grep -q 'Failed to check failover status with the other node: timed out'
+    if [ $? -ne 0 ] ; then
+      break
+    else
+      sleep 30
+    fi
+    count=$(expr $count + 1)
+    if [ $count -gt 20 ] ;
+    then
+      echo_fail
+      finish_xml_results
+      exit 1
+    fi
+  done
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+iscsi_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) iscsi_tests ;;
+     COMPLETE) iscsi_tests ;;
+    BENCHMARK) ;;
+            *) iscsi_tests ;;
+  esac
+}
