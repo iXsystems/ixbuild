@@ -81,9 +81,9 @@ ha_init()
 {
   # Run all the storage tests
   case $TESTSET in
-        SMOKE) iscsi_tests ;;
-     COMPLETE) iscsi_tests ;;
+        SMOKE) ha_tests ;;
+     COMPLETE) ha_tests ;;
     BENCHMARK) ;;
-            *) iscsi_tests ;;
+            *) ha_tests ;;
   esac
 }
