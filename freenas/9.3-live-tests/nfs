@@ -64,7 +64,7 @@ nfs_tests()
   rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
 
   echo_test_title "Mounting NFS"
-  rc_test "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
+  rc_test "mount_nfs ${ip}:/mnt/tank/nfs /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
 
   echo_test_title "Creating NFS file"
   rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
