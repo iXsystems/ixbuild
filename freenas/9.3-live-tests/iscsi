@@ -12,18 +12,26 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "iSCSI tests" "1"
+  set_test_group_text "iSCSI tests" "2"
 
-  # TODO
-  #
-  # Write series of tests to do the following:
-  #
-  # Check if an iSCSI zvol is created and service started
-  # If NOT, then provision the node
-  #
-  # If services exist, use existing
-  #
+  # Check to see if iSCSI service is running
+  echo_test_title "Checking to see if iSCSI service is enabled"
+  rest_request "GET" "/services/services/iscsi/"
+  check_rest_response "200 OK" || return 1
+  ISCSISTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+  echo "ISCSISTATUS: $ISCSISTATUS"
+  echo $ISCSISTATUS | grep -q 'true'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
 
+    # Now start the service
+    echo_test_title "Starting iSCSI service"
+    rest_request "PUT" "/services/services/iscsi/" '{ "srv_enable": true }'
+    check_rest_response "200 OK"
+
+    echo_ok
+  fi
 
 }
 
