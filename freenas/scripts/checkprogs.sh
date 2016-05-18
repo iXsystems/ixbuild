@@ -148,3 +148,9 @@ if [ "$?" != "0" ]; then
   echo "Installing ports-mgmt/poudriere-devel"
   rc_halt "pkg install -y ports-mgmt/poudriere-devel"
 fi
+
+which sshpass >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing security/sshpass"
+  rc_halt "pkg install -y security/sshpass"
+fi

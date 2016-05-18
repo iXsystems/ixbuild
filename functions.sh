@@ -452,18 +452,6 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
-  if [ "$FREENASLEGACY" = "YES" ] ; then
-    if [ ! -d "${FNASBDIR}/objs" ] ; then
-      echo "Missing FreeNAS ISO, have you done the freenas build yet?"
-      exit 1
-    fi
-  else
-    if [ ! -d "${FNASBDIR}/_BE/release" ] ; then
-      echo "Missing FreeNAS ISO, have you done the freenas build yet?"
-      exit 1
-    fi
-  fi
-
   cd ${TBUILDDIR}
   make tests
   if [ $? -ne 0 ] ; then exit_clean ; fi

@@ -12,12 +12,78 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Storage tests" "7"
+  set_test_group_text "Storage tests" "11"
 
-  # TODO
-  # 
-  # Check if storage is provisioned and the 'tank/qa' dataset exists
-  # If not, do the initial setup
+  # Check to make sure datasets exist
+  echo_test_title "Checking for datasets"
+  rest_request "GET" "/storage/volume/tank/datasets"
+  check_rest_response "200 OK" || return 1
+  DATASET=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
+  echo "DATASET: $DATASET"
+  echo $DATASET | grep -q 'qa'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    
+    # Check creating a dataset /qa
+    echo_test_title "Creating dataset tank/qa"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "qa", "pool": "tank"  }'
+    check_rest_response "201 CREATED" || return 1
+
+    echo_test_title "Creating dataset tank/cifs"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs", "pool": "tank" }'
+    check_rest_response "201 CREATED" || return 1
+    
+    # Check creating a dataset tank/nfs
+    echo_test_title "Creating dataset tank/nfs"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "nfs", "pool": "tank" }'
+    check_rest_response "201 CREATED" || return 1
+    
+    # Check creating a dataset tank/jails
+    echo_test_title "Creating dataset tank/jails"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
+    check_rest_response "201 CREATED" || return 1
+  
+    echo_ok
+  fi
+
+  # Set the permissions of tank
+  echo_test_title "Changing permissions on /mnt/tank"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the tank/cifs
+  echo_test_title "Changing permissions on /mnt/tank/cifs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the tank/nfs
+  echo_test_title "Changing permissions on /mnt/tank/nfs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/nfs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check to make see if tank@test snapshot exists
+  echo_test_title "Checking for snapshots"
+  rest_request "GET" "/storage/snapshot/"
+  check_rest_response "200 OK" || return1
+  SNAPSHOT=$(cat ${RESTYOUT} | ${JSAWK} 'return this.fullname')
+  echo "SNAPSHOT: $SNAPSHOT"
+  echo $SNAPSHOT | grep -q 'test'
+  if [ $? -eq 0 ] ; then
+    # Check deleting a ZFS snapshot
+    echo_test_title "Deleting a ZFS snapshot tank@test"
+    rest_request "DELETE" "/storage/snapshot/tank@test/"
+    check_rest_response "204" || return 1
+    echo_ok
+  else
+
+    # Check creating a ZFS snapshot
+    echo_test_title "Creating a ZFS snapshot tank@test"
+    rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
+    check_rest_response "201 CREATED" || return 1
+  
+    echo_ok
+  fi
 
   return 0
 }
