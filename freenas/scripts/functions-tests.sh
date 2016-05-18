@@ -423,7 +423,7 @@ trigger_ha_failover() {
 do_ha_panic() {
   export SSHPASS="$LIVEPASS"
   echo_test_title "Simulating kernel panic"
-  sshpass -e ssh -o StrictHostKeyChecking=no ${LIVEUSER}@${LIVEHOST} sysctl debug.kdb.panic=1
+  sshpass -e ssh -o StrictHostKeyChecking=no ${LIVEUSER}@${LIVEHOST} sysctl debug.kdb.panic=1 >/dev/null 2>/dev/null
   echo_ok
   sleep 10
 

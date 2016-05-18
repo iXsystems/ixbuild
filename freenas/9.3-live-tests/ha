@@ -16,7 +16,6 @@ ha_tests()
 
   # Simulate HA Panic
   trigger_ha_failover "panic"
-  echo_ok
 
  # Wait a short time for failover to occur.  Then run more tests.
   sleep 30
@@ -44,10 +43,6 @@ ha_tests()
 
   # Simulate HA Reboot
   trigger_ha_failover "reboot"
-  echo_ok
-
-  # Check HA Status
-  do_ha_status
 
  # Wait a short time for failover to occur.  Then run more tests.
   sleep 30
@@ -69,6 +64,9 @@ ha_tests()
   echo_test_title "Checking to see if iSCSI service is enabled"
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
+
+  # Check HA Status
+  do_ha_status
 
 }
 
