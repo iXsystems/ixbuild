@@ -443,3 +443,30 @@ do_ha_reboot() {
   wait_for_avail
   echo_ok
 }
+
+do_ha_status() {
+  # Verify each node is now in a normal state
+  count=0
+  while :
+  do
+    # Check the status of each node to make sure all nodes are online
+    echo_test_title "Checking the alert level for each node"
+    rest_request "GET" "/system/alert/" ""
+    check_rest_response "200 OK"
+    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
+    echo "NODESTATUS: $NODESTATUS"
+    echo $NODESTATUS | grep -q 'Failed to check failover status with the other node: timed out'
+    if [ $? -ne 0 ] ; then
+      break
+    else
+      sleep 30
+    fi
+    count=$(expr $count + 1)
+    if [ $count -gt 20 ] ;
+    then
+      echo_fail
+      finish_xml_results
+      exit 1
+    fi
+  done
+}
