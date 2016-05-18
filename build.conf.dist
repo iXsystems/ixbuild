@@ -54,6 +54,13 @@ ADPASSWORD=""
 ADREALM=""
 export ADUSERNAME ADPASSWORD ADREALM
 
+# Set this to be the information required for testing LDAP
+LDAPHOSTNAME=""
+LDAPBASEDN=""
+LDAPBINDDN=""
+LDAPBINDPASSWORD=""
+export LDAPHOSTNAME LDAPBASEDN LDAPBINDDN LDAPBINDPASSWORD
+
 ###########################################################################
 # PC-BSD specific settings
 ###########################################################################
