@@ -12,11 +12,32 @@ export REQUIRES
 ha_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "High Availability tests" "4"
+  set_test_group_text "High Availability tests" "10"
 
   # Simulate HA Panic
   trigger_ha_failover "panic"
   echo_ok
+
+ # Wait a short time for failover to occur.  Then run more tests.
+  sleep 30
+
+  # Check to see if services failed over
+
+  echo_test_title "Checking to see if CIFS service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+
+  # Check to see if NFS server is running
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_rest_response "200 OK" || return 1
+
+    # Check to see if iSCSI service is running
+  echo_test_title "Checking to see if iSCSI service is enabled"
+  rest_request "GET" "/services/services/iscsitarget/"
+  check_rest_response "200 OK" || return 1
 
   # Check HA Status
   do_ha_status
@@ -27,6 +48,27 @@ ha_tests()
 
   # Check HA Status
   do_ha_status
+
+ # Wait a short time for failover to occur.  Then run more tests.
+  sleep 30
+
+  # Check to see if services failed over
+
+  echo_test_title "Checking to see if CIFS service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+
+  # Check to see if NFS server is running
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_rest_response "200 OK" || return 1
+
+    # Check to see if iSCSI service is running
+  echo_test_title "Checking to see if iSCSI service is enabled"
+  rest_request "GET" "/services/services/iscsitarget/"
+  check_rest_response "200 OK" || return 1
 
 }
 
