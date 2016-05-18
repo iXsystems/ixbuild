@@ -12,7 +12,7 @@ export REQUIRES
 ha_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "High Availability tests" "10"
+  set_test_group_text "High Availability tests" "38"
 
   # Simulate HA Panic
   trigger_ha_failover "panic"
@@ -33,10 +33,56 @@ ha_tests()
   rest_request "GET" "/services/services/nfs/"
   check_rest_response "200 OK" || return 1
 
-    # Check to see if iSCSI service is running
+  # Check to see if iSCSI service is running
   echo_test_title "Checking to see if iSCSI service is enabled"
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
+
+  echo_test_title "Mounting CIFS"
+  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Creating CIFS file"
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Moving CIFS file"
+  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting CIFS"
+  rc_test "umount /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS mountpoint"
+  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  echo_test_title "Creating NFS mountpoint"
+  rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Mounting NFS"
+  rc_test "mount_nfs ${ip}:/mnt/tank/nfs /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
+
+  echo_test_title "Creating NFS file"
+  rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Moving NFS file"
+  rc_test "mv /tmp/nfs-mnt.$$/testfile /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying NFS file"
+  rc_test "cp /tmp/nfs-mnt.$$/testfile2 /tmp/nfs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting NFS file"
+  rc_test "rm /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting NFS"
+  rc_test "umount /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Removing NFS mountpoint"
+  rc_test "rmdir /tmp/nfs-mnt.$$" || return 1
 
   # Check HA Status
   do_ha_status
@@ -60,10 +106,56 @@ ha_tests()
   rest_request "GET" "/services/services/nfs/"
   check_rest_response "200 OK" || return 1
 
-    # Check to see if iSCSI service is running
+  # Check to see if iSCSI service is running
   echo_test_title "Checking to see if iSCSI service is enabled"
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
+
+  echo_test_title "Mounting CIFS"
+  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Creating CIFS file"
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Moving CIFS file"
+  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting CIFS"
+  rc_test "umount /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS mountpoint"
+  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  echo_test_title "Creating NFS mountpoint"
+  rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Mounting NFS"
+  rc_test "mount_nfs ${ip}:/mnt/tank/nfs /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
+
+  echo_test_title "Creating NFS file"
+  rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Moving NFS file"
+  rc_test "mv /tmp/nfs-mnt.$$/testfile /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying NFS file"
+  rc_test "cp /tmp/nfs-mnt.$$/testfile2 /tmp/nfs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting NFS file"
+  rc_test "rm /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting NFS"
+  rc_test "umount /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Removing NFS mountpoint"
+  rc_test "rmdir /tmp/nfs-mnt.$$" || return 1
 
   # Check HA Status
   do_ha_status
