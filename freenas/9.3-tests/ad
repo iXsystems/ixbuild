@@ -21,30 +21,39 @@ ad_tests() {
   # Update NTP Settings
   echo_test_title "Updating NTP Settings for AD.."
   rest_request "PUT" /system/ntpserver/1/ '{ "id": "1", "ntp_address": "'${ADNTPSERVER}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1" }'
-  check_rest_response "200 OK" || return 1
+  check_rest_response "200 OK"
 
   # Update Active Directory Settings
   echo_test_title "Updating Settings for AD.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'", "ad_domainname": "'${ADREALM}'" }'
-  check_rest_response "200 OK" || return 1
+  check_rest_response "200 OK"
 
 
   # Enable Active Directory
   echo_test_title "Enabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "true", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'" }'
-  check_rest_response "200 OK" || return 1
+  check_rest_response "200 OK"
 
 
   # Check Active Directory
   echo_test_title "Checking Active Directory.."
-  rest_request GET "/directoryservice/activedirectory/" | jsawk 'return this.ad_enable'
+  rest_request GET "/directoryservice/activedirectory/"
   check_rest_response "200 OK" || return 1
+  ADSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ad_enable')
+  echo "ADSTATUS: $ADSTATUS"
+  echo $ADSTATUS | grep -q 'true'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+
+    echo_fail
+  fi
 
 
   # Disable Active Directory
   echo_test_title "Disabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "false", "ad_netbiosname_a": "'{ADNETBIOSNAME_A}'" }'
-  check_rest_response "200 OK" || return 1
+  check_rest_response "200 OK"
 
 }
 
