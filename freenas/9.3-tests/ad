@@ -32,6 +32,7 @@ ad_tests() {
   # Enable Active Directory
   echo_test_title "Enabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "true", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'" }'
+  sleep 60
   check_rest_response "200 OK"
 
 
@@ -53,6 +54,7 @@ ad_tests() {
   # Disable Active Directory
   echo_test_title "Disabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "false", "ad_netbiosname_a": "'{ADNETBIOSNAME_A}'" }'
+  sleep 60
   check_rest_response "200 OK"
 
 }
