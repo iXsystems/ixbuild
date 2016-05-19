@@ -25,7 +25,7 @@ ad_tests() {
 
   # Update Active Directory Settings
   echo_test_title "Updating Settings for AD.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "${ADNETBIOSNAME_A}", "ad_domainname": "'${ADREALM}'" }'
+  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'", "ad_domainname": "'${ADREALM}'" }'
   check_rest_response "200 OK" || return 1
 
 
