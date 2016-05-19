@@ -12,8 +12,8 @@ export REQUIRES
 ad_tests() {
   set_test_group_text "Active Directory tests" "1"
 
-  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" -o -z "$ADREALM" ] ; then
-     echo "Missing the ADUSERNAME / ADPASSWORD / ADREALM settings, test skipped.."
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" -o -z "$ADNETBIOSNAME" -o -z "$ADREALM" ] ; then
+     echo "Missing the ADUSERNAME / ADPASSWORD / ADNETBIOSNAME / ADREALM settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing AD settings"
   fi
@@ -21,7 +21,7 @@ ad_tests() {
 
   # Join the Active Directory
   echo_test_title "Updating Settings for AD.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'" "ad_domainname": "'${ADREALM}'" }'
+  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname": "${ADNETBIOSNAME}", "ad_domainname": "'${ADREALM}'" }'
   check_rest_response "200 OK" || return 1
 
 }
