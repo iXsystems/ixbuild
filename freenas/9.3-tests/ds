@@ -16,17 +16,14 @@ ad_tests() {
      echo "Missing the ADUSERNAME / ADPASSWORD / ADREALM settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing AD settings"
-     return 0
   fi
 
 
   # Join the Active Directory
   echo_test_title "Updating Settings for AD.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": 
-"'${ADREALM'" }'
+  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'" "ad_domainname": "'${ADREALM}'" }'
   check_rest_response "200 OK" || return 1
 
-  return 0
 }
 
 # Init function, this is called after module is sourced
