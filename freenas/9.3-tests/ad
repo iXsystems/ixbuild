@@ -10,21 +10,26 @@ REQUIRES="storage smb nfs afp"
 export REQUIRES
 
 ad_tests() {
-  set_test_group_text "Active Directory tests" "5"
+  set_test_group_text "Active Directory tests" "6"
 
-  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" -o -z "$ADNETBIOSNAME_A" -o -z "$ADREALM" -o -z "$ADNTPSERVER" ] ; then
-     echo "Missing the ADUSERNAME / ADPASSWORD / ADNETBIOSNAME / ADREALM / ADNTPSERVER settings, test skipped.."
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" -o -z "$ADNETBIOSNAME_A" -o -z -o -z "$ADHOSTNAME" -o -z "$ADREALM" -o -z "$ADNTPSERVER" ] ; then
+     echo "Missing the ADUSERNAME / ADPASSWORD / ADNETBIOSNAME / ADHOSTNAME / ADREALM / ADNTPSERVER settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing AD settings"
   fi
 
-  # Update NTP Settings
-  echo_test_title "Updating NTP Settings for AD.."
-  rest_request "PUT" /system/ntpserver/1/ '{ "id": "1", "ntp_address": "'${ADNTPSERVER}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1" }'
+  # Set the hostname for Dynamic DNS Updates to work
+  echo_test_title "Updating hostname, and domainname settings for Active Directory.."
+  rest_request "PUT" "/network/globalconfiguration/" '{ "gc_hostname": "'${ADHOSTNAME}'", "gc_domain": "'${ADREALM}'" }'
+  #check_rest_response "200 OK"
+
+  # Update NTP Settings to prevent offset with Active Directory
+  echo_test_title "Updating NTP Settings for Active Directory.."
+  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${ADNTPSERVER}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1" }'
   check_rest_response "200 OK"
 
   # Update Active Directory Settings
-  echo_test_title "Updating Settings for AD.."
+  echo_test_title "Updating Settings for Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'", "ad_domainname": "'${ADREALM}'" }'
   check_rest_response "200 OK"
 
