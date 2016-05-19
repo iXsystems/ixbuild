@@ -21,7 +21,7 @@ ad_tests() {
   # Set the hostname for Dynamic DNS Updates to work
   echo_test_title "Updating hostname, and domainname settings for Active Directory.."
   rest_request "PUT" "/network/globalconfiguration/" '{ "gc_hostname": "'${ADHOSTNAME}'", "gc_domain": "'${ADREALM}'" }'
-  #check_rest_response "200 OK"
+  check_rest_response "200 OK"
 
   # Update NTP Settings to prevent offset with Active Directory
   echo_test_title "Updating NTP Settings for Active Directory.."
