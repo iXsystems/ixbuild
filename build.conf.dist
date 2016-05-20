@@ -34,8 +34,9 @@ BRIDGENETMASK=""
 BRIDGEGW=""
 BRIDGEDNS=""
 BRIDGEHOST=""
+BRIDGEHOST_B=""
 BRIDGEDOMAIN=""
-export BRIDGEIP BRIDGENETMASK BRIDGEGW BRIDGEDNS BRIDGEHOST BRIDGEDOMAIN
+export BRIDGEIP BRIDGENETMASK BRIDGEGW BRIDGEDNS BRIDGEHOST BRIDGEHOST_B BRIDGEDOMAIN
 
 # Set the account information for dns testing we do with noip.com
 # If this is NOT set, the test will be skipped
@@ -48,15 +49,10 @@ export NOIPPASSWORD NOIPUSERNAME NOIPHOST
 FNASTESTIP=""
 export FNASTESTIP
 
-# Set this to be the AD information for testing Active Directory
+# Set this to be the AD information for joining an Active Directory
 ADUSERNAME=""
 ADPASSWORD=""
-ADHOSTNAME=""
-ADREALM=""
-ADNETBIOSNAME_A=""
-ADNETBIOSNAME_B=""
-ADNTPSERVER=""
-export ADUSERNAME ADPASSWORD ADHOSTNAME ADREALM ADNETBIOSNAME_A ADNETBIOSNAME_B ADNTPSERVER
+export ADUSERNAME ADPASSWORD
 
 # Set this to be the information required for testing LDAP
 LDAPHOSTNAME=""
