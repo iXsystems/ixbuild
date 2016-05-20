@@ -12,7 +12,7 @@ export REQUIRES
 ad_tests() {
   set_test_group_text "Active Directory tests" "6"
 
-  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" -o -z "$ADNETBIOSNAME_A" -o -z -o -z "$ADHOSTNAME" -o -z "$ADREALM" -o -z "$ADNTPSERVER" ] ; then
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" -o -z "$ADNETBIOSNAME_A" -o -z "$ADHOSTNAME" -o -z "$ADREALM" -o -z "$ADNTPSERVER" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD / ADNETBIOSNAME / ADHOSTNAME / ADREALM / ADNTPSERVER settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing AD settings"
