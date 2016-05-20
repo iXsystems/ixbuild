@@ -18,11 +18,6 @@ ad_tests() {
      add_xml_result "skipped" "Skipped due to missing AD settings"
   fi
 
-  # Set the hostname for Dynamic DNS Updates to work
-  echo_test_title "Updating hostname, and domainname settings for Active Directory.."
-  rest_request "PUT" "/network/globalconfiguration/" '{ "gc_hostname": "'${BRIDGEHOST}'", "gc_domain": "'${BRIDGEDOMAIN}'" }'
-  check_rest_response "200 OK"
-
   # Update NTP Settings to prevent offset with Active Directory
   echo_test_title "Updating NTP Settings for Active Directory.."
   rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1" }'
@@ -31,7 +26,7 @@ ad_tests() {
   # Update Active Directory Settings
   echo_test_title "Updating Settings for Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_domainname": "'${BRIDGEDOMAIN}'" }'
-  sleep 60
+  sleep 90
   check_rest_response "200 OK"
 
 
