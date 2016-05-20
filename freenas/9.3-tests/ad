@@ -12,32 +12,32 @@ export REQUIRES
 ad_tests() {
   set_test_group_text "Active Directory tests" "6"
 
-  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" -o -z "$ADNETBIOSNAME_A" -o -z "$ADHOSTNAME" -o -z "$ADREALM" -o -z "$ADNTPSERVER" ] ; then
-     echo "Missing the ADUSERNAME / ADPASSWORD / ADNETBIOSNAME / ADHOSTNAME / ADREALM / ADNTPSERVER settings, test skipped.."
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
+     echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing AD settings"
   fi
 
   # Set the hostname for Dynamic DNS Updates to work
   echo_test_title "Updating hostname, and domainname settings for Active Directory.."
-  rest_request "PUT" "/network/globalconfiguration/" '{ "gc_hostname": "'${ADHOSTNAME}'", "gc_domain": "'${ADREALM}'" }'
+  rest_request "PUT" "/network/globalconfiguration/" '{ "gc_hostname": "'${BRIDGEHOST}'", "gc_domain": "'${BRIDGEDOMAIN}'" }'
   check_rest_response "200 OK"
 
   # Update NTP Settings to prevent offset with Active Directory
   echo_test_title "Updating NTP Settings for Active Directory.."
-  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${ADNTPSERVER}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1" }'
+  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1" }'
   check_rest_response "200 OK"
 
   # Update Active Directory Settings
   echo_test_title "Updating Settings for Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'", "ad_domainname": "'${ADREALM}'" }'
+  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_domainname": "'${BRIDGEDOMAIN}'" }'
   check_rest_response "200 OK"
 
 
   # Enable Active Directory
   echo_test_title "Enabling Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "true", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'" }'
-  sleep 60
+  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "true", "ad_netbiosname_a": "'${BRIDGEHOST}'" }'
+  sleep 90
   check_rest_response "200 OK"
 
 
@@ -58,8 +58,8 @@ ad_tests() {
 
   # Disable Active Directory
   echo_test_title "Disabling Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "false", "ad_netbiosname_a": "'${ADNETBIOSNAME_A}'" }'
-  sleep 60
+  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "false", "ad_netbiosname_a": "'${BRIDGEHOST}'" }'
+  sleep 90
   check_rest_response "200 OK"
 
 }
