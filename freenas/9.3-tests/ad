@@ -31,6 +31,7 @@ ad_tests() {
   # Update Active Directory Settings
   echo_test_title "Updating Settings for Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_domainname": "'${BRIDGEDOMAIN}'" }'
+  sleep 60
   check_rest_response "200 OK"
 
 
