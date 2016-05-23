@@ -117,6 +117,7 @@ rc_halt "VBoxManage hostonlyif create"
 rc_halt "VBoxManage modifyvm $VM --nic1 hostonly"
 rc_halt "VBoxManage modifyvm $VM --hostonlyadapter1 vboxnet0"
 rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
+rc_halt "VBoxManage modifyvm $VM --nicpromisc1 allow-all"
 if [ -n "$BRIDGEIP" ] ; then
   # Switch to bridged mode
   DEFAULTNIC=`netstat -nr | grep "^default" | awk '{print $4}'`
