@@ -20,7 +20,9 @@ ad_tests() {
 
   # Update NTP Settings to prevent offset with Active Directory
   echo_test_title "Updating NTP Settings for Active Directory.."
-  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1" }'
+  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burse": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
+  rest_request "DELETE" "/system/ntpserver/2/"
+  rest_request "DELETE" "/system/ntpserver/3/"
   check_rest_response "200 OK"
 
   # Update Active Directory Settings
