@@ -26,14 +26,12 @@ ad_tests() {
   # Update Active Directory Settings
   echo_test_title "Updating Settings for Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_domainname": "'${BRIDGEDOMAIN}'" }'
-  sleep 90
   check_rest_response "200 OK"
 
 
   # Enable Active Directory
   echo_test_title "Enabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "true", "ad_netbiosname_a": "'${BRIDGEHOST}'" }'
-  sleep 90
   check_rest_response "200 OK"
 
 
@@ -55,7 +53,6 @@ ad_tests() {
   # Disable Active Directory
   echo_test_title "Disabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "false", "ad_netbiosname_a": "'${BRIDGEHOST}'" }'
-  sleep 90
   check_rest_response "200 OK"
 
 }

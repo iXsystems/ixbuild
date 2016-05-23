@@ -123,6 +123,7 @@ if [ -n "$BRIDGEIP" ] ; then
   rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
   rc_halt "VBoxManage modifyvm $VM --nic2 bridged"
   rc_halt "VBoxManage modifyvm $VM --bridgeadapter2 ${DEFAULTNIC}"
+  rc_halt "VBoxManage modifyvm $VM --nicpromisc2 allow-all"
 else
   # Fallback to NAT
   rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
