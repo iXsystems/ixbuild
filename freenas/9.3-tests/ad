@@ -24,10 +24,10 @@ ad_tests() {
   check_rest_response "200 OK"
 
   # Remove Other NTP Servers
-  echo_test_title "Removing non AD NTP servers"
+  echo_test_title "Removing non AD NTP servers 1/2"
   rest_request "DELETE" "/system/ntpserver/2/"
   check_rest_response "204"
-  echo_test_title "Remove non AD NTP servers"
+  echo_test_title "Removing non AD NTP servers 2/2"
   rest_request "DELETE" "/system/ntpserver/3/"
   check_rest_response "204"
 
