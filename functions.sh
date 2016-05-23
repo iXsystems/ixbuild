@@ -512,12 +512,14 @@ if [ "$TYPE" != "ports-tests" ] ; then
     freenas-ltest|freenas-lupgrade)
        BRANCH="production"
        . freenas.cfg
-       if [ ! -e "freenas-ltest.cfg" ] ; then
-         echo "Missing Live Test host settings!"
+       if [ -e "freenas-ltest.cfg" ] ; then
+         echo "Using `pwd`/freenas-ltest.cfg for Live Test host configuration"
+         . freenas-ltest.cfg
+       fi
+       if [ -z "$LIVEHOST" -o -z "$LIVEUSER" -o -z "$LIVEPASS" ] ; then
+         echo "Missing Live Test host settings! LIVEHOST/LIVEUSER/LIVEPASS"
          exit_clean
        fi
-       echo "Using `pwd`/freenas-ltest.cfg for Live Test host configuration"
-       . freenas-ltest.cfg
        ;;
     *)
        if [ -z "$BRANCH" ] ; then
