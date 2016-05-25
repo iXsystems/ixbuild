@@ -16,6 +16,7 @@ ad_tests() {
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing AD settings"
+     return 0
   fi
 
   # Update NTP Settings to prevent offset with Active Directory
@@ -62,6 +63,8 @@ ad_tests() {
   echo_test_title "Disabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "false", "ad_netbiosname_a": "'${BRIDGEHOST}'" }'
   check_rest_response "200 OK"
+  
+  return 0
 
 }
 
