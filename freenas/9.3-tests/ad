@@ -10,7 +10,7 @@ REQUIRES="storage smb nfs afp"
 export REQUIRES
 
 ad_tests() {
-  set_test_group_text "Active Directory tests" "8"
+  set_test_group_text "Active Directory tests" "9"
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
@@ -32,11 +32,29 @@ ad_tests() {
   rest_request "DELETE" "/system/ntpserver/3/"
   check_rest_response "204"
 
-  # Update Active Directory Settings
+  # Update Active Directory Settings 
   echo_test_title "Updating Settings for Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_domainname": "'${BRIDGEDOMAIN}'" }'
   check_rest_response "200 OK"
 
+
+  # Now stop the CIFS service if it is running
+  echo_test_title "Stopping CIFS service"
+  rest_request "GET" "/services/services/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo $CIFSSTATUS | grep -q 'false'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+
+    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
+    check_rest_response "200 OK"
+    sleep 60
+
+    echo_ok
+  fi
 
   # Enable Active Directory
   echo_test_title "Enabling Active Directory.."
