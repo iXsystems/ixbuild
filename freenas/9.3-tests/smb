@@ -6,7 +6,7 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="storage"
+REQUIRES="storage ad"
 export REQUIRES
 
 smb_tests()
@@ -80,4 +80,3 @@ smb_init()
             *) smb_tests ;;
   esac
 }
-
