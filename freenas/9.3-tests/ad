@@ -20,7 +20,7 @@ ad_tests() {
   fi
 
 
-  # Update NTP Settings to prevent offset with Active Directory
+  # Configure NTP Settings to prevent offset with Active Directory
   echo_test_title "Updating NTP Settings for Active Directory.."
   rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
   check_rest_response "200 OK"
@@ -35,15 +35,9 @@ ad_tests() {
   check_rest_response "204"
 
 
-  # Configure Active Directory
-  echo_test_title "Configuring Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_domainname": "'${BRIDGEDOMAIN}'","ad_timeout": "60" ,"ad_dns_timeout": "60" }'
-  check_rest_response "200 OK"
-  
-
-  # Enable Active Directory
+  # Enable Active Directory Directory
   echo_test_title "Enabling Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/" '{ "ad_enable": "true", "ad_netbiosname_a": "'${BRIDGEHOST}'" }'
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"true"  }'
   check_rest_response "200 OK"
 
 
