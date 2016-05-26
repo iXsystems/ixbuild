@@ -12,29 +12,47 @@ export REQUIRES
 smb_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "CIFS tests" "14"
+  set_test_group_text "Samba tests" "14"
 
-  echo_test_title "Creating CIFS dataset"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 CREATED"
+  echo_test_title "Checking to see if CIFS share is enabled"
+  rest_request "GET" "/sharing/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSHARE=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cifs_name')
+  echo "CIFSSHARE: $CIFSSHARE"
+  echo $CIFSSHARE | grep -q 'TestShare'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
 
-  echo_test_title "Enabling CIFS service"
-  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false, "cifs_srv_netbiosname": "testnas" }'
-  check_rest_response "200 OK"
+    echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
+    rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+    check_rest_response "201 CREATED"
+  
+    echo_ok
+  fi
 
-  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 CREATED"
+  echo_test_title "Checking to see if CIFS service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo $CIFSSTATUS | grep -q 'true'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
 
-  # Now start the service
-  echo_test_title "Starting CIFS service"
-  rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
-  check_rest_response "200 OK"
+    echo_test_title "Enabling CIFS service"
+    rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
+    check_rest_response "200 OK"
 
-  echo_test_title "Changing permissions on /mnt/tank/cifs"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 CREATED"
+    # Now start the service
+    echo_test_title "Starting CIFS service"
+    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
+    check_rest_response "200 OK"
 
+    echo_ok
+  fi
+   
   # Wait a moment for samba to spin up
   sleep 4
 

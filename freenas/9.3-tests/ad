@@ -10,7 +10,7 @@ REQUIRES="storage"
 export REQUIRES
 
 ad_tests() {
-  set_test_group_text "Active Directory tests" "6"
+  set_test_group_text "Active Directory tests" "5"
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."

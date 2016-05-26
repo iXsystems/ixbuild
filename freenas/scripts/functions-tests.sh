@@ -249,7 +249,7 @@ echo_test_title()
 # Set the IP address of REST
 set_ip()
 {
-  set_test_group_text "Networking Configuration" "4"
+  set_test_group_text "Networking Configuration" "5"
 
   echo_test_title "Setting IP address: ${ip} on em0"
   rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
