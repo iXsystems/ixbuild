@@ -19,12 +19,10 @@ ad_tests() {
      return 0
   fi
 
-
   # Configure NTP Settings to prevent offset with Active Directory
   echo_test_title "Updating NTP Settings for Active Directory.."
   rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
   check_rest_response "200 OK"
-
 
   # Remove Other NTP Servers
   echo_test_title "Removing non AD NTP servers 1/2"
@@ -34,12 +32,10 @@ ad_tests() {
   rest_request "DELETE" "/system/ntpserver/3/"
   check_rest_response "204"
 
-
   # Enable Active Directory Directory
   echo_test_title "Enabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"true"  }'
   check_rest_response "200 OK"
-
 
   # Check Active Directory
   echo_test_title "Checking Active Directory.."
@@ -55,9 +51,7 @@ ad_tests() {
     echo_fail
   fi
 
- 
   return 0
-
 }
 
 # Init function, this is called after module is sourced
