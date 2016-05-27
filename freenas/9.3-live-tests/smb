@@ -12,7 +12,7 @@ export REQUIRES
 smb_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Samba tests" "12"
+  set_test_group_text "Samba tests" "10"
 
   echo_test_title "Checking to see if CIFS share is enabled"
   rest_request "GET" "/sharing/cifs/"
@@ -77,12 +77,6 @@ smb_tests()
 
   echo_test_title "Deleting CIFS file"
   rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
-
-  echo_test_title "Unmounting CIFS"
-  rc_test "umount /tmp/cifs-mnt.$$" || return 1
-
-  echo_test_title "Removing CIFS mountpoint"
-  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
 }
 
 # Init function, this is called after module is sourced

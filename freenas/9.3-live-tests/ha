@@ -12,7 +12,7 @@ export REQUIRES
 ha_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "High Availability tests" "38"
+  set_test_group_text "High Availability tests" "41"
 
   # Simulate HA Panic
   trigger_ha_failover "panic"
@@ -60,12 +60,6 @@ ha_tests()
   echo_test_title "Deleting CIFS file"
   rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
 
-  echo_test_title "Unmounting CIFS"
-  rc_test "umount /tmp/cifs-mnt.$$" || return 1
-
-  echo_test_title "Removing CIFS mountpoint"
-  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
-
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating NFS mountpoint"
   rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
@@ -84,12 +78,6 @@ ha_tests()
 
   echo_test_title "Deleting NFS file"
   rc_test "rm /tmp/nfs-mnt.$$/testfile2" || return 1
-
-  echo_test_title "Unmounting NFS"
-  rc_test "umount /tmp/nfs-mnt.$$" || return 1
-
-  echo_test_title "Removing NFS mountpoint"
-  rc_test "rmdir /tmp/nfs-mnt.$$" || return 1
 
   # Check HA Status
   do_ha_status

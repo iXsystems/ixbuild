@@ -12,7 +12,7 @@ export REQUIRES
 nfs_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "NFS tests" "12"
+  set_test_group_text "NFS tests" "10"
 
   # Check to see if NFS share exists
 
@@ -77,12 +77,6 @@ nfs_tests()
 
   echo_test_title "Deleting NFS file"
   rc_test "rm /tmp/nfs-mnt.$$/testfile2" || return 1
-
-  echo_test_title "Unmounting NFS"
-  rc_test "umount /tmp/nfs-mnt.$$" || return 1
-
-  echo_test_title "Removing NFS mountpoint"
-  rc_test "rmdir /tmp/nfs-mnt.$$" || return 1
 
 }
 
