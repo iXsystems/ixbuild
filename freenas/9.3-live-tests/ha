@@ -12,7 +12,7 @@ export REQUIRES
 ha_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "High Availability tests" "41"
+  set_test_group_text "High Availability tests" "43"
 
   # Simulate HA Panic
   trigger_ha_failover "panic"
@@ -40,9 +40,11 @@ ha_tests()
 
   sleep 10
 
+  echo_test_title "List contents of CIFS share"
+  rc_test "ls /tmp/cifs-mnt.$$/" || return 1
 
   echo_test_title "Creating CIFS file"
-  rc_test "timeout -k 30 touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Moving CIFS file"
   rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
@@ -92,8 +94,11 @@ ha_tests()
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
 
+  echo_test_title "List contents of CIFS share"
+  rc_test "ls /tmp/cifs-mnt.$$/" || return 1
+
   echo_test_title "Creating CIFS file"
-  rc_test "timeout -k 30 touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Moving CIFS file"
   rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
