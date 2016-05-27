@@ -18,7 +18,7 @@ ha_tests()
   trigger_ha_failover "panic"
 
   # Wait a short time for failover to occur.  Then run more tests.
-  sleep 60
+  sleep 30
 
   # Check to see if services failed over
 
@@ -42,7 +42,7 @@ ha_tests()
 
 
   echo_test_title "Creating CIFS file"
-  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "timeout 30 touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Moving CIFS file"
   rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
@@ -72,7 +72,7 @@ ha_tests()
   trigger_ha_failover "reboot"
 
   # Wait a short time for failover to occur.  Then run more tests.
-  sleep 60
+  sleep 35
 
   # Check to see if services failed over
 
@@ -93,7 +93,7 @@ ha_tests()
   check_rest_response "200 OK" || return 1
 
   echo_test_title "Creating CIFS file"
-  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "timeout 30 touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Moving CIFS file"
   rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
