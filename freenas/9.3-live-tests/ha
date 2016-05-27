@@ -38,15 +38,8 @@ ha_tests()
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
 
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Creating CIFS mountpoint"
-  rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
-  sync
-
   sleep 10
 
-  echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
@@ -59,13 +52,6 @@ ha_tests()
 
   echo_test_title "Deleting CIFS file"
   rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
-
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Creating NFS mountpoint"
-  rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
-
-  echo_test_title "Mounting NFS"
-  rc_test "mount_nfs ${ip}:/mnt/tank/nfs /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
 
   echo_test_title "Creating NFS file"
   rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
@@ -106,16 +92,6 @@ ha_tests()
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
 
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Creating CIFS mountpoint"
-  rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
-  sync
-
-  sleep 10
-
-  echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
-
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
 
@@ -133,13 +109,6 @@ ha_tests()
 
   echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
-
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Creating NFS mountpoint"
-  rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
-
-  echo_test_title "Mounting NFS"
-  rc_test "mount_nfs ${ip}:/mnt/tank/nfs /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
 
   echo_test_title "Creating NFS file"
   rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
