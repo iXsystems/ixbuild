@@ -40,29 +40,41 @@ create_dist_files() {
      exit 1
   fi
 
+  # Create exclude list for base.txz
+  cat << EOF >/tmp/.excList.$$
+./boot/kernel
+./usr/share/doc
+./usr/lib32
+./usr/bin/ldd32
+./usr/libexec/ld-elf32.so.1
+./usr/libexec/ld-elf32.so.1
+EOF
+
   # Create base.txz
-  tar cvJf ${DISTDIR}/base.txz -C ${DISTDIR}/world --exclude ./boot/kernel --exclude ./usr/share/doc --exclude ./usr/lib32 -exclude ./usr/bin/ldd32 --exclude ./usr/libexec/ld-elf32.so.1 --exclude ./usr/libexec/ld-elf32.so.1 .
+  tar cvJ -f ${DISTDIR}/base.txz -C ${DISTDIR}/world -X /tmp/.excList.$$ .
   if [ $? -ne 0 ] ; then
      echo "Failed creating base.txz"
+     rm /tmp/.excList.$$
      exit 1
   fi
+  rm /tmp/.excList.$$
 
   # Create kernel.txz
-  tar cvJf ${DISTDIR}/kernel.txz -C ${DISTDIR}/world ./boot/kernel
+  tar cvJ -f ${DISTDIR}/kernel.txz -C ${DISTDIR}/world ./boot/kernel
   if [ $? -ne 0 ] ; then
      echo "Failed creating kernel.txz"
      exit 1
   fi
 
   # Create doc.txz
-  tar cvJf ${DISTDIR}/doc.txz -C ${DISTDIR}/world ./usr/share/doc
+  tar cvJ -f ${DISTDIR}/doc.txz -C ${DISTDIR}/world ./usr/share/doc
   if [ $? -ne 0 ] ; then
      echo "Failed creating doc.txz"
      exit 1
   fi
 
   # Create lib32.txz
-  tar cvJf ${DISTDIR}/lib32.txz -C ${DISTDIR}/world ./usr/lib32 ./usr/libexec/ld-elf32.so.1 ./usr/bin/ldd32 ./libexec/ld-elf32.so.1
+  tar cvJ -f ${DISTDIR}/lib32.txz -C ${DISTDIR}/world ./usr/lib32 ./usr/libexec/ld-elf32.so.1 ./usr/bin/ldd32 ./libexec/ld-elf32.so.1
   if [ $? -ne 0 ] ; then
      echo "Failed creating lib32.txz"
      exit 1
