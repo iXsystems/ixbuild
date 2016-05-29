@@ -18,32 +18,65 @@ create_dist_files() {
     rm -rf ${DISTDIR}
   fi
   mkdir ${DISTDIR} 2>/dev/null
+  mkdir ${DISTDIR}/world 2>/dev/null
 
-  # cd to release dir, and clean and make
-  cd ${WORLDSRC}/release
-  make clean
-
-  # Create the FTP files
-  make ftp NOPORTS=yes TARGET=$ARCH
+  # Manually create the dist-files
+  cd ${WORLDSRC}
+  make installworld DESTDIR=${DISTDIR}/world
   if [ $? -ne 0 ] ; then
-     echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH"
+     echo "Failed running: make installworld DESTDIR=$DISTDIR/world"
      exit 1
   fi
-  rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
 
-  # Create the CD images
-  rm -rf ${PROGDIR}/fbsd-iso >/dev/null 2>/dev/null
-  mkdir ${PROGDIR}/fbsd-iso
-  make cdrom
+  make installkernel DESTDIR=${DISTDIR}/world
   if [ $? -ne 0 ] ; then
-     echo "Failed running: make cdrom"
+     echo "Failed running: make installkernel DESTDIR=$DISTDIR/world"
      exit 1
   fi
-  mv *.iso ${PROGDIR}/fbsd-iso
 
-  # Cleanup old .txz files
-  cd ${WORLDSRC}/release
-  make clean
+  make distribution DESTDIR=${DISTDIR}/world
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: make distribution DESTDIR=$DISTDIR/world"
+     exit 1
+  fi
+
+  # Create base.txz
+  tar cvJf ${DISTDIR}/base.txz -C ${DISTDIR}/world --exclude ./boot/kernel --exclude ./usr/share/doc --exclude ./usr/lib32 -exclude ./usr/bin/ldd32 --exclude ./usr/libexec/ld-elf32.so.1 --exclude ./usr/libexec/ld-elf32.so.1 .
+  if [ $? -ne 0 ] ; then
+     echo "Failed creating base.txz"
+     exit 1
+  fi
+
+  # Create kernel.txz
+  tar cvJf ${DISTDIR}/kernel.txz -C ${DISTDIR}/world ./boot/kernel
+  if [ $? -ne 0 ] ; then
+     echo "Failed creating kernel.txz"
+     exit 1
+  fi
+
+  # Create doc.txz
+  tar cvJf ${DISTDIR}/doc.txz -C ${DISTDIR}/world ./usr/share/doc
+  if [ $? -ne 0 ] ; then
+     echo "Failed creating doc.txz"
+     exit 1
+  fi
+
+  # Create lib32.txz
+  tar cvJf ${DISTDIR}/lib32.txz -C ${DISTDIR}/world ./usr/lib32 ./usr/libexec/ld-elf32.so.1 ./usr/bin/ldd32 ./libexec/ld-elf32.so.1
+  if [ $? -ne 0 ] ; then
+     echo "Failed creating lib32.txz"
+     exit 1
+  fi
+
+  # Cleanup
+  rm -rf ${DISTDIR}/world 2>/dev/null
+  chflags -R noschg ${DISTDIR}/world
+  rm -rf ${DISTDIR}/world
+
+  # Create the MANIFEST
+  cd ${DISTDIR}
+  echo "Creating MANIFEST"
+  sh ${WORLDSRC}/release/scripts/make-manifest.sh *.txz > MANIFEST
 
 }
 
