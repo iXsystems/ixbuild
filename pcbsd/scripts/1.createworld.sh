@@ -18,85 +18,22 @@ create_dist_files() {
     rm -rf ${DISTDIR}
   fi
   mkdir ${DISTDIR} 2>/dev/null
-  mkdir ${DISTDIR}/world 2>/dev/null
 
-  # Manually create the dist-files
-  cd ${WORLDSRC}
-  make installworld DESTDIR=${DISTDIR}/world
+ # cd to release dir, and clean and make
+  cd ${WORLDSRC}/release
+  make clean
+
+  # Create the FTP files
+  make ftp NOPORTS=yes TARGET=$ARCH
   if [ $? -ne 0 ] ; then
-     echo "Failed running: make installworld DESTDIR=$DISTDIR/world"
+     echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH"
      exit 1
   fi
+  rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
 
-  make installkernel DESTDIR=${DISTDIR}/world
-  if [ $? -ne 0 ] ; then
-     echo "Failed running: make installkernel DESTDIR=$DISTDIR/world"
-     exit 1
-  fi
-
-  make distribution DESTDIR=${DISTDIR}/world
-  if [ $? -ne 0 ] ; then
-     echo "Failed running: make distribution DESTDIR=$DISTDIR/world"
-     exit 1
-  fi
-
-  # Create exclude list for base.txz
-  cat << EOF >/tmp/.excList.$$
-./boot/kernel
-./usr/share/doc
-./usr/lib32
-./usr/bin/ldd32
-./usr/libexec/ld-elf32.so.1
-./usr/libexec/ld-elf32.so.1
-EOF
-
-  # Create base.txz
-  tar cvJ -f ${DISTDIR}/base.txz -C ${DISTDIR}/world -X /tmp/.excList.$$ .
-  if [ $? -ne 0 ] ; then
-     echo "Failed creating base.txz"
-     rm /tmp/.excList.$$
-     exit 1
-  fi
-  rm /tmp/.excList.$$
-
-  # Create kernel.txz
-  tar cvJ -f ${DISTDIR}/kernel.txz -C ${DISTDIR}/world ./boot/kernel
-  if [ $? -ne 0 ] ; then
-     echo "Failed creating kernel.txz"
-     exit 1
-  fi
-
-  # Create doc.txz
-  tar cvJ -f ${DISTDIR}/doc.txz -C ${DISTDIR}/world ./usr/share/doc
-  if [ $? -ne 0 ] ; then
-     echo "Failed creating doc.txz"
-     exit 1
-  fi
-
-  # Create lib32.txz
-  tar cvJ -f ${DISTDIR}/lib32.txz -C ${DISTDIR}/world ./usr/lib32 ./usr/libexec/ld-elf32.so.1 ./usr/bin/ldd32 ./libexec/ld-elf32.so.1
-  if [ $? -ne 0 ] ; then
-     echo "Failed creating lib32.txz"
-     exit 1
-  fi
-
-  # Cleanup
-  rm -rf ${DISTDIR}/world 2>/dev/null
-  chflags -R noschg ${DISTDIR}/world
-  rm -rf ${DISTDIR}/world
-
-  # Create the src.txz
-  tar cvJ -f ${DISTDIR}/src.txz -C / --exclude usr/src/.git usr/src
-  if [ $? -ne 0 ] ; then
-     echo "Failed creating src.txz"
-     exit 1
-  fi
-
-  # Create the MANIFEST
-  cd ${DISTDIR}
-  echo "Creating MANIFEST"
-  sh ${WORLDSRC}/release/scripts/make-manifest.sh *.txz > MANIFEST
-
+  # Cleanup old .txz files
+  cd ${WORLDSRC}/release
+  make clean
 }
 
 create_base_pkg_files()
