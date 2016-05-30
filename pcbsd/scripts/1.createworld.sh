@@ -85,6 +85,13 @@ EOF
   chflags -R noschg ${DISTDIR}/world
   rm -rf ${DISTDIR}/world
 
+  # Create the src.txz
+  tar cvJ -f ${DISTDIR}/src.txz -C / usr/src
+  if [ $? -ne 0 ] ; then
+     echo "Failed creating src.txz"
+     exit 1
+  fi
+
   # Create the MANIFEST
   cd ${DISTDIR}
   echo "Creating MANIFEST"
