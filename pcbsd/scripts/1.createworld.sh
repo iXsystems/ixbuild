@@ -86,7 +86,7 @@ EOF
   rm -rf ${DISTDIR}/world
 
   # Create the src.txz
-  tar cvJ -f ${DISTDIR}/src.txz -C / usr/src
+  tar cvJ -f ${DISTDIR}/src.txz -C / --exclude usr/src/.git usr/src
   if [ $? -ne 0 ] ; then
      echo "Failed creating src.txz"
      exit 1
