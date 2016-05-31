@@ -163,7 +163,7 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
   grub-mkrescue -o freenas-auto.iso isodir -- -volid ${VOLID}_INSTALL
   if [ $? -ne 0 ] ; then exit 1; fi
 else
-  grub-mkrescue -o freenas-auto.iso isodir -- -volid ${VOLID}
+  grub-mkrescue --xorriso=/tmp/xorriso -o freenas-auto.iso isodir -- -volid ${VOLID}
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
 
