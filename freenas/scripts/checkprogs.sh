@@ -23,6 +23,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y sysutils/grub2-pcbsd"
 fi
 
+pkg info -q sysutils/grub2-efi
+if [ "$?" != "0" ]; then
+  echo "Installing sysutils/grub2-efi"
+  rc_halt "pkg install -y sysutils/grub2-efi"
+fi
+
 which mkisofs >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing cdrtools.."

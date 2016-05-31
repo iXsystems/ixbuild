@@ -59,12 +59,6 @@ export FNASBDIR
 LOUT="/tmp/fnas-error-debug.txt"
 touch ${LOUT}
 
-# Check if grub2-efi is on the builder, remove it so
-#pkg info -q grub2-efi
-#if [ $? -eq 0 ] ; then
-#  pkg delete -y grub2-efi
-#fi
-
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
   rc_nohalt "rm -rf ${FNASBDIR}.previous" 2>/dev/null
@@ -178,6 +172,21 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
 
    # Fix a missing directory in NANO_WORLDDIR
    sed -i '' 's|geom_gate.ko|geom_gate.ko;mkdir -p ${NANO_WORLDDIR}/usr/src/sys|g' ${FNASSRC}/build/nanobsd-cfg/os-base-functions.sh
+
+   # Check if grub2-efi is on the builder, remove it so
+   pkg info -q grub2-efi
+   if [ $? -eq 0 ] ; then
+     pkg delete -y grub2-efi
+   fi
+else
+  # Fix an issue building with GRUB and EFI on 11
+  # Disable all the HFS crap
+  cat << EOF >/tmp/xorriso
+ARGS=\`echo \$@ | sed 's|-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label -hfs-bless-by i /System/Library/CoreServices/boot.efi||g'\`
+xorriso \$ARGS
+EOF
+  chmod 755 /tmp/xorriso
+  sed -i '' 's|grub-mkrescue |grub-mkrescue --xorriso=/tmp/xorriso |g' ${FNASSRC}/build/tools/create-iso.py
 fi
 
 # Set to use TMPFS for everything
