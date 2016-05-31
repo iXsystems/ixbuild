@@ -60,10 +60,10 @@ LOUT="/tmp/fnas-error-debug.txt"
 touch ${LOUT}
 
 # Check if grub2-efi is on the builder, remove it so
-pkg info -q grub2-efi
-if [ $? -eq 0 ] ; then
-  pkg delete -y grub2-efi
-fi
+#pkg info -q grub2-efi
+#if [ $? -eq 0 ] ; then
+#  pkg delete -y grub2-efi
+#fi
 
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
