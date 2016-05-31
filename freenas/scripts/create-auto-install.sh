@@ -163,6 +163,11 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
   grub-mkrescue -o freenas-auto.iso isodir -- -volid ${VOLID}_INSTALL
   if [ $? -ne 0 ] ; then exit 1; fi
 else
+  cat << EOF >/tmp/xorriso
+ARGS=\`echo \$@ | sed 's|-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label -hfs-bless-by i /System/Library/CoreServices/boot.efi||g'\`
+xorriso \$ARGS
+EOF
+  chmod 755 /tmp/xorriso
   grub-mkrescue --xorriso=/tmp/xorriso -o freenas-auto.iso isodir -- -volid ${VOLID}
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
