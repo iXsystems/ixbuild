@@ -116,7 +116,6 @@ CHECK_CHANGED_OPTIONS=verbose
 CHECK_CHANGED_DEPS=yes
 PARALLEL_JOBS=${BUILDERS}
 WRKDIR_ARCHIVE_FORMAT=txz
-ALLOW_MAKE_JOBS=${JOBS}
 ALLOW_MAKE_JOBS_PACKAGES="pkg ccache py*"
 MAX_EXECUTION_TIME=86400
 NOHANG_TIME=12600
@@ -128,6 +127,9 @@ GIT_URL=${PORTS_GIT_URL}
 USE_COLORS=yes
 EOF
 
+  if [ "$JOBS" = "yes" ] ; then
+    echo "ALLOW_MAKE_JOBS=yes" >> /usr/local/etc/poudriere.conf
+  fi
   # Check if we have a ccache dir to be used
   if [ -e "/ccache" ] ; then
     echo "CCACHE_DIR=/ccache" >> /usr/local/etc/poudriere.conf
