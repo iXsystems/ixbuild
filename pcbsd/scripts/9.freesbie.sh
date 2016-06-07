@@ -192,6 +192,8 @@ rc_halt "${PKGSTATIC} -c ${PDESTDIR9} add /mnt/All/pkg.txz"
 rc_halt "rm ${PKGSTATIC}"
 
 echo '#!/bin/sh
+PATH="${PATH}:/usr/local/bin:/usr/local/sbin"
+export PATH
 cd /mnt/All
 while read pkg
 do
