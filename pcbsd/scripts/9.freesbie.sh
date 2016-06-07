@@ -196,7 +196,7 @@ cd /mnt/All
 while read pkg
 do
   echo "Adding PACKAGE: $pkg"
-  pkg-static add -f ${pkg} >/tmp/pkg-log 2>/tmp/pkg-log
+  pkg-static add -f ${pkg}
   if [ $? -ne 0 ] ; then
      sleep 5
      echo "FAILED adding: $pkg"
