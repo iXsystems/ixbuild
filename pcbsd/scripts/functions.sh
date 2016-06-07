@@ -266,21 +266,6 @@ cp_iso_pkg_files()
       sleep 0.5
     done < $eP
 
-    # Create a list of deps for the meta-pkgs
-    mkdir ${PROGDIR}/tmp/dep-list
-    for plist in `find ${PCBSDSRC}/overlays/install-overlay/root/pkgset | grep pkg-list`
-    do
-       targets=""
-       while read line
-       do
-	 targets="$targets $line"
-       done < $plist
-       tfile=`echo $plist | sed "s|${PCBSDSRC}/overlays/install-overlay/root/pkgset/||g" | sed "s|/pkg-list||g"`
-       tfile=`basename $tfile`
-       echo "Saving deps for $tfile"
-       ${PKGSTATIC} ${pConf} -R ${PROGDIR}/tmp/repo/ rquery '%dn-%dv' $targets | sort | uniq > ${PROGDIR}/tmp/dep-list/${tfile}.deps
-    done
-
     # Grab all the FreeBSD base packages
     rc_halt "cp ${PROGDIR}/fbsd-pkg/* ${PROGDIR}/tmp/All/"
 
