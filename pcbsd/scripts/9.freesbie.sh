@@ -106,7 +106,7 @@ setup_usr_uzip() {
     UFSFILE=${PDESTDIR9}/uzip/usr.ufs
     USRMNT=${PDESTDIR9}/usrmnt
     DIRSIZE=$(($(du -kd 0 | cut -f 1)))
-    FSSIZE=$(($DIRSIZE + $DIRSIZE + 500))
+    FSSIZE=$(($DIRSIZE + $DIRSIZE + 50000))
     rc_halt "dd if=/dev/zero of=${UFSFILE} bs=1k count=${FSSIZE}"
 
     USRDEVICE=/dev/$(mdconfig -a -t vnode -f ${UFSFILE})
