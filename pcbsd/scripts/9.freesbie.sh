@@ -116,7 +116,7 @@ setup_usr_uzip() {
 
     # Now copy the usr filesystem
     rc_halt "cd ${PDESTDIR9}/usr"
-    find . -print -depth 2>/dev/null | cpio -dump -v ${USRMNT} 2>/dev/null
+    find . -print -depth 2>/dev/null | cpio -dump -v ${USRMNT}
 
     # Remove old usrmnt and remount
     sleep 3
@@ -145,7 +145,7 @@ setup_usr_uzip() {
     umount_md_devices ${DEVICES}
     trap "" INT
     echo "Compressing with uzip..."
-    rc_halt "uzip ${PDESTDIR9}/uzip/usr.ufs ${PDESTDIR9}/uzip/usr.uzip" >/dev/null 2>/dev/null
+    rc_halt "uzip ${PDESTDIR9}/uzip/usr.ufs ${PDESTDIR9}/uzip/usr.uzip"
     md5 -q ${PDESTDIR9}/uzip/usr.uzip > ${PDESTDIR9}/uzip/usr.uzip.md5
 
 }
