@@ -105,8 +105,11 @@ setup_usr_uzip() {
     # Figure out disk size and set up a vnode
     UFSFILE=${PDESTDIR9}/uzip/usr.ufs
     USRMNT=${PDESTDIR9}/usrmnt
+    sync
     DIRSIZE=$(($(du -kd 0 | cut -f 1)))
-    FSSIZE=$(($DIRSIZE + $DIRSIZE + 50000))
+    echo "DIRSIZE: $DIRSIZE"
+    FSSIZE=$(($DIRSIZE + $DIRSIZE + $DIRSIZE))
+    echo "FSSIZE: $FSSIZE"
     rc_halt "dd if=/dev/zero of=${UFSFILE} bs=1k count=${FSSIZE}"
 
     USRDEVICE=/dev/$(mdconfig -a -t vnode -f ${UFSFILE})
@@ -117,9 +120,13 @@ setup_usr_uzip() {
     # Now copy the usr filesystem
     rc_halt "cd ${PDESTDIR9}/usr"
     find . -print -depth 2>/dev/null | cpio -dump -v ${USRMNT}
+    if [ $? -ne 0 ] ; then
+      echo "WARNING: cpio error!"
+    fi
 
     # Remove old usrmnt and remount
-    sleep 3
+    sync
+    sleep 10
     rc_halt "umount -f ${USRDEVICE}"
     rc_halt "cd ${PDESTDIR9}/"
     rm -rf ${PDESTDIR9}/usr 2>/dev/null
