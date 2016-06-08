@@ -142,11 +142,11 @@ setup_usr_uzip() {
 
     rc_halt "cd ${PDESTDIR9}/"
 	    
-    echo "Filling the uncompressed fs with zeros to compress better"
-    echo "Don't worry if you see a 'filesystem full' message here"
-    zerofile=$(env TMPDIR=${PDESTDIR9}/usr mktemp -t zero)
-    dd if=/dev/zero of=${zerofile} >/dev/null 2>/dev/null
-    rm ${zerofile}
+    #echo "Filling the uncompressed fs with zeros to compress better"
+    #echo "Don't worry if you see a 'filesystem full' message here"
+    #zerofile=$(env TMPDIR=${PDESTDIR9}/usr mktemp -t zero)
+    #dd if=/dev/zero of=${zerofile} >/dev/null 2>/dev/null
+    #rm ${zerofile}
     set -e
 
     umount_md_devices ${DEVICES}
