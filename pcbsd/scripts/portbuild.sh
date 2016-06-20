@@ -37,7 +37,7 @@ merge_pcbsd_src_ports()
    if [ -n "$PCBSDLEGACY" ] ; then return 0 ; fi
 
    # Now add all the additional ports not apart of the main pcbsd repo
-   for repo in pcbsd/pcbsd-libsh pcbsd/lpreserver pcbsd/pc-updatemanager trueos/pc-sysinstall
+   for repo in trueos/trueos-libsh trueos/lpreserver trueos/pc-updatemanager trueos/pc-sysinstall
    do
      dname=$(basename $repo)
      rc_halt "git clone --depth=1 https://github.com/${repo}.git"
