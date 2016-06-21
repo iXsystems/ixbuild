@@ -206,7 +206,7 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
   fi
 
   # Set the jail name to use for these builds
-  export POUDRIERE_JAILNAME="`echo ${BUILDTAG} | sed 's|.||g'`"
+  export POUDRIERE_JAILNAME="`echo ${BUILDTAG} | sed 's|\.||g'`"
 
 fi
 
