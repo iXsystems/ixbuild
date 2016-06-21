@@ -193,6 +193,13 @@ fi
 if [ -e "build/config/templates/poudriere.conf" ] ; then
   echo "Enabling USE_TMPFS=all"
   sed -i '' 's|USE_TMPFS=yes|USE_TMPFS=all|g' build/config/templates/poudriere.conf
+
+  # Some tuning for our big build boxes
+  CPUS=$(sysctl -n kern.smp.cpus)
+  if [ $CPUS -gt 22 ] ; then
+    echo "PARALLEL_JOBS=22" >> build/config/templates/poudriere.conf
+  fi
+
 fi
 
 
