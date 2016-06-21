@@ -199,6 +199,7 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
   # Some tuning for our big build boxes
   CPUS=$(sysctl -n kern.smp.cpus)
   if [ $CPUS -gt 20 ] ; then
+    echo "Setting POUDRIERE_JOBS=20"
     export POUDRIERE_JOBS=20
   fi
 
