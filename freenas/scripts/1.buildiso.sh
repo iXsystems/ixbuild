@@ -119,13 +119,15 @@ fi
 start_xml_results "FreeNAS Build Process"
 set_test_group_text "Build phase tests" "2"
 
+OUTFILE="/tmp/fnas-build.out.$$"
+
 # Display output to stdout
-touch /tmp/fnas-build.out
-(tail -f /tmp/fnas-build.out 2>/dev/null) &
+touch ${OUTFILE}
+(tail -f ${OUTFILE} 2>/dev/null) &
 TPID=$!
 
 echo_test_title "make checkout ${PROFILEARGS}"
-make checkout ${PROFILEARGS} >/tmp/fnas-build.out 2>/tmp/fnas-build.out
+make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make checkout"
@@ -202,18 +204,17 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
 
 fi
 
-
 # Display output to stdout
-touch /tmp/fnas-build.out
-(sleep 5 ; tail -f /tmp/fnas-build.out 2>/dev/null) &
+touch $OUTFILE
+(sleep 5 ; tail -f $OUTFILE 2>/dev/null) &
 TPID=$!
 
 echo_test_title "make release ${PROFILEARGS}"
-make release ${PROFILEARGS} >/tmp/fnas-build.out 2>/tmp/fnas-build.out
+make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make release"
-  parse_build_error "/tmp/fnas-build.out"
+  parse_build_error "${OUTFILE}"
   finish_xml_results "make"
   exit 1
 fi
@@ -221,5 +222,5 @@ kill -9 $TPID 2>/dev/null
 echo_ok
 finish_xml_results "make"
 
-rm /tmp/fnas-build.out
+rm ${OUTFILE}
 exit 0
