@@ -61,6 +61,7 @@ touch ${LOUT}
 
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
+  echo "Doing fresh build!"
   rc_nohalt "rm -rf ${FNASBDIR}.previous" 2>/dev/null
   rc_nohalt "chflags -R noschg ${FNASBDIR}.previous" 2>/dev/null
   rc_nohalt "rm -rf ${FNASBDIR}.previous"
@@ -68,6 +69,7 @@ if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
 fi
 
 if [ -n "$BUILDINCREMENTAL" ] ; then
+  echo "Doing incremental build!"
   cd ${FNASBDIR}
   rc_halt "git reset --hard"
 
