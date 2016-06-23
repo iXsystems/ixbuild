@@ -119,11 +119,7 @@ rc_halt "git clone --depth=1 -b ${GITFBSDBRANCH} ${GITFBSDURL} ${WORLDSRC}"
 # Now create the world / kernel / distribution
 cd ${WORLDSRC}
 
-# We only really need to go up to 8 CPUS for building world
 CPUS=`sysctl -n kern.smp.cpus`
-if [ "$CPUS" -gt 8 ] ; then
-  CPUS=8
-fi
 
 make -j $CPUS buildworld buildkernel
 if [ $? -ne 0 ] ; then
