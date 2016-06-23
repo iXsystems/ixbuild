@@ -284,8 +284,14 @@ jenkins_pkg()
   if [ ! -d "${PPKGDIR}" ] ; then mkdir -p ${PPKGDIR} ; fi
   date +"%s" >${PPKGDIR}/.started
 
-  make ports
-  if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
+  # Make the release or ISO packages
+  if [ "$1" = "release" ] ; then
+    make ports
+    if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
+  else
+    make iso-ports
+    if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
+  fi
 
   # Push over the workdir to the cache
   push_pkgworkdir

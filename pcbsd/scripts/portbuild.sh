@@ -52,7 +52,7 @@ mk_metapkg_bulkfile()
    local bulkList=$1
    rm $bulkList >/dev/null 2>/dev/null
 
-   rc_halt "cp ${PCONFDIR}/essential-packages-nonrel $bulkList"
+   rc_halt "cp ${PCONFDIR}/essential-packages-iso $bulkList"
 }
 
 mk_poud_config()
@@ -230,8 +230,8 @@ if [ "$target" = "all" ] ; then
   fi
 
   # Make sure the essentials built, exit now if not
-  echo "Checking essential packages..."
-  check_essential_pkgs "NO"
+  echo "Checking essential packages for release..."
+  check_essential_pkgs "${PCONFDIR}/essential-packages-release"
   if [ $? -ne 0 ] ; then
      exit 1
   fi
@@ -239,9 +239,30 @@ if [ "$target" = "all" ] ; then
   # Update the PBI index file
   do_pbi-index
 
-  # Unset cleanup var
-  pCleanup=""
-  export pCleanup
+  exit 0
+elif [ "$target" = "iso" ] ; then
+
+  # Kill any previous running jail
+  poudriere jail -k -j ${PJAILNAME} -p ${PPORTS} 2>/dev/null
+
+  # Create the poud config
+  mk_poud_config
+
+  # Extract the world for this poud build
+  update_poud_world
+
+  # Start the build
+  poudriere bulk -j ${PJAILNAME} -p ${PPORTS} -f ${PCONFDIR}/essential-packages-iso
+  if [ $? -ne 0 ] ; then
+     echo "Failed poudriere build..."
+  fi
+
+  # Make sure the essentials built, exit now if not
+  echo "Checking essential packages for ISO creation..."
+  check_essential_pkgs "${PCONFDIR}/essential-packages-iso"
+  if [ $? -ne 0 ] ; then
+     exit 1
+  fi
 
   exit 0
 elif [ "$1" = "portsnap" ] ; then

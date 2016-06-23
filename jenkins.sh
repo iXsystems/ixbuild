@@ -37,6 +37,7 @@ freenas-lupgrade - Runs the FreeNAS "live" upgrade against a target system
   world - Build FreeBSD world
    jail - Prep the jail for package build
     pkg - Build packages
+iso-pkg - Build packages for ISO only
     iso - Assemble PC-BSD ISO files
      vm - Assemble PC-BSD VM images
 EOF
@@ -56,7 +57,8 @@ fi
 case $TYPE in
   world) jenkins_world ;;
    jail) jenkins_jail ;;
-    pkg) jenkins_pkg ;; 
+    pkg) jenkins_pkg "release" ;;
+iso-pkg) jenkins_pkg "iso" ;;
     iso) jenkins_iso ;;
      vm) jenkins_vm ;;
 freenas) jenkins_freenas ;;

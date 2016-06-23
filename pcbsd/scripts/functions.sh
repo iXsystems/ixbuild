@@ -318,7 +318,7 @@ check_essential_pkgs()
    echo "Checking essential pkgs..."
    haveWarn=0
 
-   local eP="${PCONFDIR}/essential-packages"
+   local eP="${1}"
 
    chkList=""
    # Build the list of packages to check
@@ -359,15 +359,6 @@ check_essential_pkgs()
      else
      fi
    done
-   if [ $haveWarn -ne 0 -a "$1" != "NO" ] ; then
-      echo "Warning: Packages are missing! Continue?"
-      echo -e "(Y/N)\c"
-      read tmp
-      if [ "$tmp" != "y" -a "$tmp" != "Y" ] ; then
-         rtn
-         exit 1
-      fi
-   fi
 
    return $haveWarn
 }

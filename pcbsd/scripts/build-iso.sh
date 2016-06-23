@@ -99,9 +99,25 @@ do_clean()
   rm ${PROGDIR}/tmp/All/* 2>/dev/null
 }
 
+do_iso_ports()
+{
+  echo "Building ISO ports"
+
+  if [ ! -e "${DISTDIR}/base.txz" ] ; then
+     echo "Missing WORLD files, please create first!"
+     exit 1
+  fi
+
+  sh ${PROGDIR}/scripts/portbuild.sh iso
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
+}
+
 do_ports()
 {
-  echo "Building ports"
+  echo "Building RELEASE ports"
 
   if [ ! -e "${DISTDIR}/base.txz" ] ; then
      echo "Missing WORLD files, please create first!"
@@ -160,9 +176,8 @@ case $TARGET in
    world) do_world ;;
      iso) do_iso ;;
       vm) do_vms ;;
-   ports) do_ports
-          exit $?
-          ;;
+   ports) do_ports; exit $? ;;
+iso-ports) do_iso_ports; exit $? ;;
 check-ports) do_check_ports ;;
 ports-update-all) do_ports_all ;;
 ports-update-pcbsd) do_ports_pcbsd ;;
