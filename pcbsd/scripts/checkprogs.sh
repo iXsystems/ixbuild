@@ -115,6 +115,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y textproc/libucl"
 fi
 
+pkg info "textproc/jq" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing textproc/jq.."
+  rc_halt "pkg install -y textproc/jq"
+fi
+
 which poudriere >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing poudriere.."
