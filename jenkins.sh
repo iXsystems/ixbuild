@@ -32,6 +32,12 @@ freenas-combo - Build release and run VM API tests against it automatically
 freenas-ltest - Runs the FreeNAS "live" tests against a target system
 freenas-lupgrade - Runs the FreeNAS "live" upgrade against a target system
 
+-- TrueOS Commands --
+trueos-world    - Builds the world
+trueos-pkg      - Builds the entire pkg repo
+trueos-iso-pkg  - Builds just the pkgs needed for ISO creation
+trueos-iso      - Builds the ISO files
+trueos-vm       - Builds the VM images
 
 -- PC-BSD Commands --
   world - Build FreeBSD world
@@ -55,12 +61,12 @@ fi
 ######################################################
 
 case $TYPE in
-  world) jenkins_world ;;
+  world|trueos-world) jenkins_world ;;
+    pkg|trueos-pkg) jenkins_pkg "release" ;;
+iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
+    iso|trueos-iso) jenkins_iso ;;
+     vm|trueos-vm) jenkins_vm ;;
    jail) jenkins_jail ;;
-    pkg) jenkins_pkg "release" ;;
-iso-pkg) jenkins_pkg "iso" ;;
-    iso) jenkins_iso ;;
-     vm) jenkins_vm ;;
 freenas) jenkins_freenas ;;
 freenas-tests) jenkins_freenas_tests ;;
 freenas-ltest) jenkins_freenas_live_tests ;;

@@ -58,10 +58,17 @@ create_workdir()
     cp -r /ixbuild/builds ${MASTERWRKDIR}/builds
   fi
 
-  case $TYPE in
-    freenas|freenas-tests|freenas-ltest|freenas-lupgrade|freenas-combo) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
-          *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
-  esac
+  echo "$TYPE" | grep -q "freenas"
+  if [ $? -eq 0 ] ; then
+    TBUILDDIR="${MASTERWRKDIR}/freenas"
+  else
+    echo "$TYPE" | grep -q "trueos"
+    if [ $? -eq 0 ] ; then
+      TBUILDDIR="${MASTERWRKDIR}/trueos"
+    else
+      TBUILDDIR="${MASTERWRKDIR}/pcbsd"
+    fi
+  fi
 
   cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
