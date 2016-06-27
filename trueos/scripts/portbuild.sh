@@ -27,9 +27,6 @@ merge_trueos_src_ports()
 
    rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
      
-   # Now use the git script to create source ports
-   rc_halt "./mkports.sh ${portsdir} ${distCache}"
-
    # Jump back to where we belong
    rc_halt "cd $mcwd" >/dev/null 2>/dev/null
 
@@ -37,7 +34,7 @@ merge_trueos_src_ports()
    if [ -n "$TRUEOSLEGACY" ] ; then return 0 ; fi
 
    # Now add all the additional ports not apart of the main trueos repo
-   for repo in trueos/trueos-libsh trueos/lpreserver trueos/pc-updatemanager trueos/pc-sysinstall
+   for repo in trueos/trueos-libsh trueos/lpreserver trueos/pc-updatemanager trueos/pc-sysinstall trueos/trueos-utils trueos/trueos-utils-qt5
    do
      dname=$(basename $repo)
      rc_halt "git clone --depth=1 https://github.com/${repo}.git"
