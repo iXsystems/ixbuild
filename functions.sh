@@ -517,31 +517,21 @@ if [ "$TYPE" != "ports-tests" ] ; then
   # Source build conf and set some vars
   cd ${BDIR}/${BUILD}
 
-  case $TYPE in
-    freenas|freenas-tests|freenas-combo)
-       BRANCH="production"
-       . freenas.cfg
-       ;;
-    freenas-ltest|freenas-lupgrade)
-       BRANCH="production"
-       . freenas.cfg
-       if [ -e "freenas-ltest.cfg" ] ; then
-         echo "Using `pwd`/freenas-ltest.cfg for Live Test host configuration"
-         . freenas-ltest.cfg
-       fi
-       if [ -z "$LIVEHOST" -o -z "$LIVEUSER" -o -z "$LIVEPASS" ] ; then
-         echo "Missing Live Test host settings! LIVEHOST/LIVEUSER/LIVEPASS"
-         exit_clean
-       fi
-       ;;
-    *)
-       if [ -z "$BRANCH" ] ; then
-         BRANCH="production"
-       fi
-       . pcbsd.cfg
-       ;;
-  esac
-
+  echo "$TYPE" | grep -q "freenas"
+  if [ $? -eq 0 ] ; then
+    BRANCH="production"
+    . freenas.cfg
+  else
+    if [ -z "$BRANCH" ] ; then
+      BRANCH="production"
+    fi
+    echo "$TYPE" | grep -q pcbsd
+    if [ $? -eq 0 ] ; then
+      . pcbsd.cfg
+    else
+      . trueos.cfg
+    fi
+  fi
 
   # Set the variables to reference poudrire jail locations
   if [ -z "$JAILVER" ] ; then
