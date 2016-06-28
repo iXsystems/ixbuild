@@ -35,6 +35,7 @@ merge_trueos_src_ports()
 
    # Now add all the additional ports not apart of the main trueos repo
    TREPOS="trueos/trueos-libsh \
+	  trueos/pcdm \
 	  trueos/lpreserver \
 	  trueos/pc-updatemanager \
 	  trueos/pc-sysinstall \
