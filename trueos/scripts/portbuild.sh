@@ -49,7 +49,7 @@ mk_metapkg_bulkfile()
    local bulkList=$1
    rm $bulkList >/dev/null 2>/dev/null
 
-   rc_halt "cp ${PCONFDIR}/essential-packages-iso $bulkList"
+   rc_halt "cp ${PCONFDIR}/desktop/essential-packages-iso $bulkList"
 }
 
 mk_poud_config()
@@ -228,7 +228,7 @@ if [ "$target" = "all" ] ; then
 
   # Make sure the essentials built, exit now if not
   echo "Checking essential packages for release..."
-  check_essential_pkgs "${PCONFDIR}/essential-packages-release"
+  check_essential_pkgs "${PCONFDIR}/desktop/essential-packages-release"
   if [ $? -ne 0 ] ; then
      exit 1
   fi
@@ -249,14 +249,14 @@ elif [ "$target" = "iso" ] ; then
   update_poud_world
 
   # Start the build
-  poudriere bulk -j ${PJAILNAME} -p ${PPORTS} -f ${PCONFDIR}/essential-packages-iso
+  poudriere bulk -j ${PJAILNAME} -p ${PPORTS} -f ${PCONFDIR}/desktop/essential-packages-iso
   if [ $? -ne 0 ] ; then
      echo "Failed poudriere build..."
   fi
 
   # Make sure the essentials built, exit now if not
   echo "Checking essential packages for ISO creation..."
-  check_essential_pkgs "${PCONFDIR}/essential-packages-iso"
+  check_essential_pkgs "${PCONFDIR}/desktop/essential-packages-iso"
   if [ $? -ne 0 ] ; then
      exit 1
   fi
