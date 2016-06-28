@@ -34,7 +34,17 @@ merge_trueos_src_ports()
    if [ -n "$TRUEOSLEGACY" ] ; then return 0 ; fi
 
    # Now add all the additional ports not apart of the main trueos repo
-   for repo in trueos/trueos-libsh trueos/lpreserver trueos/pc-updatemanager trueos/pc-sysinstall trueos/trueos-libqt5 trueos/trueos-utils trueos/trueos-utils-qt5
+   TREPOS="trueos/trueos-libsh \
+	  trueos/lpreserver \
+	  trueos/pc-updatemanager \
+	  trueos/pc-sysinstall \
+	  trueos/trueos-libqt5 \
+	  trueos/trueos-utils \
+	  trueos/trueos-utils-qt5 \
+	  trueos/trueos-server \
+	  trueos/trueos-desktop"
+
+   for repo in $TREPOS
    do
      dname=$(basename $repo)
      rc_halt "git clone --depth=1 https://github.com/${repo}.git"
