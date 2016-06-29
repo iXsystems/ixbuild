@@ -40,6 +40,7 @@ merge_trueos_src_ports()
 	  trueos/lpreserver \
 	  trueos/pc-updatemanager \
 	  trueos/pc-sysinstall \
+	  trueos/openrc \
 	  trueos/trueos-libqt5 \
 	  trueos/trueos-utils \
 	  trueos/trueos-utils-qt5 \
