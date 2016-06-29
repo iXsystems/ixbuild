@@ -4,6 +4,7 @@
 
 # Where is the build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+echo "Using PROGDIR: $PROGDIR"
 
 # Source the config file
 . ${PROGDIR}/trueos.cfg
