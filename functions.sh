@@ -528,12 +528,8 @@ if [ "$TYPE" != "ports-tests" ] ; then
     echo "$TYPE" | grep -q pcbsd
     if [ $? -eq 0 ] ; then
       . pcbsd.cfg
-      PPKGDIR="/poud/data/packages/${PJAILNAME}-pcbsdports"
-      PJPORTSDIR="/poud/ports/pcbsdports"
     else
       . trueos.cfg
-      PPKGDIR="/poud/data/packages/${PJAILNAME}-trueosports"
-      PJPORTSDIR="/poud/ports/trueosports"
     fi
   fi
 
@@ -550,9 +546,18 @@ if [ "$TYPE" != "ports-tests" ] ; then
   fi
 
   # Poudriere variables
-  PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   PJAILNAME="`echo $JAILVER | sed 's|\.||g'`"
+  echo "$TYPE" | grep -q pcbsd
+  if [ $? -eq 0 ] ; then
+    PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
+    PPKGDIR="/poud/data/packages/${PJAILNAME}-pcbsdports"
+    PJPORTSDIR="/poud/ports/pcbsdports"
+  else
+    PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
+    PPKGDIR="/poud/data/packages/${PJAILNAME}-trueosports"
+    PJPORTSDIR="/poud/ports/trueosports"
+  fi
   export PBUILD PJPORTSDIR PPKGDIR
 
   # Set all the stage / work dirs
