@@ -215,7 +215,7 @@ echo "git clone --depth=1 -b ${GITTRUEOSBRANCH} ${GITTRUEOSURL} ${TRUEOSSRC}"
 rc_halt "git clone --depth=1 -b ${GITTRUEOSBRANCH} ${GITTRUEOSURL} ${TRUEOSSRC}"
 
 rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
-cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/${PJAILNAME}-make.conf
+cp ${PCONFDIR}/desktop/port-make.conf /usr/local/etc/poudriere.d/${PJAILNAME}-make.conf
 
 if [ "$target" = "all" ] ; then
 
