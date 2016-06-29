@@ -58,7 +58,7 @@ create_workdir()
     cp -r /ixbuild/builds ${MASTERWRKDIR}/builds
   fi
 
-  echo "$BUILDTAG" | grep -q "freenas"
+  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas"
   if [ $? -eq 0 ] ; then
     TBUILDDIR="${MASTERWRKDIR}/freenas"
   else
