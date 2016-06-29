@@ -354,6 +354,7 @@ check_essential_pkgs()
      if [ -n "$pArch" -a "$pArch" != "$ARCH" ] ; then continue; fi
 
      if [ ! -e "${PPKGDIR}/All/${pkgName}.txz" ] ; then
+        echo "Checked: ${PPKGDIR}/All/${pkgName}.txz"
         echo "WARNING: Missing package ${pkgName} for port ${i}"
         haveWarn=1
      else
