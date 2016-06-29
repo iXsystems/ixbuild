@@ -298,7 +298,7 @@ rm ${PDESTDIR9}/.setPass.sh
 prune_fs
 
 # Copy over the config.sh to install medium
-rc_halt "cp ${TRUEOSSRC}/src-sh/config.sh ${PDESTDIR9}/root/config.sh"
+rc_halt "cp ${TRUEOSSRC}/config.sh ${PDESTDIR9}/root/config.sh"
 rc_halt "chmod 755 ${PDESTDIR9}/root/config.sh"
 
 # Compress the /root directory for extraction into a memory fs
