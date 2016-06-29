@@ -50,9 +50,9 @@ if [ -z "$ISOVER" ] ; then
 fi
 
 # Where are the config files
-PCONFDIR="${TRUEOSSRC}/build-files/conf" ; export PCONFDIR
+PCONFDIR="${TRUEOSSRC}/build-files/conf/desktop" ; export PCONFDIR
 if [ "$SYSBUILD" = "trueos" ] ; then
-  PCONFDIR="${TRUEOSSRC}/build-files/conf/trueos" ; export PCONFDIR
+  PCONFDIR="${TRUEOSSRC}/build-files/conf/server" ; export PCONFDIR
 fi
 
 # Where do we place the log files

@@ -54,7 +54,7 @@ do_iso()
 
     local oSys="$SYSBUILD"
     DOINGSYSBOTH="YES" ; export DOINGSYSBOTH
-    SYSBUILD="trueos" ; export SYSBUILD
+    SYSBUILD="desktop" ; export SYSBUILD
     ${PROGDIR}/scripts/9.freesbie.sh
     if [ $? -ne 0 ] ; then
       echo "Script failed!"
