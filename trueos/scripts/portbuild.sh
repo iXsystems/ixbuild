@@ -117,6 +117,7 @@ cat >/usr/local/etc/poudriere.conf << EOF
 ZPOOL=$ZPOOL
 ZROOTFS=$ZROOT
 FREEBSD_HOST=file://${DISTDIR}
+BUILD_AS_NON_ROOT=no
 RESOLV_CONF=/etc/resolv.conf
 BASEFS=/poud
 USE_PORTLINT=no
