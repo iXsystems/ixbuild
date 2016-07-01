@@ -41,6 +41,7 @@ merge_trueos_src_ports()
 	  trueos/pc-updatemanager \
 	  trueos/pc-sysinstall \
 	  trueos/openrc \
+	  trueos/personacrypt \
 	  trueos/trueos-libqt5 \
 	  trueos/trueos-utils \
 	  trueos/trueos-utils-qt5 \
