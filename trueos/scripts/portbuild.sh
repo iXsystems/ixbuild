@@ -34,28 +34,14 @@ merge_trueos_src_ports()
    # If on 10.x we can stop now
    if [ -n "$TRUEOSLEGACY" ] ; then return 0 ; fi
 
-   # Now add all the additional ports not apart of the main trueos repo
-   TREPOS="trueos/trueos-libsh \
-	  trueos/pcdm \
-	  trueos/lpreserver \
-	  trueos/pc-updatemanager \
-	  trueos/pc-sysinstall \
-	  trueos/openrc \
-	  trueos/personacrypt \
-	  trueos/trueos-libqt5 \
-	  trueos/trueos-utils \
-	  trueos/trueos-utils-qt5 \
-	  trueos/trueos-server \
-	  trueos/trueos-desktop"
-
-   for repo in $TREPOS
+   while read repo
    do
      dname=$(basename $repo)
      rc_halt "git clone --depth=1 https://github.com/${repo}.git"
      rc_halt "cd $dname"
      rc_halt "./mkport.sh ${portsdir} ${distCache}"
      rc_halt "cd $mcwd" >/dev/null 2>/dev/null
-   done
+   done < ${gitdir}/build-files/conf/desktop/external-port-repos
 }
 
 mk_metapkg_bulkfile()
