@@ -82,6 +82,9 @@ create_base_pkg_files()
      exit 1
   fi
 
+  # Couple of files also missed by pkg base
+  rc_halt "tar xvpf ${DISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/lib/libgcc_eh.a ./usr/lib/libgcc_eh_p.a"
+
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
     echo "Signing base packages..."
@@ -127,9 +130,10 @@ if [ $? -ne 0 ] ; then
    exit 1 
 fi
 
+create_dist_files
+
 if [ -n "$PKGBASE" ] ; then
   create_base_pkg_files
 fi
-create_dist_files
 
 exit 0
