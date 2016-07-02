@@ -229,7 +229,7 @@ if [ "$target" = "all" ] ; then
 
   # Make sure the essentials built, exit now if not
   echo "Checking essential packages for release..."
-  check_essential_pkgs "${PCONFDIR}/essential-packages-release"
+  check_essential_pkgs "${PCONFDIR}/essential-packages-iso ${PCONFDIR}/essential-packages-release"
   if [ $? -ne 0 ] ; then
      exit 1
   fi

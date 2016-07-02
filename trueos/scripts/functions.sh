@@ -318,10 +318,9 @@ check_essential_pkgs()
    echo "Checking essential pkgs..."
    haveWarn=0
 
-   local eP="${1}"
-
-   chkList=""
    # Build the list of packages to check
+   cat ${1} ${2} ${3} > /tmp/.pkgList.$$
+   chkList=""
    while read line
    do
        # See if these dirs exist
@@ -334,7 +333,8 @@ check_essential_pkgs()
        do
           chkList="$chkList $i"
        done
-   done < ${eP}
+   done < /tmp/.pkgList.$$
+   rm /tmp/.pkgList.$$
 
    # Check all our TrueOS meta-pkgs, warn if some of them don't exist
    # or cannot be determined
