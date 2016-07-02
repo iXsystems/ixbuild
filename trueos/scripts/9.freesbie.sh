@@ -345,11 +345,13 @@ if [ $? -ne 0 ] ; then
    exit_err "Failed running 9.3.makedvd.sh"
 fi
 
-echo "Making DVD/USB Network Images"
-${PROGDIR}/scripts/9.4.makenetiso.sh
-if [ $? -ne 0 ] ; then
-   exit_err "Failed running 9.4.makenetiso.sh"
-fi
+# Our main images are small enough to not need this anymore
+#echo "Making DVD/USB Network Images"
+#
+#${PROGDIR}/scripts/9.4.makenetiso.sh
+#if [ $? -ne 0 ] ; then
+#   exit_err "Failed running 9.4.makenetiso.sh"
+#fi
 
 umount -f ${PDESTDIR9} 2>/dev/null
 rmdir ${PDESTDIR9}
