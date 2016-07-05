@@ -59,12 +59,6 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y devel/gmake"
 fi
 
-pkg info "net/samba44" >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing net/samba44.."
-  rc_halt "pkg install -y net/samba44"
-fi
-
 which curl >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing ftp/curl.."
