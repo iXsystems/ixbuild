@@ -99,6 +99,20 @@ EOF
     echo "Saving jUnit results to: /tmp/test-results.xml"
     mv ${XMLRESULTS} /tmp/test-results.xml
   fi
+  # Move artifacts to pre-defined location
+  if [ -n "$WORKSPACE" ] ; then
+    if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+      mkdir -p "${WORKSPACE}/artifacts"
+      chown jenkins:jenkins "${WORKSPACE}/artifacts"
+    fi
+    tStamp=$(date +%s)
+    echo "Saving release build log to: ${WORKSPACE}/artifacts/release.build-${rTag}.log"
+    mv "${BE}" "${WORKSPACE}/artifacts/release.build-${rTag}.log"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/release.build-${rTag}.log"
+  else
+    echo "Saving jUnit results to: /tmp/release.build-${rTag}.log"
+    mv ${XMLRESULTS} /tmp/release.build-${rTag}.log
+  fi
 }
 
 # $1 = RESTY type to run 
