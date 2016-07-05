@@ -1,12 +1,12 @@
 #!/bin/sh
 # PC-BSD Build configuration settings
 
-# Where is the pcbsd-build program installed
+# Where is the build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 # Copy .dist files if necessary
-if [ ! -e "${PROGDIR}/pcbsd.cfg" ] ; then
-   cp ${PROGDIR}/pcbsd.cfg.dist ${PROGDIR}/pcbsd.cfg
+if [ ! -e "${PROGDIR}/trueos.cfg" ] ; then
+   cp ${PROGDIR}/trueos.cfg.dist ${PROGDIR}/trueos.cfg
 fi
 if [ ! -e "${PROGDIR}/repo.conf" ] ; then
    cp ${PROGDIR}/repo.conf.dist ${PROGDIR}/repo.conf
@@ -21,7 +21,7 @@ fi
 cd ${PROGDIR}/scripts
 
 # Source the config file
-. ${PROGDIR}/pcbsd.cfg
+. ${PROGDIR}/trueos.cfg
 
 # First, lets check if we have all the required programs to build an ISO
 . ${PROGDIR}/scripts/functions.sh
@@ -54,7 +54,7 @@ do_iso()
 
     local oSys="$SYSBUILD"
     DOINGSYSBOTH="YES" ; export DOINGSYSBOTH
-    SYSBUILD="pcbsd" ; export SYSBUILD
+    SYSBUILD="desktop" ; export SYSBUILD
     ${PROGDIR}/scripts/9.freesbie.sh
     if [ $? -ne 0 ] ; then
       echo "Script failed!"
@@ -144,7 +144,7 @@ do_pbi-index()
   exit $?
 }
 
-do_ports_pcbsd()
+do_ports_trueos()
 {
   if [ ! -d "${PJPORTSDIR}" ] ; then
      sh ${PROGDIR}/scripts/portbuild.sh portsnap
@@ -180,7 +180,7 @@ case $TARGET in
 iso-ports) do_iso_ports; exit $? ;;
 check-ports) do_check_ports ;;
 ports-update-all) do_ports_all ;;
-ports-update-pcbsd) do_ports_pcbsd ;;
+ports-update-trueos) do_ports_trueos ;;
 pbi-index) do_pbi-index ;;
    clean) do_clean ;;
     menu) sh ${PROGDIR}/scripts/menu.sh ;;

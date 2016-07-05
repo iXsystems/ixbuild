@@ -58,10 +58,17 @@ create_workdir()
     cp -r /ixbuild/builds ${MASTERWRKDIR}/builds
   fi
 
-  case $TYPE in
-    freenas|freenas-tests|freenas-ltest|freenas-lupgrade|freenas-combo) TBUILDDIR="${MASTERWRKDIR}/freenas" ;;
-          *) TBUILDDIR="${MASTERWRKDIR}/pcbsd" ;;
-  esac
+  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas"
+  if [ $? -eq 0 ] ; then
+    TBUILDDIR="${MASTERWRKDIR}/freenas"
+  else
+    echo "$BUILDTAG" | grep -q "trueos"
+    if [ $? -eq 0 ] ; then
+      TBUILDDIR="${MASTERWRKDIR}/trueos"
+    else
+      TBUILDDIR="${MASTERWRKDIR}/pcbsd"
+    fi
+  fi
 
   cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
@@ -284,8 +291,14 @@ jenkins_pkg()
   if [ ! -d "${PPKGDIR}" ] ; then mkdir -p ${PPKGDIR} ; fi
   date +"%s" >${PPKGDIR}/.started
 
-  make ports
-  if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
+  # Make the release or ISO packages
+  if [ "$1" = "release" ] ; then
+    make ports
+    if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
+  else
+    make iso-ports
+    if [ $? -ne 0 ] ; then push_pkgworkdir; exit_clean; fi
+  fi
 
   # Push over the workdir to the cache
   push_pkgworkdir
@@ -504,31 +517,21 @@ if [ "$TYPE" != "ports-tests" ] ; then
   # Source build conf and set some vars
   cd ${BDIR}/${BUILD}
 
-  case $TYPE in
-    freenas|freenas-tests|freenas-combo)
-       BRANCH="production"
-       . freenas.cfg
-       ;;
-    freenas-ltest|freenas-lupgrade)
-       BRANCH="production"
-       . freenas.cfg
-       if [ -e "freenas-ltest.cfg" ] ; then
-         echo "Using `pwd`/freenas-ltest.cfg for Live Test host configuration"
-         . freenas-ltest.cfg
-       fi
-       if [ -z "$LIVEHOST" -o -z "$LIVEUSER" -o -z "$LIVEPASS" ] ; then
-         echo "Missing Live Test host settings! LIVEHOST/LIVEUSER/LIVEPASS"
-         exit_clean
-       fi
-       ;;
-    *)
-       if [ -z "$BRANCH" ] ; then
-         BRANCH="production"
-       fi
-       . pcbsd.cfg
-       ;;
-  esac
-
+  echo "$TYPE" | grep -q "freenas"
+  if [ $? -eq 0 ] ; then
+    BRANCH="production"
+    . freenas.cfg
+  else
+    if [ -z "$BRANCH" ] ; then
+      BRANCH="production"
+    fi
+    echo "$TYPE" | grep -q pcbsd
+    if [ $? -eq 0 ] ; then
+      . pcbsd.cfg
+    else
+      . trueos.cfg
+    fi
+  fi
 
   # Set the variables to reference poudrire jail locations
   if [ -z "$JAILVER" ] ; then
@@ -543,11 +546,18 @@ if [ "$TYPE" != "ports-tests" ] ; then
   fi
 
   # Poudriere variables
-  PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   PJAILNAME="`echo $JAILVER | sed 's|\.||g'`"
-  PPKGDIR="/poud/data/packages/${PJAILNAME}-pcbsdports"
-  PJPORTSDIR="/poud/ports/pcbsdports"
+  echo "$TYPE" | grep -q pcbsd
+  if [ $? -eq 0 ] ; then
+    PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
+    PPKGDIR="/poud/data/packages/${PJAILNAME}-pcbsdports"
+    PJPORTSDIR="/poud/ports/pcbsdports"
+  else
+    PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
+    PPKGDIR="/poud/data/packages/${PJAILNAME}-trueosports"
+    PJPORTSDIR="/poud/ports/trueosports"
+  fi
   export PBUILD PJPORTSDIR PPKGDIR
 
   # Set all the stage / work dirs

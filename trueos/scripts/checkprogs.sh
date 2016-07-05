@@ -3,7 +3,7 @@
 # Check if we have sourced the variables yet
 if [ -z $PDESTDIR ]
 then
-  . ../pcbsd.cfg
+  . ../trueos.cfg
 fi
 
 # Source our functions

@@ -3,15 +3,15 @@
 # Most of these dont need to be modified
 #########################################################
 
-# Where is the pcbsd-build program installed
+# Where is the build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 # Source vars
-. ${PROGDIR}/pcbsd.cfg
+. ${PROGDIR}/trueos.cfg
 
-# Where on disk is the PCBSD GIT branch
-PCBSDSRC="${PROGDIR}/git/pcbsd"
-export PCBSDSRC
+# Where on disk is the TRUEOS GIT branch
+TRUEOSSRC="${PROGDIR}/git/trueos"
+export TRUEOSSRC
 
 # Where are the dist files
 DISTDIR="${PROGDIR}/fbsd-dist" ; export DISTDIR
@@ -32,8 +32,8 @@ PDESTDIR9="${PROGDIR}/buildworld9" ; export PDESTDIR9
 PDESTDIRFBSD="${PROGDIR}/buildworld-fbsd" ; export PDESTDIRFBSD
 PDESTDIRSERVER="${PROGDIR}/buildworld-server" ; export PDESTDIRSERVER
 
-# Set the PC-BSD Version
-export PCBSDVER="${TARGETREL}"
+# Set the TrueOS Version
+export TRUEOSVER="${TARGETREL}"
 
 # Set the ISO Version
 REVISION="`cat ${WORLDSRC}/sys/conf/newvers.sh 2>/dev/null | grep '^REVISION=' | cut -d '"' -f 2`"
@@ -45,14 +45,14 @@ if [ -z "$BRANCH" ] ; then
    BRANCH="UNKNOWN"
 fi
 if [ -z "$ISOVER" ] ; then
-  # This can be overridden via pcbsd.cfg
+  # This can be overridden via trueos.cfg
   export ISOVER="${REVISION}-${BRANCH}"
 fi
 
 # Where are the config files
-PCONFDIR="${PCBSDSRC}/build-files/conf" ; export PCONFDIR
+PCONFDIR="${TRUEOSSRC}/build-files/conf/desktop" ; export PCONFDIR
 if [ "$SYSBUILD" = "trueos" ] ; then
-  PCONFDIR="${PCBSDSRC}/build-files/conf/trueos" ; export PCONFDIR
+  PCONFDIR="${TRUEOSSRC}/build-files/conf/server" ; export PCONFDIR
 fi
 
 # Where do we place the log files
@@ -81,10 +81,10 @@ if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
   PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
 else
-  PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
+  PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
 fi
-PPORTS="pcbsdports"
+PPORTS="trueosports"
 if [ -z "$PPKGDIR" ] ; then
   PPKGDIR="$POUD/data/packages/${JAILVER}-${PPORTS}"
 fi
@@ -218,7 +218,7 @@ create_installer_pkg_conf()
    fi
    mkdir ${PROGDIR}/tmp/repo-installer
 
-   echo "pcbsd-build: {
+   echo "trueos-build: {
                url: \"file:///mnt\",
                enabled: true
               }" >  ${PROGDIR}/tmp/repo-installer/repo.conf
@@ -234,7 +234,7 @@ cp_iso_pkg_files()
 
    create_pkg_conf
 
-   echo "Fetching PC-BSD ISO packages... Please wait, this may take several minutes..."
+   echo "Fetching TrueOS ISO packages... Please wait, this may take several minutes..."
 
    haveWarn=0
 
@@ -318,10 +318,9 @@ check_essential_pkgs()
    echo "Checking essential pkgs..."
    haveWarn=0
 
-   local eP="${1}"
-
-   chkList=""
    # Build the list of packages to check
+   cat ${1} ${2} ${3} > /tmp/.pkgList.$$
+   chkList=""
    while read line
    do
        # See if these dirs exist
@@ -334,9 +333,10 @@ check_essential_pkgs()
        do
           chkList="$chkList $i"
        done
-   done < ${eP}
+   done < /tmp/.pkgList.$$
+   rm /tmp/.pkgList.$$
 
-   # Check all our PC-BSD meta-pkgs, warn if some of them don't exist
+   # Check all our TrueOS meta-pkgs, warn if some of them don't exist
    # or cannot be determined
    for i in $chkList
    do
@@ -354,6 +354,7 @@ check_essential_pkgs()
      if [ -n "$pArch" -a "$pArch" != "$ARCH" ] ; then continue; fi
 
      if [ ! -e "${PPKGDIR}/All/${pkgName}.txz" ] ; then
+        echo "Checked: ${PPKGDIR}/All/${pkgName}.txz"
         echo "WARNING: Missing package ${pkgName} for port ${i}"
         haveWarn=1
      else

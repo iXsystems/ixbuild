@@ -2,11 +2,12 @@
 # Meta pkg building startup script
 #############################################
 
-# Where is the pcbsd-build program installed
+# Where is the build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+echo "Using PROGDIR: $PROGDIR"
 
 # Source the config file
-. ${PROGDIR}/pcbsd.cfg
+. ${PROGDIR}/trueos.cfg
 
 cd ${PROGDIR}/scripts
 
@@ -18,7 +19,7 @@ sh ${PROGDIR}/scripts/checkprogs.sh
 cStat=$?
 if [ $cStat -ne 0 ] ; then exit $cStat; fi
 
-merge_pcbsd_src_ports()
+merge_trueos_src_ports()
 {
    local mcwd=`pwd`
    local gitdir="$1"
@@ -27,24 +28,20 @@ merge_pcbsd_src_ports()
 
    rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
      
-   # Now use the git script to create source ports
-   rc_halt "./mkports.sh ${portsdir} ${distCache}"
-
    # Jump back to where we belong
    rc_halt "cd $mcwd" >/dev/null 2>/dev/null
 
    # If on 10.x we can stop now
-   if [ -n "$PCBSDLEGACY" ] ; then return 0 ; fi
+   if [ -n "$TRUEOSLEGACY" ] ; then return 0 ; fi
 
-   # Now add all the additional ports not apart of the main pcbsd repo
-   for repo in trueos/trueos-libsh trueos/lpreserver trueos/pc-updatemanager trueos/pc-sysinstall
+   while read repo
    do
      dname=$(basename $repo)
      rc_halt "git clone --depth=1 https://github.com/${repo}.git"
      rc_halt "cd $dname"
      rc_halt "./mkport.sh ${portsdir} ${distCache}"
      rc_halt "cd $mcwd" >/dev/null 2>/dev/null
-   done
+   done < ${gitdir}/build-files/conf/desktop/external-port-repos
 }
 
 mk_metapkg_bulkfile()
@@ -107,6 +104,7 @@ cat >/usr/local/etc/poudriere.conf << EOF
 ZPOOL=$ZPOOL
 ZROOTFS=$ZROOT
 FREEBSD_HOST=file://${DISTDIR}
+BUILD_AS_NON_ROOT=no
 RESOLV_CONF=/etc/resolv.conf
 BASEFS=/poud
 USE_PORTLINT=no
@@ -116,12 +114,12 @@ CHECK_CHANGED_OPTIONS=verbose
 CHECK_CHANGED_DEPS=yes
 PARALLEL_JOBS=${BUILDERS}
 WRKDIR_ARCHIVE_FORMAT=txz
-ALLOW_MAKE_JOBS_PACKAGES="pkg ccache py* llvm* libreoffice* apache-openoffice* webkit* firefox* chrom* gcc*"
+ALLOW_MAKE_JOBS_PACKAGES="pkg ccache py* llvm* libreoffice* apache-openoffice* webkit* firefox* chrom* gcc* qt5-*"
 MAX_EXECUTION_TIME=86400
 NOHANG_TIME=12600
 ATOMIC_PACKAGE_REPOSITORY=no
 PKG_REPO_FROM_HOST=yes
-BUILDER_HOSTNAME=builds.pcbsd.org
+BUILDER_HOSTNAME=builds.trueos.org
 PRIORITY_BOOST="pypy openoffice*"
 GIT_URL=${PORTS_GIT_URL}
 USE_COLORS=yes
@@ -160,10 +158,10 @@ do_portsnap()
   fi
 }
 
-do_pcbsd_portmerge()
+do_trueos_portmerge()
 {
-   # Copy our PCBSD port files
-   merge_pcbsd_src_ports "${PCBSDSRC}" "/poud/ports/${PPORTS}"
+   # Copy our TRUEOS port files
+   merge_trueos_src_ports "${TRUEOSSRC}" "/poud/ports/${PPORTS}"
 }
 
 do_pbi-index()
@@ -171,7 +169,7 @@ do_pbi-index()
    if [ -z "$PBI_REPO_KEY" ] ; then return 0; fi
 
    # See if we can create the PBI index files for this repo
-   if [ ! -d "${PCBSDSRC}/pbi-modules" ] ; then return 0; fi
+   if [ ! -d "${TRUEOSSRC}/pbi-modules" ] ; then return 0; fi
 
    echo "Building new PBI-INDEX"
 
@@ -184,7 +182,7 @@ do_pbi-index()
    ABIVER=`echo $TARGETREL | cut -d '-' -f 1 | cut -d '.' -f 1`
    PBI_PKGCFLAG="-o ABI=freebsd:${ABIVER}:x86:64" ; export PBI_PKGCFLAG
 
-   rc_halt "cd ${PCBSDSRC}/pbi-modules" >/dev/null 2>/dev/null
+   rc_halt "cd ${TRUEOSSRC}/pbi-modules" >/dev/null 2>/dev/null
    rc_halt "pbi_makeindex ${PBI_REPO_KEY}"
    rc_nohalt "rm PBI-INDEX" >/dev/null 2>/dev/null
    rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/" >/dev/null 2>/dev/null
@@ -199,12 +197,12 @@ fi
 
 cd ${PROGDIR}
 
-if [ -d "${PCBSDSRC}" ]; then
-  rm -rf ${PCBSDSRC}
+if [ -d "${TRUEOSSRC}" ]; then
+  rm -rf ${TRUEOSSRC}
 fi
-mkdir -p ${PCBSDSRC}
-echo "git clone --depth=1 -b ${GITPCBSDBRANCH} ${GITPCBSDURL} ${PCBSDSRC}"
-rc_halt "git clone --depth=1 -b ${GITPCBSDBRANCH} ${GITPCBSDURL} ${PCBSDSRC}"
+mkdir -p ${TRUEOSSRC}
+echo "git clone --depth=1 -b ${GITTRUEOSBRANCH} ${GITTRUEOSURL} ${TRUEOSSRC}"
+rc_halt "git clone --depth=1 -b ${GITTRUEOSBRANCH} ${GITTRUEOSURL} ${TRUEOSSRC}"
 
 rc_halt "cd ${PCONFDIR}/" >/dev/null 2>/dev/null
 cp ${PCONFDIR}/port-make.conf /usr/local/etc/poudriere.d/${PJAILNAME}-make.conf
@@ -231,7 +229,7 @@ if [ "$target" = "all" ] ; then
 
   # Make sure the essentials built, exit now if not
   echo "Checking essential packages for release..."
-  check_essential_pkgs "${PCONFDIR}/essential-packages-release"
+  check_essential_pkgs "${PCONFDIR}/essential-packages-iso ${PCONFDIR}/essential-packages-release"
   if [ $? -ne 0 ] ; then
      exit 1
   fi
@@ -267,10 +265,10 @@ elif [ "$target" = "iso" ] ; then
   exit 0
 elif [ "$1" = "portsnap" ] ; then
    do_portsnap
-   do_pcbsd_portmerge
+   do_trueos_portmerge
    exit 0
 elif [ "$1" = "portmerge" ] ; then
-   do_pcbsd_portmerge
+   do_trueos_portmerge
    exit 0
 elif [ "$1" = "pbi-index" ] ; then
    do_pbi-index

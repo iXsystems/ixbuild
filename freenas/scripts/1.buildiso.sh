@@ -117,6 +117,12 @@ if [ "$FREENASLEGACY" = "910" ] ; then
   fi
 fi
 
+# Check if we have optional build options
+if [ -n "$BUILDOPTS" ] ; then
+  PROFILEARGS="$PROFILEARGS $BUILDOPTS"
+  unset BUILDOPTS
+fi
+
 # Start the XML reporting
 start_xml_results "FreeNAS Build Process"
 set_test_group_text "Build phase tests" "2"
