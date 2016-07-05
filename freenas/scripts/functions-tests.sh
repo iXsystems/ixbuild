@@ -106,12 +106,12 @@ EOF
       chown jenkins:jenkins "${WORKSPACE}/artifacts"
     fi
     tStamp=$(date +%s)
-    echo "Saving release build log to: ${WORKSPACE}/artifacts/release.build-${rTag}.log"
-    mv "${BE}" "${WORKSPACE}/artifacts/release.build-${rTag}.log"
-    chown jenkins:jenkins "${WORKSPACE}/artifacts/release.build-${rTag}.log"
+    echo "Saving logs to: ${WORKSPACE}/artifacts/BE-${rTag}"
+    mv "${BE}" "${WORKSPACE}/artifacts/BE-${rTag}"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/BE-${rTag}"
   else
-    echo "Saving jUnit results to: /tmp/release.build-${rTag}.log"
-    mv ${XMLRESULTS} /tmp/release.build-${rTag}.log
+    echo "Saving jUnit results to: /tmp/BE-${rTag}"
+    mv ${BE} /tmp/BE-${rTag}
   fi
 }
 
