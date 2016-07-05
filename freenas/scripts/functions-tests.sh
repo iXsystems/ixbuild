@@ -106,12 +106,11 @@ EOF
       chown jenkins:jenkins "${WORKSPACE}/artifacts"
     fi
     tStamp=$(date +%s)
-    echo "Saving logs to: ${WORKSPACE}/artifacts/BE-${rTag}"
-    mv "${BE}" "${WORKSPACE}/artifacts/BE-${rTag}"
-    chown jenkins:jenkins "${WORKSPACE}/artifacts/BE-${rTag}"
+    echo "Saving logs to: ${WORKSPACE}/artifacts/"
+    cp -R "${BE}" "${WORKSPACE}/artifacts/"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
-    echo "Saving jUnit results to: /tmp/BE-${rTag}"
-    mv ${BE} /tmp/BE-${rTag}
+    echo "Unable to save artifacts"
   fi
 }
 
