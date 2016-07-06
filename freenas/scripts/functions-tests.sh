@@ -101,7 +101,7 @@ EOF
   fi
 }
 
-do_save_artifacts() {
+do_save_artifacts_on_fail() {
   # Move artifacts to pre-defined location
   if [ -n "$WORKSPACE" ] ; then
     if [ ! -d "${WORKSPACE}/artifacts" ] ; then
@@ -113,7 +113,23 @@ do_save_artifacts() {
     cp -R "${BUILDENV}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
-    echo "Unable to save artifacts"
+    echo "skip saving artificats on failure / ARTIFACTONFAIL not set"
+  fi
+}
+
+do_save_artifacts_on_success() {
+  # Move artifacts to pre-defined location
+  if [ -n "$WORKSPACE" ] ; then
+    if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+      mkdir -p "${WORKSPACE}/artifacts"
+      chown jenkins:jenkins "${WORKSPACE}/artifacts"
+    fi
+    tStamp=$(date +%s)
+    echo "Saving logs to: ${WORKSPACE}/artifacts/"
+    cp -R "${BUILDENV}" "${WORKSPACE}/artifacts/"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/"
+  else
+    echo "skip saving artificats on success / ARTIFACTONSUCCESS not set"
   fi
 }
 
