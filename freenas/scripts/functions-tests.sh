@@ -112,7 +112,7 @@ save_artifacts_on_fail()
       fi
     fi
     echo "Cleaning previous artifacts"
-    rm -rf "${WORKSPACE/artifacts/*"
+    rm -rf ${WORKSPACE}/artifacts/*
     echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
     cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
@@ -132,7 +132,7 @@ save_artifacts_on_success()
       fi
     fi
     echo "Cleaning previous artifacts"
-    rm -rf "${WORKSPACE/artifacts/*
+    rm -rf ${WORKSPACE}/artifacts/*
     echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
     cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
