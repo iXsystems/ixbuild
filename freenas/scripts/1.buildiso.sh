@@ -227,6 +227,7 @@ if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make release"
   parse_build_error "${OUTFILE}"
+  do_save_artifacts
   finish_xml_results "make"
   exit 1
 fi
