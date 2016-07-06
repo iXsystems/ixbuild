@@ -105,15 +105,16 @@ save_artifacts_on_fail()
 {
   # Move artifacts to pre-defined location
   if [ -n "$ARTIFACTONFAIL" ] ; then
-    if [ -n "$WORKSPACE" ] ; then
-      if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-        mkdir -p "${WORKSPACE}/artifacts"
-        chown jenkins:jenkins "${WORKSPACE}/artifacts"
+      if [ -n "$WORKSPACE" ] ; then
+        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+          mkdir -p "${WORKSPACE}/artifacts"
+          chown jenkins:jenkins "${WORKSPACE}/artifacts"
       fi
     fi
-    tStamp=$(date +%s)
-    echo "Saving logs to: ${WORKSPACE}/artifacts/"
-    cp -R "${BUILDENV}" "${WORKSPACE}/artifacts/"
+    echo "Cleaning previous artifacts"
+    rm -rf "${WORKSPACE/artifacts/*"
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
+    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
@@ -130,9 +131,10 @@ save_artifacts_on_success()
         chown jenkins:jenkins "${WORKSPACE}/artifacts"
       fi
     fi
-    tStamp=$(date +%s)
-    echo "Saving logs to: ${WORKSPACE}/artifacts/"
-    cp -R "${BUILDENV}" "${WORKSPACE}/artifacts/"
+    echo "Cleaning previous artifacts"
+    rm -rf "${WORKSPACE/artifacts/*
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
+    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
