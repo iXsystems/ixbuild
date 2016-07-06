@@ -107,7 +107,7 @@ EOF
     fi
     tStamp=$(date +%s)
     echo "Saving logs to: ${WORKSPACE}/artifacts/"
-    cp -R "${BE}" "${WORKSPACE}/artifacts/"
+    cp -R "${BUILDENV}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Unable to save artifacts"
