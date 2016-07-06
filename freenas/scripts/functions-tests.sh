@@ -101,7 +101,7 @@ EOF
   fi
 }
 
-do_save_artifacts_on_fail() {
+save_artifacts_on_fail() {
   # Move artifacts to pre-defined location
   if [ -n $ARTIFACTONFAIL" ] ; then
     if [ -n "$WORKSPACE" ] ; then
@@ -118,7 +118,7 @@ do_save_artifacts_on_fail() {
   fi
 }
 
-do_save_artifacts_on_success() {
+save_artifacts_on_success() {
   # Move artifacts to pre-defined location
   if [ -n $ARTIFACTONSUCCESS" ] ; then
     if [ -n "$WORKSPACE" ] ; then
