@@ -103,10 +103,11 @@ EOF
 
 do_save_artifacts_on_fail() {
   # Move artifacts to pre-defined location
-  if [ -n "$WORKSPACE" ] ; then
-    if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-      mkdir -p "${WORKSPACE}/artifacts"
-      chown jenkins:jenkins "${WORKSPACE}/artifacts"
+  if [ -n $ARTIFACTONFAIL" ] ; then
+    if [ -n "$WORKSPACE" ] ; then
+      if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+        mkdir -p "${WORKSPACE}/artifacts"
+        chown jenkins:jenkins "${WORKSPACE}/artifacts"
     fi
     tStamp=$(date +%s)
     echo "Saving logs to: ${WORKSPACE}/artifacts/"
@@ -119,10 +120,11 @@ do_save_artifacts_on_fail() {
 
 do_save_artifacts_on_success() {
   # Move artifacts to pre-defined location
-  if [ -n "$WORKSPACE" ] ; then
-    if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-      mkdir -p "${WORKSPACE}/artifacts"
-      chown jenkins:jenkins "${WORKSPACE}/artifacts"
+  if [ -n $ARTIFACTONSUCCESS" ] ; then
+    if [ -n "$WORKSPACE" ] ; then
+      if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+        mkdir -p "${WORKSPACE}/artifacts"
+        chown jenkins:jenkins "${WORKSPACE}/artifacts"
     fi
     tStamp=$(date +%s)
     echo "Saving logs to: ${WORKSPACE}/artifacts/"
