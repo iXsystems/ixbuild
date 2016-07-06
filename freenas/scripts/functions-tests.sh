@@ -116,7 +116,7 @@ save_artifacts_on_fail()
     cp -R "${BUILDENV}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
-    echo "skip saving artificats on failure / ARTIFACTONFAIL not set"
+    echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
   fi
 }
 
@@ -135,7 +135,7 @@ save_artifacts_on_success()
     cp -R "${BUILDENV}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
-    echo "skip saving artificats on success / ARTIFACTONSUCCESS not set"
+    echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
   fi
 }
 
