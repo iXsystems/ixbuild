@@ -99,6 +99,9 @@ EOF
     echo "Saving jUnit results to: /tmp/test-results.xml"
     mv ${XMLRESULTS} /tmp/test-results.xml
   fi
+}
+
+do_save_artifacts() {
   # Move artifacts to pre-defined location
   if [ -n "$WORKSPACE" ] ; then
     if [ ! -d "${WORKSPACE}/artifacts" ] ; then
