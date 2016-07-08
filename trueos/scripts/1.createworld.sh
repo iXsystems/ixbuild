@@ -83,7 +83,7 @@ create_base_pkg_files()
   fi
 
   # Couple of files also missed by pkg base
-  rc_halt "tar xvpf ${DISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/lib/libgcc_eh.a ./usr/lib/libgcc_eh_p.a"
+  rc_halt "tar xvpf ${ODISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/lib/libgcc_eh.a ./usr/lib/libgcc_eh_p.a"
 
   # Signing script
   if [ -n "$PKGSIGNCMD" ] ; then
