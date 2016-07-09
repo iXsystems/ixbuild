@@ -101,6 +101,46 @@ EOF
   fi
 }
 
+save_artifacts_on_fail()
+{
+  # Move artifacts to pre-defined location
+  if [ -n "$ARTIFACTONFAIL" ] ; then
+      if [ -n "$WORKSPACE" ] ; then
+        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+          mkdir -p "${WORKSPACE}/artifacts"
+          chown jenkins:jenkins "${WORKSPACE}/artifacts"
+      fi
+    fi
+    echo "Cleaning previous artifacts"
+    rm -rf ${WORKSPACE}/artifacts/*
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
+    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/"
+  else
+    echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
+  fi
+}
+
+save_artifacts_on_success() 
+{
+  # Move artifacts to pre-defined location
+  if [ -n "$ARTIFACTONSUCCESS" ] ; then
+    if [ -n "$WORKSPACE" ] ; then
+      if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+        mkdir -p "${WORKSPACE}/artifacts"
+        chown jenkins:jenkins "${WORKSPACE}/artifacts"
+      fi
+    fi
+    echo "Cleaning previous artifacts"
+    rm -rf ${WORKSPACE}/artifacts/*
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
+    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/"
+  else
+    echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
+  fi
+}
+
 # $1 = RESTY type to run 
 # $2 = RESTY URL
 # $3 = JSON to pass to RESTY

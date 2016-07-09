@@ -53,6 +53,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y emulators/virtualbox-ose-kmod"
 fi
 
+pkg info "devel/gmake" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing devel/gmake.."
+  rc_halt "pkg install -y devel/gmake"
+fi
+
 which curl >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing ftp/curl.."
