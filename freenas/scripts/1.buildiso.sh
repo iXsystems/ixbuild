@@ -135,7 +135,7 @@ touch ${OUTFILE}
 TPID=$!
 
 echo_test_title "make checkout ${PROFILEARGS}"
-make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
+${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make checkout"
@@ -222,7 +222,7 @@ touch $OUTFILE
 TPID=$!
 
 echo_test_title "make release ${PROFILEARGS}"
-make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
+${BUILDSENV} make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make release"
