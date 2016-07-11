@@ -113,14 +113,14 @@ save_artifacts_on_fail()
   # Move artifacts to pre-defined location
   if [ -n "$ARTIFACTONFAIL" ] ; then
       if [ -n "$WORKSPACE" ] ; then
-        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-          mkdir -p "${WORKSPACE}/artifacts"
-          chown jenkins:jenkins "${WORKSPACE}/artifacts"
+        if [ ! -d "${WORKSPACE}/artifacts/${FNASBDIR}" ] ; then
+          mkdir -p "${WORKSPACE}/artifacts/${FNASBDIR}"
+          chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
       fi
     fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
-    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
-    chown jenkins:jenkins "${WORKSPACE}/artifacts/"
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts/${FNASBDIR}"
+    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/${FNASBDIR}"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
   else
     echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
   fi
@@ -133,12 +133,12 @@ save_artifacts_on_success()
     if [ -n "$WORKSPACE" ] ; then
       if [ ! -d "${WORKSPACE}/artifacts/${FNASBDIR}" ] ; then
         mkdir -p "${WORKSPACE}/artifacts/${FNASBDIR}"
-        chown jenkins:jenkins "${WORKSPACE}/artifacts"
+        chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
       fi
     fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
-    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
-    chown jenkins:jenkins "${WORKSPACE}/artifacts/"
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts/${FNASBDIR}"
+    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/${FNASBDIR}"
+    chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
   else
     echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
   fi
