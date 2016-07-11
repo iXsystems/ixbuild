@@ -131,8 +131,8 @@ save_artifacts_on_success()
   # Move artifacts to pre-defined location
   if [ -n "$ARTIFACTONSUCCESS" ] ; then
     if [ -n "$WORKSPACE" ] ; then
-      if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-        mkdir -p "${WORKSPACE}/artifacts"
+      if [ ! -d "${WORKSPACE}/artifacts/${FNASBDIR}" ] ; then
+        mkdir -p "${WORKSPACE}/artifacts/${FNASBDIR}"
         chown jenkins:jenkins "${WORKSPACE}/artifacts"
       fi
     fi
