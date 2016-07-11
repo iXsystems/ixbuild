@@ -105,7 +105,7 @@ clean_artifacts()
 {
   # Move artifacts to pre-defined location
     echo "Cleaning previous artifacts"
-    rm -rf "${WORKSPACE}/artifacts/"
+    rm -rf "${WORKSPACE}/artifacts/${FNASBDIR}"
 }
 
 save_artifacts_on_fail()
@@ -118,7 +118,7 @@ save_artifacts_on_fail()
           chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
       fi
     fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts/${FNASBDIR}"
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts${FNASBDIR}"
     cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/${FNASBDIR}"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
   else
@@ -136,7 +136,7 @@ save_artifacts_on_success()
         chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
       fi
     fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts/${FNASBDIR}"
+    echo "Saving artifacts to: ${WORKSPACE}/artifacts${FNASBDIR}"
     cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/${FNASBDIR}"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
   else
