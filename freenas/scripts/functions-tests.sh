@@ -101,6 +101,13 @@ EOF
   fi
 }
 
+clean_artifacts() 
+{
+  # Move artifacts to pre-defined location
+    echo "Cleaning previous artifacts"
+    rm -rf "${WORKSPACE}/artifacts/"
+}
+
 save_artifacts_on_fail()
 {
   # Move artifacts to pre-defined location
@@ -111,8 +118,6 @@ save_artifacts_on_fail()
           chown jenkins:jenkins "${WORKSPACE}/artifacts"
       fi
     fi
-    echo "Cleaning previous artifacts"
-    rm -rf ${WORKSPACE}/artifacts/*
     echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
     cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
@@ -131,8 +136,6 @@ save_artifacts_on_success()
         chown jenkins:jenkins "${WORKSPACE}/artifacts"
       fi
     fi
-    echo "Cleaning previous artifacts"
-    rm -rf ${WORKSPACE}/artifacts/*
     echo "Saving artifacts to: ${WORKSPACE}/artifacts/"
     cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/"
     chown jenkins:jenkins "${WORKSPACE}/artifacts/"
