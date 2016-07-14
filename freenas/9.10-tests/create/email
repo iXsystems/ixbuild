@@ -1,0 +1,33 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+# Run a series of tests on the email settings
+email_tests() {
+  set_test_group_text "E-Mail Tests" "1"
+
+  echo_test_title "Configuring e-mail settings"
+  rest_request "PUT" "/system/email/" '{ "em_fromemail": "william.spam@ixsystems.com", "em_outgoingserver": "mail.ixsystems.com", "em_pass": "changeme", "em_port": 25, "em_security": "plain", "em_smtp": true, "em_user": "william.spam@ixsystems.com" }'
+  check_rest_response "200 OK"
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+email_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) email_tests ;;
+     COMPLETE) email_tests ;;
+    BENCHMARK) ;;
+            *) email_tests ;;
+  esac
+}

@@ -1,0 +1,69 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+ad_tests() {
+  set_test_group_text "Active Directory tests" "5"
+
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
+     echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing AD settings"
+     return 0
+  fi
+
+  # Configure NTP Settings to prevent offset with Active Directory
+  echo_test_title "Updating NTP Settings for Active Directory.."
+  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
+  check_rest_response "200 OK"
+
+  # Remove Other NTP Servers
+  echo_test_title "Removing non AD NTP servers 1/2"
+  rest_request "DELETE" "/system/ntpserver/2/"
+  check_rest_response "204"
+  echo_test_title "Removing non AD NTP servers 2/2"
+  rest_request "DELETE" "/system/ntpserver/3/"
+  check_rest_response "204"
+
+  # Enable Active Directory Directory
+  echo_test_title "Enabling Active Directory.."
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"true"  }'
+  check_rest_response "200 OK"
+
+  # Check Active Directory
+  echo_test_title "Checking Active Directory.."
+  rest_request GET "/directoryservice/activedirectory/"
+  check_rest_response "200 OK" || return 1
+  ADSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ad_enable')
+  echo "ADSTATUS: $ADSTATUS"
+  echo $ADSTATUS | grep -q 'true'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+
+    echo_fail
+  fi
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+ad_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) ad_tests ; return $? ;;
+     COMPLETE) ad_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) ad_tests ; return $? ;;
+  esac
+}

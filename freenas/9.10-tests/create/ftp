@@ -1,0 +1,39 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.3
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage user"
+export REQUIRES
+
+ftp_tests() {
+  set_test_group_text "FTP tests" "3"
+
+  echo_test_title "Configuring ftp service"
+  rest_request "PUT" "/services/ftp/" '{ "ftp_clients": 10, "ftp_rootlogin": true }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Starting ftp service"
+  rest_request "PUT" "/services/services/ftp/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Fetching file via FTP"
+  rc_test "ftp -o /tmp/ftpfile ftp://testuser:test@${ip}/.cshrc"
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+ftp_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) ftp_tests ;;
+     COMPLETE) ftp_tests ;;
+    BENCHMARK) ;;
+            *) ftp_tests ;;
+  esac
+}
