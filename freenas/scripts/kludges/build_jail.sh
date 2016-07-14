@@ -72,5 +72,5 @@ if [ -e "${NANO_WORLDDIR}/bin/freebsd-version" ] ; then
   nVer=`${NANO_WORLDDIR}/bin/freebsd-version | cut -d '-' -f 1-2`
   update_version_env "$nVer"
 else
-  update_version_env "9.3-RELEASE"
+  update_version_env "10.3-RELEASE"
 fi
