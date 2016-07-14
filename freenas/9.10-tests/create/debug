@@ -1,7 +1,7 @@
 #!/usr/local/bin/bash
 # Author: Kris Moore
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.3
+# Location for tests into REST API of FreeNAS 9.10
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 

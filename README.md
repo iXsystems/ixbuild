@@ -20,7 +20,7 @@ The scripts in this repo will allow you to build PC-BSD or FreeNAS, either
 as an automated job from Jenkins or manually. It includes support to build
 the following:
 
- * FreeNAS 9.3 / 9.10 / 10.0
+ * FreeNAS 9.10 / 10.0
  * PC-BSD 10.2 / 10.3 / 11.0-CURRENT
 
 
@@ -113,7 +113,7 @@ FreeNAS Testing Framework
 Adding New tests
 ---
 
-New tests can be written for FreeNAS 9.3.X by adding a test "module" to the 9.3 testing directory:
+New tests can be written for FreeNAS 9.10.X by adding a test "module" to the 9.10 testing directory:
 
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests
 
@@ -126,7 +126,7 @@ For more details, click the link above and checkout the README file.
 Where are tests run?
 ---
 
-The tests for FreeNAS 9.3.X are currently being run on-commit. Committers will automatically get
+The tests for FreeNAS 9.10.X are currently being run on-commit. Committers will automatically get
 an e-mail with results and log files on testing failures.
 
 Tests / log output can be viewed at the following location:
