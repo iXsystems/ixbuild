@@ -11,8 +11,10 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 # Set variable to call jsawk utility
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 
-# Test Module directory
-TDIR="${PROGDIR}/9.10-tests"
+# Test Module directories
+TDIRCREATE="${PROGDIR}/9.10-tests/create"
+TDIRMODIFY="${PROGDIR}/9.10-tests/modify"
+TDIRDELETE="${PROGDIR}/9.10-tests/delete"
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions-tests.sh
