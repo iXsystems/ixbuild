@@ -71,16 +71,16 @@ before executing checkprogs:
  # cd freenas/scripts && ./checkprogs.sh
 ```
 
-Tests are located in the freenas/scripts/9.3-tests.sh and
+Tests are located in the freenas/scripts/9.10-tests.sh and
 freenas/scripts/10-tests.sh files. These scripts can also be run directly
 by pointing them at a FreeNAS instance with the following syntax:
 
 ```
- # cd freenas/scripts && ./9.3-tests.sh
+ # cd freenas/scripts && ./9.10-tests.sh
 ```
 
 ```
- *Optional* arguments to 9.3-tests.sh
+ *Optional* arguments to 9.10-tests.sh
 
  testset={smoke|complete|benchmark}
 
@@ -115,7 +115,7 @@ Adding New tests
 
 New tests can be written for FreeNAS 9.3.X by adding a test "module" to the 9.3 testing directory:
 
-https://github.com/iXsystems/ixbuild/tree/master/freenas/9.3-tests
+https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests
 
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.

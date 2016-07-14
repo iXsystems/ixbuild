@@ -222,7 +222,7 @@ sleep 120
 cd ${PROGDIR}/scripts
 
 if [ -n "$FREENASLEGACY" ] ; then
-  ./9.3-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
+  ./9.10-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
   res=$?
 else
   ./10-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
