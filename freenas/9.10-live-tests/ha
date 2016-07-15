@@ -1,0 +1,153 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage ssh smb nfs iscsi"
+export REQUIRES
+
+ha_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "High Availability tests" "43"
+
+  # Simulate HA Panic
+  trigger_ha_failover "panic"
+
+  # Wait a short time for failover to occur.  Then run more tests.
+  sleep 30
+
+  # Check to see if services failed over
+
+  echo_test_title "Checking to see if CIFS service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+
+  # Check to see if NFS server is running
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_rest_response "200 OK" || return 1
+
+  # Check to see if iSCSI service is running
+  echo_test_title "Checking to see if iSCSI service is enabled"
+  rest_request "GET" "/services/services/iscsitarget/"
+  check_rest_response "200 OK" || return 1
+
+  sleep 10
+
+  echo_test_title "List contents of CIFS share"
+  rc_test "ls /tmp/cifs-mnt.$$/" || return 1
+
+  echo_test_title "Creating CIFS file"
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Moving CIFS file"
+  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Creating NFS file"
+  rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Moving NFS file"
+  rc_test "mv /tmp/nfs-mnt.$$/testfile /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying NFS file"
+  rc_test "cp /tmp/nfs-mnt.$$/testfile2 /tmp/nfs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting NFS file"
+  rc_test "rm /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  # Check HA Status
+  do_ha_status
+
+  # Simulate HA Reboot
+  trigger_ha_failover "reboot"
+
+  # Wait a short time for failover to occur.  Then run more tests.
+  sleep 30
+
+  # Check to see if services failed over
+
+  echo_test_title "Checking to see if CIFS service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+
+  # Check to see if NFS server is running
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_rest_response "200 OK" || return 1
+
+  # Check to see if iSCSI service is running
+  echo_test_title "Checking to see if iSCSI service is enabled"
+  rest_request "GET" "/services/services/iscsitarget/"
+  check_rest_response "200 OK" || return 1
+
+  echo_test_title "List contents of CIFS share"
+  rc_test "ls /tmp/cifs-mnt.$$/" || return 1
+
+  echo_test_title "Creating CIFS file"
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Moving CIFS file"
+  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting CIFS"
+  rc_test "umount /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS mountpoint"
+  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Creating NFS file"
+  rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Moving NFS file"
+  rc_test "mv /tmp/nfs-mnt.$$/testfile /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying NFS file"
+  rc_test "cp /tmp/nfs-mnt.$$/testfile2 /tmp/nfs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting NFS file"
+  rc_test "rm /tmp/nfs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting NFS"
+  rc_test "umount /tmp/nfs-mnt.$$" || return 1
+
+  echo_test_title "Removing NFS mountpoint"
+  rc_test "rmdir /tmp/nfs-mnt.$$" || return 1
+
+  # Check HA Status
+  do_ha_status
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+ha_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) ha_tests ;;
+     COMPLETE) ha_tests ;;
+    BENCHMARK) ;;
+            *) ha_tests ;;
+  esac
+}
