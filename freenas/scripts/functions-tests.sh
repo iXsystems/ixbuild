@@ -119,7 +119,7 @@ save_artifacts_on_fail()
               if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
                 mkdir "${WORKSPACE}/artifacts/logs"
 	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
+                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
 		  mkdir "${WORKSPACE}/artifacts/ports"
                   chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
           fi
@@ -146,7 +146,7 @@ save_artifacts_on_success()
               if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
                 mkdir "${WORKSPACE}/artifacts/logs"
 	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
+                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
 		  mkdir "${WORKSPACE}/artifacts/ports"
                   chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
           fi
