@@ -155,7 +155,7 @@ save_artifacts_on_success()
     fi
     echo "Saving artifacts to: ${WORKSPACE}/artifacts"
     cp -R "${FNASBDIR}/_BE/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/${FNASBDIR}/ports/"
+    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
     chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
