@@ -123,8 +123,9 @@ save_artifacts_on_fail()
       fi
     fi
     echo "Saving artifacts to: ${WORKSPACE}/artifacts${FNASBDIR}"
-    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/${FNASBDIR}"
-    chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
+    cp -R "${FNASBDIR}/_BE/objs/logs" "${WORKSPACE}/artifacts/${FNASBDIR}"
+    cp -R "${FNASBDIR}/_BE/objs/ports/logs" "${WORKSPACE}/artifacts/${FNASBDIR}"
+    chown -R jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
   else
     echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
   fi
@@ -145,8 +146,9 @@ save_artifacts_on_success()
       fi
     fi
     echo "Saving artifacts to: ${WORKSPACE}/artifacts${FNASBDIR}"
-    cp -R "${ARTIFACTONFAIL}" "${WORKSPACE}/artifacts/${FNASBDIR}"
-    chown jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
+    cp -R "${FNASBDIR}/_BE/objs/logs" "${WORKSPACE}/artifacts/${FNASBDIR}"
+    cp -R "${FNASBDIR}/_BE/objs/ports/logs" "${WORKSPACE}/artifacts/${FNASBDIR}"
+    chown -R jenkins:jenkins "${WORKSPACE}/artifacts/${FNASBDIR}"
   else
     echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
   fi
