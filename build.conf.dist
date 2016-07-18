@@ -49,6 +49,11 @@ export NOIPPASSWORD NOIPUSERNAME NOIPHOST
 FNASTESTIP=""
 export FNASTESTIP
 
+# Set this to the information to use for testing jails
+JAILIP=""
+JAILNETMASK=""
+JAILGW=""
+
 # Set this to be the AD information for joining an Active Directory
 ADUSERNAME=""
 ADPASSWORD=""
