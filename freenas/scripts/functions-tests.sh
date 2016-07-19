@@ -105,7 +105,7 @@ clean_artifacts()
 {
   # Move artifacts to pre-defined location
     echo "Cleaning previous artifacts"
-    rm -rf "${WORKSPACE}/artifacts/${FNASBDIR}"
+    rm -rf "${WORKSPACE}/artifacts/"
 }
 
 save_artifacts_on_fail()
