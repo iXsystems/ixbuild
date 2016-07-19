@@ -379,6 +379,24 @@ run_module() {
     return 1
   fi
 
+  # Source the module now
+  cd ${TDIRUPDATE}
+  . ./${1}
+  if [ $? -ne 0 ] ; then
+    echo "Failed sourcing ${1}"
+    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
+    return 1
+  fi
+
+  # Source the module now
+  cd ${TDIRDELETE}
+  . ./${1}
+  if [ $? -ne 0 ] ; then
+    echo "Failed sourcing ${1}"
+    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
+    return 1
+  fi
+
   # Make sure any required module have been run first
   local modreq="$REQUIRES"
   local nofails="true"
