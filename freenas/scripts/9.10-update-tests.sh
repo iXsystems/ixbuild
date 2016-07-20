@@ -77,6 +77,9 @@ echo_ok
 
 RESULT="SUCCESS"
 
+echo "Running tests for $TDIR"
+cd $TDIR
+
 if [ -n "$runmod" ] ; then
   for mod in $runmod
   do

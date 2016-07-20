@@ -80,6 +80,9 @@ set_ip
 
 RESULT="SUCCESS"
 
+echo "Running tests for $TDIR"
+cd $TDIR
+
 if [ -n "$runmod" ] ; then
   for mod in $runmod
   do
