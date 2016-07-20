@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 user_tests() {
-  set_test_group_text "User delete tests" "1"
+  set_test_group_text "Delete User tests" "1"
 
   # Delete the testuser
   echo_test_title "Deleting user: testuser"
