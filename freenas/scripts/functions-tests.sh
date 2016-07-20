@@ -371,25 +371,7 @@ run_module() {
   unset REQUIRES
 
   # Source the module now
-  cd ${TDIRCREATE}
-  . ./${1}
-  if [ $? -ne 0 ] ; then
-    echo "Failed sourcing ${1}"
-    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
-    return 1
-  fi
-
-  # Source the module now
-  cd ${TDIRUPDATE}
-  . ./${1}
-  if [ $? -ne 0 ] ; then
-    echo "Failed sourcing ${1}"
-    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
-    return 1
-  fi
-
-  # Source the module now
-  cd ${TDIRDELETE}
+  cd ${TDIR}
   . ./${1}
   if [ $? -ne 0 ] ; then
     echo "Failed sourcing ${1}"
@@ -456,7 +438,7 @@ run_module() {
 
 # Read through the test modules and start running them
 read_module_dir() {
-  cd ${TDIRCREATE}
+  cd ${TDIR}
   if [ $? -ne 0 ] ; then
     echo "Missing test module dir"
     exit 1

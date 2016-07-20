@@ -12,9 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 
 # Test Module directories
-TDIR="${PROGDIR}/9.10-tests/create"
-#TDIRUPDATE="${PROGDIR}/9.10-tests/update"
-#TDIRDELETE="${PROGDIR}/9.10-tests/delete"
+TDIR="${PROGDIR}/9.10-tests/update"
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions-tests.sh
@@ -76,9 +74,6 @@ set_test_group_text "Testing Connectivity" "1"
 echo_test_title "Testing access to REST API"
 wait_for_avail
 echo_ok
-
-# Reset the IP address via REST
-set_ip
 
 RESULT="SUCCESS"
 

@@ -13,8 +13,6 @@ JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 
 # Test Module directories
 TDIR="${PROGDIR}/9.10-tests/create"
-#TDIRUPDATE="${PROGDIR}/9.10-tests/update"
-#TDIRDELETE="${PROGDIR}/9.10-tests/delete"
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions-tests.sh
