@@ -224,7 +224,7 @@ cd ${PROGDIR}/scripts
 if [ -n "$FREENASLEGACY" ] ; then
   ./9.10-create-tests.sh 2>&1 | tee >/tmp/fnas-create-tests.log
 #  ./9.10-update-tests.sh 2>&1 | tee >/tmp/fnas-update-tests.log
-  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/fnas-delete-tests.log
+#  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/fnas-delete-tests.log
   res=$?
 else
   ./10-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
