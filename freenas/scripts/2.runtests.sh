@@ -228,6 +228,8 @@ if [ -n "$FREENASLEGACY" ] ; then
   res=$?
 else
   ./10-create-tests.sh 2>&1 | tee >/tmp/fnas-tests-create.log
+  ./10-update-tests.sh 2>&1 | tee >/tmp/fnas-tests-update.log
+  ./10-delete-tests.sh 2>&1 | tee >/tmp/fnas-tests-delete.log
   res=$?
 fi
 
