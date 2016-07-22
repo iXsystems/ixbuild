@@ -377,6 +377,63 @@ jenkins_vm()
   exit 0
 }
 
+jenkins_freenas_docs()
+{
+  create_workdir
+
+  cd ${TBUILDDIR}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  make clean-docs
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  make docs
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  # Now lets sync the docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${FREENASBDIR}/_BE/freenas-docs/userguide/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  cleanup_workdir
+
+  return 0
+}
+
+jenkins_freenas_api()
+{
+  create_workdir
+
+  cd ${TBUILDDIR}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  make clean-docs
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  make api-docs
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  # Now lets sync the api docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${FREENASBDIR}/_BE/freenas-docs/api/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/api" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  cleanup_workdir
+
+  return 0
+}
+
+
 jenkins_freenas()
 {
   create_workdir
@@ -564,16 +621,19 @@ if [ "$TYPE" != "ports-tests" ] ; then
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
+    DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
+    DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/edge"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
+    DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/enterprise"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   else
