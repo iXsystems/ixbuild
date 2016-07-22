@@ -32,6 +32,27 @@ do_iso() {
   fi
 }
 
+do_doc() {
+
+  echo "Starting build of FreeNAS handbook"
+  ${PROGDIR}/scripts/1.buildiso.sh doc
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
+}
+
+do_api() {
+
+  echo "Starting build of FreeNAS API handbook"
+  ${PROGDIR}/scripts/1.buildiso.sh api-docs
+  if [ $? -ne 0 ] ; then
+    echo "Script failed!"
+    exit 1
+  fi
+}
+
+
 do_live_tests() {
 
   echo "Starting FreeNAS Live regression testing"
@@ -71,6 +92,8 @@ if [ -z "$TARGET" ] ; then TARGET="all"; fi
 case $TARGET in
      all) do_iso ; do_tests ;;
      iso) do_iso ;;
+     doc) do_doc ;;
+     api) do_api ;;
    tests) do_tests ;;
    livetests) do_live_tests ;;
    liveupgrade) do_live_upgrade ;;

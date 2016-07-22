@@ -16,3 +16,7 @@ livetests:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh livetests
 liveupgrade:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh liveupgrade
+api:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh api
+docs:
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh docs

@@ -123,6 +123,15 @@ if [ -n "$BUILDOPTS" ] ; then
   unset BUILDOPTS
 fi
 
+# Are we building docs / API?
+if [ "$1" = "doc" -o "$1" = "api-docs" ] ; then
+  cd ${FNASBDIR}
+  rc_halt "make clean-docs $BUILDOPTS"
+  rc_halt "make $1 $BUILDOPTS"
+  exit 0
+fi
+
+
 # Start the XML reporting
 start_xml_results "FreeNAS Build Process"
 set_test_group_text "Build phase tests" "2"
