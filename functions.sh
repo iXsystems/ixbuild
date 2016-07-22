@@ -377,6 +377,53 @@ jenkins_vm()
   exit 0
 }
 
+jenkins_freenas_push_docs()
+{
+  # Now lets upload the docs
+  if [ -n "$SFTPHOST" ] ; then
+    rm -rf /tmp/handbookpush 2>/dev/null
+    mkdir -p /tmp/handbookpush
+
+    # Get the docs from the staging server
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook /tmp/handbookpush
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    cd /tmp/handbookpush
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    # Make them live!
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i id_dsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html
+    if [ $? -ne 0 ] ; then exit_clean; fi
+    rm -rf /tmp/handbookpush 2>/dev/null
+  fi
+
+  return 0
+}
+
+jenkins_freenas_push_api()
+{
+  # Now lets upload the docs
+  if [ -n "$SFTPHOST" ] ; then
+    rm -rf /tmp/apipush 2>/dev/null
+    mkdir -p /tmp/apipush
+
+    # Get the docs from the staging server
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api /tmp/apipush
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    cd /tmp/apipush
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    # Make them live!
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i id_dsa.jenkins' . jenkins@api.freenas.org:/tank/api/html
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    rm -rf /tmp/apipush 2>/dev/null
+  fi
+
+  return 0
+}
+
 jenkins_freenas_docs()
 {
   create_workdir
