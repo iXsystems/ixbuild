@@ -124,6 +124,10 @@ FreeNAS Testing Framework
 Adding New tests
 ---
 
+A create, update, delete directory exists for each directory of tests.  Tests which create an object should be added
+to the create folder.Tests which update an object should be added to the update folder.  Tests which delete an object 
+should be added to delete folder.
+
 New tests can be written for FreeNAS 9.10.X by adding a test "module" to the 9.10 testing directories:
 
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/create
