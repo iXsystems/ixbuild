@@ -11,7 +11,7 @@ export REQUIRES
 
 # Run a series of tests on the boot-environments
 bootenv_tests() {
-  set_test_group_text "Boot-Environment Tests" "3"
+  set_test_group_text "Create Boot-Environment Tests" "3"
 
   echo_test_title "Creating a new boot-environment: newbe1"
   rest_request "POST" "/system/bootenv/" '{ "name": "newbe1", "source": "default" }'

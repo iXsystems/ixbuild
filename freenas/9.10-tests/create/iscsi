@@ -12,7 +12,7 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "iSCSI tests" "1"
+  set_test_group_text "Create iSCSI tests" "1"
 
   # Enable iSCSI server
   echo_test_title "Creating iSCSI extent"
