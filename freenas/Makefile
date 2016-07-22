@@ -19,4 +19,4 @@ liveupgrade:
 api:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh api
 docs:
-	@cd ${.CURDIR}/scripts/ && sh build-iso.sh docs
+	@cd ${.CURDIR}/scripts/ && sh build-iso.sh doc
