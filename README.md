@@ -91,7 +91,7 @@ FreeNAS 10.0
 ```
 
 ```
- *Optional* arguments to 9.10-tests.sh
+ *Optional* arguments for test scripts
 
  testset={smoke|complete|benchmark}
 
