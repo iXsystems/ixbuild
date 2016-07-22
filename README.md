@@ -71,12 +71,23 @@ before executing checkprogs:
  # cd freenas/scripts && ./checkprogs.sh
 ```
 
-Tests are located in the freenas/scripts/9.10-tests.sh and
-freenas/scripts/10-tests.sh files. These scripts can also be run directly
-by pointing them at a FreeNAS instance with the following syntax:
+Tests are located in the freenas/scripts directory.  These scripts can also be run 
+directly by pointing them at a FreeNAS instance with the following syntax:
+
+FreeNAS 9.10
 
 ```
- # cd freenas/scripts && ./9.10-tests.sh
+ # cd freenas/scripts && ./9.10-create-tests.sh
+ # cd freenas/scripts && ./9.10-update-tests.sh
+ # cd freenas/scripts && ./9.10-delete-tests.sh
+````
+
+FreeNAS 10.0
+
+````
+ # cd freenas/scripts && ./10-create-tests.sh
+ # cd freenas/scripts && ./10-update-tests.sh
+ # cd freenas/scripts && ./10-delete-tests.sh
 ```
 
 ```
