@@ -222,10 +222,11 @@ sleep 120
 cd ${PROGDIR}/scripts
 
 if [ -n "$FREENASLEGACY" ] ; then
-  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
+  ./9.10-create-tests.sh 2>&1 | tee >/tmp/fnas-tests-create.log
+  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/fnas-tests-delete.log
   res=$?
 else
-  ./10-tests.sh 2>&1 | tee >/tmp/fnas-tests.log
+  ./10-create-tests.sh 2>&1 | tee >/tmp/fnas-tests-create.log
   res=$?
 fi
 
@@ -244,6 +245,7 @@ cat /tmp/vboxpipe
 echo ""
 echo "Output from REST API calls:"
 echo "-----------------------------------------"
-cat /tmp/fnas-tests.log
+cat /tmp/fnas-tests-create.log
+cat /tmp/fnas-tests-delete.log
 
 exit $res
