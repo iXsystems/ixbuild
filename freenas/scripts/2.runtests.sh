@@ -223,6 +223,7 @@ cd ${PROGDIR}/scripts
 
 if [ -n "$FREENASLEGACY" ] ; then
   ./9.10-create-tests.sh 2>&1 | tee >/tmp/fnas-tests-create.log
+  ./9.10-update-tests.sh 2>&1 | tee >/tmp/fnas-tests-update.log
   ./9.10-delete-tests.sh 2>&1 | tee >/tmp/fnas-tests-delete.log
   res=$?
 else
@@ -246,6 +247,7 @@ echo ""
 echo "Output from REST API calls:"
 echo "-----------------------------------------"
 cat /tmp/fnas-tests-create.log
+cat /tmp/fnas-tests-update.log
 cat /tmp/fnas-tests-delete.log
 
 exit $res
