@@ -384,9 +384,6 @@ jenkins_freenas_docs()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  make clean-docs
-  if [ $? -ne 0 ] ; then exit_clean; fi
-
   make docs
   if [ $? -ne 0 ] ; then exit_clean; fi
 
@@ -410,9 +407,6 @@ jenkins_freenas_api()
   create_workdir
 
   cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
-
-  make clean-docs
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   make api-docs
