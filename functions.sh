@@ -456,7 +456,7 @@ jenkins_freenas_api()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  make api-docs
+  make api
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Now lets sync the api docs
