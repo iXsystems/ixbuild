@@ -126,6 +126,7 @@ fi
 # Are we building docs / API?
 if [ "$1" = "doc" -o "$1" = "api-docs" ] ; then
   cd ${FNASBDIR}
+  rc_halt "make checkout $BUILDOPTS"
   rc_halt "make clean-docs $BUILDOPTS"
   rc_halt "make $1 $BUILDOPTS"
   exit 0
