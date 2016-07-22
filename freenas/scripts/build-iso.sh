@@ -35,7 +35,7 @@ do_iso() {
 do_doc() {
 
   echo "Starting build of FreeNAS handbook"
-  ${PROGDIR}/scripts/1.buildiso.sh doc
+  ${PROGDIR}/scripts/1.buildiso.sh docs
   if [ $? -ne 0 ] ; then
     echo "Script failed!"
     exit 1

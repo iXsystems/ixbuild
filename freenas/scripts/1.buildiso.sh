@@ -124,7 +124,7 @@ if [ -n "$BUILDOPTS" ] ; then
 fi
 
 # Are we building docs / API?
-if [ "$1" = "doc" -o "$1" = "api-docs" ] ; then
+if [ "$1" = "docs" -o "$1" = "api-docs" ] ; then
   echo "Creating $1"
   cd ${FNASBDIR}
   rc_halt "make checkout $PROFILEARGS"
