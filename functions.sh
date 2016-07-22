@@ -408,7 +408,7 @@ jenkins_freenas_push_api()
     mkdir -p /tmp/apipush
 
     # Get the docs from the staging server
-    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api /tmp/apipush
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api/ /tmp/apipush
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     cd /tmp/apipush
