@@ -128,7 +128,6 @@ if [ "$1" = "docs" -o "$1" = "api-docs" ] ; then
   echo "Creating $1"
   cd ${FNASBDIR}
   rc_halt "make checkout $PROFILEARGS"
-  rc_halt "make clean-docs $PROFILEARGS"
   rc_halt "make $1 $PROFILEARGS"
   exit 0
 fi
