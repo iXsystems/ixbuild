@@ -458,17 +458,24 @@ jenkins_freenas_docs()
 
 jenkins_freenas_api()
 {
-  create_workdir
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
+  fi
 
-  cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  DDIR=`mktemp -d /tmp/build/XXXX` 
 
-  make api
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  git clone --depth=1 https://github.com/freenas/freenas ${DDIR}
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  cd ${DDIR}/docs/api
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  make html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   # Now lets sync the api docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${FNASBDIR}/_BE/freenas/docs/api/_build/html/
+    cd ${DDIR}/docs/api/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/api" >/dev/null 2>/dev/null
