@@ -461,7 +461,7 @@ jenkins_freenas_api()
 
   # Now lets sync the api docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${FNASBDIR}/_BE/freenas-docs/api/_build/html/
+    cd ${FNASBDIR}/_BE/freenas/docs/api/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/api" >/dev/null 2>/dev/null
