@@ -110,13 +110,6 @@ fi
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
 
-if [ "$FREENASLEGACY" = "910" ] ; then
-  PROFILEARGS="PROFILE=freenas9"
-  if [ "$FLAVOR" = "TRUENAS" ] ; then
-    PROFILEARGS="PRODUCT=TrueNAS ${PROFILEARGS}"
-  fi
-fi
-
 # Check if we have optional build options
 if [ -n "$BUILDOPTS" ] ; then
   PROFILEARGS="$PROFILEARGS $BUILDOPTS"
