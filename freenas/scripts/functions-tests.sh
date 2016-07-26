@@ -5,13 +5,15 @@ export RESTYERR=/tmp/resty.err
 
 #   $1 = Test Description
 start_xml_results() {
+  if [ -z "$TOTALCOUNT" ] ; then
   # Set total number of tests
   export TOTALCOUNT="0"
 
-  if [ -n "${1}" ] ; then
-    tnick="${1}"
-  else
-    tnick="FreeNAS QA Tests"
+    if [ -n "${1}" ] ; then
+      tnick="${1}"
+    else
+      tnick="FreeNAS QA Tests"
+    fi
   fi
   if [ -z "$XMLRESULTS" ] ; then
   export XMLRESULTS="/tmp/.results.xml.$$"
