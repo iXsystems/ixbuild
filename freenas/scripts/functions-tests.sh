@@ -15,11 +15,11 @@ start_xml_results() {
   fi
   if [ -n "$XMLRESULTS" ] ; then
   export XMLRESULTS="/tmp/.results.xml.$$"
-  fi
   cat >${XMLRESULTS} << EOF
 <?xml version="1.0" encoding="UTF-8"?>
   <testsuite tests="TOTALTESTS" name="${tnick}">
 EOF
+  fi
 }
 
 #          $1 = true/false
