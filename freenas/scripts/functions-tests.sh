@@ -13,12 +13,13 @@ start_xml_results() {
   else
     tnick="FreeNAS QA Tests"
   fi
-
+  if [ -n "$XMLRESULTS" ] ; then
   export XMLRESULTS="/tmp/.results.xml.$$"
   cat >${XMLRESULTS} << EOF
 <?xml version="1.0" encoding="UTF-8"?>
   <testsuite tests="TOTALTESTS" name="${tnick}">
 EOF
+  fi
 }
 
 #          $1 = true/false
