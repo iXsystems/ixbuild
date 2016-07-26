@@ -108,7 +108,7 @@ EOF
     fi
     tStamp=$(date +%s)
     echo "Saving jUnit results to: ${WORKSPACE}/results/"
-    mv "/tmp/results/results.xml*" "${WORKSPACE}/results/"
+    mv "/tmp/results/results.xml.*" "${WORKSPACE}/results/"
     chown jenkins:jenkins "${WORKSPACE}/results/results.xml.*"
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
