@@ -13,7 +13,7 @@ start_xml_results() {
   else
     tnick="FreeNAS QA Tests"
   fi
-  if [ -n "$XMLRESULTS" ] ; then
+  if [ -z "$XMLRESULTS" ] ; then
   export XMLRESULTS="/tmp/.results.xml.$$"
   cat >${XMLRESULTS} << EOF
 <?xml version="1.0" encoding="UTF-8"?>
