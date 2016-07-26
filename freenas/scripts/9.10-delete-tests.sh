@@ -97,6 +97,6 @@ fi
 # Made it to the end, exit with success!
 echo "$RESULT - $TOTALCOUNT tests run - REST API testing complete!"
 
-# finish_xml_results "$TOTALCOUNT"
+finish_xml_results "$TOTALCOUNT"
 
 exit 0

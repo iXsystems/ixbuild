@@ -4,6 +4,15 @@ export RESTYOUT=/tmp/resty.out
 export RESTYERR=/tmp/resty.err
 
 #   $1 = Test Description
+clean_xml_results() {
+  if [ -d "/tmp/results" ] ; then
+    rm -rf "/tmp/results"
+  fi
+  if [ -d "${WORKSPACE}/results" ] ; then
+      rm -rf "${WORKSPACE}/results"
+  fi
+}
+
 start_xml_results() {
   if [ -z "$TOTALCOUNT" ] ; then
   # Set total number of tests
@@ -15,9 +24,12 @@ start_xml_results() {
       tnick="FreeNAS QA Tests"
     fi
   fi
+  if [ ! -d "/tmp/results" ] ; then
+    mkdir "/tmp/results"
+  fi
   if [ -z "$XMLRESULTS" ] ; then
-  export XMLRESULTS="/tmp/.results.xml.$$"
-  cat >${XMLRESULTS} << EOF
+    export XMLRESULTS="/tmp/results/results.xml.$$"
+    cat >${XMLRESULTS} << EOF
 <?xml version="1.0" encoding="UTF-8"?>
   <testsuite tests="TOTALTESTS" name="${tnick}">
 EOF
@@ -95,9 +107,9 @@ EOF
       chown jenkins:jenkins "${WORKSPACE}/results"
     fi
     tStamp=$(date +%s)
-    echo "Saving jUnit results to: ${WORKSPACE}/results/freenas-results-${rTag}.xml"
-    mv "${XMLRESULTS}" "${WORKSPACE}/results/freenas-results-${rTag}.xml"
-    chown jenkins:jenkins "${WORKSPACE}/results/freenas-results-${rTag}.xml"
+    echo "Saving jUnit results to: ${WORKSPACE}/results/"
+    mv "/tmp/.results.xml*" "${WORKSPACE}/results/"
+    chown jenkins:jenkins "${WORKSPACE}/results/results.xml.*"
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
     mv ${XMLRESULTS} /tmp/test-results.xml
