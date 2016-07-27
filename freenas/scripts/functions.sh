@@ -20,7 +20,7 @@ else
 fi
 
 # Set the local location of XML results
-if [ -n "$RESULTSDIR" ] ; then
+if [ -z "$RESULTSDIR" ] ; then
   RESULTSDIR="/tmp/${BUILDTAG}"
   export RESULTSDIR
 fi
