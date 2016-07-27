@@ -57,6 +57,8 @@ echo "Using REST API Address: ${ip}"
 # Source our resty / jsawk functions
 . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
+clean_xml_results
+
 start_xml_results
 
 # When running via Jenkins / ATF mode, it may take a variable

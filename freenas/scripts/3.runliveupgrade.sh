@@ -28,6 +28,9 @@ fi
 # Source our resty / jsawk functions
 . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
 
+# Clean previous XML results
+clean_xml_results
+
 # Start the XML reporting
 start_xml_results "Live Testing"
 

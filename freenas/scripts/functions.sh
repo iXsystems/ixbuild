@@ -19,6 +19,12 @@ else
   export FNASSRC
 fi
 
+# Set the local location of XML results
+if [ -n "$RESULTSDIR" ] ; then
+  RESULTSDIR="/tmp/${BUILDTAG}"
+  export RESULTSDIR
+fi
+
 git_fnas_up()
 {
   local lDir=${1}

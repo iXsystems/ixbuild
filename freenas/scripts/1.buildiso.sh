@@ -124,6 +124,7 @@ if [ -n "$BUILDOPTS" ] ; then
 fi
 
 # Start the XML reporting
+clean_xml_results "Clean previous results"
 start_xml_results "FreeNAS Build Process"
 set_test_group_text "Build phase tests" "2"
 

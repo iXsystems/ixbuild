@@ -5,8 +5,8 @@ export RESTYERR=/tmp/resty.err
 
 #   $1 = Test Description
 clean_xml_results() {
-  if [ -d "/tmp/results" ] ; then
-    rm -rf "/tmp/results"
+  if [ -d "$RESULTSDIR" ] ; then
+    rm -rf "$RESULTSDIR"
   fi
   if [ -d "${WORKSPACE}/results" ] ; then
       rm -rf "${WORKSPACE}/results"
@@ -22,10 +22,10 @@ start_xml_results() {
     else
       tnick="FreeNAS QA Tests"
   fi
-  if [ ! -d "/tmp/results" ] ; then
-    mkdir "/tmp/results"
+  if [ ! -d "$RESULTSDIR" ] ; then
+    mkdir "$RESULTSDIR"
   fi
-    export XMLRESULTS="/tmp/results/results.xml.$$"
+    export XMLRESULTS="$RESULTSDIR/results.xml.$$"
     cat >${XMLRESULTS} << EOF
 <?xml version="1.0" encoding="UTF-8"?>
   <testsuite tests="TOTALTESTS" name="${tnick}">
@@ -104,8 +104,8 @@ EOF
     fi
     tStamp=$(date +%s)
     echo "Saving jUnit results to: ${WORKSPACE}/results/"
-    mv /tmp/results/results.xml.* "${WORKSPACE}/results/"
-    chown jenkins:jenkins "${WORKSPACE}/results/results.xml.*"
+    mv $RESULTSDIR/results.xml.* "${WORKSPACE}/results/"
+    chown jenkins:jenkins ${WORKSPACE}/results/results.xml.*
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
     mv ${XMLRESULTS} /tmp/test-results.xml
