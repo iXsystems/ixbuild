@@ -110,18 +110,22 @@ fi
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
 
-if [ "$FREENASLEGACY" = "910" ] ; then
-  PROFILEARGS="PROFILE=freenas9"
-  if [ "$FLAVOR" = "TRUENAS" ] ; then
-    PROFILEARGS="PRODUCT=TrueNAS ${PROFILEARGS}"
-  fi
-fi
-
 # Check if we have optional build options
 if [ -n "$BUILDOPTS" ] ; then
   PROFILEARGS="$PROFILEARGS $BUILDOPTS"
   unset BUILDOPTS
 fi
+
+# Are we building docs / API?
+if [ "$1" = "docs" -o "$1" = "api-docs" ] ; then
+  echo "Creating $1"
+  cd ${FNASBDIR}
+  rc_halt "make checkout $PROFILEARGS"
+  rc_halt "make clean-docs $PROFILEARGS"
+  rc_halt "make $1 $PROFILEARGS"
+  exit 0
+fi
+
 
 # Start the XML reporting
 start_xml_results "FreeNAS Build Process"

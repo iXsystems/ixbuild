@@ -377,6 +377,118 @@ jenkins_vm()
   exit 0
 }
 
+jenkins_freenas_push_docs()
+{
+  # Now lets upload the docs
+  if [ -n "$SFTPHOST" ] ; then
+    rm -rf /tmp/handbookpush 2>/dev/null
+    mkdir -p /tmp/handbookpush
+
+    # Get the docs from the staging server
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook/ /tmp/handbookpush
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    cd /tmp/handbookpush
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    # Make them live!
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_dsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html
+    if [ $? -ne 0 ] ; then exit_clean; fi
+    rm -rf /tmp/handbookpush 2>/dev/null
+  fi
+
+  return 0
+}
+
+jenkins_freenas_push_api()
+{
+  # Now lets upload the docs
+  if [ -n "$SFTPHOST" ] ; then
+    rm -rf /tmp/apipush 2>/dev/null
+    mkdir -p /tmp/apipush
+
+    # Get the docs from the staging server
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api/ /tmp/apipush
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    cd /tmp/apipush
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    # Make them live!
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_dsa.jenkins' . jenkins@api.freenas.org:/tank/api/html
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    rm -rf /tmp/apipush 2>/dev/null
+  fi
+
+  return 0
+}
+
+jenkins_freenas_docs()
+{
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
+  fi
+
+  DDIR=`mktemp -d /tmp/build/XXXX` 
+
+  git clone --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  cd ${DDIR}/userguide
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  make html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Now lets sync the docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/userguide/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  rm -rf ${DDIR}
+
+  return 0
+}
+
+jenkins_freenas_api()
+{
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
+  fi
+
+  DDIR=`mktemp -d /tmp/build/XXXX` 
+
+  git clone --depth=1 https://github.com/freenas/freenas ${DDIR}
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  cd ${DDIR}/docs/api
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  make html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Now lets sync the api docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/docs/api/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/api" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  cleanup_workdir
+
+  return 0
+}
+
+
 jenkins_freenas()
 {
   create_workdir
@@ -548,15 +660,15 @@ if [ "$TYPE" != "ports-tests" ] ; then
   # Poudriere variables
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
   PJAILNAME="`echo $JAILVER | sed 's|\.||g'`"
-  echo "$TYPE" | grep -q pcbsd
+  echo "$TYPE" | grep -q trueos
   if [ $? -eq 0 ] ; then
-    PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
-    PPKGDIR="/poud/data/packages/${PJAILNAME}-pcbsdports"
-    PJPORTSDIR="/poud/ports/pcbsdports"
-  else
     PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
     PPKGDIR="/poud/data/packages/${PJAILNAME}-trueosports"
     PJPORTSDIR="/poud/ports/trueosports"
+  else
+    PBUILD="pcbsd-`echo $JAILVER | sed 's|\.||g'`"
+    PPKGDIR="/poud/data/packages/${PJAILNAME}-pcbsdports"
+    PJPORTSDIR="/poud/ports/pcbsdports"
   fi
   export PBUILD PJPORTSDIR PPKGDIR
 
@@ -564,16 +676,19 @@ if [ "$TYPE" != "ports-tests" ] ; then
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
+    DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
+    DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/edge"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
+    DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/enterprise"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
   else
