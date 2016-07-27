@@ -14,7 +14,6 @@ clean_xml_results() {
 }
 
 start_xml_results() {
-  if [ -z "$TOTALCOUNT" ] ; then
   # Set total number of tests
   export TOTALCOUNT="0"
 
@@ -22,18 +21,15 @@ start_xml_results() {
       tnick="${1}"
     else
       tnick="FreeNAS QA Tests"
-    fi
   fi
   if [ ! -d "/tmp/results" ] ; then
     mkdir "/tmp/results"
   fi
-  if [ -z "$XMLRESULTS" ] ; then
     export XMLRESULTS="/tmp/results/results.xml.$$"
     cat >${XMLRESULTS} << EOF
 <?xml version="1.0" encoding="UTF-8"?>
   <testsuite tests="TOTALTESTS" name="${tnick}">
 EOF
-  fi
 }
 
 #          $1 = true/false
