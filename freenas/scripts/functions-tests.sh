@@ -99,7 +99,7 @@ EOF
   # Move results to pre-defined location
   if [ -n "$WORKSPACE" ] ; then
     if [ ! -d "${WORKSPACE}/results" ] ; then
-      mkdir -p "${WORKSPACE}/results"
+      mkdir "${WORKSPACE}/results"
       chown jenkins:jenkins "${WORKSPACE}/results"
     fi
     tStamp=$(date +%s)
