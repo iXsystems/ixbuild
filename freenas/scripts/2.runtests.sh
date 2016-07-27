@@ -5,6 +5,7 @@ PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
+. ${PROGDIR}/scripts/functions-tests.sh
 
 # Make sure we have all the required packages installed
 ${PROGDIR}/scripts/checkprogs.sh
