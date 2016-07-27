@@ -62,10 +62,9 @@ touch ${LOUT}
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
   echo "Doing fresh build!"
-  rc_nohalt "rm -rf ${FNASBDIR}.previous" 2>/dev/null
-  rc_nohalt "chflags -R noschg ${FNASBDIR}.previous" 2>/dev/null
-  rc_nohalt "rm -rf ${FNASBDIR}.previous"
-  rc_halt "mv ${FNASBDIR} ${FNASBDIR}.previous"
+  rc_nohalt "rm -rf ${FNASBDIR}" 2>/dev/null
+  rc_nohalt "chflags -R noschg ${FNASBDIR}" 2>/dev/null
+  rc_nohalt "rm -rf ${FNASBDIR}"
 fi
 
 if [ -n "$BUILDINCREMENTAL" ] ; then
