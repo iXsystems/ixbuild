@@ -10,7 +10,7 @@ REQUIRES="storage"
 export REQUIRES
 
 rsync_tests() {
-  set_test_group_text "Create RSYNC tests" "4"
+  set_test_group_text "1 - Create - RSYNC tests" "4"
 
   echo_test_title "Configuring rsyncd service"
   rest_request "PUT" "/services/rsyncd/" '{ "rsyncd_port": 873 }'

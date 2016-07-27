@@ -10,7 +10,7 @@ REQUIRES="storage user"
 export REQUIRES
 
 ftp_tests() {
-  set_test_group_text "Create FTP tests" "3"
+  set_test_group_text "1 - Create - FTP tests" "3"
 
   echo_test_title "Configuring ftp service"
   rest_request "PUT" "/services/ftp/" '{ "ftp_clients": 10, "ftp_rootlogin": true }'

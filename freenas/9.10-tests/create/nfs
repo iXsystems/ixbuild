@@ -12,7 +12,7 @@ export REQUIRES
 nfs_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Create NFS tests" "11"
+  set_test_group_text "1 - Create - NFS tests" "11"
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"

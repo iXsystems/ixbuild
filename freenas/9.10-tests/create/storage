@@ -12,7 +12,7 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "Create Storage tests" "7"
+  set_test_group_text "1 - Create - Storage tests" "7"
 
   # Check getting disks
   echo_test_title "Disks / API functionality"
