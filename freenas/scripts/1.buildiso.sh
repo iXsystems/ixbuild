@@ -62,10 +62,9 @@ touch ${LOUT}
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
   echo "Doing fresh build!"
-  rc_nohalt "rm -rf ${FNASBDIR}.previous" 2>/dev/null
-  rc_nohalt "chflags -R noschg ${FNASBDIR}.previous" 2>/dev/null
-  rc_nohalt "rm -rf ${FNASBDIR}.previous"
-  rc_halt "mv ${FNASBDIR} ${FNASBDIR}.previous"
+  rc_nohalt "rm -rf ${FNASBDIR}" 2>/dev/null
+  rc_nohalt "chflags -R noschg ${FNASBDIR}" 2>/dev/null
+  rc_nohalt "rm -rf ${FNASBDIR}"
 fi
 
 if [ -n "$BUILDINCREMENTAL" ] ; then
@@ -110,18 +109,22 @@ fi
 # Now create the world / kernel / distribution
 cd ${FNASSRC}
 
-if [ "$FREENASLEGACY" = "910" ] ; then
-  PROFILEARGS="PROFILE=freenas9"
-  if [ "$FLAVOR" = "TRUENAS" ] ; then
-    PROFILEARGS="PRODUCT=TrueNAS ${PROFILEARGS}"
-  fi
-fi
-
 # Check if we have optional build options
 if [ -n "$BUILDOPTS" ] ; then
   PROFILEARGS="$PROFILEARGS $BUILDOPTS"
   unset BUILDOPTS
 fi
+
+# Are we building docs / API?
+if [ "$1" = "docs" -o "$1" = "api-docs" ] ; then
+  echo "Creating $1"
+  cd ${FNASBDIR}
+  rc_halt "make checkout $PROFILEARGS"
+  rc_halt "make clean-docs $PROFILEARGS"
+  rc_halt "make $1 $PROFILEARGS"
+  exit 0
+fi
+
 
 # Start the XML reporting
 clean_xml_results "Clean previous results"
