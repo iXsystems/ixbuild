@@ -659,8 +659,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
     if [ -z "$BRANCH" ] ; then
       BRANCH="production"
     fi
-    echo "$TYPE" | grep -q trueos
-    if [ $? -eq 0 ] ; then
+    if [ -e 'trueos.cfg' ] ; then
       . trueos.cfg
     else
       . pcbsd.cfg
