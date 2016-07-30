@@ -349,6 +349,28 @@ jenkins_iso()
   exit 0
 }
 
+jenkins_publish_iso()
+{
+  if [ -z "$SFTPHOST" ] ; then
+    exit 1
+  fi
+
+  if [ -d "/tmp/trueos-iso-push" ] ; then
+    rm -rf /tmp/trueos-iso-push
+  fi
+  mkdir /tmp/trueos-iso-push
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ /tmp/trueos-iso-push
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  cd /tmp/trueos-iso-push
+  scale="pcbsd@pcbsd-master.scaleengine.net"
+  target="/usr/home/pcbsd/mirror/iso"
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${scale}:${target}/${TARGETREL}/${ARCH}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+}
+
 jenkins_vm()
 {
   create_workdir
