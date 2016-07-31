@@ -446,6 +446,24 @@ jenkins_freenas_push_api()
   return 0
 }
 
+jenkins_freenas_push_nightly()
+{
+  # Sanity check that the build was done on this node
+  if [ ! -d "${FNASBDIR}" ] ; then
+    echo "ERROR: No such build dir: ${FNASBDIR}"
+    exit 1
+  fi
+
+  cd ${FNASBDIR}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  # Push the release to download.freenas.org
+  make release-push ${BUILDOPTS}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  return 0
+}
+
 jenkins_freenas_docs()
 {
   if [ ! -d "/tmp/build" ] ; then

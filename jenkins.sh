@@ -35,6 +35,7 @@ freenas-docs      - Create FreeNAS Handbook
 freenas-api       - Create FreeNAS API
 freenas-push-docs - Push FreeNAS Docs
 freenas-push-api  - Push FreeNAS API
+freenas-push-nightly - Run 'release-push' for FreeNAS Nightly
 
 -- TrueOS Commands --
 trueos-world    - Builds the world
@@ -81,6 +82,7 @@ freenas-docs) jenkins_freenas_docs ;;
 freenas-push-docs) jenkins_freenas_push_docs ;;
 freenas-api) jenkins_freenas_api ;;
 freenas-push-api) jenkins_freenas_push_api ;;
+freenas-push-nightly) jenkins_freenas_push_nightly ;;
 freenas-combo) jenkins_freenas
 	       jenkins_freenas_tests ;;
 ports-tests) jenkins_ports_tests ;;
