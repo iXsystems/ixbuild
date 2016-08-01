@@ -358,8 +358,8 @@ jenkins_publish_pkg()
   if [ -d "/tmp/trueos-pkg-push" ] ; then
     rm -rf /tmp/trueos-pkg-push
   fi
-  mkdir /tmp/trueos-pkg-push/${ARCH}
-  mkdir /tmp/trueos-pkg-push/${ARCH}-base
+  mkdir -p /tmp/trueos-pkg-push/${ARCH}
+  mkdir -p /tmp/trueos-pkg-push/${ARCH}-base
 
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/ /tmp/trueos-pkg-push/${ARCH}
   if [ $? -ne 0 ] ; then exit_clean; fi
@@ -370,6 +370,7 @@ jenkins_publish_pkg()
   cd /tmp/trueos-pkg-push
   scale="pcbsd@pcbsd-master.scaleengine.net"
   target="/usr/home/pcbsd/mirror/pkg"
+  echo "ssh ${scale} mkdir -p ${target}/${TARGETREL}"
   ssh ${scale} "mkdir -p ${target}/${TARGETREL}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${scale}:${target}/${TARGETREL}
   if [ $? -ne 0 ] ; then exit_clean; fi
