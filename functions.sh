@@ -351,7 +351,8 @@ jenkins_iso()
 
 jenkins_publish_pkg()
 {
-  if [ -z "$SFTPHOST" ] ; then
+  if [ -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
+    echo "Missing packages to push!"
     exit 1
   fi
 
@@ -361,21 +362,18 @@ jenkins_publish_pkg()
 
   # Make sure remote target exists
   echo "ssh ${scale} mkdir -p ${target}/${TARGETREL}"
-  ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
-  ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}-base" >/dev/null 2>/dev/null
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}" >/dev/null 2>/dev/null
 
   # Copy packages
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/ ${scale}:${target}/${TARGETREL}/${ARCH}
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/${TARGETREL}/ ${scale}:${target}/${TARGETREL}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  # Copy base system packages
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ ${scale}:${target}/${TARGETREL}/${ARCH}-base
-  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 jenkins_publish_iso()
 {
-  if [ -z "$SFTPHOST" ] ; then
+  if [ -d "${SFTPFINALDIR}/iso/${TARGETREL}" ] ; then
+    echo "Missing iso to push!"
     exit 1
   fi
 
@@ -385,7 +383,7 @@ jenkins_publish_iso()
   ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
 
   # Copy the ISOs
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ ${scale}:${target}/${TARGETREL}/${ARCH}
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${TARGETREL}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
