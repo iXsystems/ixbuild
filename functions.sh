@@ -351,7 +351,7 @@ jenkins_iso()
 
 jenkins_publish_pkg()
 {
-  if [ -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
+  if [ ! -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
     echo "Missing packages to push!"
     exit 1
   fi
@@ -372,7 +372,7 @@ jenkins_publish_pkg()
 
 jenkins_publish_iso()
 {
-  if [ -d "${SFTPFINALDIR}/iso/${TARGETREL}" ] ; then
+  if [ ! -d "${SFTPFINALDIR}/iso/${TARGETREL}" ] ; then
     echo "Missing iso to push!"
     exit 1
   fi
