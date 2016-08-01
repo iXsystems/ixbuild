@@ -355,28 +355,22 @@ jenkins_publish_pkg()
     exit 1
   fi
 
-  if [ -d "/tmp/trueos-pkg-push" ] ; then
-    rm -rf /tmp/trueos-pkg-push
-  fi
-  mkdir -p /tmp/trueos-pkg-push/${ARCH}
-  mkdir -p /tmp/trueos-pkg-push/${ARCH}-base
-
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/ /tmp/trueos-pkg-push/${ARCH}
-  if [ $? -ne 0 ] ; then exit_clean; fi
-
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ /tmp/trueos-pkg-push/${ARCH}-base
-  if [ $? -ne 0 ] ; then exit_clean; fi
-
-  cd /tmp/trueos-pkg-push
+  # Set target locations
   scale="pcbsd@pcbsd-master.scaleengine.net"
   target="/usr/home/pcbsd/mirror/pkg"
+
+  # Make sure remote target exists
   echo "ssh ${scale} mkdir -p ${target}/${TARGETREL}"
-  ssh ${scale} "mkdir -p ${target}/${TARGETREL}" >/dev/null 2>/dev/null
-  rsync -va --delete-delay --delay-updates -e 'ssh' . ${scale}:${target}/${TARGETREL}
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}-base" >/dev/null 2>/dev/null
+
+  # Copy packages
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/ ${scale}:${target}/${TARGETREL}/${ARCH}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  cd
-  rm -rf /tmp/trueos-pkg-push
+  # Copy base system packages
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ ${scale}:${target}/${TARGETREL}/${ARCH}-base
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 jenkins_publish_iso()
@@ -385,23 +379,14 @@ jenkins_publish_iso()
     exit 1
   fi
 
-  if [ -d "/tmp/trueos-iso-push" ] ; then
-    rm -rf /tmp/trueos-iso-push
-  fi
-  mkdir /tmp/trueos-iso-push
-
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ /tmp/trueos-iso-push
-  if [ $? -ne 0 ] ; then exit_clean; fi
-
-  cd /tmp/trueos-iso-push
+  # Set the targets
   scale="pcbsd@pcbsd-master.scaleengine.net"
   target="/usr/home/pcbsd/mirror/iso"
   ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
-  rsync -va --delete-delay --delay-updates -e 'ssh' . ${scale}:${target}/${TARGETREL}/${ARCH}
-  if [ $? -ne 0 ] ; then exit_clean; fi
 
-  cd
-  rm -rf /tmp/trueos-iso-push
+  # Copy the ISOs
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ ${scale}:${target}/${TARGETREL}/${ARCH}
+  if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
 jenkins_vm()
