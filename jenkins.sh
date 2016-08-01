@@ -72,6 +72,7 @@ case $TYPE in
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
     iso|trueos-iso) jenkins_iso ;;
 publish-iso) jenkins_publish_iso ;;
+publish-pkg) jenkins_publish_pkg ;;
      vm|trueos-vm) jenkins_vm ;;
    jail) jenkins_jail ;;
 freenas) jenkins_freenas ;;

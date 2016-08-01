@@ -349,6 +349,35 @@ jenkins_iso()
   exit 0
 }
 
+jenkins_publish_pkg()
+{
+  if [ -z "$SFTPHOST" ] ; then
+    exit 1
+  fi
+
+  if [ -d "/tmp/trueos-pkg-push" ] ; then
+    rm -rf /tmp/trueos-pkg-push
+  fi
+  mkdir /tmp/trueos-pkg-push/${ARCH}
+  mkdir /tmp/trueos-pkg-push/${ARCH}-base
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/ /tmp/trueos-pkg-push/${ARCH}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ /tmp/trueos-pkg-push/${ARCH}-base
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  cd /tmp/trueos-pkg-push
+  scale="pcbsd@pcbsd-master.scaleengine.net"
+  target="/usr/home/pcbsd/mirror/pkg"
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}" >/dev/null 2>/dev/null
+  rsync -va --delete-delay --delay-updates -e 'ssh' . ${scale}:${target}/${TARGETREL}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  cd
+  rm -rf /tmp/trueos-pkg-push
+}
+
 jenkins_publish_iso()
 {
   if [ -z "$SFTPHOST" ] ; then
@@ -369,6 +398,9 @@ jenkins_publish_iso()
   ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
   rsync -va --delete-delay --delay-updates -e 'ssh' . ${scale}:${target}/${TARGETREL}/${ARCH}
   if [ $? -ne 0 ] ; then exit_clean; fi
+
+  cd
+  rm -rf /tmp/trueos-iso-push
 }
 
 jenkins_vm()
