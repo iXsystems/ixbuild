@@ -9,13 +9,11 @@
 REQUIRES=""
 export REQUIRES
 
-smb_tests()
-{
-  # Set the group text and number of tests
-  set_test_group_text "1 - Update - Samba tests" "1"
+ftp_tests() {
+  set_test_group_text "1 - Update - FTP tests" "1"
 
-  echo_test_title "Updating CIFS service"
-  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_hostlookup": "false" }'
+  echo_test_title "Updating ftp service"
+  rest_request "PUT" "/services/ftp/" '{ "ftp_clients": 20 }'
   check_rest_response "200"
 
 }
@@ -23,13 +21,13 @@ smb_tests()
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-smb_init()
+ftp_init()
 {
-  # Run all the smb tests
+  # Run all the storage tests
   case $TESTSET in
-        SMOKE) smb_tests ;;
-     COMPLETE) smb_tests ;;
+        SMOKE) ftp_tests ;;
+     COMPLETE) ftp_tests ;;
     BENCHMARK) ;;
-            *) smb_tests ;;
+            *) ftp_tests ;;
   esac
 }
