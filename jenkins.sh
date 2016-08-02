@@ -44,6 +44,8 @@ trueos-iso-pkg  - Builds just the pkgs needed for ISO creation
 trueos-iso      - Builds the ISO files
 trueos-vm       - Builds the VM images
 publish-iso     - Upload ISO files to ScaleEngine
+lumina-docs	- Create lumina handbook
+push-lumina-docs- Upload lumina handbook
 
 -- PC-BSD Commands --
   world - Build FreeBSD world
@@ -67,27 +69,29 @@ fi
 ######################################################
 
 case $TYPE in
-  world|trueos-world) jenkins_world ;;
-    pkg|trueos-pkg) jenkins_pkg "release" ;;
+    world|trueos-world) jenkins_world ;;
+        pkg|trueos-pkg) jenkins_pkg "release" ;;
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
-    iso|trueos-iso) jenkins_iso ;;
-publish-iso) jenkins_publish_iso ;;
-     vm|trueos-vm) jenkins_vm ;;
-   jail) jenkins_jail ;;
-freenas) jenkins_freenas ;;
-freenas-tests) jenkins_freenas_tests ;;
-freenas-ltest) jenkins_freenas_live_tests ;;
-freenas-lupgrade) jenkins_freenas_live_upgrade ;;
-freenas-docs) jenkins_freenas_docs ;;
-freenas-push-docs) jenkins_freenas_push_docs ;;
-freenas-api) jenkins_freenas_api ;;
-freenas-push-api) jenkins_freenas_push_api ;;
-freenas-push-nightly) jenkins_freenas_push_nightly ;;
-freenas-combo) jenkins_freenas
-	       jenkins_freenas_tests ;;
-ports-tests) jenkins_ports_tests ;;
-      *) echo "Invalid command: $1" 
-         display_usage
+        iso|trueos-iso) jenkins_iso ;;
+           publish-iso) jenkins_publish_iso ;;
+          vm|trueos-vm) jenkins_vm ;;
+           lumina-docs) jenkins_trueos_lumina_docs ;;
+      push-lumina-docs) jenkins_trueos_push_lumina_docs ;;
+                  jail) jenkins_jail ;;
+               freenas) jenkins_freenas ;;
+         freenas-tests) jenkins_freenas_tests ;;
+         freenas-ltest) jenkins_freenas_live_tests ;;
+      freenas-lupgrade) jenkins_freenas_live_upgrade ;;
+          freenas-docs) jenkins_freenas_docs ;;
+     freenas-push-docs) jenkins_freenas_push_docs ;;
+           freenas-api) jenkins_freenas_api ;;
+      freenas-push-api) jenkins_freenas_push_api ;;
+  freenas-push-nightly) jenkins_freenas_push_nightly ;;
+         freenas-combo) jenkins_freenas
+   		        jenkins_freenas_tests ;;
+           ports-tests) jenkins_ports_tests ;;
+                     *) echo "Invalid command: $1" 
+         		display_usage
          exit 1
          ;;
 esac
