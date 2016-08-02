@@ -1,0 +1,35 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+smb_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "1 - Update - Samba tests" "1"
+
+  echo_test_title "Updating CIFS service"
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_hostlookup": "false" }'
+  check_rest_response "200"
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+smb_init()
+{
+  # Run all the smb tests
+  case $TESTSET in
+        SMOKE) smb_tests ;;
+     COMPLETE) smb_tests ;;
+    BENCHMARK) ;;
+            *) smb_tests ;;
+  esac
+}
