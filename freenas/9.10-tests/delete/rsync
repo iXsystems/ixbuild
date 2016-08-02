@@ -6,11 +6,11 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="storage"
+REQUIRES=""
 export REQUIRES
 
 rsync_tests() {
-  set_test_group_text "1 - Create - RSYNC tests" "4"
+  set_test_group_text "1 - Delete - RSYNC tests" "4"
 
   echo_test_title "Delete rsync resource"
   rest_request "DELETE" "/services/rsyncmod/1/"
