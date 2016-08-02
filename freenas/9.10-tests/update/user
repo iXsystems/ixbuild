@@ -10,11 +10,16 @@ REQUIRES=""
 export REQUIRES
 
 user_tests() {
-  set_test_group_text "2 - Update - User tests" "1"
+  set_test_group_text "2 - Update - User tests" "2"
 
   # Update the testuser
   echo_test_title "Updating user: testuser"
   rest_request "PUT" "/account/users/28/" '{ "bsdusr_username": "testuser", "bsdusr_full_name": "Test Renamed", "bsdusr_password": "testing123", "bsdusr_uid": 1112, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }'
+  check_rest_response "200"
+
+  # Update password for testuser
+  echo_test_title "Updating password for testuser"
+  rest_request "POST" "/account/users/28/password/" { "bsdusr_password": "newpasswd" }
   check_rest_response "200"
 
 }
