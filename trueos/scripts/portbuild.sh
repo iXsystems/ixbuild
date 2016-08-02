@@ -164,31 +164,6 @@ do_trueos_portmerge()
    merge_trueos_src_ports "${TRUEOSSRC}" "/poud/ports/${PPORTS}"
 }
 
-do_pbi-index()
-{
-   if [ -z "$PBI_REPO_KEY" ] ; then return 0; fi
-
-   # See if we can create the PBI index files for this repo
-   if [ ! -d "${TRUEOSSRC}/pbi-modules" ] ; then return 0; fi
-
-   echo "Building new PBI-INDEX"
-
-   # Lets update the PBI-INDEX
-   create_pkg_conf
-   REPOS_DIR="${PROGDIR}/tmp/repo" ; export REPOS_DIR
-   PKG_DBDIR="${PROGDIR}/tmp/repodb" ; export PKG_DBDIR
-   if [ -d "$PKG_DBDIR" ] ; then rm -rf ${PKG_DBDIR}; fi
-   mkdir -p ${PKG_DBDIR}
-   ABIVER=`echo $TARGETREL | cut -d '-' -f 1 | cut -d '.' -f 1`
-   PBI_PKGCFLAG="-o ABI=freebsd:${ABIVER}:x86:64" ; export PBI_PKGCFLAG
-
-   rc_halt "cd ${TRUEOSSRC}/pbi-modules" >/dev/null 2>/dev/null
-   rc_halt "pbi_makeindex ${PBI_REPO_KEY}"
-   rc_nohalt "rm PBI-INDEX" >/dev/null 2>/dev/null
-   rc_halt "mv PBI-INDEX.txz* ${PPKGDIR}/" >/dev/null 2>/dev/null
-   return 0
-}
-
 if [ -z "$1" ] ; then
    target="all"
 else
@@ -234,9 +209,6 @@ if [ "$target" = "all" ] ; then
      exit 1
   fi
 
-  # Update the PBI index file
-  do_pbi-index
-
   exit 0
 elif [ "$target" = "iso" ] ; then
 
@@ -270,9 +242,6 @@ elif [ "$1" = "portsnap" ] ; then
 elif [ "$1" = "portmerge" ] ; then
    do_trueos_portmerge
    exit 0
-elif [ "$1" = "pbi-index" ] ; then
-   do_pbi-index
-   exit $?
 else
    echo "Invalid option!"
    exit 1

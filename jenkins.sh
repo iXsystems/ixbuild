@@ -35,6 +35,7 @@ freenas-docs      - Create FreeNAS Handbook
 freenas-api       - Create FreeNAS API
 freenas-push-docs - Push FreeNAS Docs
 freenas-push-api  - Push FreeNAS API
+freenas-push-nightly - Run 'release-push' for FreeNAS Nightly
 
 -- TrueOS Commands --
 trueos-world    - Builds the world
@@ -42,6 +43,7 @@ trueos-pkg      - Builds the entire pkg repo
 trueos-iso-pkg  - Builds just the pkgs needed for ISO creation
 trueos-iso      - Builds the ISO files
 trueos-vm       - Builds the VM images
+publish-iso     - Upload ISO files to ScaleEngine
 
 -- PC-BSD Commands --
   world - Build FreeBSD world
@@ -69,6 +71,8 @@ case $TYPE in
     pkg|trueos-pkg) jenkins_pkg "release" ;;
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
     iso|trueos-iso) jenkins_iso ;;
+publish-iso) jenkins_publish_iso ;;
+publish-pkg) jenkins_publish_pkg ;;
      vm|trueos-vm) jenkins_vm ;;
    jail) jenkins_jail ;;
 freenas) jenkins_freenas ;;
@@ -79,6 +83,7 @@ freenas-docs) jenkins_freenas_docs ;;
 freenas-push-docs) jenkins_freenas_push_docs ;;
 freenas-api) jenkins_freenas_api ;;
 freenas-push-api) jenkins_freenas_push_api ;;
+freenas-push-nightly) jenkins_freenas_push_nightly ;;
 freenas-combo) jenkins_freenas
 	       jenkins_freenas_tests ;;
 ports-tests) jenkins_ports_tests ;;

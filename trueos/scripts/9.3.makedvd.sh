@@ -146,9 +146,9 @@ cd ${PROGDIR}/iso
 md5 -q ${OUTFILE} >${OUTFILE}.md5
 sha256 -q ${OUTFILE} >${OUTFILE}.sha256
 if [ ! -e "latest.img" ] ; then
-  ln -s ${OUTFILE} latest.img
-  ln -s ${OUTFILE}.md5 latest.img.md5
-  ln -s ${OUTFILE}.sha256 latest.img.sha256
+  ln -s `basename ${OUTFILE}` latest.img
+  ln -s `basename ${OUTFILE}.md5` latest.img.md5
+  ln -s `basename ${OUTFILE}.sha256` latest.img.sha256
 fi
 
 # Create the .torrent

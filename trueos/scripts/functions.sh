@@ -198,7 +198,7 @@ create_pkg_conf()
   fi
   mkdir ${PROGDIR}/tmp/sysrel
 
-  ABIVER=`echo $PKGVERUPLOAD | cut -d '-' -f 1 | cut -d '.' -f 1`
+  ABIVER=`echo $FREEBSDVER | cut -d '-' -f 1 | cut -d '.' -f 1`
   echo "PKG_CACHEDIR: ${PROGDIR}/tmp" > ${PROGDIR}/tmp/pkg.conf
   echo "ALTABI: freebsd:${ABIVER}:x86:64" >> ${PROGDIR}/tmp/pkg.conf
   echo "ABI: FreeBSD:${ABIVER}:amd64" >> ${PROGDIR}/tmp/pkg.conf

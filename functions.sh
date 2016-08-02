@@ -349,6 +349,44 @@ jenkins_iso()
   exit 0
 }
 
+jenkins_publish_pkg()
+{
+  if [ ! -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
+    echo "Missing packages to push!"
+    exit 1
+  fi
+
+  # Set target locations
+  scale="pcbsd@pcbsd-master.scaleengine.net"
+  target="/usr/home/pcbsd/mirror/pkg"
+
+  # Make sure remote target exists
+  echo "ssh ${scale} mkdir -p ${target}/${TARGETREL}"
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}" >/dev/null 2>/dev/null
+
+  # Copy packages
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/${TARGETREL}/ ${scale}:${target}/${TARGETREL}/
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+}
+
+jenkins_publish_iso()
+{
+  if [ ! -d "${SFTPFINALDIR}/iso/${TARGETREL}" ] ; then
+    echo "Missing iso to push!"
+    exit 1
+  fi
+
+  # Set the targets
+  scale="pcbsd@pcbsd-master.scaleengine.net"
+  target="/usr/home/pcbsd/mirror/iso"
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
+
+  # Copy the ISOs
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${TARGETREL}/${ARCH}/
+  if [ $? -ne 0 ] ; then exit_clean; fi
+}
+
 jenkins_vm()
 {
   create_workdir
@@ -420,6 +458,24 @@ jenkins_freenas_push_api()
 
     rm -rf /tmp/apipush 2>/dev/null
   fi
+
+  return 0
+}
+
+jenkins_freenas_push_nightly()
+{
+  # Sanity check that the build was done on this node
+  if [ ! -d "${FNASBDIR}" ] ; then
+    echo "ERROR: No such build dir: ${FNASBDIR}"
+    exit 1
+  fi
+
+  cd ${FNASBDIR}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  # Push the release to download.freenas.org
+  make release-push ${BUILDOPTS}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
 
   return 0
 }
@@ -637,8 +693,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
     if [ -z "$BRANCH" ] ; then
       BRANCH="production"
     fi
-    echo "$TYPE" | grep -q trueos
-    if [ $? -eq 0 ] ; then
+    if [ -e 'trueos.cfg' ] ; then
       . trueos.cfg
     else
       . pcbsd.cfg
