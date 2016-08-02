@@ -1,0 +1,36 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+afp_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "1 - Update - AFP tests" "1"
+
+  echo_test_title "Updating AFP service"
+  rest_request "PUT" "/services/afp/" '{ "afp_srv_connections_limit": "100"  }'
+  check_rest_response "200" || return 1
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+afp_init()
+{
+  # Run all the smb tests
+  case $TESTSET in
+        SMOKE) afp_tests ; return $? ;;
+     COMPLETE) afp_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) afp_tests ; return $? ;;
+  esac
+}
+
