@@ -72,11 +72,11 @@ case $TYPE in
     world|trueos-world) jenkins_world ;;
         pkg|trueos-pkg) jenkins_pkg "release" ;;
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
+           lumina-docs) jenkins_trueos_lumina_docs ;;
+      push-lumina-docs) jenkins_trueos_push_lumina_docs ;;
         iso|trueos-iso) jenkins_iso ;;
            publish-iso) jenkins_publish_iso ;;
           vm|trueos-vm) jenkins_vm ;;
-           lumina-docs) jenkins_trueos_lumina_docs ;;
-      push-lumina-docs) jenkins_trueos_push_lumina_docs ;;
                   jail) jenkins_jail ;;
                freenas) jenkins_freenas ;;
          freenas-tests) jenkins_freenas_tests ;;

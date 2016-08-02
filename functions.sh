@@ -349,25 +349,41 @@ jenkins_iso()
   exit 0
 }
 
-jenkins_publish_iso()
+jenkins_publish_pkg()
 {
-  if [ -z "$SFTPHOST" ] ; then
+  if [ ! -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
+    echo "Missing packages to push!"
     exit 1
   fi
 
-  if [ -d "/tmp/trueos-iso-push" ] ; then
-    rm -rf /tmp/trueos-iso-push
-  fi
-  mkdir /tmp/trueos-iso-push
+  # Set target locations
+  scale="pcbsd@pcbsd-master.scaleengine.net"
+  target="/usr/home/pcbsd/mirror/pkg"
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ /tmp/trueos-iso-push
+  # Make sure remote target exists
+  echo "ssh ${scale} mkdir -p ${target}/${TARGETREL}"
+  ssh ${scale} "mkdir -p ${target}/${TARGETREL}" >/dev/null 2>/dev/null
+
+  # Copy packages
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/${TARGETREL}/ ${scale}:${target}/${TARGETREL}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  cd /tmp/trueos-iso-push
+}
+
+jenkins_publish_iso()
+{
+  if [ ! -d "${SFTPFINALDIR}/iso/${TARGETREL}" ] ; then
+    echo "Missing iso to push!"
+    exit 1
+  fi
+
+  # Set the targets
   scale="pcbsd@pcbsd-master.scaleengine.net"
   target="/usr/home/pcbsd/mirror/iso"
   ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
-  rsync -va --delete-delay --delay-updates -e 'ssh' . ${scale}:${target}/${TARGETREL}/${ARCH}
+
+  # Copy the ISOs
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${TARGETREL}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
