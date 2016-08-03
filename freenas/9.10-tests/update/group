@@ -14,7 +14,7 @@ group_tests() {
 
   # Update the testgroup
   echo_test_title "Updating group: testgroup"
-  rest_request "POST" "/account/groups/36/" '{ "bsdgrp_gid": 1201,"bsdgrp_group": "newgroup" }'
+  rest_request "PUT" "/account/groups/36/" '{ "bsdgrp_gid": "1201","bsdgrp_group": "newgroup" }'
   check_rest_response "200"
 
 }

@@ -19,7 +19,7 @@ user_tests() {
 
   # Update password for testuser
   echo_test_title "Updating password for testuser"
-  rest_request "POST" "/account/users/28/password/" { "bsdusr_password": "newpasswd" }
+  rest_request "POST" "/account/users/28/password/" '{ "bsdusr_password": "newpasswd" }'
   check_rest_response "200"
 
 }
