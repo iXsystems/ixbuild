@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 ftp_tests() {
-  set_test_group_text "1 - Update - FTP tests" "1"
+  set_test_group_text "2 - Update - FTP tests" "1"
 
   echo_test_title "Updating ftp service"
   rest_request "PUT" "/services/ftp/" '{ "ftp_clients": 20 }'

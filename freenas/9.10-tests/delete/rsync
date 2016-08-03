@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 rsync_tests() {
-  set_test_group_text "1 - Delete - RSYNC tests" "4"
+  set_test_group_text "3 - Delete - RSYNC tests" "4"
 
   echo_test_title "Delete rsync resource"
   rest_request "DELETE" "/services/rsyncmod/1/"

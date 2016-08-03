@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 group_tests() {
-  set_test_group_text "1 - Update - group tests" "1"
+  set_test_group_text "2 - Update - group tests" "1"
 
   # Update the testgroup
   echo_test_title "Updating group: testgroup"
