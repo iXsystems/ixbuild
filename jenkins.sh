@@ -44,6 +44,8 @@ trueos-iso-pkg  - Builds just the pkgs needed for ISO creation
 trueos-iso      - Builds the ISO files
 trueos-vm       - Builds the VM images
 publish-iso     - Upload ISO files to ScaleEngine
+trueos-docs     - Create TrueOS handbook
+push-trueos-docs- Upload TrueOS handbook
 lumina-docs	- Create lumina handbook
 push-lumina-docs- Upload lumina handbook
 
@@ -72,6 +74,8 @@ case $TYPE in
     world|trueos-world) jenkins_world ;;
         pkg|trueos-pkg) jenkins_pkg "release" ;;
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
+           trueos-docs) jenkins_trueos_docs ;;
+      push-trueos-docs) jenkins_trueos_push_docs ;;
            lumina-docs) jenkins_trueos_lumina_docs ;;
       push-lumina-docs) jenkins_trueos_push_lumina_docs ;;
         iso|trueos-iso) jenkins_iso ;;
