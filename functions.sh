@@ -575,6 +575,16 @@ jenkins_trueos_docs()
   return 0
 }
 
+jenkins_trueos_push_docs()
+{
+  cd /outgoing/doc/master/trueos-docs
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/trueos.org/handbook/
+  return 0
+}
+
+
 jenkins_trueos_lumina_docs()
 {
   if [ ! -d "/tmp/build" ] ; then
@@ -605,6 +615,16 @@ jenkins_trueos_lumina_docs()
   cleanup_workdir
   return 0
 }
+
+jenkins_trueos_lumina_push_docs()
+{
+  cd /outgoing/doc/master/lumina-docs
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/lumina-desktop.org/handbook/
+  return 0
+}
+
 
 jenkins_freenas()
 {
