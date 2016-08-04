@@ -616,7 +616,7 @@ jenkins_trueos_lumina_docs()
   return 0
 }
 
-jenkins_trueos_lumina_push_docs()
+jenkins_trueos_push_lumina_docs()
 {
   cd /outgoing/doc/master/lumina-docs
   if [ $? -ne 0 ] ; then exit_clean ; fi
