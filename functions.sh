@@ -555,7 +555,7 @@ jenkins_trueos_docs()
   git clone --depth=1 https://github.com/trueos/trueos-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
-  cd ${DDIR}
+  cd ${DDIR}/trueos-handbook
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   make html
@@ -563,7 +563,7 @@ jenkins_trueos_docs()
 
   # Now lets sync the TrueOS docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/_build/html/
+    cd ${DDIR}/trueos-handbook/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/trueos-docs" >/dev/null 2>/dev/null
