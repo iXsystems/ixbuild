@@ -27,7 +27,7 @@ fi
 mkdir ${ISODISTDIR}
 
 # Set the file-date
-fDate="-`date '+%m-%d-%Y'`"
+fDate="-`date '+%Y-%m-%d'`"
 
 # Base file name
 if [ "$SYSBUILD" = "trueos" ] ; then
