@@ -116,7 +116,7 @@ cd ${FNASSRC}
 
 # Check if we have optional build options
 if [ -n "$BUILDOPTS" ] ; then
-  PROFILEARGS="$PROFILEARGS $BUILDOPTS"
+  PROFILEARGS="$PROFILEARGS `echo $BUILDOPTS | sed 's|%BUILDID%|${BUILD_ID}|g'`"
   unset BUILDOPTS
 fi
 
