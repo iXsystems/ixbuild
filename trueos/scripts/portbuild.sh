@@ -123,6 +123,7 @@ BUILDER_HOSTNAME=builds.trueos.org
 PRIORITY_BOOST="pypy openoffice*"
 GIT_URL=${PORTS_GIT_URL}
 USE_COLORS=yes
+NOLINUX=yes
 EOF
 
   if [ "$JOBS" = "yes" ] ; then
