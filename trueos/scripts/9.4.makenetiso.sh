@@ -31,11 +31,11 @@ fDate="-`date '+%Y-%m-%d'`"
 
 # Base file name
 if [ "$SYSBUILD" = "trueos" ] ; then
-  bFile="TrueOS-Server-${ISOVER}${fDate}-${FARCH}"
+  bFile="TrueOS-Server-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
 else
-  bFile="TrueOS-Desktop-${ISOVER}${fDate}-${FARCH}"
+  bFile="TrueOS-Desktop-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
 fi

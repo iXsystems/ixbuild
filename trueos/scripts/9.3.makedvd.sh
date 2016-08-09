@@ -34,11 +34,11 @@ fDate="-`date '+%Y-%m-%d'`"
 
 # Base file name
 if [ "$SYSBUILD" = "trueos" ] ; then
-  bFile="TrueOS-Server-${ISOVER}${fDate}-${FARCH}"
+  bFile="TrueOS-Server-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
 else
-  bFile="TrueOS-Desktop-${ISOVER}${fDate}-${FARCH}"
+  bFile="TrueOS-Desktop-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
 fi
@@ -100,7 +100,7 @@ if [ ! -e "latest.iso" ] ; then
 fi
 
 # Create the .torrent
-mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/iso/${ISOVER}/amd64/${bFile}-DVD.iso ${bFile}-DVD.iso
+mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/iso/master/amd64/${bFile}-DVD.iso ${bFile}-DVD.iso
 
 ######
 # Create the USB images
@@ -152,6 +152,6 @@ if [ ! -e "latest.img" ] ; then
 fi
 
 # Create the .torrent
-mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/iso/${ISOVER}/amd64/${OUTFILE} ${OUTFILE}
+mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/iso/master/amd64/${OUTFILE} ${OUTFILE}
 
 exit 0
