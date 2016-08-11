@@ -12,7 +12,7 @@ export REQUIRES
 system_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "4 - Factory system test" "1"
+  set_test_group_text "Delete - System tests" "1"
 
   echo_test_title "Restoring to factory defaults"
   rest_request "POST" "/system/config/factory_system/"
