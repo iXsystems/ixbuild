@@ -6,27 +6,29 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="user group rsync restore"
+REQUIRES="user group rsync storage"
 export REQUIRES
 
-restore_tests()
+system_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "4 - Factory Restore test" "1"
+  set_test_group_text "4 - Factory system test" "1"
 
   echo_test_title "Restoring to factory defaults"
-  rest_request "POST" "/system/config/factory_restore/"
+  rest_request "POST" "/system/config/factory_system/"
   check_rest_response "202" || return 1
+
+}
 
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-restore_init()
+system_init()
 {
-  # Run all the restore tests
+  # Run all the system tests
   case $TESTSET in
-        SMOKE) restore_tests ; return $? ;;
-     COMPLETE) restore_tests ; return $? ;;
-    BENCHMARK) restore_tests ; return $? ;;
-            *) restore_tests ; return $? ;;
+        SMOKE) system_tests ; return $? ;;
+     COMPLETE) system_tests ; return $? ;;
+    BENCHMARK) system_tests ; return $? ;;
+            *) system_tests ; return $? ;;
   esac
 }
