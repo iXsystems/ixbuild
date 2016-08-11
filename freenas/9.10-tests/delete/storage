@@ -34,6 +34,8 @@ storage_tests()
   rest_request "DELETE" "/storage/volume/1/"
   check_rest_response "204" || return 1
 
+}
+
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
