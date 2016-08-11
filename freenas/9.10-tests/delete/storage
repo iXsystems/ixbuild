@@ -1,5 +1,5 @@
 #!/usr/local/bin/bash
-# Author: Kris Moore
+# Author: Joe Maloney
 # License: BSD
 # Location for tests into REST API of FreeNAS 9.10
 # Resty Docs: https://github.com/micha/resty
@@ -12,7 +12,12 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Delete - Storage tests" "1"
+  set_test_group_text "1 - Delete - Storage tests" "2"
+
+  # Check destroying a dataset
+  echo_test_title "Destroying dataset"
+  rest_request "DELETE" "/storage/volume/1/datasets/cifs/"
+  check_rest_response "204" || return 1
 
   # Check destroying a zpool
   echo_test_title "Destroying volume"
