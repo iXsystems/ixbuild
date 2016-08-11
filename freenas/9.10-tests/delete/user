@@ -14,7 +14,7 @@ user_tests() {
 
   # Delete the testuser
   echo_test_title "Deleting user: testuser"
-  rest_request "DELETE" "/account/users/28/"
+  rest_request "DELETE" "/account/users/${userid}/"
   check_rest_response "204"
 
 }
