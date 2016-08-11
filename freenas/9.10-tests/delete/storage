@@ -12,7 +12,7 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Delete - Storage tests" "3"
+  set_test_group_text "1 - Delete - Storage tests" "4"
 
   # Check destroying a ZFS snapshot
   echo_test_title "Destroying ZFS snapshot tank@test"
