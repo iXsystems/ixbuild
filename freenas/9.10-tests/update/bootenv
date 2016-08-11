@@ -11,7 +11,7 @@ export REQUIRES
 
 # Run a series of tests on the boot-environments
 bootenv_tests() {
-  set_test_group_text "1 - Update - Boot-Environment Tests" "1"
+  set_test_group_text "2 - Update - Boot-Environment Tests" "1"
 
   echo_test_title "Cloning a new boot-environment: newbe1"
   rest_request "POST" "/system/bootenv/" '{ "name": "newbe1", "source": "default" }'
