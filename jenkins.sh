@@ -32,6 +32,7 @@ freenas-combo - Build release and run VM API tests against it automatically
 freenas-ltest - Runs the FreeNAS "live" tests against a target system
 freenas-lupgrade - Runs the FreeNAS "live" upgrade against a target system
 freenas-docs      - Create FreeNAS Handbook
+truenas-docs      - Create TrueNAS Handbook
 freenas-api       - Create FreeNAS API
 freenas-push-docs - Push FreeNAS Docs
 freenas-push-api  - Push FreeNAS API
@@ -88,6 +89,7 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
          freenas-tests) jenkins_freenas_tests ;;
          freenas-ltest) jenkins_freenas_live_tests ;;
       freenas-lupgrade) jenkins_freenas_live_upgrade ;;
+          truenas-docs) jenkins_truenas_docs ;;
           freenas-docs) jenkins_freenas_docs ;;
      freenas-push-docs) jenkins_freenas_push_docs ;;
            freenas-api) jenkins_freenas_api ;;

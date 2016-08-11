@@ -480,6 +480,39 @@ jenkins_freenas_push_nightly()
   return 0
 }
 
+jenkins_truenas_docs()
+{
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
+  fi
+
+  DDIR=`mktemp -d /tmp/build/XXXX` 
+
+  git clone --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  cd ${DDIR}/userguide
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  make TAG=truenas html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Now lets sync the docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/userguide/processed_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  rm -rf ${DDIR}
+
+  return 0
+}
+
+
 jenkins_freenas_docs()
 {
   if [ ! -d "/tmp/build" ] ; then
@@ -494,12 +527,12 @@ jenkins_freenas_docs()
   cd ${DDIR}/userguide
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
-  make html
+  make TAG=freenas html
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   # Now lets sync the docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/userguide/_build/html/
+    cd ${DDIR}/userguide/processed_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
