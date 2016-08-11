@@ -12,6 +12,9 @@ export REQUIRES
 user_tests() {
   set_test_group_text "2 - Update - User tests" "2"
 
+  # Get the ID of this user
+  userid=$(cat ${FNASBDIR}/testuser)
+
   # Update the testuser
   echo_test_title "Updating user: testuser"
   rest_request "PUT" "/account/users/${userid}/" '{ "bsdusr_username": "testuser", "bsdusr_full_name": "Test Renamed", "bsdusr_password": "testing123", "bsdusr_uid": 1112, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }'

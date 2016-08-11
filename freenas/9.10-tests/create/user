@@ -30,6 +30,9 @@ user_tests() {
   rest_request "POST" "/account/users/${userid}/groups/" '["wheel","ftp"]'
   check_rest_response "202 OK"
 
+  # Save the ID of this user for other jobs
+  echo userid > ${FNASBDIR}/testuser
+
 }
 
 # Init function, this is called after module is sourced
