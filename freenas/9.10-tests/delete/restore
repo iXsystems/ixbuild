@@ -1,0 +1,32 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="user group rsync restore"
+export REQUIRES
+
+restore_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "4 - Factory Restore test" "1"
+
+  echo_test_title "Restoring to factory defaults"
+  rest_request "POST" "/system/config/factory_restore/"
+  check_rest_response "202" || return 1
+
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+restore_init()
+{
+  # Run all the restore tests
+  case $TESTSET in
+        SMOKE) restore_tests ; return $? ;;
+     COMPLETE) restore_tests ; return $? ;;
+    BENCHMARK) restore_tests ; return $? ;;
+            *) restore_tests ; return $? ;;
+  esac
+}
