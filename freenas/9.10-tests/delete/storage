@@ -14,6 +14,11 @@ storage_tests()
   # Set the group text and number of tests
   set_test_group_text "1 - Delete - Storage tests" "3"
 
+  # Check destroying a ZFS snapshot
+  echo_test_title "Destroying ZFS snapshot tank@test"
+  rest_request "DELETE" "/storage/snapshot/tank/test/"
+  check_rest_response "204" || return 1
+
   # Check destroying a ZVOL
   echo_test_title "Destroying ZVOL"
   rest_request "DELETE" "storage/volume/tank/zvols/testzvol/"
