@@ -30,7 +30,7 @@ rc_halt "mkdir -p ${ISODISTDIR}/packages"
 rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"
 
 # Set the file-date
-fDate="-`date '+%Y-%m-%d'`"
+fDate="`date '+%Y-%m-%d'`"
 
 # Base file name
 if [ "$SYSBUILD" = "trueos" ] ; then
