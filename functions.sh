@@ -499,7 +499,7 @@ jenkins_truenas_docs()
 
   # Now lets sync the docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/userguide/processed_build/html/
+    cd ${DDIR}/userguide/processed/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
@@ -532,7 +532,7 @@ jenkins_freenas_docs()
 
   # Now lets sync the docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/userguide/processed_build/html/
+    cd ${DDIR}/userguide/processed/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
