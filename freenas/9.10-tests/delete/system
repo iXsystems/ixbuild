@@ -6,7 +6,7 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="user group rsync storage"
+REQUIRES="bootenv user group rsync storage"
 export REQUIRES
 
 system_tests()
