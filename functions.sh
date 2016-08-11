@@ -462,6 +462,38 @@ jenkins_freenas_push_api()
   return 0
 }
 
+jenkins_freenas_push()
+{
+  # Sanity check that the build was done on this node
+  if [ ! -d "${FNASBDIR}" ] ; then
+    echo "ERROR: No such build dir: ${FNASBDIR}"
+    exit 1
+  fi
+
+  cd ${FNASBDIR}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  PROFILEARGS="$BUILDOPTS"
+
+  if [ -n "$JENKINSPRODUCTION" -a "$JENKINSPRODUCTION" = "true" ] ; then
+    PROFILEARGS="${PROFILEARGS} PRODUCTION=yes"
+  fi
+
+  if [ -n "$JENKINSVERSION" ] ; then
+    PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
+  fi
+
+  if [ -n "$JENKINSINTUPDATE" -a "$JENKINSINTUPDATE" = "true" ] ; then
+    PROFILEARGS="${PROFILEARGS} INTERNAL_UPDATE=yes"
+  fi
+
+  # Push the release to download.freenas.org
+  make release-push ${PROFILEARGS}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  return 0
+}
+
 jenkins_freenas_push_nightly()
 {
   # Sanity check that the build was done on this node
