@@ -122,7 +122,7 @@ if [ -n "$BUILDOPTS" ] ; then
 fi
 
 if [ -n "$JENKINSPRODUCTION" -a "$JENKINSPRODUCTION" = "true" ] ; then
-  PROFILEARGS="${PROFILEARGS} PRODUCTION=true"
+  PROFILEARGS="${PROFILEARGS} PRODUCTION=yes"
 fi
 
 if [ -n "$JENKINSVERSION" ] ; then
