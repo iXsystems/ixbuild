@@ -20,6 +20,9 @@ group_tests() {
   # Get the ID of this group
   groupid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
 
+  # Save the ID of this user for other jobs
+  echo groupid > ${FNASBDIR}/testgroup
+
 }
 
 # Init function, this is called after module is sourced
