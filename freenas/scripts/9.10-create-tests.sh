@@ -76,7 +76,7 @@ wait_for_avail
 echo_ok
 
 # Reset the IP address via REST
-set_ip
+# set_ip
 
 RESULT="SUCCESS"
 
