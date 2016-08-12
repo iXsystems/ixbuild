@@ -78,6 +78,7 @@ if [ -n "$BUILDINCREMENTAL" ] ; then
   rc_halt "git reset --hard"
 
   # Nuke old ISO's / builds
+  echo "Removing old build ISOs"
   rm -rf _BE/release 2>/dev/null
 fi
 
@@ -129,6 +130,11 @@ if [ $? -eq 0 ] ; then
     exit 1
   fi
   PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
+
+  # Cleanup before the build if doing PRODUCTION and INCREMENTAL is set
+  if [ -n "$BUILDINCREMENTAL" ] ; then
+    make cleandist
+  fi
 fi
 
 # Are we building docs / API?
