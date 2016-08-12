@@ -121,11 +121,13 @@ if [ -n "$BUILDOPTS" ] ; then
   unset BUILDOPTS
 fi
 
-if [ -n "$JENKINSPRODUCTION" -a "$JENKINSPRODUCTION" = "true" ] ; then
-  PROFILEARGS="${PROFILEARGS} PRODUCTION=yes"
-fi
-
-if [ -n "$JENKINSVERSION" ] ; then
+echo $PROFILEARGS | grep -q "PRODUCTION=yes"
+if [ $? -eq 0 ] ; then
+  # PRODUCTION is enabled, make sure VERSION was specified
+  if [ -z "$JENKINSVERSION" ] ; then
+    echo "PRODUCTION=yes is SET, but no JENKINSVERSION= is set!"
+    exit 1
+  fi
   PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
 fi
 
