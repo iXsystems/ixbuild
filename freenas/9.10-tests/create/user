@@ -25,6 +25,9 @@ user_tests() {
   # Get the ID of this user
   userid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
 
+  # Save the ID of this group for other jobs
+  export userid
+
   # Set the user to part of the 'wheel' / 'ftp' groups
   echo_test_title "Setting user groups: wheel,ftp"
   rest_request "POST" "/account/users/${userid}/groups/" '["wheel","ftp"]'

@@ -20,8 +20,9 @@ group_tests() {
   # Get the ID of this group
   groupid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
 
-  # Save the ID of this user for other jobs
-  echo groupid > ${FNASBDIR}/testgroup
+  # Save the ID of this group for other jobs
+  export groupid
+  #echo groupid > ${FNASBDIR}/testgroup
 
 }
 

@@ -13,7 +13,7 @@ user_tests() {
   set_test_group_text "3 - Delete - User tests" "1"
 
   # Get the ID of this user
-  userid=$(cat ${FNASBDIR}/testuser)
+  # userid=$(cat ${FNASBDIR}/testuser)
 
   # Delete the testuser
   echo_test_title "Deleting user: testuser"
