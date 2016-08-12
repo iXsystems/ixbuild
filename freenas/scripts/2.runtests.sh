@@ -7,6 +7,9 @@ PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
 
+# Source our resty / jsawk functions
+. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
+
 # Make sure we have all the required packages installed
 ${PROGDIR}/scripts/checkprogs.sh
 
