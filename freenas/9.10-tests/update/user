@@ -14,6 +14,7 @@ user_tests() {
 
   # Get the ID of this user
   userid=`cat ${FNASBDIR}/testuser`
+  export userid
 
   # Update the testuser
   echo_test_title "Updating user: testuser"
