@@ -17,7 +17,7 @@ group_tests() {
 
   # Delete the testgroup
   echo_test_title "Delete group: testgroup/newgroup"
-  rest_request "DELETE" "/account/groups/$groupid/"
+  rest_request "DELETE" "/account/groups/${groupid}/"
   check_rest_response "204"
 
 
