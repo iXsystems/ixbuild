@@ -12,8 +12,8 @@ export REQUIRES
 group_tests() {
   set_test_group_text "3 - Delete - Group tests" "1"
 
-  # Get the ID of this group
-  # groupid=$(cat ${FNASBDIR}/testgroup)
+  # Get the ID of testgroup
+  groupid=$(cat ${FNASBDIR}/testgroup)
 
   # Delete the testgroup
   echo_test_title "Delete group: testgroup/newgroup"
