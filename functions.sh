@@ -462,6 +462,38 @@ jenkins_freenas_push_api()
   return 0
 }
 
+jenkins_freenas_push()
+{
+  # Sanity check that the build was done on this node
+  if [ ! -d "${FNASBDIR}" ] ; then
+    echo "ERROR: No such build dir: ${FNASBDIR}"
+    exit 1
+  fi
+
+  cd ${FNASBDIR}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  PROFILEARGS="$BUILDOPTS"
+
+  if [ -n "$JENKINSPRODUCTION" -a "$JENKINSPRODUCTION" = "true" ] ; then
+    PROFILEARGS="${PROFILEARGS} PRODUCTION=yes"
+  fi
+
+  if [ -n "$JENKINSVERSION" ] ; then
+    PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
+  fi
+
+  if [ -n "$JENKINSINTUPDATE" -a "$JENKINSINTUPDATE" = "true" ] ; then
+    PROFILEARGS="${PROFILEARGS} INTERNAL_UPDATE=yes"
+  fi
+
+  # Push the release to download.freenas.org
+  make release-push ${PROFILEARGS}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  return 0
+}
+
 jenkins_freenas_push_nightly()
 {
   # Sanity check that the build was done on this node
@@ -480,6 +512,39 @@ jenkins_freenas_push_nightly()
   return 0
 }
 
+jenkins_truenas_docs()
+{
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
+  fi
+
+  DDIR=`mktemp -d /tmp/build/XXXX` 
+
+  git clone --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  cd ${DDIR}/userguide
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  make TAG=truenas html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Now lets sync the docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/userguide/processed/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
+    rsync -va --delete-delay --delay-updates -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  rm -rf ${DDIR}
+
+  return 0
+}
+
+
 jenkins_freenas_docs()
 {
   if [ ! -d "/tmp/build" ] ; then
@@ -494,12 +559,12 @@ jenkins_freenas_docs()
   cd ${DDIR}/userguide
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
-  make html
+  make TAG=freenas html
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   # Now lets sync the docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/userguide/_build/html/
+    cd ${DDIR}/userguide/processed/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null

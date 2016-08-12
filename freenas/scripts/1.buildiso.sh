@@ -121,6 +121,14 @@ if [ -n "$BUILDOPTS" ] ; then
   unset BUILDOPTS
 fi
 
+if [ -n "$JENKINSPRODUCTION" -a "$JENKINSPRODUCTION" = "true" ] ; then
+  PROFILEARGS="${PROFILEARGS} PRODUCTION=yes"
+fi
+
+if [ -n "$JENKINSVERSION" ] ; then
+  PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
+fi
+
 # Are we building docs / API?
 if [ "$1" = "docs" -o "$1" = "api-docs" ] ; then
   echo "Creating $1"
