@@ -475,16 +475,21 @@ jenkins_freenas_push()
 
   PROFILEARGS="$BUILDOPTS"
 
-  if [ -n "$JENKINSPRODUCTION" -a "$JENKINSPRODUCTION" = "true" ] ; then
-    PROFILEARGS="${PROFILEARGS} PRODUCTION=yes"
+  if [ -z "$JENKINSVERSION" ] ; then
+    echo "ERROR: Missing JENKINSVERSION="
   fi
-
-  if [ -n "$JENKINSVERSION" ] ; then
-    PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
-  fi
+  PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
 
   if [ -n "$JENKINSINTUPDATE" -a "$JENKINSINTUPDATE" = "true" ] ; then
     PROFILEARGS="${PROFILEARGS} INTERNAL_UPDATE=yes"
+  else
+    if [ -z "$JENKINSRELPASS" ] ; then
+      echo "ERROR: Pushing public with no password set!"
+      exit 1
+    fi
+
+    # Do stuff here to save the password for release-push
+
   fi
 
   # Push the release to download.freenas.org

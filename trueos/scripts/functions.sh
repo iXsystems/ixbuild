@@ -269,6 +269,9 @@ cp_iso_pkg_files()
     # Grab all the FreeBSD base packages
     rc_halt "cp ${PROGDIR}/fbsd-pkg/* ${PROGDIR}/tmp/All/"
 
+    # Remove the FreeBSD Debug Packages
+    rc_halt "rm ${PROGDIR}/tmp/All/FreeBSD*-debug-*.txz"
+
     # Copy pkgng
     rc_halt "cp ${PROGDIR}/tmp/All/pkg-*.txz ${PROGDIR}/tmp/All/pkg.txz"
 
