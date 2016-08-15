@@ -809,7 +809,7 @@ jenkins_push_fn_statedir()
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${FNSTATEPUSH}" >/dev/null 2>/dev/null
 
   # Now rsync this sucker
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEPUSH}/
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEPUSH}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 }
 
