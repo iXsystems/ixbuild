@@ -706,6 +706,9 @@ jenkins_freenas()
   make iso
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+  # Push the entire build statedir
+  jenkins_push_fn_statedir
+
   # Now lets sync the ISOs
   if [ -n "$SFTPHOST" ] ; then
     if [ "$FREENASLEGACY" = "YES" ] ; then
@@ -793,6 +796,28 @@ jenkins_freenas_tests()
   return 0
 }
 
+jenkins_push_fn_statedir()
+{
+  if [ -z "$SFTPHOST" ] ; then return 0 ; fi
+
+  # Now lets push the new state dir
+  if [ ! -d "${FNASBDIR}" ] ; then return 0 ; fi
+
+  local FNSTATEPUSH="${FNSTATEDIR}${FNASBDIR}"
+
+  # Make sure dir exists remotely
+  ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${FNSTATEPUSH}" >/dev/null 2>/dev/null
+
+  # Now rsync this sucker
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEPUSH}/
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+}
+
+jenkins_pull_fn_statedir()
+{
+  return 0
+}
+
 jenkins_ports_tests()
 {
   echo "Changing to $WORKSPACE"
@@ -877,6 +902,9 @@ if [ "$TYPE" != "ports-tests" ] ; then
     PJPORTSDIR="/poud/ports/pcbsdports"
   fi
   export PBUILD PJPORTSDIR PPKGDIR
+
+  # Set the remote directory for FreeNAS Builds state
+  FNSTATEDIR="${SFTPFINALDIR}/fnstate/${TARGETREL}"
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
