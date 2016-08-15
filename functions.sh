@@ -707,7 +707,7 @@ jenkins_freenas()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Push the entire build statedir
-  jenkins_push_fn_statedir
+  #jenkins_push_fn_statedir
 
   # Now lets sync the ISOs
   if [ -n "$SFTPHOST" ] ; then
