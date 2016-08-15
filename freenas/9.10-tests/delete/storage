@@ -21,7 +21,7 @@ storage_tests()
 
   # Check destroying a ZVOL
   echo_test_title "Destroying ZVOL"
-  rest_request "DELETE" "storage/volume/tank/zvols/testzvol/"
+  rest_request "DELETE" "/storage/volume/tank/zvols/testzvol/"
   check_rest_response "204" || return 1
 
   # Check destroying a dataset
