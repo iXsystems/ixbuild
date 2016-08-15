@@ -904,7 +904,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
   export PBUILD PJPORTSDIR PPKGDIR
 
   # Set the remote directory for FreeNAS Builds state
-  FNSTATEDIR="${SFTPFINALDIR}/fnstate/${TARGETREL}"
+  FNSTATEDIR="${SFTPWORKDIR}/fnstate/${TARGETREL}"
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
