@@ -29,11 +29,6 @@ storage_tests()
   rest_request "DELETE" "/storage/volume/1/datasets/share/"
   check_rest_response "204" || return 1
 
-  # Check destroying a zpool
-  echo_test_title "Destroying volume"
-  rest_request "DELETE" "/storage/volume/1/"
-  check_rest_response "204" || return 1
-
 }
 
 # Init function, this is called after module is sourced
