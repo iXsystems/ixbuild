@@ -707,7 +707,7 @@ jenkins_freenas()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Push the entire build statedir
-  #jenkins_push_fn_statedir
+  jenkins_push_fn_statedir
 
   # Now lets sync the ISOs
   if [ -n "$SFTPHOST" ] ; then
@@ -809,7 +809,8 @@ jenkins_push_fn_statedir()
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${FNSTATEPUSH}" >/dev/null 2>/dev/null
 
   # Now rsync this sucker
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEPUSH}
+  echo "Copying build-state..."
+  rsync -a -e 'ssh' ${FNASBDIR} ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
 }
 
