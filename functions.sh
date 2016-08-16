@@ -484,13 +484,10 @@ jenkins_freenas_push()
   if [ -n "$JENKINSINTUPDATE" -a "$JENKINSINTUPDATE" = "true" ] ; then
     PROFILEARGS="${PROFILEARGS} INTERNAL_UPDATE=yes"
   else
-    if [ -z "$JENKINSRELPASS" ] ; then
+    if [ -z "$RELENG_PASSWORD" ] ; then
       echo "ERROR: Pushing public with no password set!"
       exit 1
     fi
-
-    # Do stuff here to save the password for release-push
-
   fi
 
   # Push the release to download.freenas.org
