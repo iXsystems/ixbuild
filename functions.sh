@@ -807,7 +807,7 @@ jenkins_push_fn_statedir()
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${FNSTATEPUSH}" >/dev/null 2>/dev/null
 
   # Now rsync this sucker
-  echo "Copying build-state..."
+  echo "Copying build-state to remote... ${FNASBDIR} -> ${FNSTATEDIR}/"
   rsync -a -e 'ssh' ${FNASBDIR} ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
 }
