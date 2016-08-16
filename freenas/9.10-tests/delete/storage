@@ -26,7 +26,7 @@ storage_tests()
 
   # Check destroying a dataset
   echo_test_title "Destroying dataset"
-  rest_request "DELETE" "/storage/volume/1/datasets/cifs/"
+  rest_request "DELETE" "/storage/volume/1/datasets/share/"
   check_rest_response "204" || return 1
 
   # Check destroying a zpool
