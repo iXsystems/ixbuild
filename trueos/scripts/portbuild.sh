@@ -188,8 +188,10 @@ if [ "$target" = "all" ] ; then
   # Kill any previous running jail
   poudriere jail -k -j ${PJAILNAME} -p ${PPORTS} 2>/dev/null
 
-  # Remove old PBI-INDEX.txz files
-  rm ${PPKGDIR}/PBI-INDEX.txz* 2>/dev/null
+  # Cleanup old packages?
+  if [ -n "$WIPEPOUDRIERE" ] ; then
+    poudriere bulk -c -j ${PJAILNAME} -p ${PPORTS}
+  fi
 
   # Create the poud config
   mk_poud_config
@@ -215,6 +217,11 @@ elif [ "$target" = "iso" ] ; then
 
   # Kill any previous running jail
   poudriere jail -k -j ${PJAILNAME} -p ${PPORTS} 2>/dev/null
+
+  # Cleanup old packages?
+  if [ -n "$WIPEPOUDRIERE" ] ; then
+    poudriere bulk -c -j ${PJAILNAME} -p ${PPORTS}
+  fi
 
   # Create the poud config
   mk_poud_config
