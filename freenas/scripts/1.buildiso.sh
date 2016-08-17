@@ -160,7 +160,7 @@ touch ${OUTFILE}
 (tail -f ${OUTFILE} 2>/dev/null) &
 TPID=$!
 
-echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}"
+echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "${BUILDSENV} make checkout ${PROFILEARGS}"
 ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
@@ -248,7 +248,7 @@ touch $OUTFILE
 (sleep 5 ; tail -f $OUTFILE 2>/dev/null) &
 TPID=$!
 
-echo_test_title "${BUILDSENV} make release ${PROFILEARGS}"
+echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "${BUILDSENV} make release ${PROFILEARGS}"
 ${BUILDSENV} make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
