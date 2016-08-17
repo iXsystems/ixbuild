@@ -10,11 +10,14 @@ REQUIRES=""
 export REQUIRES
 
 group_tests() {
-  set_test_group_text "2 - Update - group tests" "1"
+  set_test_group_text "2 - Update - Group tests" "1"
+
+  # Get the ID of testgroup
+  groupid=$(cat ${FNASBDIR}/testgroup)
 
   # Update the testgroup
   echo_test_title "Updating group: testgroup"
-  rest_request "PUT" "/account/groups/36/" '{ "bsdgrp_gid": "1201","bsdgrp_group": "newgroup" }'
+  rest_request "PUT" "/account/groups/${groupid}/" '{ "bsdgrp_gid": "1201","bsdgrp_group": "newgroup" }'
   check_rest_response "200"
 
 }

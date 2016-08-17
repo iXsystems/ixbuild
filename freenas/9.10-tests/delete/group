@@ -10,11 +10,14 @@ REQUIRES=""
 export REQUIRES
 
 group_tests() {
-  set_test_group_text "3 - Delete - group tests" "1"
+  set_test_group_text "3 - Delete - Group tests" "1"
+
+  # Get the ID of testgroup
+  groupid=$(cat ${FNASBDIR}/testgroup)
 
   # Delete the testgroup
   echo_test_title "Delete group: testgroup/newgroup"
-  rest_request "DELETE" "/account/groups/36/"
+  rest_request "DELETE" "/account/groups/${groupid}/"
   check_rest_response "204"
 
 

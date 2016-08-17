@@ -12,9 +12,12 @@ export REQUIRES
 user_tests() {
   set_test_group_text "3 - Delete - User tests" "1"
 
+  # Get the ID of testuser
+  userid=$(cat ${FNASBDIR}/testuser)
+
   # Delete the testuser
   echo_test_title "Deleting user: testuser"
-  rest_request "DELETE" "/account/users/28/"
+  rest_request "DELETE" "/account/users/${userid}/"
   check_rest_response "204"
 
 }

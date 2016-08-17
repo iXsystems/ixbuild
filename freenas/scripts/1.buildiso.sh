@@ -233,9 +233,9 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
 
   # Some tuning for our big build boxes
   CPUS=$(sysctl -n kern.smp.cpus)
-  if [ $CPUS -gt 20 ] ; then
-    echo "Setting POUDRIERE_JOBS=20"
-    export POUDRIERE_JOBS=20
+  if [ $CPUS -gt 16 ] ; then
+    echo "Setting POUDRIERE_JOBS=16"
+    export POUDRIERE_JOBS=16
   fi
 
   # Set the jail name to use for these builds
