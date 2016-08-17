@@ -189,8 +189,10 @@ if [ "$target" = "all" ] ; then
   poudriere jail -k -j ${PJAILNAME} -p ${PPORTS} 2>/dev/null
 
   # Cleanup old packages?
+  POUDFLAGS=""
   if [ -n "$WIPEPOUDRIERE" ] ; then
-    poudriere bulk -c -j ${PJAILNAME} -p ${PPORTS}
+    echo "Cleaning old packages"
+    POUDFLAGS="-c"
   fi
 
   # Create the poud config
@@ -200,7 +202,7 @@ if [ "$target" = "all" ] ; then
   update_poud_world
 
   # Build entire ports tree
-  poudriere bulk -a -j ${PJAILNAME} -p ${PPORTS}
+  poudriere bulk -a ${POUDFLAGS} -j ${PJAILNAME} -p ${PPORTS}
   if [ $? -ne 0 ] ; then
      echo "Failed poudriere build..."
   fi
@@ -219,8 +221,9 @@ elif [ "$target" = "iso" ] ; then
   poudriere jail -k -j ${PJAILNAME} -p ${PPORTS} 2>/dev/null
 
   # Cleanup old packages?
+  POUDFLAGS=""
   if [ -n "$WIPEPOUDRIERE" ] ; then
-    poudriere bulk -c -j ${PJAILNAME} -p ${PPORTS}
+    POUDFLAGS="-c"
   fi
 
   # Create the poud config
@@ -230,7 +233,7 @@ elif [ "$target" = "iso" ] ; then
   update_poud_world
 
   # Start the build
-  poudriere bulk -j ${PJAILNAME} -p ${PPORTS} -f ${PCONFDIR}/essential-packages-iso
+  poudriere bulk ${POUDFLAGS} -j ${PJAILNAME} -p ${PPORTS} -f ${PCONFDIR}/essential-packages-iso
   if [ $? -ne 0 ] ; then
      echo "Failed poudriere build..."
   fi
