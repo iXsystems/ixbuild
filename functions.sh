@@ -491,6 +491,7 @@ jenkins_freenas_push()
   fi
 
   # Push the release to download.freenas.org
+  echo "make release-push ${PROFILEARGS}"
   make release-push ${PROFILEARGS}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
