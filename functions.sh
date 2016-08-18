@@ -699,7 +699,7 @@ jenkins_freenas()
   create_workdir
 
   # If we have a saved build state, lets pull that before we begin
-  jenkins_pull_fn_statedir
+  #jenkins_pull_fn_statedir
 
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
@@ -708,7 +708,7 @@ jenkins_freenas()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Push the entire build statedir
-  jenkins_push_fn_statedir
+  #jenkins_push_fn_statedir
 
   # Now lets sync the ISOs
   if [ -n "$SFTPHOST" ] ; then
