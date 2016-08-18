@@ -160,7 +160,8 @@ touch ${OUTFILE}
 (tail -f ${OUTFILE} 2>/dev/null) &
 TPID=$!
 
-echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}"
+echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/null
+echo "${BUILDSENV} make checkout ${PROFILEARGS}"
 ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
@@ -232,9 +233,9 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
 
   # Some tuning for our big build boxes
   CPUS=$(sysctl -n kern.smp.cpus)
-  if [ $CPUS -gt 20 ] ; then
-    echo "Setting POUDRIERE_JOBS=20"
-    export POUDRIERE_JOBS=20
+  if [ $CPUS -gt 16 ] ; then
+    echo "Setting POUDRIERE_JOBS=16"
+    export POUDRIERE_JOBS=16
   fi
 
   # Set the jail name to use for these builds
@@ -247,7 +248,8 @@ touch $OUTFILE
 (sleep 5 ; tail -f $OUTFILE 2>/dev/null) &
 TPID=$!
 
-echo_test_title "${BUILDSENV} make release ${PROFILEARGS}"
+echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
+echo "${BUILDSENV} make release ${PROFILEARGS}"
 ${BUILDSENV} make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
