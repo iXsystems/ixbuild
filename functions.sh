@@ -814,12 +814,18 @@ jenkins_pull_fn_statedir()
 {
   if [ -z "$SFTPHOST" ] ; then return 0 ; fi
 
-  # Now lets pull the old state dir
-  if [ ! -d "${FNASBDIR}" ] ; then mkdir -p ${FNASBDIR} ; fi
-
   # Make sure the remote dir exists
   ssh ${SFTPUSER}@${SFTPHOST} ls ${FNSTATEDIR}/ >/dev/null 2>/dev/null
   if [ $? -ne 0 ] ; then return 0 ; fi
+
+  # Now lets cleanup old state dir
+  if [ -d "${FNASBDIR}" ] ; then 
+    echo "Removing local state dir..."
+    rm -rf ${FNASBDIR} 2>/dev/null
+    chflags -R noschg ${FNASBDIR} 2>/dev/null
+    rm -rf ${FNASBDIR}
+  fi
+  mkdir -p ${FNASBDIR}
 
   # Now rsync this sucker
   echo "Copying build-state from remote... ${FNSTATEDIR}/ -> ${FNASBDIR}/"
