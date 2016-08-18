@@ -801,17 +801,27 @@ jenkins_push_fn_statedir()
   # Now lets push the new state dir
   if [ ! -d "${FNASBDIR}" ] ; then return 0 ; fi
 
-  local FNSTATEPUSH="${FNSTATEDIR}${FNASBDIR}"
-
   # Now rsync this sucker
-  echo "Copying build-state to remote... ${FNASBDIR} -> ${FNSTATEDIR}/"
-  rsync -a -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEPUSH}
+  echo "Copying build-state to remote... ${FNASBDIR}/ -> ${FNSTATEDIR}/"
+  rsync -a -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
 }
 
 jenkins_pull_fn_statedir()
 {
-  return 0
+  if [ -z "$SFTPHOST" ] ; then return 0 ; fi
+
+  # Now lets pull the old state dir
+  if [ ! -d "${FNASBDIR}" ] ; then mkdir -p ${FNASBDIR} ; fi
+
+  # Make sure the remote dir exists
+  ssh ${SFTPUSER}@${SFTPHOST} ls ${FNSTATEDIR}/ >/dev/null 2>/dev/null
+  if [ $? -ne 0 ] ; then return 0 ; fi
+
+  # Now rsync this sucker
+  echo "Copying build-state from remote... ${FNSTATEDIR}/ -> ${FNASBDIR}/"
+  rsync -a -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/ ${FNASBDIR}/
+  if [ $? -ne 0 ] ; then exit_clean ; fi
 }
 
 jenkins_ports_tests()
