@@ -825,6 +825,9 @@ jenkins_pull_fn_statedir()
   echo "Copying build-state from remote... ${FNSTATEDIR}/ -> ${FNASBDIR}/"
   rsync -a --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/ ${FNASBDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  # Make sure to set proper ownership
+  chown -R root:wheel ${FNASBDIR}
 }
 
 jenkins_ports_tests()
