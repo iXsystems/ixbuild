@@ -493,6 +493,12 @@ jenkins_freenas_push()
     fi
   fi
 
+  if [ -n "$RELENG_PASSWORD" ] ; then
+    # Set the correct variable release-push expects
+    IX_KEY_PASSWORD="${RELENG_PASSWORD}"
+    export IX_KEY_PASSWORD
+  fi
+
   # Push the release to download.freenas.org
   echo "make release-push ${PROFILEARGS}"
   make release-push ${PROFILEARGS}
