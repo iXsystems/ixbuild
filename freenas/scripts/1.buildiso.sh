@@ -67,7 +67,9 @@ touch ${LOUT}
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
   echo "Doing fresh build!"
-  rc_halt "make cleandist"
+  cd ${FNASBDIR}
+  chflags -R 0 _BE
+  rm -rf _BE
 fi
 
 if [ -n "$BUILDINCREMENTAL" ] ; then
