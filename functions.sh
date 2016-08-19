@@ -474,6 +474,9 @@ jenkins_freenas_push()
   cd ${FNASBDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
+  git reset --hard
+  git pull
+
   PROFILEARGS="$BUILDOPTS"
 
   if [ -z "$JENKINSVERSION" ] ; then
