@@ -190,7 +190,7 @@ if [ "$target" = "all" ] ; then
 
   # Cleanup old packages?
   POUDFLAGS=""
-  if [ -n "$WIPEPOUDRIERE" ] ; then
+  if [ "$WIPEPOUDRIERE" = "true" ] ; then
     echo "Cleaning old packages"
     POUDFLAGS="-c"
   fi
