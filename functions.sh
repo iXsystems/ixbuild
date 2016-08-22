@@ -711,6 +711,10 @@ jenkins_freenas()
   # If we have a saved build state, lets pull that before we begin
   #jenkins_pull_fn_statedir
 
+  # Check if this is a Release Engineer build
+  echo ${BUILDOPTS} | grep -q "PRODUCTION"
+  if [ $? -eq 0 ] ; then RELENGBUILD="YES" ; fi
+
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
@@ -731,7 +735,7 @@ jenkins_freenas()
       if [ $? -ne 0 ] ; then exit_clean ; fi
     fi
 
-    if [ -e "${FNASBDIR}/releng-build" ] ; then
+    if [ -n "${RELENGBUILD}" ] ; then
       # Release Engineer Build
       # Don't cleanup all the old versions
       RSYNCFLAGS=""
@@ -746,7 +750,7 @@ jenkins_freenas()
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     # Sync the releng build_env
-    if [ -e "${FNASBDIR}/releng-build" ] ; then
+    if [ -n "${RELENGBUILD}" ] ; then
       echo "$BUILD" | grep -q "truenas"
       if [ $? -eq 0 ] ; then
         envdir="/builds/TrueNAS/build_env"

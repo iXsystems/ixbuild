@@ -120,12 +120,6 @@ if [ -n "$BUILDOPTS" ] ; then
   BUILDOPTS=`echo $BUILDOPTS | sed "s|%BUILDID%|${BUILD_ID}|g"`
   PROFILEARGS="$PROFILEARGS $BUILDOPTS"
 
-  # Check if this is a Release Engineer build
-  echo ${BUILDOPTS} | grep -q "PRODUCTION=YES"
-  if [ $? -eq 0 ] ; then
-    touch ${FNASSRC}/releng-build
-  fi
-
   # Unset so we don't conflict with anything
   unset BUILDOPTS
 fi
