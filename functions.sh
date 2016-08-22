@@ -731,9 +731,38 @@ jenkins_freenas()
       if [ $? -ne 0 ] ; then exit_clean ; fi
     fi
 
+    if [ -e "${FNASBDIR}/releng-build" ] ; then
+      # Release Engineer Build
+      # Don't cleanup all the old versions
+      RSYNCFLAGS=""
+      if [ $? -ne 0 ] ; then exit_clean; fi
+    else
+      RSYNCFLAGS="--delete"
+    fi
+
+    # Sync the ISO / Update files now
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+    rsync -va ${RSYNCFLAGS} -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
     if [ $? -ne 0 ] ; then exit_clean; fi
+
+    # Sync the releng build_env
+    if [ -e "${FNASBDIR}/releng-build" ] ; then
+      echo "$BUILD" | grep -q "truenas"
+      if [ $? -eq 0 ] ; then
+        envdir="/builds/TrueNAS/build_env"
+      else
+        envdir="/builds/FreeNAS/build_env"
+      fi
+      if [ ! -d "$envdir" ] ; then
+        echo "WARNING: Unable to sync $envdir"
+        cleanup_workdir
+        return 0
+      fi
+      cd ${envdir}
+      ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ENVSTAGE}" >/dev/null 2>/dev/null
+      rsync -va ${RSYNCFLAGS} -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ENVSTAGE}
+    fi
+
   fi
 
   cleanup_workdir
@@ -933,6 +962,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
 
   # Set the remote directory for FreeNAS Builds state
   FNSTATEDIR="${SFTPWORKDIR}/fnstate/${TARGETREL}"
+  ENVSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/build_env"
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
