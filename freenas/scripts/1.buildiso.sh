@@ -135,6 +135,7 @@ if [ $? -eq 0 ] ; then
 
   # Cleanup before the build if doing PRODUCTION and INCREMENTAL is set
   if [ -n "$BUILDINCREMENTAL" ] ; then
+    echo "Running cleandist"
     make cleandist
   fi
 fi
