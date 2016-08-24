@@ -712,7 +712,7 @@ jenkins_freenas()
   #jenkins_pull_fn_statedir
 
   # Check if this is a Release Engineer build
-  echo ${BUILDOPTS} | grep -q "PRODUCTION"
+  echo ${BUILDTAG} | grep -q "releng"
   if [ $? -eq 0 ] ; then RELENGBUILD="YES" ; fi
 
   cd ${TBUILDDIR}
