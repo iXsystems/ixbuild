@@ -891,23 +891,75 @@ jenkins_ports_tests()
   exit 0
 }
 
-# Set the builds directory
-BDIR="./builds"
-export BDIR
+jenkins_mkcustard()
+{
+  cd /root
 
-# Set location of local PC-BSD build data
-PCBSDBDIR="/pcbsd"
-export PCBSDBDIR
+  # Roll back to clean snapshot
+  VBoxManage snapshot custard restore clean
+  if [ $? -ne 0 ] ; then
+    echo "Failed to roll-back to @clean snapshot"
+    exit 1
+  fi
 
-# Set the build tag
-BUILDTAG="$BUILD"
-export BUILDTAG
+  # Start the custard VM and wait for it to finish
+  ( VBoxHeadless -s custard ) &
+  echo "$!" > /tmp/.custardPID
+  count=0
 
-# Set location of local FreeNAS build data
-FNASBDIR="/$BUILDTAG"
-export FNASBDIR
+  echo -e "Waiting for Custard prep to finish...\c"
+  while :
+  do
+    sleep 20
+    echo -e ".\c"
 
-if [ "$TYPE" != "ports-tests" ] ; then
+    pgrep -q -F /tmp/.custardPID
+    if [ $? -ne 0 ] ; then
+      break
+    fi
+
+    count=`expr $count + 1`
+    if [ $count -gt 20 ] ; then
+      VBoxManage controlvm custard poweroff
+      exit 1
+    fi
+  done
+
+  rm -rf /root/custard/
+  mkdir /root/custard
+  OUTFILE=/root/custard/custard-`date '+%Y-%m-%d-%H-%M'`.ova
+
+  # Looks like custard finished on its own, lets package it up
+  VBoxManage modifyvm custard --nic1 bridged
+  VBoxManage modifyvm custard --nic2 bridged
+  VBoxManage export custard -o ${OUTFILE}
+
+  # Save the .ova to stage server
+  if [ -n "$SFTPHOST" ] ; then
+    STAGE="${SFTPFINALDIR}/iso/custard/amd64"
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${STAGE}" >/dev/null 2>/dev/null
+    rsync -va --delete -e 'ssh' /root/custard/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+  fi
+
+  exit 0
+}
+
+do_build_env_setup()
+{
+
+  # Set location of local PC-BSD build data
+  PCBSDBDIR="/pcbsd"
+  export PCBSDBDIR
+
+  # Set the build tag
+  BUILDTAG="$BUILD"
+  export BUILDTAG
+
+  # Set location of local FreeNAS build data
+  FNASBDIR="/$BUILDTAG"
+  export FNASBDIR
 
   if [ -z "$BUILD" ] ; then
     echo "Missing BUILD"
@@ -991,5 +1043,15 @@ if [ "$TYPE" != "ports-tests" ] ; then
     echo "Invalid BRANCH"
     exit_clean
   fi
-fi
+}
 
+# Set the builds directory
+BDIR="./builds"
+export BDIR
+
+# Check the type of build being done
+case $TYPE in
+  port-tests) ;;
+  mkcustard) ;;
+  *) do_build_env_setup ;;
+esac
