@@ -903,7 +903,7 @@ jenkins_mkcustard()
   fi
 
   # Start the custard VM and wait for it to finish
-  ( VBoxHeadless -s custard ) &
+  ( VBoxHeadless -s custard 2>/dev/null ) &
   echo "$!" > /tmp/.custardPID
   count=0
 
@@ -933,6 +933,7 @@ jenkins_mkcustard()
   VBoxManage modifyvm custard --nic1 bridged
   VBoxManage modifyvm custard --nic2 bridged
   VBoxManage export custard -o ${OUTFILE}
+  chmod 644 ${OUTFILE}
 
   # Save the .ova to stage server
   if [ -n "$SFTPHOST" ] ; then
