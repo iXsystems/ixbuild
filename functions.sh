@@ -904,16 +904,15 @@ jenkins_mkcustard()
 
   # Start the custard VM and wait for it to finish
   ( VBoxHeadless -s custard 2>/dev/null ) &
-  echo "$!" > /tmp/.custardPID
   count=0
 
-  echo -e "Waiting for Custard prep to finish...\c"
+  echo "Waiting for Custard prep to finish..."
   while :
   do
     sleep 20
-    echo -e ".\c"
+    echo "."
 
-    pgrep -q -F /tmp/.custardPID
+    vboxmanage list runningvms | grep -q "custard"
     if [ $? -ne 0 ] ; then
       break
     fi
