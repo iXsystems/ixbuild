@@ -222,7 +222,7 @@ elif [ "$target" = "iso" ] ; then
 
   # Cleanup old packages?
   POUDFLAGS=""
-  if [ -n "$WIPEPOUDRIERE" ] ; then
+  if [ "$WIPEPOUDRIERE" = "true" ] ; then
     POUDFLAGS="-c"
   fi
 
