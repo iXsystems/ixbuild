@@ -903,7 +903,7 @@ jenkins_mkcustard()
   fi
 
   # Start the custard VM and wait for it to finish
-  ( VBoxHeadless -s custard 2>/dev/null ) &
+  ( VBoxHeadless -s custard >/dev/null 2>/dev/null ) &
   count=0
 
   echo "Waiting for Custard prep to finish..."
@@ -929,6 +929,7 @@ jenkins_mkcustard()
   OUTFILE=/root/custard/custard-`date '+%Y-%m-%d-%H-%M'`.ova
 
   # Looks like custard finished on its own, lets package it up
+  echo "Exporting CUSTARD .ova file..."
   VBoxManage modifyvm custard --nic1 bridged
   VBoxManage modifyvm custard --nic2 bridged
   VBoxManage export custard -o ${OUTFILE}
@@ -938,6 +939,7 @@ jenkins_mkcustard()
   if [ -n "$SFTPHOST" ] ; then
     STAGE="${SFTPFINALDIR}/iso/custard/amd64"
 
+    echo "Moving CUSTARD to stage server..."
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${STAGE}" >/dev/null 2>/dev/null
     rsync -va --delete -e 'ssh' /root/custard/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
     if [ $? -ne 0 ] ; then exit_clean ; fi
