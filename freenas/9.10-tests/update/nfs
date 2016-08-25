@@ -16,7 +16,7 @@ nfs_tests()
 
   # Update NFS server
   echo_test_title "Updating the NFS service"
-  rest_request "PUT" "/services/nfs/ '{ "nfs_srv_servers": "50" }'
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_servers": "50" }'
   check_rest_response "200"
 
 }
