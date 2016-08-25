@@ -52,6 +52,7 @@ trueos-docs     - Create TrueOS handbook
 push-trueos-docs- Upload TrueOS handbook
 lumina-docs	- Create lumina handbook
 push-lumina-docs- Upload lumina handbook
+ports-tests	- Test building a repo port files
 
 -- PC-BSD Commands --
   world - Build FreeBSD world

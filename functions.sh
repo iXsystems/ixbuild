@@ -885,7 +885,27 @@ jenkins_ports_tests()
   cd "$WORKSPACE"
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  ./mkports-tests.sh /usr/ports
+  ./mkports.sh /usr/ports
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+
+  # Now determine the port to build
+  bPort=`cat mkport.sh | grep ^port= | cut -d '"' -f 2`
+  cd /usr/ports/${bPort}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  make clean
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  portlint
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  make BATCH=yes
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+
+  make stage
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+
+  make check-plist
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
   exit 0
