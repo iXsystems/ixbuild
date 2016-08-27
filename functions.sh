@@ -885,7 +885,7 @@ jenkins_ports_tests()
   cd "$WORKSPACE"
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  ./mkports.sh /usr/ports
+  ./mkport.sh /usr/ports
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
   # Now determine the port to build
