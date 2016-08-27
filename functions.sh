@@ -1073,7 +1073,7 @@ export BDIR
 
 # Check the type of build being done
 case $TYPE in
-  port-tests) ;;
+  ports-tests) ;;
   mkcustard) ;;
   *) do_build_env_setup ;;
 esac
