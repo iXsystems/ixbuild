@@ -890,6 +890,11 @@ jenkins_ports_tests()
 
   # Now determine the port to build
   bPort=`cat mkport.sh | grep ^port= | cut -d '"' -f 2`
+  if [ -z "$bPort" ] ; then
+    echo "ERROR: Unable to determine bPort="
+    exit 1
+  fi
+
   cd /usr/ports/${bPort}
   if [ $? -ne 0 ] ; then exit 1; fi
 
