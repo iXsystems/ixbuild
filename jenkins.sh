@@ -79,6 +79,8 @@ case $TYPE in
     world|trueos-world) jenkins_world ;;
         pkg|trueos-pkg) jenkins_pkg "release" ;;
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
+           sysadm-docs) jenkins_sysadm_docs ;;
+      push-sysadm-docs) jenkins_sysadm_push_docs ;;
            trueos-docs) jenkins_trueos_docs ;;
       push-trueos-docs) jenkins_trueos_push_docs ;;
            lumina-docs) jenkins_trueos_lumina_docs ;;
