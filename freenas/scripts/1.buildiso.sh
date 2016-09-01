@@ -90,6 +90,16 @@ else
   FLAVOR="FREENAS"
 fi
 
+# Add JENKINSBUILDSENV to one specified by the build itself
+if [ -n "$JENKINSBUILDSENV" ] ; then
+  BUILDSENV="$BUILDSENV $JENKINSBUILDSENV"
+fi
+
+# Throw env command on the front
+if [ -n "$BUILDSENV" ] ; then
+  BUILDSENV="env $BUILDSENV"
+fi
+
 # Make sure we have our freenas sources
 if [ -d "${FNASBDIR}" ]; then
   rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
