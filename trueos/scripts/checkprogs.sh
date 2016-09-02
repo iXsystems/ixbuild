@@ -121,6 +121,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y textproc/jq"
 fi
 
+pkg info "devel/llvm48" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing devel/llvm48"
+  rc_halt "pkg install -y devel/llvm48"
+fi
+
 which poudriere >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing poudriere.."
