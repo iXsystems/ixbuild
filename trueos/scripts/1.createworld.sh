@@ -66,7 +66,7 @@ create_dist_files() {
 
   # Re-run make-manifest
   cd ${DISTDIR}
-  ${WORLDSRC}/release/scripts/make-manifest.sh *.txz
+  ${WORLDSRC}/release/scripts/make-manifest.sh *.txz > MANIFEST
 
   return 0
 }
