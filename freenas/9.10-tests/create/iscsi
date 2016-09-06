@@ -12,12 +12,38 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - iSCSI tests" "1"
+  set_test_group_text "1 - Create - iSCSI tests" "7"
 
-  # Enable iSCSI server
+  # Create iSCSI portal
+  echo_test_title "Create iSCSI portal"
+  rest_request "POST" "/services/iscsi/portal/" '{ "iscsi_target_portal_ips": ["0.0.0.0:3620"] }'
+  check_rest_response "201 CREATED"
+
+  # Create iSCSI target
+  echo_test_title "Create iSCSI target"
+  rest_request "POST" "/services/iscsi/target/" '{ "iscsi_target_name": "target0"}'
+  check_rest_response "201 CREATED"
+  
+  # Create iSCSI extent
   echo_test_title "Creating iSCSI extent"
   rest_request "POST" "/services/iscsi/extent/" '{ "iscsi_target_extent_type": "File", "iscsi_target_extent_name": "extent", "iscsi_target_extent_filesize": "50MB", "iscsi_target_extent_path": "/mnt/tank/iscsi" }'
   check_rest_response "201 CREATED"
+
+  # Associate iSCSI target
+  echo_test_title "Associate iSCSI target"
+  rest_request "POST" "/services/iscsi/targettoextent/" '{ "id": "1", "iscsi_extent": "1", "iscsi_lunid": null, "iscsi_target": "1" }'
+  check_rest_response "201 CREATED"
+
+  # Enable the iSCSI service
+  echo_test_title "Enable iSCSI service"
+  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "true" }'
+  check_rest_response "200 OK"
+
+  # Now connect to iSCSI target
+  # echo_test_title "Connecting to iSCSI target"
+  # rc_test "iscsictl -A -p ${ip} -t iqn.2005-10.org.freenas.ctl:target0" || return 1
+
+  # Verify we are connected to target
 
 }
 
