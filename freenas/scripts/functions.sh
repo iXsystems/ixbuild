@@ -25,6 +25,13 @@ if [ -z "$RESULTSDIR" ] ; then
   export RESULTSDIR
 fi
 
+# Default IP4 Pool of addresses
+DEFAULT_IP4POOL="$(grep ^IP4POOL: /ixbuild/build.conf | cut -d' ' -f2)"
+if [ -z "$DEFAULT_IP4POOL" ] ; then
+   DEFAULT_IP4POOL="192.168.0.220"
+   export DEFAULT_IP4POOL
+fi
+
 git_fnas_up()
 {
   local lDir=${1}

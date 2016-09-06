@@ -67,9 +67,9 @@ touch ${LOUT}
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
   echo "Doing fresh build!"
-  rc_nohalt "rm -rf ${FNASBDIR}" 2>/dev/null
-  rc_nohalt "chflags -R noschg ${FNASBDIR}" 2>/dev/null
-  rc_nohalt "rm -rf ${FNASBDIR}"
+  cd ${FNASBDIR}
+  chflags -R 0 _BE
+  rm -rf _BE
 fi
 
 if [ -n "$BUILDINCREMENTAL" ] ; then
@@ -88,6 +88,16 @@ if [ $? -eq 0 ] ; then
   FLAVOR="TRUENAS"
 else
   FLAVOR="FREENAS"
+fi
+
+# Add JENKINSBUILDSENV to one specified by the build itself
+if [ -n "$JENKINSBUILDSENV" ] ; then
+  BUILDSENV="$BUILDSENV $JENKINSBUILDSENV"
+fi
+
+# Throw env command on the front
+if [ -n "$BUILDSENV" ] ; then
+  BUILDSENV="env $BUILDSENV"
 fi
 
 # Make sure we have our freenas sources
@@ -119,6 +129,8 @@ cd ${FNASSRC}
 if [ -n "$BUILDOPTS" ] ; then
   BUILDOPTS=`echo $BUILDOPTS | sed "s|%BUILDID%|${BUILD_ID}|g"`
   PROFILEARGS="$PROFILEARGS $BUILDOPTS"
+
+  # Unset so we don't conflict with anything
   unset BUILDOPTS
 fi
 
@@ -133,6 +145,7 @@ if [ $? -eq 0 ] ; then
 
   # Cleanup before the build if doing PRODUCTION and INCREMENTAL is set
   if [ -n "$BUILDINCREMENTAL" ] ; then
+    echo "Running cleandist"
     make cleandist
   fi
 fi

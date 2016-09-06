@@ -26,18 +26,19 @@ display_usage() {
 Available Commands:
 
 -- FreeNAS Commands --
-      freenas - Builds FreeNAS release
-freenas-tests - Runs FreeNAS VM API tests against built release
-freenas-combo - Build release and run VM API tests against it automatically
-freenas-ltest - Runs the FreeNAS "live" tests against a target system
-freenas-lupgrade - Runs the FreeNAS "live" upgrade against a target system
-freenas-docs     - Create FreeNAS Handbook
-freenas-tn-docs  - Create TrueNAS Handbook
-freenas-api      - Create FreeNAS API
-freenas-push-docs - Push FreeNAS Docs
-freenas-push-api  - Push FreeNAS API
+      freenas        - Builds FreeNAS release
+freenas-tests        - Runs FreeNAS VM API tests against built release
+freenas-combo        - Build release and run VM API tests against it automatically
+freenas-ltest        - Runs the FreeNAS "live" tests against a target system
+freenas-lupgrade     - Runs the FreeNAS "live" upgrade against a target system
+freenas-docs         - Create FreeNAS Handbook
+freenas-tn-docs      - Create TrueNAS Handbook
+freenas-api          - Create FreeNAS API
+freenas-push-docs    - Push FreeNAS Docs
+freenas-push-api     - Push FreeNAS API
 freenas-push-nightly - Run 'release-push' for FreeNAS Nightly
-freenas-push      - Run 'release-push' for FreeNAS / TrueNAS
+freenas-push         - Run 'release-push' for FreeNAS / TrueNAS
+mkcustard            - Build a Custard VM
 
 -- TrueOS Commands --
 trueos-world    - Builds the world
@@ -51,6 +52,7 @@ trueos-docs     - Create TrueOS handbook
 push-trueos-docs- Upload TrueOS handbook
 lumina-docs	- Create lumina handbook
 push-lumina-docs- Upload lumina handbook
+ports-tests	- Test building a repo port files
 
 -- PC-BSD Commands --
   world - Build FreeBSD world
@@ -77,6 +79,8 @@ case $TYPE in
     world|trueos-world) jenkins_world ;;
         pkg|trueos-pkg) jenkins_pkg "release" ;;
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
+           sysadm-docs) jenkins_sysadm_docs ;;
+      push-sysadm-docs) jenkins_sysadm_push_docs ;;
            trueos-docs) jenkins_trueos_docs ;;
       push-trueos-docs) jenkins_trueos_push_docs ;;
            lumina-docs) jenkins_trueos_lumina_docs ;;
@@ -99,6 +103,7 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
           freenas-push) jenkins_freenas_push ;;
          freenas-combo) jenkins_freenas
    		        jenkins_freenas_tests ;;
+	     mkcustard)	jenkins_mkcustard ;;
            ports-tests) jenkins_ports_tests ;;
                      *) echo "Invalid command: $1" 
          		display_usage

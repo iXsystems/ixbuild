@@ -34,6 +34,41 @@ create_dist_files() {
   # Cleanup old .txz files
   cd ${WORLDSRC}/release
   make clean
+
+  # Dirty dirty hack to get llvm38 into our base packages
+  # specifically for buildign in poudriere
+  rm -rf ${DISTDIR}/llvm-src 2>/dev/null
+  chflags -R noschg ${DISTDIR}/llvm-src 2>/dev/null
+  rm -rf ${DISTDIR}/llvm-src 2>/dev/null
+
+  mkdir ${DISTDIR}/llvm-src
+  tar xvpf ${DISTDIR}/base.txz -C ${DISTDIR}/llvm-src
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: tar xvpf base.txz"
+     exit 1
+  fi
+
+  pkg info -l llvm38 | tail -n +2 | awk '{print $1}' > /tmp/.llvmPlist
+
+  echo "Extracting llvm38 to base"
+  tar cvf - -T /tmp/.llvmPlist 2>/dev/null | tar xvpf - -C ${DISTDIR}/llvm-src
+
+  tar cvJf ${DISTDIR}/base.txz -C ${DISTDIR}/llvm-src .
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: tar cvJf base.txz"
+     exit 1
+  fi
+
+  # Remove temp dir
+  rm -rf ${DISTDIR}/llvm-src 2>/dev/null
+  chflags -R noschg ${DISTDIR}/llvm-src 2>/dev/null
+  rm -rf ${DISTDIR}/llvm-src 2>/dev/null
+
+  # Re-run make-manifest
+  cd ${DISTDIR}
+  ${WORLDSRC}/release/scripts/make-manifest.sh *.txz > MANIFEST
+
+  return 0
 }
 
 create_base_pkg_files()

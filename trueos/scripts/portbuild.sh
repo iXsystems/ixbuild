@@ -120,7 +120,7 @@ NOHANG_TIME=12600
 ATOMIC_PACKAGE_REPOSITORY=no
 PKG_REPO_FROM_HOST=yes
 BUILDER_HOSTNAME=builds.trueos.org
-PRIORITY_BOOST="pypy openoffice*"
+PRIORITY_BOOST="pypy openoffice* paraview webkit* llvm*"
 GIT_URL=${PORTS_GIT_URL}
 USE_COLORS=yes
 NOLINUX=yes
@@ -190,7 +190,7 @@ if [ "$target" = "all" ] ; then
 
   # Cleanup old packages?
   POUDFLAGS=""
-  if [ -n "$WIPEPOUDRIERE" ] ; then
+  if [ "$WIPEPOUDRIERE" = "true" ] ; then
     echo "Cleaning old packages"
     POUDFLAGS="-c"
   fi
@@ -222,7 +222,7 @@ elif [ "$target" = "iso" ] ; then
 
   # Cleanup old packages?
   POUDFLAGS=""
-  if [ -n "$WIPEPOUDRIERE" ] ; then
+  if [ "$WIPEPOUDRIERE" = "true" ] ; then
     POUDFLAGS="-c"
   fi
 

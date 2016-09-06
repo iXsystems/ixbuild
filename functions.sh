@@ -86,7 +86,7 @@ push_pkgworkdir()
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKPKG}" >/dev/null 2>/dev/null
 
   echo "Pushing cached pkgs..."
-  rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
@@ -109,7 +109,7 @@ pull_pkgworkdir()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   echo "Pulling cached pkgs..."
-  rsync -va -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
 
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
@@ -131,20 +131,20 @@ push_world()
   # Push world packages to work directory
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
 
-  rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 
   if [ -n "$PKGBASE" ] ; then
     # Push packages to base directory
     cd ${TBUILDDIR}/fbsd-pkg
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}-base" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
 
   # Dist files to dist directory
   cd ${TBUILDDIR}/fbsd-dist
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}/dist" >/dev/null 2>/dev/null
-  rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/dist/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/dist/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
 }
 
 pull_world()
@@ -177,13 +177,13 @@ pull_world()
     cd ${TBUILDDIR}/fbsd-pkg
     if [ $? -ne 0 ] ; then exit_clean; fi
     echo "Pulling base packages..."
-    rsync -va -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
 
   cd ${TBUILDDIR}/fbsd-dist
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  rsync -va -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
   return 0
 }
@@ -205,7 +205,7 @@ pull_iso()
   cd ${TBUILDDIR}/iso
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  rsync -va -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
@@ -311,7 +311,7 @@ jenkins_pkg()
   if [ -n "$SFTPHOST" ] ; then
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}" >/dev/null 2>/dev/null
 
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
     if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
   fi
 
@@ -341,7 +341,7 @@ jenkins_iso()
 
   if [ -n "$SFTPHOST" ] ; then
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
     if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
   fi
 
@@ -407,7 +407,7 @@ jenkins_vm()
 
   if [ -n "$SFTPHOST" ] ; then
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -474,6 +474,9 @@ jenkins_freenas_push()
   cd ${FNASBDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
+  git reset --hard
+  git pull
+
   PROFILEARGS="$BUILDOPTS"
 
   if [ -z "$JENKINSVERSION" ] ; then
@@ -490,7 +493,14 @@ jenkins_freenas_push()
     fi
   fi
 
+  if [ -n "$RELENG_PASSWORD" ] ; then
+    # Set the correct variable release-push expects
+    IX_KEY_PASSWORD="${RELENG_PASSWORD}"
+    export IX_KEY_PASSWORD
+  fi
+
   # Push the release to download.freenas.org
+  echo "make release-push ${PROFILEARGS}"
   make release-push ${PROFILEARGS}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
@@ -538,7 +548,7 @@ jenkins_truenas_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -571,7 +581,7 @@ jenkins_freenas_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -603,7 +613,7 @@ jenkins_freenas_api()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/api" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -611,6 +621,53 @@ jenkins_freenas_api()
 
   return 0
 }
+
+jenkins_sysadm_docs()
+{
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
+  fi
+
+  DDIR=`mktemp -d /tmp/build/XXXX` 
+
+  git clone --depth=1 https://github.com/trueos/sysadm ${DDIR}
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  cd ${DDIR}/docs/client_handbook
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+  make html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Now lets sync the client docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/docs/client_handbook/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/client" >/dev/null 2>/dev/null
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/client
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  cd ${DDIR}/docs/server_handbook
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  make html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Now lets sync the server docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/docs/server_handbook/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/server" >/dev/null 2>/dev/null
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/server
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  cleanup_workdir
+  return 0
+}
+
 
 jenkins_trueos_docs()
 {
@@ -635,7 +692,7 @@ jenkins_trueos_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/trueos-docs" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/trueos-docs
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/trueos-docs
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -649,6 +706,15 @@ jenkins_trueos_push_docs()
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/trueos.org/handbook/
+  return 0
+}
+
+jenkins_sysadm_push_docs()
+{
+  cd /outgoing/doc/master/sysadm-docs
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/
   return 0
 }
 
@@ -676,7 +742,7 @@ jenkins_trueos_lumina_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/lumina-docs" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/lumina-docs
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/lumina-docs
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -698,6 +764,13 @@ jenkins_freenas()
 {
   create_workdir
 
+  # If we have a saved build state, lets pull that before we begin
+  #jenkins_pull_fn_statedir
+
+  # Check if this is a Release Engineer build
+  echo ${BUILDTAG} | grep -q "releng"
+  if [ $? -eq 0 ] ; then RELENGBUILD="YES" ; fi
+
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
@@ -705,7 +778,7 @@ jenkins_freenas()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Push the entire build statedir
-  jenkins_push_fn_statedir
+  #jenkins_push_fn_statedir
 
   # Now lets sync the ISOs
   if [ -n "$SFTPHOST" ] ; then
@@ -718,9 +791,38 @@ jenkins_freenas()
       if [ $? -ne 0 ] ; then exit_clean ; fi
     fi
 
+    if [ -n "${RELENGBUILD}" ] ; then
+      # Release Engineer Build
+      # Don't cleanup all the old versions
+      RSYNCFLAGS=""
+      if [ $? -ne 0 ] ; then exit_clean; fi
+    else
+      RSYNCFLAGS="--delete"
+    fi
+
+    # Sync the ISO / Update files now
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+    rsync -va ${RSYNCFLAGS} -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
     if [ $? -ne 0 ] ; then exit_clean; fi
+
+    # Sync the releng build_env
+    if [ -n "${RELENGBUILD}" ] ; then
+      echo "$BUILD" | grep -q "truenas"
+      if [ $? -eq 0 ] ; then
+        envdir="/builds/TrueNAS/build_env"
+      else
+        envdir="/builds/FreeNAS/build_env"
+      fi
+      if [ ! -d "$envdir" ] ; then
+        echo "WARNING: Unable to sync $envdir"
+        cleanup_workdir
+        return 0
+      fi
+      cd ${envdir}
+      ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ENVSTAGE}" >/dev/null 2>/dev/null
+      rsync -va ${RSYNCFLAGS} -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ENVSTAGE}
+    fi
+
   fi
 
   cleanup_workdir
@@ -781,7 +883,7 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${FNASBDIR}/_BE/release/
+    rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${FNASBDIR}/_BE/release/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
@@ -803,7 +905,7 @@ jenkins_push_fn_statedir()
 
   # Now rsync this sucker
   echo "Copying build-state to remote... ${FNASBDIR}/ -> ${FNSTATEDIR}/"
-  rsync -a -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/
+  rsync -a --delete -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
 }
 
@@ -811,17 +913,26 @@ jenkins_pull_fn_statedir()
 {
   if [ -z "$SFTPHOST" ] ; then return 0 ; fi
 
-  # Now lets pull the old state dir
-  if [ ! -d "${FNASBDIR}" ] ; then mkdir -p ${FNASBDIR} ; fi
-
   # Make sure the remote dir exists
   ssh ${SFTPUSER}@${SFTPHOST} ls ${FNSTATEDIR}/ >/dev/null 2>/dev/null
   if [ $? -ne 0 ] ; then return 0 ; fi
 
+  # Now lets cleanup old state dir
+  if [ -d "${FNASBDIR}" ] ; then 
+    echo "Removing local state dir..."
+    rm -rf ${FNASBDIR} 2>/dev/null
+    chflags -R noschg ${FNASBDIR} 2>/dev/null
+    rm -rf ${FNASBDIR}
+  fi
+  mkdir -p ${FNASBDIR}
+
   # Now rsync this sucker
   echo "Copying build-state from remote... ${FNSTATEDIR}/ -> ${FNASBDIR}/"
-  rsync -a -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/ ${FNASBDIR}/
+  rsync -a --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/ ${FNASBDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  # Make sure to set proper ownership
+  chown -R root:wheel ${FNASBDIR}
 }
 
 jenkins_ports_tests()
@@ -830,29 +941,108 @@ jenkins_ports_tests()
   cd "$WORKSPACE"
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  ./mkports-tests.sh /usr/ports
+  ./mkport.sh /usr/ports
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+
+  # Now determine the port to build
+  bPort=`cat mkport.sh | grep ^port= | cut -d '"' -f 2`
+  if [ -z "$bPort" ] ; then
+    echo "ERROR: Unable to determine bPort="
+    exit 1
+  fi
+
+  cd /usr/ports/${bPort}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  make clean
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  portlint
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  make BATCH=yes
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+
+  make stage
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+
+  make check-plist
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
   exit 0
 }
 
-# Set the builds directory
-BDIR="./builds"
-export BDIR
+jenkins_mkcustard()
+{
+  cd /root
 
-# Set location of local PC-BSD build data
-PCBSDBDIR="/pcbsd"
-export PCBSDBDIR
+  # Roll back to clean snapshot
+  VBoxManage snapshot custard restore clean
+  if [ $? -ne 0 ] ; then
+    echo "Failed to roll-back to @clean snapshot"
+    exit 1
+  fi
 
-# Set the build tag
-BUILDTAG="$BUILD"
-export BUILDTAG
+  # Start the custard VM and wait for it to finish
+  ( VBoxHeadless -s custard >/dev/null 2>/dev/null ) &
+  count=0
 
-# Set location of local FreeNAS build data
-FNASBDIR="/$BUILDTAG"
-export FNASBDIR
+  echo "Waiting for Custard prep to finish..."
+  while :
+  do
+    sleep 20
+    echo "."
 
-if [ "$TYPE" != "ports-tests" ] ; then
+    vboxmanage list runningvms | grep -q "custard"
+    if [ $? -ne 0 ] ; then
+      break
+    fi
+
+    count=`expr $count + 1`
+    if [ $count -gt 20 ] ; then
+      VBoxManage controlvm custard poweroff
+      exit 1
+    fi
+  done
+
+  rm -rf /root/custard/
+  mkdir /root/custard
+  OUTFILE=/root/custard/custard-`date '+%Y-%m-%d-%H-%M'`.ova
+
+  # Looks like custard finished on its own, lets package it up
+  echo "Exporting CUSTARD .ova file..."
+  VBoxManage modifyvm custard --nic1 bridged
+  VBoxManage modifyvm custard --nic2 bridged
+  VBoxManage export custard -o ${OUTFILE}
+  chmod 644 ${OUTFILE}
+
+  # Save the .ova to stage server
+  if [ -n "$SFTPHOST" ] ; then
+    STAGE="${SFTPFINALDIR}/iso/custard/amd64"
+
+    echo "Moving CUSTARD to stage server..."
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${STAGE}" >/dev/null 2>/dev/null
+    rsync -va --delete -e 'ssh' /root/custard/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+  fi
+
+  exit 0
+}
+
+do_build_env_setup()
+{
+
+  # Set location of local PC-BSD build data
+  PCBSDBDIR="/pcbsd"
+  export PCBSDBDIR
+
+  # Set the build tag
+  BUILDTAG="$BUILD"
+  export BUILDTAG
+
+  # Set location of local FreeNAS build data
+  FNASBDIR="/$BUILDTAG"
+  export FNASBDIR
 
   if [ -z "$BUILD" ] ; then
     echo "Missing BUILD"
@@ -911,6 +1101,7 @@ if [ "$TYPE" != "ports-tests" ] ; then
 
   # Set the remote directory for FreeNAS Builds state
   FNSTATEDIR="${SFTPWORKDIR}/fnstate/${TARGETREL}"
+  ENVSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/build_env"
 
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
@@ -935,5 +1126,15 @@ if [ "$TYPE" != "ports-tests" ] ; then
     echo "Invalid BRANCH"
     exit_clean
   fi
-fi
+}
 
+# Set the builds directory
+BDIR="./builds"
+export BDIR
+
+# Check the type of build being done
+case $TYPE in
+  ports-tests) ;;
+  mkcustard) ;;
+  *) do_build_env_setup ;;
+esac
