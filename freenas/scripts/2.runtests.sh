@@ -227,15 +227,15 @@ cd ${PROGDIR}/scripts
 
 if [ -n "$FREENASLEGACY" ] ; then
   clean_xml_results
-  ./9.10-create-tests.sh 2>&1 | tee >/tmp/fnas-tests-create.log
-  ./9.10-update-tests.sh 2>&1 | tee >/tmp/fnas-tests-update.log
-  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/fnas-tests-delete.log
+  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-create.log
+  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-update.log
+  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-delete.log
   res=$?
 else
   clean_xml_results
-  ./10-create-tests.sh 2>&1 | tee >/tmp/fnas-tests-create.log
-  ./10-update-tests.sh 2>&1 | tee >/tmp/fnas-tests-update.log
-  ./10-delete-tests.sh 2>&1 | tee >/tmp/fnas-tests-delete.log
+  ./10-create-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-create.log
+  ./10-update-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-update.log
+  ./10-delete-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-delete.log
   res=$?
 fi
 
