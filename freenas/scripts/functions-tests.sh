@@ -208,13 +208,16 @@ rc_test()
   if [ -z "$3" ] ; then
     ${1} >${TESTSTDOUT} 2>${TESTSTDERR}
     if [ $? -ne 0 ] ; then
-       echo_fail 
-       eval "${2}"
-       echo "Failed running: $1"
-       return 1
+      echo_fail 
+      if [ -n "$2" ] ; then 
+	eval "${2}"
+      fi
+      echo "Failed running: $1"
+      return 1
+    else
+      echo_ok
+      return 0
     fi
-    echo_ok
-    return 0
   fi
 
 
