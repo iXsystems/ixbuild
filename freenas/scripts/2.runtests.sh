@@ -98,7 +98,7 @@ rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 50000"
 VM="$BUILDTAG"
 # Remove any crashed / old VM
 VBoxManage unregistervm $VM >/dev/null 2>/dev/null
-rm -rf "/root/VirtualBox VMs/vminstall" >/dev/null 2>/dev/null
+rm -rf "/root/VirtualBox VMs/$BUILDTAG" >/dev/null 2>/dev/null
 
 # Copy ISO over to /root in case we need to grab it from jenkins node later
 if [ "$FLAVOR" = "TRUENAS" ] ; then
@@ -148,18 +148,18 @@ echo "Performing VM installation..."
 count=0
 
 # Unload VB
-VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
 
 # Start the VM
-daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
+daemon -p /tmp/$BUILDTAG.pid vboxheadless -startvm "$VM" --vrde off
 
 # Wait for initial bhyve startup
 count=0
 while :
 do
-  if [ ! -e "/tmp/vminstall.pid" ] ; then break; fi
+  if [ ! -e "/tmp/$BUILDTAG.pid" ] ; then break; fi
 
-  pgrep -qF /tmp/vminstall.pid
+  pgrep -qF /tmp/$BUILDTAG.pid
   if [ $? -ne 0 ] ; then
         break;
   fi
@@ -172,7 +172,7 @@ do
 done
 
 # Make sure VM is shutdown
-VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
 
 # Remove from the vbox registry
 VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
@@ -217,7 +217,7 @@ if [ -e "/tmp/vboxpipe" ] ; then
 fi
 
 echo "Running Installed System..."
-daemon -p /tmp/vminstall.pid vboxheadless -startvm "$VM" --vrde off
+daemon -p /tmp/$BUILDTAG.pid vboxheadless -startvm "$VM" --vrde off
 
 # Give a minute to boot, should be ready for REST calls now
 sleep 120
@@ -240,7 +240,7 @@ else
 fi
 
 # Shutdown that VM
-VBoxManage controlvm vminstall poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
 sync
 
 # Delete the VM
