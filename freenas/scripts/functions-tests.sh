@@ -353,7 +353,7 @@ set_ip()
   #check_rest_response "202 ACCEPTED"
 
   echo "Waiting for reboot"
-  sleep 30
+  sleep 120
 }
 
 wait_for_avail()
