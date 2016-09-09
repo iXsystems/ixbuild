@@ -358,7 +358,7 @@ set_ip()
   echo_ok
 
   echo_test_title "Waiting for reboot"
-  sleep 20
+  sleep 30
   wait_for_avail
   echo_ok
 }
