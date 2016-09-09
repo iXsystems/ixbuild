@@ -70,10 +70,10 @@ start_xml_results
 # When running via Jenkins / ATF mode, it may take a variable
 # time to boot the system and be ready for REST calls. We run
 # an initial test to determine when the interface is up
-set_test_group_text "3 - Delete - Testing Connectivity" "1"
-echo_test_title "Testing access to REST API"
-wait_for_avail
-echo_ok
+# set_test_group_text "3 - Delete - Testing Connectivity" "1"
+# echo_test_title "Testing access to REST API"
+# wait_for_avail
+# echo_ok
 
 RESULT="SUCCESS"
 
