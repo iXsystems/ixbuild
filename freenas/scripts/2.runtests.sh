@@ -93,12 +93,12 @@ fi
 ######################################################
 MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
 echo "Creating $MFSFILE"
-rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 50000"
+rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 8000"
 
 VM="$BUILDTAG"
 # Remove any crashed / old VM
 VBoxManage unregistervm $VM >/dev/null 2>/dev/null
-rm -rf "/root/VirtualBox VMs/$BUILDTAG" >/dev/null 2>/dev/null
+rm -rf "/root/VirtualBox VMs/$VM" >/dev/null 2>/dev/null
 
 # Copy ISO over to /root in case we need to grab it from jenkins node later
 if [ "$FLAVOR" = "TRUENAS" ] ; then
@@ -141,25 +141,25 @@ rc_halt "VBoxManage modifyvm $VM --usb on"
 
 # Setup serial output
 rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
-rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/vboxpipe"
+rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/$VM.vboxpipe"
 
 # Just in case the install hung, we don't need to be waiting for over an hour
 echo "Performing VM installation..."
 count=0
 
 # Unload VB
-VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
 
 # Start the VM
-daemon -p /tmp/$BUILDTAG.pid vboxheadless -startvm "$VM" --vrde off
+daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
 
 # Wait for initial bhyve startup
 count=0
 while :
 do
-  if [ ! -e "/tmp/$BUILDTAG.pid" ] ; then break; fi
+  if [ ! -e "/tmp/$VM.pid" ] ; then break; fi
 
-  pgrep -qF /tmp/$BUILDTAG.pid
+  pgrep -qF /tmp/$VM.pid
   if [ $? -ne 0 ] ; then
         break;
   fi
@@ -172,7 +172,7 @@ do
 done
 
 # Make sure VM is shutdown
-VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
 
 # Remove from the vbox registry
 VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
@@ -183,7 +183,7 @@ rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --ty
 # Display output of VM serial mode
 echo "OUTPUT FROM INSTALLATION CONSOLE..."
 echo "---------------------------------------------"
-cat /tmp/vboxpipe
+cat /tmp/$VM.vboxpipe
 echo ""
 
 # Check that this device seemed to install properly
@@ -212,12 +212,12 @@ rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk2 --size 20000"
 rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 2 --device 0 --type hdd --medium ${MFSFILE}.disk2"
 
 # Get rid of old output file
-if [ -e "/tmp/vboxpipe" ] ; then
-  rm /tmp/vboxpipe
+if [ -e "/tmp/$VM.vboxpipe" ] ; then
+  rm /tmp/$VM.vboxpipe
 fi
 
 echo "Running Installed System..."
-daemon -p /tmp/$BUILDTAG.pid vboxheadless -startvm "$VM" --vrde off
+daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
 
 # Give a minute to boot, should be ready for REST calls now
 sleep 120
@@ -228,22 +228,21 @@ cd ${PROGDIR}/scripts
 if [ -n "$FREENASLEGACY" ] ; then
   clean_xml_results
   set_ip
-  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-create.log
-  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-update.log
-  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-delete.log
+  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
   res=$?
 else
   clean_xml_results
-  wait_for_avail
   set_ip
-  ./10-create-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-create.log
-  ./10-update-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-update.log
-  ./10-delete-tests.sh 2>&1 | tee >/tmp/$BUILDTAG-tests-delete.log
+  ./10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
   res=$?
 fi
 
 # Shutdown that VM
-VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
 sync
 
 # Delete the VM
@@ -252,13 +251,13 @@ VBoxManage unregistervm $VM --delete
 echo ""
 echo "Output from console during runtime tests:"
 echo "-----------------------------------------"
-cat /tmp/vboxpipe
+cat /tmp/$VM.vboxpipe
 
 echo ""
 echo "Output from REST API calls:"
 echo "-----------------------------------------"
-cat /tmp/fnas-tests-create.log
-cat /tmp/fnas-tests-update.log
-cat /tmp/fnas-tests-delete.log
+cat /tmp/$VM-tests-create.log
+cat /tmp/$VM-tests-update.log
+cat /tmp/$VM-tests-delete.log
 
 exit $res

@@ -326,41 +326,35 @@ set_ip()
 {
   set_test_group_text "0 - Prerequisite - Networking Configuration" "5"
 
-  echo_test_title "Setting IP address: ${ip} on em0"
+  echo "Setting IP address: ${ip} on em0"
   rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
-  check_rest_response "201 CREATED"
 
   # Wait 30 seconds before trying more REST queries again
   sleep 30
 
-  if [ -n "$BRIDGEIP" ] ; then
+  if [ -n "$BRIDGEIP" ]    check_rest_response "201 CREATED" ; then
     # Using the bridged adapter settings
-    echo_test_title "Setting bridged IP on em1"
+    echo "Setting bridged IP on em1"
     rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
-    check_rest_response "201 CREATED"
 
     # Set the global config stuff
-    echo_test_title "Setting default route and DNS"
+    echo "Setting default route and DNS"
     rest_request "PUT" "/network/globalconfiguration/" '{ "gc_domain": "'"${BRIDGEDOMAIN}"'", "gc_ipv4gateway": "'"${BRIDGEGW}"'", "gc_hostname": "'"${BRIDGEHOST}"'", "gc_nameserver1": "'"${BRIDGEDNS}"'" }'
-    check_rest_response "200 OK"
   else
     # Using the NAT mode
-    echo_test_title "Setting DHCP on em1"
+    echo "Setting DHCP on em1"
     rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
-    check_rest_response "201 CREATED"
   fi
 
-  echo_test_title "Rebooting VM"
+  echo "Rebooting VM"
   rest_request "POST" "/system/reboot/" "''"
   # Disabled the response check, seems the reboot happens fast enough to
   # prevent a valid response sometimes
   #check_rest_response "202 ACCEPTED"
-  echo_ok
 
-  echo_test_title "Waiting for reboot"
+  echo "Waiting for reboot"
   sleep 30
   wait_for_avail
-  echo_ok
 }
 
 wait_for_avail()
