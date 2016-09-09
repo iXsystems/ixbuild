@@ -332,7 +332,7 @@ set_ip()
   # Wait 30 seconds before trying more REST queries again
   sleep 30
 
-  if [ -n "$BRIDGEIP" ]    check_rest_response "201 CREATED" ; then
+  if [ -n "$BRIDGEIP" ] ; then
     # Using the bridged adapter settings
     echo "Setting bridged IP on em1"
     rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
@@ -354,7 +354,6 @@ set_ip()
 
   echo "Waiting for reboot"
   sleep 30
-  wait_for_avail
 }
 
 wait_for_avail()
