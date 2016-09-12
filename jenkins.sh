@@ -53,6 +53,8 @@ push-trueos-docs- Upload TrueOS handbook
 lumina-docs	- Create lumina handbook
 push-lumina-docs- Upload lumina handbook
 ports-tests	- Test building a repo port files
+sysadm-docs     - Build SysAdm handbook
+sysadm-api      - Build SysAdm API handbook
 
 -- PC-BSD Commands --
   world - Build FreeBSD world
@@ -79,6 +81,8 @@ case $TYPE in
     world|trueos-world) jenkins_world ;;
         pkg|trueos-pkg) jenkins_pkg "release" ;;
 iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
+            sysadm-api) jenkins_sysadm_api ;;
+       push-sysadm-api) jenkins_sysadm_push_api ;;
            sysadm-docs) jenkins_sysadm_docs ;;
       push-sysadm-docs) jenkins_sysadm_push_docs ;;
            trueos-docs) jenkins_trueos_docs ;;
