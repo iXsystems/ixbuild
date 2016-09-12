@@ -740,7 +740,7 @@ jenkins_trueos_push_docs()
   return 0
 }
 
-jenkins_sysadm_push_docs()
+jenkins_sysadm_push_api()
 {
   cd /outgoing/doc/master/sysadm-docs/api
   if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -749,7 +749,7 @@ jenkins_sysadm_push_docs()
   return 0
 }
 
-jenkins_sysadm_push_api()
+jenkins_sysadm_push_docs()
 {
   cd /outgoing/doc/master/sysadm-docs/client
   if [ $? -ne 0 ] ; then exit_clean ; fi
