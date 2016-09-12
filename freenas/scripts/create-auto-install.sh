@@ -15,6 +15,8 @@ PROGDIR="`realpath ${0} | sed 's|/create-auto-install.sh||g'`/../" ; export PROG
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
+. ${PROGDIR}/scripts/functions-tests.sh
+. ${PROGDIR}/scripts/functions-vm.sh
 
 ISO="$1"
 

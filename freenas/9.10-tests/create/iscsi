@@ -12,12 +12,82 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - iSCSI tests" "1"
+  set_test_group_text "1 - Create - iSCSI tests" "16"
 
-  # Enable iSCSI server
-  echo_test_title "Creating iSCSI extent"
+  # Add iSCSI initator
+  echo_test_title "Add iSCSI initiator"
+  rest_request "POST" "/services/iscsi/authorizedinitiator/" '{ "id": 1, "iscsi_target_initiator_auth_network": "ALL", "iscsi_target_initiator_comment": "", "iscsi_target_initiator_initiators": "ALL", "iscsi_target_initiator_tag": 1 }'
+  check_rest_response "201 CREATED"
+
+  # Add iSCSI portal
+  echo_test_title "Add iSCSI portal"
+  rest_request "POST" "/services/iscsi/portal/" '{ "iscsi_target_portal_ips": ["0.0.0.0:3620"] }'
+  check_rest_response "201 CREATED"
+
+  # Add iSCSI target
+  echo_test_title "Add iSCSI target"
+  rest_request "POST" "/services/iscsi/target/" '{ "iscsi_target_name": "iqn.2005-10.org.freenas.ctl:target0"}'
+  check_rest_response "201 CREATED"
+
+  # Add Target to groups
+  echo_test_title "Add target to groups"
+  rest_request "POST" "/services/iscsi/targetgroup/" '{ "iscsi_target": "1", "iscsi_target_authgroup": null, "iscsi_target_portalgroup": 1, "iscsi_target_initiatorgroup": "1", "iscsi_target_authtype": "None", "iscsi_target_initialdigest": "Auto" }'
+  check_rest_response "201 CREATED"
+  
+  # Add iSCSI extent
+  echo_test_title "Add iSCSI extent"
   rest_request "POST" "/services/iscsi/extent/" '{ "iscsi_target_extent_type": "File", "iscsi_target_extent_name": "extent", "iscsi_target_extent_filesize": "50MB", "iscsi_target_extent_path": "/mnt/tank/iscsi" }'
   check_rest_response "201 CREATED"
+
+  # Associate iSCSI target
+  echo_test_title "Associate iSCSI target"
+  rest_request "POST" "/services/iscsi/targettoextent/" '{ "id": "1", "iscsi_extent": "1", "iscsi_lunid": null, "iscsi_target": "1" }'
+  check_rest_response "201 CREATED"
+
+  # Enable the iSCSI service
+  echo_test_title "Enable iSCSI service"
+  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "true" }'
+  check_rest_response "200 OK"
+
+  # Now connect to iSCSI target
+  echo_test_title "Connecting to iSCSI target"
+  rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
+  sleep 10
+ 
+  # Now check if we can mount target / create / rename / copy / delete / umount
+
+  # Get the device for the connect target
+  devname=`iscsictl | grep ${ip} | tr -d '\t' | awk '{print $4}'`
+
+  # echo_test_title "Format the target volume"
+  rc_test "newfs /dev/$devname" || return 1
+
+  echo_test_title "Creating iSCSI mountpoint"
+  rc_test "mkdir /tmp/iscsi-mnt.$$" || return 1
+
+  # echo_test_title "Mount the target volume"
+  rc_test "mount /dev/${devname} /tmp/iscsi-mnt.$$" || return 1
+
+  echo_test_title "Creating file"
+  rc_test "touch /tmp/iscsi-mnt.$$/testfile" "umount /tmp/iscsi-mnt.$$ ; rmdir /tmp/iscsi-mnt.$$" || return 1
+
+  echo_test_title "Moving file"
+  rc_test "mv /tmp/iscsi-mnt.$$/testfile /tmp/iscsi-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying file"
+  rc_test "cp /tmp/iscsi-mnt.$$/testfile2 /tmp/iscsi-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting file"
+  rc_test "rm /tmp/iscsi-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting iSCSI volume"
+  rc_test "umount /tmp/iscsi-mnt.$$" || return 1
+
+  echo_test_title "Removing iSCSI volume mountpoint"
+  rc_test "rmdir /tmp/iscsi-mnt.$$" || return 1
+
+  echo_test_title "Disconnect all targets"
+  rc_test "iscsictl -R -a" || return 1
 
 }
 

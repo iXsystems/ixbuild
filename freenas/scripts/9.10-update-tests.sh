@@ -26,16 +26,8 @@ TESTSET="SMOKE"
 export TESTSET
 
 
-# Set the default FreeNAS testing IP address
-if [ -z "${FNASTESTIP}" ] ; then
-  FNASTESTIP="192.168.56.100"
-fi
-
-# Set the defaults for connecting to the VM
-ip="$FNASTESTIP"
-manualip="NO"
-fuser="root"
-fpass="testing"
+# Set the defaults for FreeNAS testing
+set_defaults
 
 
 while [ $# -gt 0 ] ; do
@@ -66,14 +58,6 @@ echo "Using REST API Address: ${ip}"
 . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
 start_xml_results
-
-# When running via Jenkins / ATF mode, it may take a variable
-# time to boot the system and be ready for REST calls. We run
-# an initial test to determine when the interface is up
-set_test_group_text "2 - Update - Testing Connectivity" "1"
-echo_test_title "Testing access to REST API"
-wait_for_avail
-echo_ok
 
 RESULT="SUCCESS"
 

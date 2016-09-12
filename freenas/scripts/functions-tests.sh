@@ -1,3 +1,14 @@
+#!/usr/local/bin/bash
+
+# Where is the pcbsd-build program installed
+PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
+
+# Source our functions
+. ${PROGDIR}/scripts/functions.sh
+. ${PROGDIR}/scripts/functions-vm.sh
+
+# Source our resty / jsawk functions
+. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
 # Log files
 export RESTYOUT=/tmp/resty.out
@@ -109,67 +120,6 @@ EOF
   else
     echo "Saving jUnit results to: /tmp/test-results.xml"
     mv ${XMLRESULTS} /tmp/test-results.xml
-  fi
-}
-
-clean_artifacts() 
-{
-  # Move artifacts to pre-defined location
-    echo "Cleaning previous artifacts"
-    rm -rf "${WORKSPACE}/artifacts/"
-}
-
-save_artifacts_on_fail()
-{
-  # Move artifacts to pre-defined location
-  if [ -n "$ARTIFACTONFAIL" ] ; then
-      if [ -n "$WORKSPACE" ] ; then
-        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-            mkdir "${WORKSPACE}/artifacts"
-            chown jenkins:jenkins "${WORKSPACE}/artifacts"
-              if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
-                mkdir "${WORKSPACE}/artifacts/logs"
-	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
-		  mkdir "${WORKSPACE}/artifacts/ports"
-                  chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
-          fi
-        fi
-      fi
-    fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts"
-    cp -R "${FNASBDIR}/_BE/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
-    chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
-  else
-    echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
-  fi
-}
-
-save_artifacts_on_success() 
-{
-  # Move artifacts to pre-defined location
-  if [ -n "$ARTIFACTONSUCCESS" ] ; then
-    if [ -n "$WORKSPACE" ] ; then
-        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-            mkdir "${WORKSPACE}/artifacts"
-            chown jenkins:jenkins "${WORKSPACE}/artifacts"
-              if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
-                mkdir "${WORKSPACE}/artifacts/logs"
-	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
-		  mkdir "${WORKSPACE}/artifacts/ports"
-                  chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
-          fi
-        fi
-      fi
-    fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts"
-    cp -R "${FNASBDIR}/_BE/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
-    chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
-  else
-    echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
   fi
 }
 
@@ -321,46 +271,54 @@ echo_test_title()
   echo -e "Running $GROUPTEXT ($TCOUNT/$TOTALTESTS) - $1\c"
 }
 
+#
+set_defaults()
+{
+# Set the defaults for connecting to the VM
+ip="$FNASTESTIP"
+manualip="NO"
+fuser="root"
+fpass="testing"
+}
+
 # Set the IP address of REST
 set_ip()
 {
+# Set the default FreeNAS testing IP address
+if [ -z "${FNASTESTIP}" ] ; then
+  FNASTESTIP="192.168.56.100"
+fi
+
   set_test_group_text "0 - Prerequisite - Networking Configuration" "5"
 
-  echo_test_title "Setting IP address: ${ip} on em0"
+  echo "Setting IP address: ${ip} on em0"
   rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
-  check_rest_response "201 CREATED"
 
   # Wait 30 seconds before trying more REST queries again
   sleep 30
 
   if [ -n "$BRIDGEIP" ] ; then
     # Using the bridged adapter settings
-    echo_test_title "Setting bridged IP on em1"
+    echo "Setting bridged IP on em1"
     rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
-    check_rest_response "201 CREATED"
 
     # Set the global config stuff
-    echo_test_title "Setting default route and DNS"
+    echo "Setting default route and DNS"
     rest_request "PUT" "/network/globalconfiguration/" '{ "gc_domain": "'"${BRIDGEDOMAIN}"'", "gc_ipv4gateway": "'"${BRIDGEGW}"'", "gc_hostname": "'"${BRIDGEHOST}"'", "gc_nameserver1": "'"${BRIDGEDNS}"'" }'
-    check_rest_response "200 OK"
   else
     # Using the NAT mode
-    echo_test_title "Setting DHCP on em1"
+    echo "Setting DHCP on em1"
     rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
-    check_rest_response "201 CREATED"
   fi
 
-  echo_test_title "Rebooting VM"
+  echo "Rebooting VM"
   rest_request "POST" "/system/reboot/" "''"
   # Disabled the response check, seems the reboot happens fast enough to
   # prevent a valid response sometimes
   #check_rest_response "202 ACCEPTED"
-  echo_ok
 
-  echo_test_title "Waiting for reboot"
-  sleep 20
-  wait_for_avail
-  echo_ok
+  echo "Waiting for reboot"
+  sleep 120
 }
 
 wait_for_avail()
@@ -544,4 +502,67 @@ do_ha_status() {
       exit 1
     fi
   done
+}
+
+create_auto_install()
+{
+# Set local location of FreeNAS build
+if [ -n "$BUILDTAG" ] ; then
+  FNASBDIR="/$BUILDTAG"
+else
+  FNASBDIR="/freenas"
+fi
+export FNASBDIR
+
+# Figure out the ISO name
+echo "Finding ISO file..."
+if [ -d "${FNASBDIR}/objs" ] ; then
+  ISOFILE=`find ${FNASBDIR}/objs | grep '\.iso$' | head -n 1`
+elif [ -d "${FNASBDIR}/_BE/release" ] ; then
+  ISOFILE=`find ${FNASBDIR}/_BE/release | grep '\.iso$' | head -n 1`
+else
+  if [ -n "$1" ] ; then
+    ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`
+  else
+    ISOFILE=`find ${PROGDIR}/../objs | grep '\.iso$' | head -n 1`
+  fi
+fi
+
+# If no ISO found
+if [ -z "$ISOFILE" ] ; then
+  exit_err "Failed locating ISO file, did 'make release' work?"
+fi
+
+# Is this TrueNAS or FreeNAS?
+echo $ISOFILE | grep -q "TrueNAS"
+if [ $? -eq 0 ] ; then
+   export FLAVOR="TRUENAS"
+else
+   export FLAVOR="FREENAS"
+fi
+
+echo "Using ISO: $ISOFILE"
+
+# Create the automatic ISO installer
+cd ${PROGDIR}/tmp
+${PROGDIR}/scripts/create-auto-install.sh ${ISOFILE}
+if [ $? -ne 0 ] ; then
+  exit_err "Failed creating auto-install ISO!"
+fi
+}
+
+run_tests()
+{
+cd ${PROGDIR}/scripts
+if [ -n "$FREENASLEGACY" ] ; then
+  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  res=$?
+else
+  ./10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  res=$?
+fi
 }
