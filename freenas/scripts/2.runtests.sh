@@ -3,7 +3,6 @@
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
-. ${PROGDIR}/scripts/functions-run-tests.sh
 . ${PROGDIR}/scripts/functions-vm.sh
 
 # Source our resty / jsawk functions
