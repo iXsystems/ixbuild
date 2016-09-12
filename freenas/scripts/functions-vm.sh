@@ -292,7 +292,7 @@ echo "Running Installed System..."
 daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
 
 # Give a minute to boot, should be ready for REST calls now
-sleep 120
+sleep 240
 }
 
 stop_vbox()
