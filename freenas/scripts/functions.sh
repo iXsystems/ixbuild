@@ -3,10 +3,6 @@
 # Most of these dont need to be modified
 #########################################################
 
-# Source our functions
-. ${PROGDIR}/scripts/functions-tests.sh
-. ${PROGDIR}/scripts/functions-vm.sh
-
 # Where is the build program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 

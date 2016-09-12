@@ -1,6 +1,6 @@
 #!/usr/local/bin/bash
 
-# Where is the pcbsd-build program installed
+# Where is the ixbuild program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 
 # Source our functions
@@ -15,6 +15,56 @@ ${PROGDIR}/scripts/checkprogs.sh
 
 VM="$BUILDTAG"
 export VM
+
+if [ ! -d "${PROGDIR}/tmp" ] ; then
+  mkdir ${PROGDIR}/tmp
+fi
+# Set local location of FreeNAS build
+if [ -n "$BUILDTAG" ] ; then
+  FNASBDIR="/$BUILDTAG"
+else
+  FNASBDIR="/freenas"
+fi
+export FNASBDIR
+
+create_auto_install()
+{
+# Figure out the ISO name
+echo "Finding ISO file..."
+if [ -d "${FNASBDIR}/objs" ] ; then
+  ISOFILE=`find ${FNASBDIR}/objs | grep '\.iso$' | head -n 1`
+elif [ -d "${FNASBDIR}/_BE/release" ] ; then
+  ISOFILE=`find ${FNASBDIR}/_BE/release | grep '\.iso$' | head -n 1`
+else
+  if [ -n "$1" ] ; then
+    ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`
+  else
+    ISOFILE=`find ${PROGDIR}/../objs | grep '\.iso$' | head -n 1`
+  fi
+fi
+
+# If no ISO found
+if [ -z "$ISOFILE" ] ; then
+  exit_err "Failed locating ISO file, did 'make release' work?"
+fi
+
+# Is this TrueNAS or FreeNAS?
+echo $ISOFILE | grep -q "TrueNAS"
+if [ $? -eq 0 ] ; then
+   export FLAVOR="TRUENAS"
+else
+   export FLAVOR="FREENAS"
+fi
+
+echo "Using ISO: $ISOFILE"
+
+# Create the automatic ISO installer
+cd ${PROGDIR}/tmp
+${PROGDIR}/scripts/create-auto-install.sh ${ISOFILE}
+if [ $? -ne 0 ] ; then
+  exit_err "Failed creating auto-install ISO!"
+fi
+}
 
 start_bhyve()
 {

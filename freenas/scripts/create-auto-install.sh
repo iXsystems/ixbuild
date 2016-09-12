@@ -13,10 +13,6 @@ VMDISK="ada0"
 # Where is the ixbuild program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 
-if [ ! -d "${PROGDIR}/tmp" ] ; then
-  mkdir ${PROGDIR}/tmp
-fi
-
 ISO="$1"
 
 # Extract the ISO file
