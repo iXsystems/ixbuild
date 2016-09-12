@@ -1,15 +1,3 @@
-#!/usr/local/bin/bash
-
-# Where is the pcbsd-build program installed
-PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
-
-# Source our functions
-. ${PROGDIR}/scripts/functions.sh
-. ${PROGDIR}/scripts/functions-vm.sh
-
-# Source our resty / jsawk functions
-. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
-
 # Log files
 export RESTYOUT=/tmp/resty.out
 export RESTYERR=/tmp/resty.err
@@ -274,50 +262,8 @@ echo_test_title()
 #
 set_defaults()
 {
-# Set the defaults for connecting to the VM
-# Set the default FreeNAS testing IP address
-if [ -z "${FNASTESTIP}" ] ; then
-  FNASTESTIP="192.168.56.100"
-fi
-ip="$FNASTESTIP"
-manualip="NO"
 fuser="root"
 fpass="testing"
-}
-
-# Set the IP address of REST
-set_ip()
-{
-  set_test_group_text "0 - Prerequisite - Networking Configuration" "5"
-
-  echo "Setting IP address: ${ip} on em0"
-  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
-
-  # Wait 30 seconds before trying more REST queries again
-  sleep 30
-
-  if [ -n "$BRIDGEIP" ] ; then
-    # Using the bridged adapter settings
-    echo "Setting bridged IP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
-
-    # Set the global config stuff
-    echo "Setting default route and DNS"
-    rest_request "PUT" "/network/globalconfiguration/" '{ "gc_domain": "'"${BRIDGEDOMAIN}"'", "gc_ipv4gateway": "'"${BRIDGEGW}"'", "gc_hostname": "'"${BRIDGEHOST}"'", "gc_nameserver1": "'"${BRIDGEDNS}"'" }'
-  else
-    # Using the NAT mode
-    echo "Setting DHCP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
-  fi
-
-  echo "Rebooting VM"
-  rest_request "POST" "/system/reboot/" "''"
-  # Disabled the response check, seems the reboot happens fast enough to
-  # prevent a valid response sometimes
-  #check_rest_response "202 ACCEPTED"
-
-  echo "Waiting for reboot"
-  sleep 120
 }
 
 wait_for_avail()
@@ -501,20 +447,4 @@ do_ha_status() {
       exit 1
     fi
   done
-}
-
-run_tests()
-{
-cd ${PROGDIR}/scripts
-if [ -n "$FREENASLEGACY" ] ; then
-  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
-  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
-  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
-  res=$?
-else
-  ./10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
-  ./10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
-  ./10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
-  res=$?
-fi
 }

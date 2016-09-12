@@ -3,9 +3,6 @@
 # Most of these dont need to be modified
 #########################################################
 
-# Where is the build program installed
-PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
-
 # Source vars
 if [ -z "${PROGDIR}" ] ; then
   . ../freenas.cfg

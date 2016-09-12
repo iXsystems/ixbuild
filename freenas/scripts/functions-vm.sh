@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/bin/sh
 
 # Where is the ixbuild program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
@@ -6,9 +6,6 @@ PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
-
-# Source our resty / jsawk functions
-. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
 start_bhyve()
 {
