@@ -389,7 +389,7 @@ jenkins_publish_iso()
   for i in `ls *.iso *.img`
   do
     echo "Signing: $i"
-    gpg -u releng@trueos.org --output ${i}.sig --sign ${i}
+    gpg -u releng@trueos.org --output ${i}.sig --detatched-sig ${i}
   done
 
   # Copy the ISOs
