@@ -275,6 +275,10 @@ echo_test_title()
 set_defaults()
 {
 # Set the defaults for connecting to the VM
+# Set the default FreeNAS testing IP address
+if [ -z "${FNASTESTIP}" ] ; then
+  FNASTESTIP="192.168.56.100"
+fi
 ip="$FNASTESTIP"
 manualip="NO"
 fuser="root"
@@ -284,11 +288,6 @@ fpass="testing"
 # Set the IP address of REST
 set_ip()
 {
-# Set the default FreeNAS testing IP address
-if [ -z "${FNASTESTIP}" ] ; then
-  FNASTESTIP="192.168.56.100"
-fi
-
   set_test_group_text "0 - Prerequisite - Networking Configuration" "5"
 
   echo "Setting IP address: ${ip} on em0"
