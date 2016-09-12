@@ -1,3 +1,14 @@
+#!/usr/local/bin/bash
+
+# Where is the pcbsd-build program installed
+PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
+
+# Source our functions
+. ${PROGDIR}/scripts/functions.sh
+. ${PROGDIR}/scripts/functions-vm.sh
+
+# Source our resty / jsawk functions
+. ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
 # Log files
 export RESTYOUT=/tmp/resty.out
@@ -537,4 +548,20 @@ do_ha_status() {
       exit 1
     fi
   done
+}
+
+run_tests()
+{
+cd ${PROGDIR}/scripts
+if [ -n "$FREENASLEGACY" ] ; then
+  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  res=$?
+else
+  ./10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  res=$?
+fi
 }
