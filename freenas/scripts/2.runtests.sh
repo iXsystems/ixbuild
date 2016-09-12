@@ -23,10 +23,6 @@ else
 fi
 export FNASBDIR
 
-# Set the name for VM
-VM="$BUILDTAG"
-export VM
-
 # Figure out the ISO name
 echo "Finding ISO file..."
 if [ -d "${FNASBDIR}/objs" ] ; then
@@ -62,6 +58,10 @@ ${PROGDIR}/scripts/create-auto-install.sh ${ISOFILE}
 if [ $? -ne 0 ] ; then
   exit_err "Failed creating auto-install ISO!"
 fi
+
+# Set the name for VM
+VM="$BUILDTAG"
+export VM
 
 # Determine which VM backend to start
 if [ -n "$USE_BHYVE" ] ; then
