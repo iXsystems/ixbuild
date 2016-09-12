@@ -389,6 +389,7 @@ jenkins_publish_iso()
   for i in `ls *.iso *.img`
   do
     echo "Signing: $i"
+    rm ${i}.sig >/dev/null 2>/dev/null
     gpg -u releng@trueos.org --output ${i}.sig --detach-sig ${i}
   done
 
