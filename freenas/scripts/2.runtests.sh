@@ -1,8 +1,5 @@
 #!/usr/local/bin/bash
 
-# Where is the pcbsd-build program installed
-PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
-
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
@@ -13,10 +10,6 @@ PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 
 # Make sure we have all the required packages installed
 ${PROGDIR}/scripts/checkprogs.sh
-
-if [ ! -d "${PROGDIR}/tmp" ] ; then
-  mkdir ${PROGDIR}/tmp
-fi
 
 # Create ISO for VM
 create_auto_install
