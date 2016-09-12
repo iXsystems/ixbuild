@@ -10,13 +10,12 @@ VMDISK="ada0"
 
 ########################################################
 
-# Where is the program installed
-PROGDIR="`realpath ${0} | sed 's|/create-auto-install.sh||g'`/../" ; export PROGDIR
+# Where is the ixbuild program installed
+PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 
-# Source our functions
-. ${PROGDIR}/scripts/functions.sh
-. ${PROGDIR}/scripts/functions-tests.sh
-. ${PROGDIR}/scripts/functions-vm.sh
+if [ ! -d "${PROGDIR}/tmp" ] ; then
+  mkdir ${PROGDIR}/tmp
+fi
 
 ISO="$1"
 

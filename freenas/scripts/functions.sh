@@ -7,12 +7,8 @@
 . ${PROGDIR}/scripts/functions-tests.sh
 . ${PROGDIR}/scripts/functions-vm.sh
 
-# Where is the ixbuild program installed
+# Where is the build program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
-
-if [ ! -d "${PROGDIR}/tmp" ] ; then
-  mkdir ${PROGDIR}/tmp
-fi
 
 # Source vars
 if [ -z "${PROGDIR}" ] ; then
