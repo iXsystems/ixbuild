@@ -13,6 +13,9 @@ VMDISK="ada0"
 # Where is the ixbuild program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 
+# Source our functions
+. ${PROGDIR}/scripts/functions.sh
+
 ISO="$1"
 
 # Extract the ISO file
