@@ -21,8 +21,8 @@ network_tests()
      return 0
   fi
 
-  echo_test_title "Setting IP address: ${ip} on em0"
-  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${ip}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
+  echo_test_title "Setting IP address: ${FNASTESTIP} on em0"
+  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
   check_rest_response "201 CREATED"
 
   # Wait 30 seconds before trying more REST queries again
@@ -47,9 +47,6 @@ network_tests()
 
   echo_test_title "Rebooting VM"
   rest_request "POST" "/system/reboot/" "''"
-  # Disabled the response check, seems the reboot happens fast enough to
-  # prevent a valid response sometimes
-  #check_rest_response "202 ACCEPTED"
   echo_ok
 
   echo_test_title "Waiting for reboot"
@@ -71,4 +68,3 @@ network_init()
             *) network_tests ; return $? ;;
   esac
 }
-
