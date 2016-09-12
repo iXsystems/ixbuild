@@ -622,6 +622,37 @@ jenkins_freenas_api()
   return 0
 }
 
+jenkins_sysadm_api()
+{
+  if [ ! -d "/tmp/build" ] ; then
+     mkdir /tmp/build
+  fi
+
+  DDIR=`mktemp -d /tmp/build/XXXX` 
+
+  git clone --depth=1 https://github.com/trueos/sysadm ${DDIR}
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  cd ${DDIR}/docs/api_reference
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+  make html
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Now lets sync the API docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/docs/api_reference/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/api" >/dev/null 2>/dev/null
+    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/api
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
+  cleanup_workdir
+  return 0
+}
+
+
 jenkins_sysadm_docs()
 {
   if [ ! -d "/tmp/build" ] ; then
@@ -709,14 +740,29 @@ jenkins_trueos_push_docs()
   return 0
 }
 
-jenkins_sysadm_push_docs()
+jenkins_sysadm_push_api()
 {
-  cd /outgoing/doc/master/sysadm-docs
+  cd /outgoing/doc/master/sysadm-docs/api
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/
+  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/api.sysadm.us/
   return 0
 }
+
+jenkins_sysadm_push_docs()
+{
+  cd /outgoing/doc/master/sysadm-docs/client
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/client
+
+  cd /outgoing/doc/master/sysadm-docs/server
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/server
+  return 0
+}
+
 
 
 jenkins_trueos_lumina_docs()
