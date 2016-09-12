@@ -123,67 +123,6 @@ EOF
   fi
 }
 
-clean_artifacts() 
-{
-  # Move artifacts to pre-defined location
-    echo "Cleaning previous artifacts"
-    rm -rf "${WORKSPACE}/artifacts/"
-}
-
-save_artifacts_on_fail()
-{
-  # Move artifacts to pre-defined location
-  if [ -n "$ARTIFACTONFAIL" ] ; then
-      if [ -n "$WORKSPACE" ] ; then
-        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-            mkdir "${WORKSPACE}/artifacts"
-            chown jenkins:jenkins "${WORKSPACE}/artifacts"
-              if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
-                mkdir "${WORKSPACE}/artifacts/logs"
-	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
-		  mkdir "${WORKSPACE}/artifacts/ports"
-                  chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
-          fi
-        fi
-      fi
-    fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts"
-    cp -R "${FNASBDIR}/_BE/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
-    chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
-  else
-    echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
-  fi
-}
-
-save_artifacts_on_success() 
-{
-  # Move artifacts to pre-defined location
-  if [ -n "$ARTIFACTONSUCCESS" ] ; then
-    if [ -n "$WORKSPACE" ] ; then
-        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-            mkdir "${WORKSPACE}/artifacts"
-            chown jenkins:jenkins "${WORKSPACE}/artifacts"
-              if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
-                mkdir "${WORKSPACE}/artifacts/logs"
-	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
-		  mkdir "${WORKSPACE}/artifacts/ports"
-                  chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
-          fi
-        fi
-      fi
-    fi
-    echo "Saving artifacts to: ${WORKSPACE}/artifacts"
-    cp -R "${FNASBDIR}/_BE/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
-    chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
-  else
-    echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
-  fi
-}
-
 # $1 = RESTY type to run 
 # $2 = RESTY URL
 # $3 = JSON to pass to RESTY
@@ -332,9 +271,24 @@ echo_test_title()
   echo -e "Running $GROUPTEXT ($TCOUNT/$TOTALTESTS) - $1\c"
 }
 
+#
+set_defaults()
+{
+# Set the defaults for connecting to the VM
+ip="$FNASTESTIP"
+manualip="NO"
+fuser="root"
+fpass="testing"
+}
+
 # Set the IP address of REST
 set_ip()
 {
+# Set the default FreeNAS testing IP address
+if [ -z "${FNASTESTIP}" ] ; then
+  FNASTESTIP="192.168.56.100"
+fi
+
   set_test_group_text "0 - Prerequisite - Networking Configuration" "5"
 
   echo "Setting IP address: ${ip} on em0"

@@ -28,9 +28,16 @@ else
   start_vbox
 fi
 
-# Run the REST tests now
+# Cleanup old test results before running tests
 clean_xml_results
+
+# Set the defaults for FreeNAS testing
+set_defaults
+
+# Set the default FreeNAS testing IP address
 set_ip
+
+# Run the REST tests now
 run_tests
 
 # Determine which VM backend to stop
