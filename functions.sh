@@ -383,6 +383,15 @@ jenkins_publish_iso()
   target="/usr/home/pcbsd/mirror/iso"
   ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
 
+  # We sign the ISO's with gpg
+  cd ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/
+  if [ $? -ne 0 ] ; then exit_clean; fi
+  for i in `ls *.iso *.img`
+  do
+    echo "Signing: $i"
+    gpg -u releng@trueos.org --output ${i}.sig --sign ${i}
+  done
+
   # Copy the ISOs
   rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${TARGETREL}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
