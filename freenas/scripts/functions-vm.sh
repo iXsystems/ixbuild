@@ -166,7 +166,7 @@ fi
 ######################################################
 MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
 echo "Creating $MFSFILE"
-rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 10000"
+rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 20000"
 
 # Remove any crashed / old VM
 VBoxManage unregistervm $VM >/dev/null 2>/dev/null
