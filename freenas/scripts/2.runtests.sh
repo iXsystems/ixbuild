@@ -3,6 +3,7 @@
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
+. ${PROGDIR}/scripts/functions-run-tests.sh
 . ${PROGDIR}/scripts/functions-vm.sh
 
 # Source our resty / jsawk functions
@@ -73,14 +74,19 @@ fi
 # Cleanup old test results before running tests
 clean_xml_results
 
-# Set the defaults for FreeNAS testing
-set_defaults
-
-# Set the default FreeNAS testing IP address
-set_ip
-
 # Run the REST tests now
-run_tests
+cd ${PROGDIR}/scripts
+if [ -n "$FREENASLEGACY" ] ; then
+  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  res=$?
+else
+  ./10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  res=$?
+fi
 
 # Determine which VM backend to stop
 if [ -n "$USE_BHYVE" ] ; then
