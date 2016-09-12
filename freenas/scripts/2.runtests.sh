@@ -1,5 +1,8 @@
 #!/usr/local/bin/bash
 
+# Where is the pcbsd-build program installed
+PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
+
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
