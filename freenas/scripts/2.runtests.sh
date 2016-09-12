@@ -79,14 +79,14 @@ clean_xml_results
 # Run the REST tests now
 cd ${PROGDIR}/scripts
 if [ -n "$FREENASLEGACY" ] ; then
-  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
-  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
-  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  ./9.10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log ip=$FNASTESTIP
+  ./9.10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log ip=$FNASTESTIP
+  ./9.10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log ip=$FNASTESTIP
   res=$?
 else
-  ./10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log
-  ./10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log
-  ./10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log
+  ./10-create-tests.sh 2>&1 | tee >/tmp/$VM-tests-create.log ip=$FNASTESTIP
+  ./10-update-tests.sh 2>&1 | tee >/tmp/$VM-tests-update.log ip=$FNASTESTIP
+  ./10-delete-tests.sh 2>&1 | tee >/tmp/$VM-tests-delete.log ip=$FNASTESTIP
   res=$?
 fi
 
