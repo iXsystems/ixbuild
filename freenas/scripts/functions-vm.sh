@@ -38,7 +38,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Start grub-bhyve
-bhyvectl --destroy --vm=$vm >/dev/null 2>/dev/null
+bhyvectl --destroy --vm=$VM >/dev/null 2>/dev/null
 echo "(hd0) ${MFSFILE}
 (cd0) ${PROGDIR}/tmp/freenas-auto.iso" > ${PROGDIR}/tmp/device.map
 
@@ -47,16 +47,16 @@ echo "(hd0) ${MFSFILE}
 echo "#!/bin/sh
 count=0
 
-grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $vm
+grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $VM
 
-daemon -p /tmp/$vm.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M $vm
+daemon -p /tmp/$VM.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M $VM
 
 # Wait for initial bhyve startup
 while :
 do
-  if [ ! -e "/tmp/$vm.pid" ] ; then break; fi
+  if [ ! -e "/tmp/$VM.pid" ] ; then break; fi
 
-  pgrep -qF /tmp/$vm.pid
+  pgrep -qF /tmp/$VM.pid
   if [ \$? -ne 0 ] ; then
         break;
   fi
@@ -69,12 +69,12 @@ do
 done
 
 # Cleanup the old VM
-bhyvectl --destroy --vm=$vm
-"> ${PROGDIR}/tmp/screen-$vm.sh
-chmod 755 ${PROGDIR}/tmp/screen-$vm.sh
+bhyvectl --destroy --vm=$VM
+"> ${PROGDIR}/tmp/screen-$VM.sh
+chmod 755 ${PROGDIR}/tmp/screen-$VM.sh
 
 echo "Running bhyve in screen session, will display when finished..."
-screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$vm.sh
+screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$VM.sh
 
 # Display output of screen command
 cat flush
@@ -104,16 +104,16 @@ echo "(hd0) ${MFSFILE}" > ${PROGDIR}/tmp/device.map
 echo "#!/bin/sh
 count=0
 
-grub-bhyve -m ${PROGDIR}/tmp/device.map -M 2048M $vm
+grub-bhyve -m ${PROGDIR}/tmp/device.map -M 2048M $VM
 
-daemon -p /tmp/$vm.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -l com1,stdio -c 4 -m 2048M $vm
+daemon -p /tmp/$VM.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -l com1,stdio -c 4 -m 2048M $VM
 
 # Wait for initial bhyve startup
 while :
 do
-  if [ ! -e "/tmp/$vm.pid" ] ; then break; fi
+  if [ ! -e "/tmp/$VM.pid" ] ; then break; fi
 
-  pgrep -qF /tmp/$vm.pid
+  pgrep -qF /tmp/$VM.pid
   if [ \$? -ne 0 ] ; then
         break;
   fi
@@ -129,12 +129,12 @@ done
 stop_bhyve()
 {
 # Cleanup the old VM
-bhyvectl --destroy --vm=$vm
-"> ${PROGDIR}/tmp/screen-$vm.sh
-chmod 755 ${PROGDIR}/tmp/screen-$vm.sh
+bhyvectl --destroy --vm=$VM
+"> ${PROGDIR}/tmp/screen-$VM.sh
+chmod 755 ${PROGDIR}/tmp/screen-$VM.sh
 
 echo "Running bhyve tests in screen session, will display when finished..."
-screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$vm.sh
+screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$VM.sh
 
 # Display output of screen command
 cat flush
@@ -282,7 +282,7 @@ else
   echo "$VM has been successfully shut down"
 fi
 
-echo "Attaching extra disks for testing!"
+echo "Attaching extra disks for testing"
 
 # Attach extra disks to the VM for testing
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
@@ -303,7 +303,7 @@ echo "Running Installed System..."
 daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
 
 # Give a minute to boot, should be ready for REST calls now
-echo "Waiting up to 4 minutes for VM to boot with hostpipe output"
+echo "Waiting up to 4 minutes for $VM to boot with hostpipe output"
 sleep 240
 }
 
