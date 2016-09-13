@@ -20,54 +20,56 @@ export SFTPWORKDIR
 
 # Select which branch of ixbuild repo testing framework to use
 # (Optional)
-IXBUILDBRANCH=""
-export IXBUILDBRANCH
+# IXBUILDBRANCH=""
+# export IXBUILDBRANCH
 
 ###########################################################################
 # FreeNAS specific settings
 ###########################################################################
 
 # Set this to be the first IP address in IPv4 range for automatic assignment
-DEFAULT_IP4POOL=""
+# DEFAULT_IP4POOL=""
+# export DEFAULT_IP4POOL
 
 # Set this be the network information assigned to the bridged interface
 
-BRIDGEIP=""
-BRIDGENETMASK=""
-BRIDGEGW=""
-BRIDGEDNS=""
-BRIDGEHOST=""
-BRIDGEHOST_B=""
-BRIDGEDOMAIN=""
-export BRIDGEIP BRIDGENETMASK BRIDGEGW BRIDGEDNS BRIDGEHOST BRIDGEHOST_B BRIDGEDOMAIN
+# BRIDGEIP=""
+# BRIDGENETMASK=""
+# BRIDGEGW=""
+# BRIDGEDNS=""
+# BRIDGEHOST=""
+# BRIDGEHOST_B=""
+# BRIDGEDOMAIN=""
+# export BRIDGEIP BRIDGENETMASK BRIDGEGW BRIDGEDNS BRIDGEHOST BRIDGEHOST_B BRIDGEDOMAIN
 
 # Set the account information for dns testing we do with noip.com
 # If this is NOT set, the test will be skipped
-NOIPUSERNAME=""
-NOIPPASSWORD=""
-NOIPHOST=""
-export NOIPPASSWORD NOIPUSERNAME NOIPHOST
+# NOIPUSERNAME=""
+# NOIPPASSWORD=""
+# NOIPHOST=""
+# export NOIPPASSWORD NOIPUSERNAME NOIPHOST
 
 # Set this to the IP address to use in VirtualBox for testing
-FNASTESTIP=""
-export FNASTESTIP
+# FNASTESTIP=""
+# export FNASTESTIP
 
 # Set this to the information to use for testing jails
-JAILIP=""
-JAILNETMASK=""
-JAILGW=""
+# JAILIP=""
+# JAILNETMASK=""
+# JAILGW=""
+# export JAILIP JAILNETMASK JAILGW
 
 # Set this to be the AD information for joining an Active Directory
-ADUSERNAME=""
-ADPASSWORD=""
-export ADUSERNAME ADPASSWORD
+# ADUSERNAME=""
+# ADPASSWORD=""
+# export ADUSERNAME ADPASSWORD
 
 # Set this to be the information required for testing LDAP
-LDAPHOSTNAME=""
-LDAPBASEDN=""
-LDAPBINDDN=""
-LDAPBINDPASSWORD=""
-export LDAPHOSTNAME LDAPBASEDN LDAPBINDDN LDAPBINDPASSWORD
+# LDAPHOSTNAME=""
+# LDAPBASEDN=""
+# LDAPBINDDN=""
+# LDAPBINDPASSWORD=""
+# export LDAPHOSTNAME LDAPBASEDN LDAPBINDDN LDAPBINDPASSWORD
 
 ###########################################################################
 # PC-BSD specific settings
