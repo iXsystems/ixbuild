@@ -12,7 +12,7 @@ export REQUIRES
 network_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "0 - Prerequisite - Networking Configuration" "5"
+  set_test_group_text "0 - Prerequisite - Networking Configuration" "3"
 
   if [ -z "$FNASTESTIP" ] ; then
      echo "Missing the FNASTESTIP settings, test skipped.."
@@ -24,13 +24,6 @@ network_tests()
   echo_test_title "Waiting for $VM to start"
   wait_for_avail
   echo_ok
-
-  echo_test_title "Setting IP address: ${FNASTESTIP} on em0"
-  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "internal", "int_v4netmaskbit": "24", "int_interface": "em0" }'
-  check_rest_response "201 CREATED"
-
-  # Wait 30 seconds before trying more REST queries again
-  sleep 30
 
   if [ -n "$BRIDGEIP" ] ; then
     # Using the bridged adapter settings
