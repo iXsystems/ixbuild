@@ -168,7 +168,7 @@ ARGS=\`echo \$@ | sed 's|-hfsplus -apm-block-size 2048 -hfsplus-file-creator-typ
 xorriso \$ARGS
 EOF
   chmod 755 /tmp/xorriso
-  grub-mkrescue --xorriso=/tmp/xorriso -o @BUILDTAG.iso isodir -- -volid ${VOLID}
+  grub-mkrescue --xorriso=/tmp/xorriso -o $BUILDTAG.iso isodir -- -volid ${VOLID}
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
 
