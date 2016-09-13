@@ -149,8 +149,8 @@ rm base.ufs
 rc_halt "mv base.ufs.uzip isodir/data/base.ufs.uzip"
 
 # Create the new ISO file
-if [ -e "freenas-auto.iso" ] ; then
-  rm freenas-auto.iso
+if [ -e "$BUILDTAG.iso" ] ; then
+  rm $BUILDTAG.iso
 fi
 
 if [ "$FLAVOR" = "TRUENAS" ] ; then
@@ -160,7 +160,7 @@ else
 fi
 
 if [ "$FREENASLEGACY" = "YES" ] ; then
-  grub-mkrescue -o freenas-auto.iso isodir -- -volid ${VOLID}_INSTALL
+  grub-mkrescue -o $BUILDTAG.iso isodir -- -volid ${VOLID}_INSTALL
   if [ $? -ne 0 ] ; then exit 1; fi
 else
   cat << EOF >/tmp/xorriso
@@ -168,7 +168,7 @@ ARGS=\`echo \$@ | sed 's|-hfsplus -apm-block-size 2048 -hfsplus-file-creator-typ
 xorriso \$ARGS
 EOF
   chmod 755 /tmp/xorriso
-  grub-mkrescue --xorriso=/tmp/xorriso -o freenas-auto.iso isodir -- -volid ${VOLID}
+  grub-mkrescue --xorriso=/tmp/xorriso -o @BUILDTAG.iso isodir -- -volid ${VOLID}
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
 

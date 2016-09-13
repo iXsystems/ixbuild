@@ -26,7 +26,7 @@ MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
 echo "Creating $MFSFILE"
 rc_halt "truncate -s 5000M $MFSFILE"
 
-cp ${PROGDIR}/tmp/freenas-auto.iso /root/
+cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/
 
 # Just in case the install hung, we don't need to be waiting for over an hour
 echo "Performing bhyve installation..."
@@ -40,7 +40,7 @@ fi
 # Start grub-bhyve
 bhyvectl --destroy --vm=$VM >/dev/null 2>/dev/null
 echo "(hd0) ${MFSFILE}
-(cd0) ${PROGDIR}/tmp/freenas-auto.iso" > ${PROGDIR}/tmp/device.map
+(cd0) ${PROGDIR}/tmp/$BUILDTAG.iso" > ${PROGDIR}/tmp/device.map
 
 # We run the bhyve commands in a seperate screen session, so that they can run
 # in jenkins / save output
@@ -49,7 +49,7 @@ count=0
 
 grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $VM
 
-daemon -p /tmp/$VM.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/freenas-auto.iso -l com1,stdio -c 4 -m 2048M $VM
+daemon -p /tmp/$VM.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/$BUILDTAG.iso -l com1,stdio -c 4 -m 2048M $VM
 
 # Wait for initial bhyve startup
 while :
@@ -173,20 +173,16 @@ VBoxManage unregistervm $VM >/dev/null 2>/dev/null
 rm -rf "/root/VirtualBox VMs/$VM" >/dev/null 2>/dev/null
 
 # Copy ISO over to /root in case we need to grab it from jenkins node later
-if [ "$FLAVOR" = "TRUENAS" ] ; then
-  cp ${PROGDIR}/tmp/freenas-auto.iso /root/truenas-auto.iso
-else
-  cp ${PROGDIR}/tmp/freenas-auto.iso /root/freenas-auto.iso
-fi
+  cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
 
 # Remove from the vbox registry
-VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
+VBoxManage closemedium dvd ${PROGDIR}/tmp/$BUILDTAG.iso >/dev/null 2>/dev/null
 
 # Create the VM in virtualbox
 rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
 rc_halt "VBoxManage storagectl $VM --name SATA --add sata --controller IntelAhci"
 rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
-rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/tmp/freenas-auto.iso"
+rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/tmp/$BUILDTAG.iso"
 rc_halt "VBoxManage modifyvm $VM --cpus 1 --ioapic on --boot1 disk --memory 4096 --vram 12"
 rc_nohalt "VBoxManage hostonlyif remove vboxnet0"
 rc_halt "VBoxManage hostonlyif create"
@@ -249,7 +245,7 @@ VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
 # Remove from the vbox registry
 # Give extra time to ensure VM is shutdown to avoid CAM errors
 sleep 30
-VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
+VBoxManage closemedium dvd ${PROGDIR}/tmp/$BUILDTAG.iso >/dev/null 2>/dev/null
 
 # Set the DVD drive to empty
 rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium emptydrive"
