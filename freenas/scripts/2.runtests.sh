@@ -77,6 +77,7 @@ fi
 clean_xml_results
 
 # Run the REST tests now
+echo "Starting testing now!"
 cd ${PROGDIR}/scripts
 if [ -n "$FREENASLEGACY" ] ; then
   ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log 

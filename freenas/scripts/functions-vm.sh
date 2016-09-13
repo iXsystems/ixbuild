@@ -270,12 +270,13 @@ sync
 sleep 2
 
 echo "VM installation successful!"
-sleep 1
+sleep 60
 
 # Exit for now, can't do live run until grub-bhyve is updated
 #exit 0
 
-echo "Starting testing now!"
+echo "Attaching extra disks for testing!"
+sleep 60
 
 # Attach extra disks to the VM for testing
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
@@ -292,6 +293,7 @@ echo "Running Installed System..."
 daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
 
 # Give a minute to boot, should be ready for REST calls now
+echo "Waiting up to 4 minutes for VM to boot with hostpipe output"
 sleep 240
 }
 
