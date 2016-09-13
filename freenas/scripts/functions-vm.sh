@@ -126,7 +126,7 @@ do
 done
 }
 
-stop_vbox()
+stop_bhyve()
 {
 # Cleanup the old VM
 bhyvectl --destroy --vm=$vm
