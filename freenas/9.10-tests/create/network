@@ -41,15 +41,6 @@ network_tests()
     rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
     check_rest_response "201 CREATED"
   fi
-
-  echo_test_title "Rebooting VM"
-  rest_request "POST" "/system/reboot/" "''"
-  echo_ok
-
-  echo_test_title "Waiting for reboot"
-  sleep 20
-  wait_for_avail
-  echo_ok
 }
 
 # Init function, this is called after module is sourced
