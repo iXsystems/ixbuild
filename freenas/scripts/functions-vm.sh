@@ -216,7 +216,7 @@ rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
 rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/$VM.vboxpipe"
 
 # Just in case the install hung, we don't need to be waiting for over an hour
-echo "Performing VM installation..."
+echo "Performing $VM installation..."
 count=0
 
 # Unload VB
@@ -271,14 +271,10 @@ fi
 sync
 sleep 2
 
-echo "VM installation successful!"
-sleep 60
-
-# Exit for now, can't do live run until grub-bhyve is updated
-#exit 0
+echo "$VM installation successful!"
+sleep 30
 
 echo "Attaching extra disks for testing!"
-sleep 30
 
 # Attach extra disks to the VM for testing
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
@@ -286,10 +282,14 @@ rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --ty
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk2 --size 20000"
 rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 2 --device 0 --type hdd --medium ${MFSFILE}.disk2"
 
+sleep 30
+
 # Get rid of old output file
 if [ -e "/tmp/$VM.vboxpipe" ] ; then
   rm /tmp/$VM.vboxpipe
 fi
+
+sleep 5
 
 echo "Running Installed System..."
 daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
