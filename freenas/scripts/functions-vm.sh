@@ -274,6 +274,14 @@ sleep 2
 echo "$VM installation successful!"
 sleep 30
 
+runningvm=$(VBoxManage list runningvms | grep FreeNAS)
+OS=`echo $runningvm | cut -d \" -f 2`
+if [ "${VM}" == "${OS}" ]; then
+  echo "Warning ${VM} has failed to shut down!"
+else
+  echo "$VM has been successfully shut down"
+fi
+
 echo "Attaching extra disks for testing!"
 
 # Attach extra disks to the VM for testing
@@ -289,7 +297,7 @@ if [ -e "/tmp/$VM.vboxpipe" ] ; then
   rm /tmp/$VM.vboxpipe
 fi
 
-sleep 5
+sleep 30
 
 echo "Running Installed System..."
 daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
