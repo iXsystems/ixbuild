@@ -10,11 +10,21 @@ REQUIRES=""
 export REQUIRES
 
 ftp_tests() {
-  set_test_group_text "2 - Update - FTP tests" "1"
+  set_test_group_text "2 - Update - FTP tests" "3"
+
+  echo_test_title "Starting ftp service"
+  rest_request "PUT" "/services/services/ftp/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
+
 
   echo_test_title "Updating ftp service"
   rest_request "PUT" "/services/ftp/" '{ "ftp_clients": 20 }'
   check_rest_response "200"
+
+  echo_test_title "Starting ftp service"
+  rest_request "PUT" "/services/services/ftp/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
+
 
 }
 
