@@ -247,6 +247,8 @@ done
 VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
 
 # Remove from the vbox registry
+# Give extra time to ensure VM is shutdown to avoid CAM errors
+sleep 30
 VBoxManage closemedium dvd ${PROGDIR}/tmp/freenas-auto.iso >/dev/null 2>/dev/null
 
 # Set the DVD drive to empty
@@ -276,7 +278,7 @@ sleep 60
 #exit 0
 
 echo "Attaching extra disks for testing!"
-sleep 60
+sleep 30
 
 # Attach extra disks to the VM for testing
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
