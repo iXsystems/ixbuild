@@ -299,8 +299,8 @@ echo "Running Installed System..."
 daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
 
 # Give a minute to boot, should be ready for REST calls now
-echo "Waiting up to 4 minutes for $VM to boot with hostpipe output"
-sleep 240
+echo "Waiting up to 8 minutes for $VM to boot with hostpipe output"
+sleep 480
 }
 
 stop_vbox()
