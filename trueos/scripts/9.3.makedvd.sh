@@ -152,6 +152,6 @@ if [ ! -e "latest.img" ] ; then
 fi
 
 # Create the .torrent
-mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/iso/master/amd64/${OUTFILE} ${OUTFILE}
+mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/iso/master/amd64/`basename ${OUTFILE}` ${OUTFILE}
 
 exit 0
