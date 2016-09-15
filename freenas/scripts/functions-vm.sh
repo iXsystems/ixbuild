@@ -234,6 +234,7 @@ do
   # Check if the install failed
   grep -q "installation on ada0 has failed" "/tmp/${VM}.vboxpipe"
   if [ $? -eq 0 ] ; then
+    cat /tmp/$VM.vboxpipe
     echo_fail
     break
   fi
