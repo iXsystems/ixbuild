@@ -164,6 +164,23 @@ fi
 
 # Now lets spin-up vbox and do an installation
 ######################################################
+while :
+do
+runningvm=$(VBoxManage list runningvms | grep ${VM})
+OS=`echo $runningvm | cut -d \" -f 2`
+if [ "${VM}" == "${OS}" ]; then
+  echo "A previous instance of ${VM} is still running!"
+  echo "Shutting down ${VM}"
+  VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
+  sleep 10
+  echo "Unregistering previous ${VM}"
+  VBoxManage unregistervm ${VM} >/dev/null 2>/dev/null
+else
+  echo "Checking for previous running instances of ${VM}... none found"
+  break
+fi
+done
+
 MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
 echo "Creating $MFSFILE"
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 20000"
@@ -285,7 +302,7 @@ sleep 2
 echo "$VM installation successful!"
 sleep 30
 
-runningvm=$(VBoxManage list runningvms | grep FreeNAS)
+runningvm=$(VBoxManage list runningvms | grep ${VM})
 OS=`echo $runningvm | cut -d \" -f 2`
 if [ "${VM}" == "${OS}" ]; then
   echo "Warning ${VM} has failed to shut down!"
