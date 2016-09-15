@@ -219,23 +219,31 @@ count=0
 VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
 
 # Start the VM
-daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
+daemon -p "/tmp/${VM}.pid" vboxheadless -startvm "$VM" --vrde off
+
+sleep 5
+if [ ! -e "/tmp/${VM}.pid" ] ; then
+  echo "WARNING: Missing /tmp/${VM}.pid"
+fi
 
 # Wait for initial virtualbox startup
 count=0
 while :
 do
-grep -q "installation on ada0 has failed" /tmp/${VM}.vboxpipe
-if [ $? -eq 0 ] ; then
-echo_fail
-break
-fi
+  
+  # Check if the install failed
+  grep -q "installation on ada0 has failed" "/tmp/${VM}.vboxpipe"
+  if [ $? -eq 0 ] ; then
+    echo_fail
+    break
+  fi
 
   if [ ! -e "/tmp/${VM}.pid" ] ; then break; fi
 
   pgrep -qF /tmp/${VM}.pid
   if [ $? -ne 0 ] ; then
-        break;
+    echo "pgrep -qF /tmp/${VM}.pid detects install finished"
+    break;
   fi
 
   count=`expr $count + 1`
