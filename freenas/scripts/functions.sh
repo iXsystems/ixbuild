@@ -21,7 +21,7 @@ fi
 
 # Set the local location of XML results
 if [ -z "$RESULTSDIR" ] ; then
-  RESULTSDIR="/tmp/${BUILDTAG}"
+  RESULTSDIR="/tmp/results/${BUILDTAG}"
   export RESULTSDIR
 fi
 

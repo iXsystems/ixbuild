@@ -22,7 +22,7 @@ start_xml_results() {
       tnick="FreeNAS QA Tests"
   fi
   if [ ! -d "$RESULTSDIR" ] ; then
-    mkdir "$RESULTSDIR"
+    mkdir -p "$RESULTSDIR"
   fi
     export XMLRESULTS="$RESULTSDIR/results.xml.$$"
     cat >${XMLRESULTS} << EOF
@@ -102,7 +102,7 @@ EOF
       chown jenkins:jenkins "${WORKSPACE}/results"
     fi
     tStamp=$(date +%s)
-    echo "Saving jUnit results to: ${WORKSPACE}/results/"
+    echo "Saving jUnit results ${RESULTSDIR} -> ${WORKSPACE}/results/"
     mv $RESULTSDIR/results.xml.* "${WORKSPACE}/results/"
     chown -R jenkins:jenkins "${WORKSPACE}/results/"
   else
