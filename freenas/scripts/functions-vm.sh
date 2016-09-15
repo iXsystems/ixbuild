@@ -227,7 +227,7 @@ while :
 do
 grep -q "installation on ada0 has failed" /tmp/${VM}.vboxpipe
 if [ $? -eq 0 ] ; then
-echo_failed
+echo_fail
 break
 fi
 
