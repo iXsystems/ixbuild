@@ -155,7 +155,7 @@ iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 # Load up VBOX
 kldstat | grep -q vboxdrv
 if [ $? -eq 0 ] ; then
-  kldload vboxdrv
+  kldload vboxdrv >/dev/null 2>/dev/null
 fi
 kldstat | grep -q vboxnet
 if [ $? -eq 0 ] ; then
@@ -173,8 +173,6 @@ if [ "${VM}" == "${OS}" ]; then
   echo "Shutting down ${VM}"
   VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
   sleep 10
-  echo "Unregistering previous ${VM}"
-  VBoxManage unregistervm ${VM} >/dev/null 2>/dev/null
 else
   echo "Checking for previous running instances of ${VM}... none found"
   break
