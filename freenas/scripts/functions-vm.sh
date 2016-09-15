@@ -231,9 +231,9 @@ echo_failed
 break
 fi
 
-  if [ ! -e "/tmp/${VM.pid}" ] ; then break; fi
+  if [ ! -e "/tmp/${VM}.pid" ] ; then break; fi
 
-  pgrep -qF /tmp/${VM.pid}
+  pgrep -qF /tmp/${VM}.pid
   if [ $? -ne 0 ] ; then
         break;
   fi
