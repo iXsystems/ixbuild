@@ -509,6 +509,9 @@ jenkins_freenas_push()
     export IX_KEY_PASSWORD
   fi
 
+  # Only do 2 deltas right now
+  export DELTAS="2"
+
   # Push the release to download.freenas.org
   echo "make release-push ${PROFILEARGS}"
   make release-push ${PROFILEARGS}
