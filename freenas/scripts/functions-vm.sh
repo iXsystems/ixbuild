@@ -225,9 +225,15 @@ daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
 count=0
 while :
 do
-  if [ ! -e "/tmp/$VM.pid" ] ; then break; fi
+grep -q "installation on ada0 has failed" /tmp/${VM}.vboxpipe
+if [ $? -eq 0 ] ; then
+echo_failed
+break
+fi
 
-  pgrep -qF /tmp/$VM.pid
+  if [ ! -e "/tmp/${VM.pid}" ] ; then break; fi
+
+  pgrep -qF /tmp/${VM.pid}
   if [ $? -ne 0 ] ; then
         break;
   fi
