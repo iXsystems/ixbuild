@@ -509,8 +509,9 @@ jenkins_freenas_push()
     export IX_KEY_PASSWORD
   fi
 
-  # Only do 2 deltas right now
-  export DELTAS="2"
+  # Only do 1 delta right now
+  DELTAS="1"
+  export DELTAS
 
   # Push the release to download.freenas.org
   echo "make release-push ${PROFILEARGS}"
@@ -531,10 +532,12 @@ jenkins_freenas_push_nightly()
   cd ${FNASBDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  # Only do 2 deltas right now
-  export DELTAS="2"
+  # Only do 1 delta right now
+  DELTAS="1"
+  export DELTAS
 
   # Push the release to download.freenas.org
+  echo "make release-push ${BUILDOPTS}"
   make release-push ${BUILDOPTS}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
