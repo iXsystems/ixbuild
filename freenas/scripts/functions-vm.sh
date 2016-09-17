@@ -162,10 +162,6 @@ if [ $? -eq 0 ] ; then
   service vboxnet onestart
 fi
 
-# Try restarting virtualbox networking to ensure network should work
-service vboxnet restart
-sleep 30
-
 # Now lets spin-up vbox and do an installation
 ######################################################
 while :
@@ -182,6 +178,10 @@ else
   break
 fi
 done
+
+# Try restarting virtualbox networking to ensure network should work
+service vboxnet restart
+sleep 60
 
 MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
 echo "Creating $MFSFILE"
