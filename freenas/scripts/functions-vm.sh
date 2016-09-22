@@ -152,15 +152,17 @@ ifconfig tap0 destroy >/dev/null 2>/dev/null
 # Get the default interface
 iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 
+# This will try to load the module even if it is already loaded
 # Load up VBOX
-kldstat | grep -q vboxdrv
-if [ $? -eq 0 ] ; then
-  kldload vboxdrv >/dev/null 2>/dev/null
-fi
-kldstat | grep -q vboxnet
-if [ $? -eq 0 ] ; then
-  service vboxnet onestart
-fi
+# kldstat | grep -q vboxdrv
+# if [ $? -eq 0 ] ; then
+#  kldload vboxdrv >/dev/null 2>/dev/null
+# fi
+# kldstat | grep -q vboxnet
+# if [ $? -eq 0 ] ; then
+# Onestart will run if even if service is started
+#  service vboxnet onestart
+# fi
 
 # Now lets spin-up vbox and do an installation
 ######################################################
@@ -179,9 +181,10 @@ else
 fi
 done
 
+# Restarting vboxnet before tests can actually break networking
 # Try restarting virtualbox networking to ensure network should work
-service vboxnet restart
-sleep 60
+# service vboxnet restart
+# sleep 60
 
 MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
 echo "Creating $MFSFILE"
