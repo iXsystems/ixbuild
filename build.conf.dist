@@ -23,6 +23,11 @@ export SFTPWORKDIR
 # IXBUILDBRANCH=""
 # export IXBUILDBRANCH
 
+# (Optional) Settings for vmware-vsphere-cli
+# VI_HOST
+# VI_USERNAME
+# VI_PASSWORD
+
 ###########################################################################
 # FreeNAS specific settings
 ###########################################################################
@@ -83,4 +88,3 @@ export PBI_REPO_KEY
 # Command used in 'pkg repo' to sign (I.E. signing_command: <cmd>)
 PKGSIGNCMD=""
 export PKGSIGNCMD
-
