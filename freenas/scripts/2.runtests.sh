@@ -69,7 +69,7 @@ export VM
 # Determine which VM backend to start
 if [ -n "$USE_BHYVE" ] ; then
   start_bhyve
-elif [ -n $USE_EXT_VM"] ; then
+elif [ -n "$USE_EXT_VM"] ; then
   echo "auto-install ISO has been created"
   clean_xml_results
   return 0
