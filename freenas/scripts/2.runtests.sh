@@ -70,7 +70,8 @@ export VM
 if [ -n "$USE_BHYVE" ] ; then
   start_bhyve
 elif [ -n "$USE_EXT_VM"] ; then
-  echo "auto-install ISO has been created"
+  cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
+  echo "autoinstall ISO has been created"
   clean_xml_results
   exit 0
 else
