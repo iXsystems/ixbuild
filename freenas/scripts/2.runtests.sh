@@ -72,7 +72,7 @@ if [ -n "$USE_BHYVE" ] ; then
 elif [ -n "$USE_EXT_VM"] ; then
   echo "auto-install ISO has been created"
   clean_xml_results
-  return 0
+  exit 0
 else
   start_vbox
 fi
