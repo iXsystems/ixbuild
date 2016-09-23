@@ -961,6 +961,23 @@ jenkins_freenas_tests()
   return 0
 }
 
+jenkins_freenas_run_tests()
+{
+  create_workdir
+
+  cd ${TBUILDDIR}/scripts/
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log 
+  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  cleanup_workdir
+
+  return 0
+}
+
 jenkins_push_fn_statedir()
 {
   if [ -z "$SFTPHOST" ] ; then return 0 ; fi

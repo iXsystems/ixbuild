@@ -32,6 +32,9 @@ export SFTPWORKDIR
 # FreeNAS specific settings
 ###########################################################################
 
+# (Optional) Define a VM Backend otherwise VirtualBox is used (possible types are bhyve, esxi)
+# VMBACKEND = esxi
+
 # Set this to be the first IP address in IPv4 range for automatic assignment
 # DEFAULT_IP4POOL=""
 # export DEFAULT_IP4POOL
