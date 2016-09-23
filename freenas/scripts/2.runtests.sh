@@ -66,17 +66,21 @@ fi
 VM="$BUILDTAG"
 export VM
 
-# Determine which VM backend to start
-if [ -n "$USE_BHYVE" ] ; then
-  start_bhyve
-elif [ -n "$USE_EXT_VM"] ; then
-  cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
-  echo "autoinstall ISO has been created"
-  clean_xml_results
-  exit 0
-else
-  start_vbox
+# Set the default VMBACKEND
+if [ -z "$VMBACKEND" ] ; then
+  VMBACKEND="vbox"
 fi
+
+# Determine which VM backend to start
+case ${VMBACKEND} in
+    bhyve) start_bhyve ;;
+     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
+           echo "autoinstall ISO has been created"
+           clean_xml_results
+           exit 0
+           ;;
+	*) start_vbox ;;
+esac
 
 # Cleanup old test results before running tests
 clean_xml_results
