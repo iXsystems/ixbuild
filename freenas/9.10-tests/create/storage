@@ -21,7 +21,7 @@ storage_tests()
 
   # Check creating a zpool
   echo_test_title "Creating volume"
-  rest_request "POST" "/storage/volume/" '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "ada1", "ada2" ] } ] }'
+  rest_request "POST" "/storage/volume/" '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "da0", "da1" ] } ] }'
   check_rest_response "201 CREATED" || return 1
 
   # Check creating a dataset /share
