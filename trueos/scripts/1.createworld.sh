@@ -24,9 +24,9 @@ create_dist_files() {
   make clean
 
   # Create the FTP files
-  make ftp NOPORTS=yes TARGET=$ARCH
+  make ftp NOPORTS=yes ${SYS_MAKEFLAGS}
   if [ $? -ne 0 ] ; then
-     echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH"
+     echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH ${SYS_MAKEFLAGS}"
      exit 1
   fi
   rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
@@ -86,10 +86,10 @@ create_base_pkg_files()
   unset DISTDIR WORLDSRC
 
   # Create the package files now
-  make packages
+  make packages ${SYS_MAKEFLAGS}
   if [ $? -ne 0 ] ; then
      env
-     echo "Failed running: make packages"
+     echo "Failed running: make packages ${SYS_MAKEFLAGS}"
      exit 1
   fi
 
@@ -104,16 +104,16 @@ create_base_pkg_files()
   # grab all the distrib files
   rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
   cd /usr/src
-  make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib
+  make distrib-dirs DESTDIR=${PROGDIR}/fbsd-distrib ${SYS_MAKEFLAGS}
   if [ $? -ne 0 ] ; then
      env
-     echo "Failed running: make distrib-dirs"
+     echo "Failed running: make distrib-dirs ${SYS_MAKEFLAGS}"
      exit 1
   fi
-  make distribution DESTDIR=${PROGDIR}/fbsd-distrib
+  make distribution DESTDIR=${PROGDIR}/fbsd-distrib ${SYS_MAKEFLAGS}
   if [ $? -ne 0 ] ; then
      env
-     echo "Failed running: make distribution"
+     echo "Failed running: make distribution ${SYS_MAKEFLAGS}"
      exit 1
   fi
 
@@ -163,9 +163,9 @@ cd ${WORLDSRC}
 
 CPUS=`sysctl -n kern.smp.cpus`
 
-make -j $CPUS buildworld buildkernel
+make -j $CPUS buildworld buildkernel ${SYS_MAKEFLAGS}
 if [ $? -ne 0 ] ; then
-   echo "Failed running: make buildworld buildkernel"
+   echo "Failed running: make buildworld buildkernel ${SYS_MAKEFLAGS}"
    exit 1 
 fi
 
