@@ -64,15 +64,19 @@ fi
 LOUT="/tmp/fnas-error-debug.txt"
 touch ${LOUT}
 
+if [ -z "$BUILDINCREMENTAL" ] ; then
+  BUILDINCREMENTAL="false"
+fi
+
 # Rotate an old build
-if [ -d "${FNASBDIR}" -a -z "${BUILDINCREMENTAL}" ] ; then
+if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
   echo "Doing fresh build!"
   cd ${FNASBDIR}
   chflags -R 0 _BE
   rm -rf _BE
 fi
 
-if [ -n "$BUILDINCREMENTAL" ] ; then
+if [ "$BUILDINCREMENTAL" = "true" ] ; then
   echo "Doing incremental build!"
   cd ${FNASBDIR}
   rc_halt "git reset --hard"
@@ -144,7 +148,7 @@ if [ $? -eq 0 ] ; then
   PROFILEARGS="${PROFILEARGS} VERSION=$JENKINSVERSION"
 
   # Cleanup before the build if doing PRODUCTION and INCREMENTAL is set
-  if [ -n "$BUILDINCREMENTAL" ] ; then
+  if [ "$BUILDINCREMENTAL" != "true" ] ; then
     echo "Running cleandist"
     make cleandist
   fi
