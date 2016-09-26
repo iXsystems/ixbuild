@@ -21,19 +21,19 @@ create_dist_files() {
 
  # cd to release dir, and clean and make
   cd ${WORLDSRC}/release
-  make clean
+  make clean ${SYS_MAKEFLAGS}
 
   # Create the FTP files
   make ftp NOPORTS=yes ${SYS_MAKEFLAGS}
   if [ $? -ne 0 ] ; then
-     echo "Failed running: make ftp NOPORTS=yes TARGET=$ARCH ${SYS_MAKEFLAGS}"
+     echo "Failed running: make ftp NOPORTS=yes ${SYS_MAKEFLAGS}"
      exit 1
   fi
   rc_halt "mv ${WORLDSRC}/release/ftp/* ${DISTDIR}/"
 
   # Cleanup old .txz files
   cd ${WORLDSRC}/release
-  make clean
+  make clean ${SYS_MAKEFLAGS}
 
   # Dirty dirty hack to get llvm38 into our base packages
   # specifically for buildign in poudriere
@@ -139,6 +139,42 @@ create_base_pkg_files()
   return 0
 }
 
+# Create a static tarball
+create_tarball() {
+
+  if [ -n "${DISTDIR}" -a -d "${DISTDIR}" ] ; then
+    rm -rf ${DISTDIR}
+  fi
+  mkdir ${DISTDIR} 2>/dev/null
+
+  rc_halt "mkdir ${PROGDIR}/fbsd-distrib"
+  make installworld DESTDIR=${PROGDIR}/fbsd-distrib ${SYS_MAKEFLAGS}
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: make installworld ${SYS_MAKEFLAGS}"
+     exit 1
+  fi
+
+  make distribution DESTDIR=${PROGDIR}/fbsd-distrib ${SYS_MAKEFLAGS}
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: make distribution ${SYS_MAKEFLAGS}"
+     exit 1
+  fi
+
+  make installkernel DESTDIR=${PROGDIR}/fbsd-distrib ${SYS_MAKEFLAGS}
+  if [ $? -ne 0 ] ; then
+     echo "Failed running: make installkernel ${SYS_MAKEFLAGS}"
+     exit 1
+  fi
+
+  # Create the tarball
+  rc_halt "tar cvJf ${DISTDIR}/fbsd-dist.txz -C ${PROGDIR}/fbsd-distrib ."
+  rm -rf ${PROGDIR}/fbsd-distrib
+  chflags -R noschg ${PROGDIR}/fbsd-distrib 2>/dev/null
+  rm -rf ${PROGDIR}/fbsd-distrib 2>/dev/null
+
+  return 0
+}
+
 if [ -z "$DISTDIR" ] ; then
   DISTDIR="${PROGDIR}/fbsd-dist"
 fi
@@ -169,10 +205,17 @@ if [ $? -ne 0 ] ; then
    exit 1 
 fi
 
-create_dist_files
-
-if [ -n "$PKGBASE" ] ; then
-  create_base_pkg_files
+# If building ARM, we can just make a tarball
+echo "$SYS_MAKEFLAGS" | grep -q "armv6"
+if [ $? -eq 0 ] ; then
+  # arm
+  create_tarball
+else
+  # amd64
+  create_dist_files
+  if [ -n "$PKGBASE" ] ; then
+    create_base_pkg_files
+  fi
 fi
 
 exit 0
