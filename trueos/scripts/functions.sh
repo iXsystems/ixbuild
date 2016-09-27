@@ -54,6 +54,10 @@ PCONFDIR="${TRUEOSSRC}/build-files/conf/desktop" ; export PCONFDIR
 if [ "$SYSBUILD" = "trueos" ] ; then
   PCONFDIR="${TRUEOSSRC}/build-files/conf/server" ; export PCONFDIR
 fi
+# Use the PICO config files
+if [ "$PACKAGE_ARCH" = "armv6" ] ; then
+  PCONFDIR="${TRUEOSSRC}/build-files/conf/pico" ; export PCONFDIR
+fi
 
 # Where do we place the log files
 PLOGFILES="${PROGDIR}/log" ; export PLOGFILES
@@ -294,6 +298,15 @@ update_poud_world()
 
   # Nuke the built-in manifests from poudriere, since they don't match ours
   rm /usr/local/share/poudriere/MANIFESTS/* 2>/dev/null
+
+  if [ "$PACKAGE_ARCH" = "armv6" ] ; then
+    echo "Creating new ARM jail: $PJAILNAME - $JAILVER"
+    poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.armv6 -m tar=file://${DISTDIR}/fbsd-dist.txz
+    if [ $? -ne 0 ] ; then
+      exit_err "Failed creating poudriere ARM jail"
+    fi
+    return 0
+  fi
 
   echo "Creating new jail: $PJAILNAME - $JAILVER"
   poudriere jail -c -j $PJAILNAME -v $JAILVER -m url=file://${DISTDIR}
