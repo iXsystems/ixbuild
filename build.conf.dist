@@ -33,7 +33,8 @@ export SFTPWORKDIR
 ###########################################################################
 
 # (Optional) Define a VM Backend otherwise VirtualBox is used (possible types are bhyve, esxi)
-# VMBACKEND = esxi
+# VMBACKEND=""
+# export VMBACKEND
 
 # Set this to be the first IP address in IPv4 range for automatic assignment
 # DEFAULT_IP4POOL=""
