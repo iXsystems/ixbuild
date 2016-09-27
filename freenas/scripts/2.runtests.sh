@@ -74,7 +74,7 @@ fi
 # Determine which VM backend to start
 case ${VMBACKEND} in
      bhyve) start_bhyve ;;
-     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
+     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
            echo "autoinstall ISO has been created"
            clean_xml_results
            exit 0
