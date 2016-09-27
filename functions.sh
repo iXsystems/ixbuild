@@ -967,10 +967,24 @@ jenkins_freenas_run_tests()
 
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
-
-  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log 
+  echo "Running test group 1/3 Create"
+  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
+  echo ""
+  echo "Output from REST API calls:"
+  echo "-----------------------------------------"
+  cat /tmp/$VM-tests-create.log
+  echo "Running test group 2/3 Update" 
   ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
+  echo ""
+  echo "Output from REST API calls:"
+  echo "-----------------------------------------"
+  cat /tmp/$VM-tests-update.log
+  echo "Running test group 3/3 Delete"
   ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
+  echo ""
+  echo "Output from REST API calls:"
+  echo "-----------------------------------------"
+  cat /tmp/$VM-tests-delete.log	
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   cleanup_workdir
