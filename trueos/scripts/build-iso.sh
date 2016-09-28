@@ -103,7 +103,7 @@ do_iso_ports()
 {
   echo "Building ISO ports"
 
-  if [ ! -e "${DISTDIR}/base.txz" ] ; then
+  if [ ! -e "${DISTDIR}/base.txz" -a ! -e "${DISTDIR}/fbsd-dist.txz" ] ; then
      echo "Missing WORLD files, please create first!"
      exit 1
   fi
