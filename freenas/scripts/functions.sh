@@ -59,16 +59,19 @@ exit_err() {
 
 save_install_output()
 {
+killall cu
 cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/install.out
 }
 
 save_upgrade_output()
 {
+killall cu
 cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/upgrade.out
 }
 
 save_boot_output()
 {
+killall cu
 cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/boot.out
 }
 
