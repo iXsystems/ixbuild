@@ -57,6 +57,45 @@ exit_err() {
    exit 1
 }
 
+save_install_output()
+{
+cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/install.out
+}
+
+save_upgrade_output()
+{
+cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/upgrade.out
+}
+
+save_boot_output()
+{
+cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/boot.out
+}
+
+print_install_output()
+{
+echo ""
+echo "Output from console during install:"
+echo "-----------------------------------------"
+cat /tmp/results/${BUILDTAG}/tests.out
+}
+
+print_upgrade_output()
+{
+echo ""
+echo "Output from console during upgrade:"
+echo "-----------------------------------------"
+cat /tmp/results/${BUILDTAG}/upgrade.out
+}
+
+print_boot_output()
+{
+echo ""
+echo "Output from console during runtime:"
+echo "-----------------------------------------"  
+cat /tmp/results/${BUILDTAG}/boot.out
+}    
+
 clean_artifacts() 
 {
   # Move artifacts to pre-defined location
