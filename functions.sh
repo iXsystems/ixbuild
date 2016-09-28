@@ -967,19 +967,22 @@ jenkins_freenas_run_tests()
 
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
-  echo "Running test group 1/3 Create"
+  echo ""
+  echo "Running test group create 1/3"
   ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
   echo ""
   echo "Output from REST API calls:"
   echo "-----------------------------------------"
   cat /tmp/$VM-tests-create.log
-  echo "Running test group 2/3 Update" 
+  echo ""
+  echo "Running test group update 2/3" 
   ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
   echo ""
   echo "Output from REST API calls:"
   echo "-----------------------------------------"
   cat /tmp/$VM-tests-update.log
-  echo "Running test group 3/3 Delete"
+  echo ""
+  echo "Running test group delete 3/3"
   ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
   echo ""
   echo "Output from REST API calls:"
