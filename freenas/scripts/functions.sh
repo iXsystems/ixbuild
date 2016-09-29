@@ -63,7 +63,7 @@ echo ""
 echo "Starting console output:"
 echo "-----------------------------------------"
 daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
-daemon -p /tmp/vmtail.pid tail -f /tmp/console.log 2>/dev/null &
+daemon -p /tmp/vmtail.pid tail -f /tmp/console.log &
 }
 
 stop_console_output()
