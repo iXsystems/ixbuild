@@ -57,47 +57,20 @@ exit_err() {
    exit 1
 }
 
-save_install_output()
+start_console_output()
 {
-killall cu >/dev/null 2>/dev/null
-cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/install.out
-}
-
-save_upgrade_output()
-{
-killall cu >/dev/null 2>/dev/null
-cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/upgrade.out
-}
-
-save_boot_output()
-{
-killall cu >/dev/null 2>/dev/null
-cu -l /dev/cuau0 > /tmp/results/${BUILDTAG}/boot.out
-}
-
-print_install_output()
-{
-echo ""
-echo "Output from console during install:"
+echo ""                                                 
+echo "Starting console output:"
 echo "-----------------------------------------"
-cat /tmp/results/${BUILDTAG}/tests.out
+daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
+daemon -p /tmp/vmtail.pid tail -f /tmp/console.log 2>/dev/null &
 }
 
-print_upgrade_output()
+stop_console_output()
 {
-echo ""
-echo "Output from console during upgrade:"
-echo "-----------------------------------------"
-cat /tmp/results/${BUILDTAG}/upgrade.out
+echo "Stopping console output"
+killall daemon
 }
-
-print_boot_output()
-{
-echo ""
-echo "Output from console during runtime:"
-echo "-----------------------------------------"  
-cat /tmp/results/${BUILDTAG}/boot.out
-}    
 
 clean_artifacts() 
 {
