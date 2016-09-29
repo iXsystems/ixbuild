@@ -76,7 +76,6 @@ case ${VMBACKEND} in
      bhyve) start_bhyve ;;
      esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
            clean_xml_results
-	   start_console_output
            exit 0
            ;;
 	*) start_vbox ;;
