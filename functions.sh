@@ -441,7 +441,7 @@ jenkins_freenas_push_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_dsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html
     if [ $? -ne 0 ] ; then exit_clean; fi
     rm -rf /tmp/handbookpush 2>/dev/null
   fi
@@ -464,7 +464,7 @@ jenkins_freenas_push_api()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_dsa.jenkins' . jenkins@api.freenas.org:/tank/api/html
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/api/html
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     rm -rf /tmp/apipush 2>/dev/null
