@@ -301,7 +301,7 @@ update_poud_world()
 
   if [ "$PACKAGE_ARCH" = "armv6" ] ; then
     echo "Creating new ARM jail: $PJAILNAME - $JAILVER"
-    poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.armv6 -m tar=file://${DISTDIR}/fbsd-dist.txz
+    poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.armv6 -m tar=${DISTDIR}/fbsd-dist.txz
     if [ $? -ne 0 ] ; then
       exit_err "Failed creating poudriere ARM jail"
     fi
