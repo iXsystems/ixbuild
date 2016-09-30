@@ -74,7 +74,12 @@ fi
 # Determine which VM backend to start
 case ${VMBACKEND} in
      bhyve) start_bhyve ;;
-     esxi ) start_esxi ;;
+     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
+	   daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
+	   sleep 10
+           clean_xml_results
+           exit 0
+	   ;;
 	*) start_vbox ;;
 esac
 
