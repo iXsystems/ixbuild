@@ -388,6 +388,10 @@ read_module_dir() {
   return 0 
 }
 
+run_tests() {
+/ixbuild/jenkins.sh freenas-run-tests ${BUILDTAG}
+}
+
 # Do a TrueNAS HA failover
 # $1 = reboot/panic
 trigger_ha_failover() {

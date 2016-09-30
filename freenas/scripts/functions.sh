@@ -57,21 +57,6 @@ exit_err() {
    exit 1
 }
 
-start_console_output()
-{
-echo ""                                                 
-echo "Starting console output:"
-echo "-----------------------------------------"
-daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
-daemon -p /tmp/vmtail.pid tail -f /tmp/console.log &
-}
-
-stop_console_output()
-{
-echo "Stopping console output"
-killall daemon
-}
-
 clean_artifacts() 
 {
   # Move artifacts to pre-defined location

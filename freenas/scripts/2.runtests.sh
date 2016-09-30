@@ -74,34 +74,19 @@ fi
 # Determine which VM backend to start
 case ${VMBACKEND} in
      bhyve) start_bhyve ;;
-     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
-           clean_xml_results
-           exit 0
-           ;;
+     esxi ) start_esxi ;;
 	*) start_vbox ;;
 esac
 
 # Cleanup old test results before running tests
 clean_xml_results
 
-# Run the REST tests now
-echo "Starting testing now!"
-cd ${PROGDIR}/scripts
-if [ -n "$FREENASLEGACY" ] ; then
-  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log 
-  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
-  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
-  res=$?
-else
-  ./10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
-  ./10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
-  ./10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
-  res=$?
-fi
+# Run tests now
+run_tests
 
 # Determine which VM backend to stop
-if [ -n "$USE_BHYVE" ] ; then
-  stop_bhyve
-else
-  stop_vbox
-fi
+case ${VMBACKEND} in
+    bhyve) stop_bhyve ;;
+    esxi ) stop_esxi ;;
+       * ) stop_vbox ;;
+esac
