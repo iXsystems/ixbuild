@@ -988,7 +988,6 @@ jenkins_freenas_run_tests()
   cat /tmp/$VM-tests-delete.log
   sleep 10
   pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
-  pkill -F /tmp/vmtail.pid >/dev/null 2>/dev/null
 
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
