@@ -976,6 +976,20 @@ jenkins_freenas_run_tests()
   echo ""
   echo "Running test group delete 3/3"
   ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
+  echo ""
+  echo "Output from console:"
+  echo "-----------------------------------------"
+  cat /tmp/console.log
+  echo ""
+  echo "Output from REST API calls:"
+  echo "-----------------------------------------"
+  cat /tmp/$VM-tests-create.log
+  cat /tmp/$VM-tests-update.log
+  cat /tmp/$VM-tests-delete.log
+  sleep 10
+  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+  pkill -F /tmp/vmtail.pid >/dev/null 2>/dev/null
+
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   cleanup_workdir

@@ -366,26 +366,7 @@ exit $res
 start_esxi()
 {
 cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
-echo ""                                                 
-echo "Starting console output:"
-echo "-----------------------------------------"
 daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
-sleep 10 
-}
-
-stop_esxi()
-{
-echo ""
-echo "Output from console:"
-echo "-----------------------------------------"
-cat /tmp/console.log
-echo ""
-echo "Output from REST API calls:"
-echo "-----------------------------------------"
-cat /tmp/$VM-tests-create.log
-cat /tmp/$VM-tests-update.log
-cat /tmp/$VM-tests-delete.log
 sleep 10
-pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
-pkill -F /tmp/vmtail.pid >/dev/null 2>/dev/null
-}
+exit 0
+} 
