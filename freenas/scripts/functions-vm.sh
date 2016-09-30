@@ -366,6 +366,7 @@ exit $res
 start_esxi()
 {
 cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
+clean_xml_results
 daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
 sleep 10
 exit 0
