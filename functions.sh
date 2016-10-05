@@ -1107,14 +1107,21 @@ jenkins_mkcustard()
 
   rm -rf /root/custard/
   mkdir /root/custard
-  OUTFILE=/root/custard/custard-`date '+%Y-%m-%d-%H-%M'`.ova
+  OUTFILE=/root/custard/custard-`date '+%Y-%m-%d-%H-%M'`
 
   # Looks like custard finished on its own, lets package it up
-  echo "Exporting CUSTARD .ova file..."
   VBoxManage modifyvm custard --nic1 bridged
   VBoxManage modifyvm custard --nic2 bridged
-  VBoxManage export custard -o ${OUTFILE}
-  chmod 644 ${OUTFILE}
+
+  echo "Exporting CUSTARD .ova file..."
+  VBoxManage export custard -o ${OUTFILE}.ova
+  chmod 644 ${OUTFILE}.ova
+  echo "Exporting CUSTARD legacy .ova file..."
+  VBoxManage export custard -o ${OUTFILE}-legacy.ova --legacy09
+  chmod 644 ${OUTFILE}-legacy09.ova
+  echo "Exporting CUSTARD ovf20 .ova file..."
+  VBoxManage export custard -o ${OUTFILE}-ovf20.ova --ovf20
+  chmod 644 ${OUTFILE}-ovf20.ova
 
   # Save the .ova to stage server
   if [ -n "$SFTPHOST" ] ; then
