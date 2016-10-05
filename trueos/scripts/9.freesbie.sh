@@ -185,6 +185,7 @@ do_arm_build() {
   rc_halt "gpart create -s BSD ${MD}s2"
   rc_halt "gpart add -t freebsd-ufs ${MD}s2"
   rc_halt "newfs -U ${MD}s2a"
+  rc_halt "mkdir -p ${PDESTDIR9}"
   rc_halt "mount /dev/${MD}s2a ${PDESTDIR9}"
 
   extract_dist "${ARMDIST}" "${PDESTDIR9}"
