@@ -157,11 +157,112 @@ setup_usr_uzip() {
 
 }
 
+do_arm_build() {
+
+  if [ -e "${PDESTDIR9}" ]; then
+    echo "Removing ${PDESTDIR9}"
+    umount -f ${PDESTDIR9}/mnt >/dev/null 2>/dev/null
+    umount -f ${PDESTDIR9}/tmp/packages >/dev/null 2>/dev/null
+    umount -f ${PDESTDIR9} >/dev/null 2>/dev/null
+  fi
+
+  # Copy over the pkgs
+  if [ -n "$SFTPUSER" ] ; then
+    mkdir ${PROGDIR}/pkgs
+    rc_halt "rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/All/ ${PROGDIR}/pkgs/"
+  fi
+
+  cd ${PROGDIR}/
+
+  truncate -s 2g arm.img
+  MD=$(mdconfig -f arm.img)
+
+  # Create the disk image
+  rc_halt "gpart create -s MBR ${MD}"
+  rc_halt "gpart add -t '\!12' -a 63 -s 50m ${MD}"
+  rc_halt "gpart set -a active -i 1 ${MD}"
+  rc_halt "newfs_msdos -F 16 /dev/${MD}s1"
+  rc_halt "gpart add -t freebsd -a 4m ${MD}"
+  rc_halt "gpart create -s BSD ${MD}s2"
+  rc_halt "gpart add -t freebsd-ufs ${MD}s2"
+  rc_halt "newfs -U ${MD}s2a"
+  rc_halt "mount /dev/${MD}s2a ${PDESTDIR9}"
+
+  extract_dist "${ARMDIST}" "${PDESTDIR9}"
+
+  # Loop through and add pkgs
+  rc_halt "mkdir ${PDESTDIR9}/pkgs"
+  rc_halt "mount_nullfs ${PROGDIR}/pkgs ${PDESTDIR9}/pkgs"
+  while read line
+  do
+    pname=`ls ${PDESTDIR9}/pkgs/${line}-*.txz`
+    pname=$(basename ${pname})
+    rc_halt "pkg -c ${PDESTDIR9} add 'pkgs/$pname'"
+  done < ${PCONFDIR}/installcd-packages
+
+  # Copy bootloader files
+  rc_halt "cp ${PDESTDIR9}/boot/ubldr ${PROGDIR}/"
+  rc_halt "cp ${PDESTDIR9}/boot/dtb/rpi2.dtb ${PROGDIR}/"
+  rc_halt "mkdir ${PDESTDIR9}/boot/msdos"
+
+  # Setup some sane default files
+  cat << EOF > ${PDESTDIR9}/etc/fstab
+/dev/mmcsd0s1   /boot/msdos     msdosfs rw,noatime      0 0
+/dev/mmcsd0s2a  /               ufs rw,noatime          1 1
+md              /tmp            mfs rw,noatime,-s30m    0 0
+md              /var/log        mfs rw,noatime,-s15m    0 0
+md              /var/tmp        mfs rw,noatime,-s5m     0 0
+EOF
+
+cat << EOF > ${PDESTDIR9}/etc/rc.conf
+hostname="pico"
+ifconfig_ue0="DHCP"
+sshd_enable="YES"
+sendmail_enable="NONE"
+sendmail_submit_enable="NO"
+sendmail_outbound_enable="NO"
+sendmail_msp_queue_enable="NO"
+EOF
+
+cat << EOF > ${PDESTDIR9}/etc/ttys
+ttyv0   "/usr/libexec/getty Pc"         xterm   on  secure
+ttyv1   "/usr/libexec/getty Pc"         xterm   on  secure
+ttyv2   "/usr/libexec/getty Pc"         xterm   on  secure
+ttyv3   "/usr/libexec/getty Pc"         xterm   on  secure
+ttyu0   "/usr/libexec/getty 3wire"      vt100   on  secure
+EOF
+
+  sync
+  sleep 2
+  rc_halt "umount -f ${PDESTDIR9}"
+
+  # Copy the boot-loader files
+  rc_halt "mount_msdosfs /dev/${MD}s1 ${PDESTDIR9}"
+  rc_halt "cp /usr/local/share/u-boot/u-boot-rpi2/* ${PDESTDIR9}/"
+  rc_halt "cp ${PROGDIR}/ubldr ${PDESTDIR9}/"
+  rc_halt "cp ${PROGDIR}/rpi2.dtb ${PDESTDIR9}/"
+
+  # Cleanup
+  rc_halt "umount -f ${PDESTDIR9}"
+  rc_halt "mdconfig -d -u ${MD}"
+
+  rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso"
+
+  rm ${PDESTDIR9}
+  return 0
+}
     
 if [ -z ${PDESTDIR} ]
 then
   echo "ERROR: PDESTDIR is still unset!"
   exit 1
+fi
+
+# If building ARM, we can just make a tarball
+echo "$SYS_MAKEFLAGS" | grep -q "armv6"
+if [ $? -eq 0 ] ; then
+  do_arm_build
+  exit $?
 fi
 
 # Copy over a fresh set of package files for DVD

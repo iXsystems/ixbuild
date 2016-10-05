@@ -17,6 +17,7 @@ export TRUEOSSRC
 DISTDIR="${PROGDIR}/fbsd-dist" ; export DISTDIR
 
 # Set the dist files
+ARMDIST="$DISTDIR/fbsd-dist.txz"
 BASEDIST="$DISTDIR/base.txz"
 KERNDIST="$DISTDIR/kernel.txz"
 L32DIST="$DISTDIR/lib32.txz"

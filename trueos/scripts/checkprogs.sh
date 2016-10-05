@@ -127,6 +127,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y devel/llvm38"
 fi
 
+pkg info "sysutils/u-boot-rpi2" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing sysutils/u-boot-rpi2"
+  rc_halt "pkg install -y sysutils/u-boot-rpi2"
+fi
+
 which poudriere >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing poudriere.."
