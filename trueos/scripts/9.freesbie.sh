@@ -248,6 +248,7 @@ EOF
   rc_halt "mdconfig -d -u ${MD}"
 
   rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso"
+  rc_halt "gzip ${PROGDIR}/iso/arm.img"
 
   rmdir ${PDESTDIR9}
   return 0

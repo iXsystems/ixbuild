@@ -1203,25 +1203,31 @@ do_build_env_setup()
   FNSTATEDIR="${SFTPWORKDIR}/fnstate/${TARGETREL}"
   ENVSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/build_env"
 
+  # Set the default amd64 arch
+  if [ -z "$PACKAGE_ARCH" ] ; then
+    PACKAGE_ARCH="amd64"
+    export PACKAGE_ARCH
+  fi
+
   # Set all the stage / work dirs
   if [ "$BRANCH" = "PRODUCTION" -o "$BRANCH" = "production" ] ; then
-    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/amd64"
-    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/amd64"
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/${PACKAGE_ARCH}"
+    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/${PACKAGE_ARCH}"
     DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}"
-    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/amd64"
-    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/${PACKAGE_ARCH}"
+    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/${PACKAGE_ARCH}"
   elif [ "$BRANCH" = "EDGE" -o "$BRANCH" = "edge" ] ; then
-    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
-    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/amd64"
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/edge/${PACKAGE_ARCH}"
+    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/${PACKAGE_ARCH}"
     DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/edge"
-    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/edge/amd64"
-    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/edge/${PACKAGE_ARCH}"
+    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/${PACKAGE_ARCH}"
   elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
-    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
-    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/amd64"
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/enterprise/${PACKAGE_ARCH}"
+    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/enterprise/${PACKAGE_ARCH}"
     DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/enterprise"
-    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/enterprise/amd64"
-    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/amd64"
+    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/enterprise/${PACKAGE_ARCH}"
+    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/${PACKAGE_ARCH}"
   else
     echo "Invalid BRANCH"
     exit_clean
