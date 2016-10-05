@@ -49,6 +49,12 @@ do_iso()
 
   rm ${PROGDIR}/iso/* >/dev/null 2>/dev/null
 
+  # If on ARM, only need single image
+  echo "$PACKAGE_ARCH" | grep -q "arm"
+  if [ $? -eq 0 ] ; then
+    SYSBUILD="desktop"
+  fi
+
   # Are we building both TrueOS / PC-BSD images?
   if [ -z "$SYSBUILD" -o "$SYSBUILD" = "BOTH" ] ; then
 

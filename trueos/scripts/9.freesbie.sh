@@ -249,7 +249,7 @@ EOF
 
   rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso"
 
-  rm ${PDESTDIR9}
+  rmdir ${PDESTDIR9}
   return 0
 }
     
