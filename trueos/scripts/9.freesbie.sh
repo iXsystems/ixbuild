@@ -167,12 +167,9 @@ do_arm_build() {
   fi
 
   # Copy over the pkgs
-  if [ -n "$SFTPUSER" ] ; then
-    mkdir ${PROGDIR}/pkgs
-    rc_halt "rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}/All/ ${PROGDIR}/pkgs/"
-  fi
+  rc_halt "cp -r ${PPKGDIR}/All ${PROGDIR}/pkgs"
 
-  cd ${PROGDIR}/
+  rc_halt "cd ${PROGDIR}/"
 
   truncate -s 2g arm.img
   MD=$(mdconfig -f arm.img)
