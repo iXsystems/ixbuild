@@ -195,7 +195,7 @@ do_arm_build() {
   rc_halt "mount_nullfs ${PROGDIR}/pkgs ${PDESTDIR9}/pkgs"
   while read line
   do
-    pname=`ls ${PDESTDIR9}/pkgs/${line}-*.txz`
+    pname=`ls ${PDESTDIR9}/pkgs/${line}-[0-9]*.txz`
     pname=$(basename ${pname})
     pkg -c ${PDESTDIR9} add /pkgs/${pname}
     if [ $? -ne 0 ] ; then exit 1; fi
