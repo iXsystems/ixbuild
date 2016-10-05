@@ -197,7 +197,7 @@ do_arm_build() {
   do
     pname=`ls ${PDESTDIR9}/pkgs/${line}-*.txz`
     pname=$(basename ${pname})
-    pkg -c ${PDESTDIR9} add '/pkgs/$pname'
+    pkg -c ${PDESTDIR9} add /pkgs/${pname}
     if [ $? -ne 0 ] ; then exit 1; fi
   done < ${PCONFDIR}/installcd-packages
 
