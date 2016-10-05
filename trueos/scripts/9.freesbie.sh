@@ -197,7 +197,7 @@ do_arm_build() {
   do
     pname=`ls ${PDESTDIR9}/pkgs/${line}-*.txz`
     pname=$(basename ${pname})
-    rc_halt "pkg -c ${PDESTDIR9} add 'pkgs/$pname'"
+    rc_halt "pkg -c ${PDESTDIR9} add '/pkgs/$pname'"
   done < ${PCONFDIR}/installcd-packages
 
   # Copy bootloader files
