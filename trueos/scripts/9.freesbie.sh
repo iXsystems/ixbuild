@@ -176,7 +176,9 @@ do_arm_build() {
 
   # Create the disk image
   rc_halt "gpart create -s MBR ${MD}"
-  rc_halt "gpart add -t '\!12' -a 63 -s 50m ${MD}"
+  gpart add -t '!12' -a 63 -s 50m ${MD}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
   rc_halt "gpart set -a active -i 1 ${MD}"
   rc_halt "newfs_msdos -F 16 /dev/${MD}s1"
   rc_halt "gpart add -t freebsd -a 4m ${MD}"
