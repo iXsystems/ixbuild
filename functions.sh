@@ -1118,7 +1118,7 @@ jenkins_mkcustard()
   chmod 644 ${OUTFILE}.ova
   echo "Exporting CUSTARD legacy .ova file..."
   VBoxManage export custard -o ${OUTFILE}-legacy.ova --legacy09
-  chmod 644 ${OUTFILE}-legacy09.ova
+  chmod 644 ${OUTFILE}-legacy.ova
   echo "Exporting CUSTARD ovf20 .ova file..."
   VBoxManage export custard -o ${OUTFILE}-ovf20.ova --ovf20
   chmod 644 ${OUTFILE}-ovf20.ova
