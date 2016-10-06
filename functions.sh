@@ -1090,7 +1090,7 @@ jenkins_mkcustard()
   echo "Waiting for Custard prep to finish..."
   while :
   do
-    sleep 20
+    sleep 30
     echo "."
 
     vboxmanage list runningvms | grep -q "custard"
