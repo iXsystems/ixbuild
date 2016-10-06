@@ -1129,6 +1129,8 @@ jenkins_mkcustard()
   cd /root/custard
   zip -r ${OUTFILE}-vmdk.zip custard-flat.vmdk custard.vmdk
   chmod 644 ${OUTFILE}-vmdk.zip
+  rm custard-flat.vmdk
+  rm custard.vmdk
 
   # Save the .ova to stage server
   if [ -n "$SFTPHOST" ] ; then
