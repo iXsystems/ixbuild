@@ -206,32 +206,8 @@ do_arm_build() {
   rc_halt "cp ${PDESTDIR9}/boot/dtb/rpi2.dtb ${PROGDIR}/"
   rc_halt "mkdir ${PDESTDIR9}/boot/msdos"
 
-  # Setup some sane default files
-  cat << EOF > ${PDESTDIR9}/etc/fstab
-/dev/mmcsd0s1   /boot/msdos     msdosfs rw,noatime      0 0
-/dev/mmcsd0s2a  /               ufs rw,noatime          1 1
-md              /tmp            mfs rw,noatime,-s30m    0 0
-md              /var/log        mfs rw,noatime,-s15m    0 0
-md              /var/tmp        mfs rw,noatime,-s5m     0 0
-EOF
-
-cat << EOF > ${PDESTDIR9}/etc/rc.conf
-hostname="pico"
-ifconfig_ue0="DHCP"
-sshd_enable="YES"
-sendmail_enable="NONE"
-sendmail_submit_enable="NO"
-sendmail_outbound_enable="NO"
-sendmail_msp_queue_enable="NO"
-EOF
-
-cat << EOF > ${PDESTDIR9}/etc/ttys
-ttyv0   "/usr/libexec/getty Pc"         xterm   on  secure
-ttyv1   "/usr/libexec/getty Pc"         xterm   on  secure
-ttyv2   "/usr/libexec/getty Pc"         xterm   on  secure
-ttyv3   "/usr/libexec/getty Pc"         xterm   on  secure
-ttyu0   "/usr/libexec/getty 3wire"      vt100   on  secure
-EOF
+  # Copy over the PICO overlay
+  tar cvf - -C ${TRUEOSSRC}/overlays/pico-overlay/ . | tar xvpf - -C ${PDESTDIR9}
 
   sync
   sleep 2
