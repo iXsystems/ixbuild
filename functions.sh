@@ -1123,6 +1123,13 @@ jenkins_mkcustard()
   VBoxManage export custard -o ${OUTFILE}-ovf20.ova --ovf20
   chmod 644 ${OUTFILE}-ovf20.ova
 
+  # Export the RAW disk image
+  dimg=`ls /root/VirtualBox\ VMs/custard/custard-builder*.vmdk`
+  vboxmanage clonemedium "$dimg" /root/custard/custard.vmdk --format VMDK --variant Fixed,ESX
+  cd /root/custard
+  zip -r ${OUTFILE}-vmdk.zip custard-flat.vmdk custard.vmdk
+  chmod 644 ${OUTFILE}-vmdk.zip
+
   # Save the .ova to stage server
   if [ -n "$SFTPHOST" ] ; then
     STAGE="${SFTPFINALDIR}/iso/custard/amd64"
