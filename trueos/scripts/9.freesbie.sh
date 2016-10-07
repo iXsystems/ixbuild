@@ -219,6 +219,9 @@ do_arm_build() {
   rc_halt "cp ${PROGDIR}/ubldr ${PDESTDIR9}/"
   rc_halt "cp ${PROGDIR}/rpi2.dtb ${PDESTDIR9}/"
 
+  # Disable TV overscan by default
+  echo "disable_overscan=1" >> ${PDESTDIR9}/config.txt
+
   # Cleanup
   rc_halt "umount -f ${PDESTDIR9}"
   rc_halt "mdconfig -d -u ${MD}"
