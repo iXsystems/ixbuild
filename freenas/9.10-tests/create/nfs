@@ -28,6 +28,9 @@ nfs_tests()
   echo_test_title "Starting NFS service"
   rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
+  
+  # Give NFS time to start
+  sleep 30
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating NFS mountpoint"
