@@ -190,16 +190,33 @@ do_arm_build() {
 
   extract_dist "${ARMDIST}" "${PDESTDIR9}"
 
-  # Loop through and add pkgs
+  # Prep for pkg install
   rc_halt "mkdir ${PDESTDIR9}/pkgs"
   rc_halt "mount_nullfs ${PROGDIR}/pkgs ${PDESTDIR9}/pkgs"
+  rc_halt "mount -t devfs devfs ${PDESTDIR9}/dev"
+
+  # Copy over the qemu binary
+  rc_halt "cp /usr/local/bin/qemu-arm-static ${PDESTDIR9}/qemu-arm-static"
+  rc_halt "chmod 755 ${PDESTDIR9}/qemu-arm-static"
+
+  # Boot-strap PKGNG
+  pname=`ls ${PDESTDIR9}/pkgs/pkg-[0-9]*.txz`
+  pname=$(basename ${pname})
+  pkg -c ${PDESTDIR9} add /pkgs/${pname}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  # Loop through and add pkgs
   while read line
   do
     pname=`ls ${PDESTDIR9}/pkgs/${line}-[0-9]*.txz`
     pname=$(basename ${pname})
-    pkg -c ${PDESTDIR9} add /pkgs/${pname}
+    # pkg -c ${PDESTDIR9} add /pkgs/${pname}
+    chroot ${PDESTDIR9} /qemu-arm-static pkg add /pkgs/${pname}
     if [ $? -ne 0 ] ; then exit 1; fi
   done < ${PCONFDIR}/installcd-packages
+
+  # Cleanup the qemu binary
+  rc_halt "rm ${PDESTDIR9}/qemu-arm-static"
 
   # Copy bootloader files
   rc_halt "cp ${PDESTDIR9}/boot/ubldr ${PROGDIR}/"
@@ -211,6 +228,8 @@ do_arm_build() {
 
   sync
   sleep 2
+  rc_halt "umount -f ${PDESTDIR9}/pkgs"
+  rc_halt "umount -f ${PDESTDIR9}/dev"
   rc_halt "umount -f ${PDESTDIR9}"
 
   # Copy the boot-loader files
