@@ -20,6 +20,11 @@ group_tests() {
   # Get the ID of this group
   groupid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
 
+  # Create temporary directory for output if needed
+  if [ ! -d "${FNASBDIR}" ] ; then
+  mkdir "${FNASBDIR}"
+  fi
+
   # Save the ID of this group for other jobs
   echo $groupid > ${FNASBDIR}/testgroup
 
