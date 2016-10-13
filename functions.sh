@@ -426,6 +426,29 @@ jenkins_vm()
   exit 0
 }
 
+jenkins_truenas_push_docs()
+{
+  # Now lets upload the docs
+  if [ -n "$SFTPHOST" ] ; then
+    rm -rf /tmp/handbookpush 2>/dev/null
+    mkdir -p /tmp/handbookpush
+
+    # Get the docs from the staging server
+    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook/ /tmp/handbookpush
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    cd /tmp/handbookpush
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    # Make them live!
+    rsync -a -v -z --delete -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@support.ixsystems.com:/usr/local/www/vhosts/truenas-guide
+    if [ $? -ne 0 ] ; then exit_clean; fi
+    rm -rf /tmp/handbookpush 2>/dev/null
+  fi
+
+  return 0
+}
+
 jenkins_freenas_push_docs()
 {
   # Now lets upload the docs
@@ -566,7 +589,7 @@ jenkins_truenas_docs()
     cd ${DDIR}/userguide/processed/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
-    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/tn-handbook" >/dev/null 2>/dev/null
     rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi

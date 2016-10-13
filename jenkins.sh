@@ -36,6 +36,7 @@ freenas-docs         - Create FreeNAS Handbook
 freenas-tn-docs      - Create TrueNAS Handbook
 freenas-api          - Create FreeNAS API
 freenas-push-docs    - Push FreeNAS Docs
+freenas-push-tn-docs - Push TrueNAS Docs
 freenas-push-api     - Push FreeNAS API
 freenas-push-nightly - Run 'release-push' for FreeNAS Nightly
 freenas-push         - Run 'release-push' for FreeNAS / TrueNAS
@@ -103,6 +104,7 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
        freenas-tn-docs) jenkins_truenas_docs ;;
           freenas-docs) jenkins_freenas_docs ;;
      freenas-push-docs) jenkins_freenas_push_docs ;;
+  freenas-push-tn-docs) jenkins_truenas_push_docs ;;
            freenas-api) jenkins_freenas_api ;;
       freenas-push-api) jenkins_freenas_push_api ;;
   freenas-push-nightly) jenkins_freenas_push_nightly ;;
