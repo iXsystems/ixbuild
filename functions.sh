@@ -441,7 +441,7 @@ jenkins_truenas_push_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    rsync -a -v -z --delete -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@support.ixsystems.com:/usr/local/www/vhosts/truenas-guide
+    rsync -a -O -v -z --delete -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@support.ixsystems.com:/usr/local/www/vhosts/truenas-guide
     if [ $? -ne 0 ] ; then exit_clean; fi
     rm -rf /tmp/handbookpush 2>/dev/null
   fi
