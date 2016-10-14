@@ -14,16 +14,22 @@ storage_tests()
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Storage tests" "8"
 
+# Set the default VMBACKEND
+if [ -z "$VMBACKEND" ] ; then
+  VMBACKEND="vbox"
+  echo $VMBACKEND
+fi
+
 # Determine which VM backend to use for storage
 case ${VMBACKEND} in
-     esxi)
-	   export disk1="da0"
-	   export disk2="da1"
-	   ;;
-	*)
-          export disk1="ada1"
-	  export disk2="ada2"
-          ;;
+         esxi)
+	 	export disk1="da0"
+	 	export disk2="da1"
+	 	;;
+	 vbox)
+         	export disk1="ada1"
+	 	export disk2="ada2"
+         	;;
 esac
 
   # Check getting disks
@@ -33,7 +39,7 @@ esac
 
   # Check creating a zpool
   echo_test_title "Creating volume"
-  rest_request "POST" "/storage/volume/" '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "${disk1}", "${disk2}" ] } ] }'
+  rest_request "POST" "/storage/volume/" '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "'${disk1}'", "'${disk2}'" ] } ] }'
   check_rest_response "201 CREATED" || return 1
 
   # Check creating a dataset /share
