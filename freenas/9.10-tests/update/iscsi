@@ -12,7 +12,7 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - iSCSI tests" "9"
+  set_test_group_text "2 - Update - iSCSI tests" "8"
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
