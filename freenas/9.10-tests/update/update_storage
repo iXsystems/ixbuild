@@ -9,14 +9,14 @@
 REQUIRES=""
 export REQUIRES
 
-storage_tests()
+update_storage_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "2 - Update - Storage tests" "1"
 
   # Check updating a ZVOL
   echo_test_title "Updating ZVOL"
-  rest_request "PUT" "/storage/volume/tank/zvols/testzvol/" '{ "volsize" : "20485760" }'
+  rest_request "PUT" "/storage/volume/tank/zvols/testzvol/" '{ "volsize" : "50M" }'
   check_rest_response "201" || return 1
 
   return 0
@@ -25,13 +25,13 @@ storage_tests()
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-storage_init()
+update_storage_init()
 {
   # Run all the storage tests
   case $TESTSET in
-        SMOKE) storage_tests ; return $? ;;
-     COMPLETE) storage_tests ; return $? ;;
-    BENCHMARK) storage_tests ; return $? ;;
-            *) storage_tests ; return $? ;;
+        SMOKE) update_storage_tests ; return $? ;;
+     COMPLETE) update_storage_tests ; return $? ;;
+    BENCHMARK) update_storage_tests ; return $? ;;
+            *) update_storage_tests ; return $? ;;
   esac
 }

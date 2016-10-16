@@ -1,0 +1,65 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="update_storage"
+export REQUIRES
+
+iscsi_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "2 - Update - iSCSI tests" "8"
+
+  # Now connect to iSCSI target
+  echo_test_title "Connecting to iSCSI target"
+  rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
+  sleep 10
+ 
+  # Now check if we can mount target / create / rename / copy / delete / umount
+
+  # Get the device for the connect target
+  devname=`iscsictl | grep ${ip} | tr -d '\t' | awk '{print $4}'`
+
+  echo_test_title "Creating iSCSI mountpoint"
+  rc_test "mkdir /tmp/iscsi-mnt.$$" || return 1
+
+  # echo_test_title "Mount the target volume"
+  rc_test "mount /dev/${devname} /tmp/iscsi-mnt.$$" || return 1
+
+  echo_test_title "Creating 45MB file to verify vzol size increase"
+  rc_test "dd if=/dev/zero of=/tmp/45Mfile.img bs=1M count=45" || return 1
+
+  echo_test_title "Moving 45MB file to verify vzol size increase"
+  rc_test "mv /tmp/45Mfile.img /tmp/iscsi-mnt.$$/testfile1" || return 1
+
+  echo_test_title "Deleting file"
+  rc_test "rm /tmp/iscsi-mnt.$$/testfile1" || return 1
+
+  echo_test_title "Unmounting iSCSI volume"
+  rc_test "umount /tmp/iscsi-mnt.$$" || return 1
+
+  echo_test_title "Removing iSCSI volume mountpoint"
+  rc_test "rmdir /tmp/iscsi-mnt.$$" || return 1
+
+  echo_test_title "Disconnect all targets"
+  rc_test "iscsictl -R -a" || return 1
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+iscsi_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) iscsi_tests ;;
+     COMPLETE) iscsi_tests ;;
+    BENCHMARK) ;;
+            *) iscsi_tests ;;
+  esac
+}
