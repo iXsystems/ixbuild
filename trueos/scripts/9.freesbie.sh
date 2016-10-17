@@ -240,13 +240,19 @@ do_arm_build() {
 
   # Disable TV overscan by default
   echo "disable_overscan=1" >> ${PDESTDIR9}/config.txt
+  # Set some options for 32bpp
+  echo "framebuffer_depth=32" >> ${PDESTDIR9}/config.txt
+  echo "framebuffer_ignore_alpha=1" >> ${PDESTDIR9}/config.txt
 
   # Cleanup
   rc_halt "umount -f ${PDESTDIR9}"
   rc_halt "mdconfig -d -u ${MD}"
 
-  rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso"
-  rc_halt "gzip ${PROGDIR}/iso/arm.img"
+  fDate="`date '+%Y-%m-%d'`"
+  rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img"
+  rc_halt "gzip ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img"
+  md5 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz.md5
+  sha256 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz.sha256
 
   rmdir ${PDESTDIR9}
   return 0
