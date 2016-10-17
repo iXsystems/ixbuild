@@ -28,6 +28,20 @@ fi
 # Source our resty / jsawk functions
 . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
 
+# Set the default VMBACKEND
+if [ -z "$VMBACKEND" ] ; then
+  echo "Not using a VM.  Skipping console output.."
+fi
+
+# Determine if a VM is being used for upgrades
+case ${VMBACKEND} in
+     esxi)
+           daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
+           sleep 30
+           ;;                                                             
+esac
+
+
 # Clean previous XML results
 clean_xml_results
 
