@@ -226,6 +226,10 @@ do_arm_build() {
   # Copy over the PICO overlay
   tar cvf - -C ${TRUEOSSRC}/overlays/pico-overlay/ . | tar xvpf - -C ${PDESTDIR9}
 
+  # Grab the latest ARM GO binary
+  rc_halt "fetch -o ${PDESTDIR9}/opt/pico-client http://web.trueos.org/picodist/pico-client"
+  rc_halt "chmod 755 ${PDESTDIR9}/opt/pico-client"
+
   sync
   sleep 2
   rc_halt "umount -f ${PDESTDIR9}/pkgs"
