@@ -14,7 +14,7 @@ system_tests() {
 
   # Set the timezone
   echo_test_title "Setting timezone.."
-  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "stg_timezone": "America/New_York_" }'
+  rest_request "PUT" "/system/settings/" '{ "stg_timezone": "America/New_York_" }'
   check_rest_response "200 OK"
 }
 
