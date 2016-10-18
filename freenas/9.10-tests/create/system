@@ -1,0 +1,33 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="ssh"
+export REQUIRES
+
+system_tests() {
+  set_test_group_text "1 - Create - System tests" "1"
+
+  # Set the timezone
+  echo_test_title "Setting timezone.."
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "stg_timezone": "America/New_York_" }'
+  check_rest_response "200 OK"
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+system_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) system_tests ; return $? ;;
+     COMPLETE) system_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) system_tests ; return $? ;;
+  esac
+}
