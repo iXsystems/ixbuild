@@ -19,13 +19,10 @@ ad_tests() {
      return 0
   fi
 
-  sleep 30
-  
   # Enable Active Directory Directory
   echo_test_title "Enabling Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"true" }'
-  # check_rest_response "200 OK"
-  sleep 60
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":true }'
+  check_rest_response "200 OK"
 
   # Check Active Directory
   echo_test_title "Checking Active Directory.."
