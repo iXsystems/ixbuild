@@ -51,14 +51,6 @@ ad_tests() {
     echo_fail
   fi
 
-  echo_test_title "Creating CIFS dataset"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 CREATED"
-
-  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 CREATED"
-
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
   check_rest_response "200 OK" || return 1
@@ -80,10 +72,6 @@ ad_tests() {
 
     echo_ok
   fi
-
-  echo_test_title "Changing permissions on /mnt/tank/cifs"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\QA" }'
-  check_rest_response "201 CREATED"   
 
   # Wait a moment for samba to spin up
   sleep 4
