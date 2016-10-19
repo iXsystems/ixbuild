@@ -10,7 +10,7 @@ REQUIRES="storage system smb"
 export REQUIRES
 
 ad_tests() {
-  set_test_group_text "1 - Create - Active Directory tests" "19"
+  set_test_group_text "2 - Update - Active Directory tests" "19"
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
@@ -19,22 +19,9 @@ ad_tests() {
      return 0
   fi
 
-  # Configure NTP Settings to prevent offset with Active Directory
-  echo_test_title "Updating NTP Settings for Active Directory.."
-  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
-  check_rest_response "200 OK"
-
-  # Remove Other NTP Servers
-  echo_test_title "Removing non AD NTP servers 1/2"
-  rest_request "DELETE" "/system/ntpserver/2/"
-  check_rest_response "204"
-  echo_test_title "Removing non AD NTP servers 2/2"
-  rest_request "DELETE" "/system/ntpserver/3/"
-  check_rest_response "204"
-
   # Enable Active Directory Directory
   echo_test_title "Enabling Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"true" }'
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"true" }'
   check_rest_response "200 OK"
 
   # Check Active Directory
@@ -50,14 +37,6 @@ ad_tests() {
 
     echo_fail
   fi
-
-  echo_test_title "Creating CIFS dataset"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 CREATED"
-
-  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 CREATED"
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
@@ -95,6 +74,11 @@ ad_tests() {
 
   sleep 10
 
+  # Store credentials file for mount_smb
+  # The ADUSER user must exist in AD with this password
+  echo "[TESTNAS:ADUSER]" > ~/.nsmbrc
+  echo password=12345678 >> ~/.nsmbrc
+
   echo_test_title "Mounting CIFS"
   rc_test "mount_smbfs -N -I ${ip} -W AD01 //aduser@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
 
@@ -118,7 +102,7 @@ ad_tests() {
 
   # Disable Active Directory Directory
   echo_test_title "Disabling Active Directory.."
-  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"false" }'
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
   check_rest_response "200 OK"
 
   return 0
