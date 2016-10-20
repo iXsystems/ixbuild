@@ -166,3 +166,10 @@ if [ "$?" != "0" ]; then
   echo "Installing security/sshpass"
   rc_halt "pkg install -y security/sshpass"
 fi
+
+which py-virtualenv >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing devel/py-virtualenv"
+  rc_halt "pkg install -y devel/py-virtualenv"
+fi
+
