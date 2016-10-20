@@ -21,6 +21,7 @@ if [ -n "$FREENASLEGACY" ] ; then
   break
 else
   OUTFILE="/tmp/fnas-build.out.$$"
+  touch /tmp/fnas-build.out.$$
   kldunload vboxnet >/dev/null 2>/dev/null
   kldunload vboxnetadp >/dev/null 2>/dev/null
   kldunload vboxnetflt >/dev/null 2>/dev/null
@@ -35,6 +36,7 @@ else
     sysctl net.link.tap.up_on_open=1
   fi
   echo "Starting make tests..."
+  tail -f /tmp/fnas-build.out.$$ 2>/dev/null &
   cd /freenas-10 && make tests profile=freenas-10 >${OUTFILE} 2>${OUTFILE}
   exit 0
 fi
