@@ -20,7 +20,7 @@ cd ${PROGDIR}/scripts
 if [ -n "$FREENASLEGACY" ] ; then
   break
 else
-  git clone https://www.github.com/freenas/freebsd-build.git --depth=1 /freenas-build
+  cd /freenas-build && git pull
   make checkout profile=freenas-10
   OUTFILE="/tmp/fnas-build.out.$$"
   touch /tmp/fnas-build.out.$$
