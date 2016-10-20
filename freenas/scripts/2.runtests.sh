@@ -38,7 +38,7 @@ else
     sysctl net.link.tap.up_on_open=1
   fi
   tail -f /tmp/fnas-build.out.$$ 2>/dev/null &
-  cd /freenas-10 && make tests profile=freenas-10 >${OUTFILE} 2>${OUTFILE}
+  cd /freenas-10 && make tests profile=freenas-10 BUILD_LOGLEVEL=DEBUG >${OUTFILE} 2>${OUTFILE}
   exit 0
 fi
 
