@@ -35,7 +35,6 @@ else
     kldload if_tap
     sysctl net.link.tap.up_on_open=1
   fi
-  echo "Starting make tests..."
   tail -f /tmp/fnas-build.out.$$ 2>/dev/null &
   cd /freenas-10 && make tests profile=freenas-10 >${OUTFILE} 2>${OUTFILE}
   exit 0
