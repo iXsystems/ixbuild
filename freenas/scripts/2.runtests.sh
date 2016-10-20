@@ -34,13 +34,8 @@ else
     kldload if_tap
     sysctl net.link.tap.up_on_open=1
   fi
-  # clean_xml_results "Clean previous results"
-  # start_xml_results "FreeNAS Build QA Tests"
-  # set_test_group_text "FreeNAS Build QA Tests" "2"
-  # echo_test_title "${BUILDSENV} make tests ${PROFILEARGS}" 2>/dev/null >/dev/null
-  echo "${BUILDSENV} make tests ${PROFILEARGS}"
-  ${BUILDSENV} make tests ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
-  # finish_xml_results "make"
+  echo "Starting make tests..."
+  cd /freenas-10 && make tests profile=freenas-10 >${OUTFILE} 2>${OUTFILE}
   exit 0
 fi
 
