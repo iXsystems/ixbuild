@@ -20,6 +20,16 @@ cd ${PROGDIR}/scripts
 if [ -n "$FREENASLEGACY" ] ; then
   break
 else
+  kldunload vboxnet >/dev/null 2>/dev/null
+  kldstat | grep -q "vmm"
+  if [ $? -ne 0 ] ; then
+    kldload vmm
+  fi
+  kldstat | grep -q "if_tap"
+  if [ $? -ne 0 ] ; then
+    kldload if_tap
+    sysctl net.link.tap.up_on_open=1
+  fi
   # clean_xml_results "Clean previous results"
   # start_xml_results "FreeNAS Build QA Tests"
   # set_test_group_text "FreeNAS Build QA Tests" "2"
