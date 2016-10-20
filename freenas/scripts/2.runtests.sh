@@ -14,6 +14,22 @@ PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 # Make sure we have all the required packages installed
 ${PROGDIR}/scripts/checkprogs.sh
 
+# Run the REST tests now
+cd ${PROGDIR}/scripts
+
+if [ -n "$FREENASLEGACY" ] ; then
+  break
+else
+  # clean_xml_results "Clean previous results"
+  # start_xml_results "FreeNAS Build QA Tests"
+  # set_test_group_text "FreeNAS Build QA Tests" "2"
+  # echo_test_title "${BUILDSENV} make tests ${PROFILEARGS}" 2>/dev/null >/dev/null
+  echo "${BUILDSENV} make tests ${PROFILEARGS}"
+  ${BUILDSENV} make tests ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
+  # finish_xml_results "make"
+  exit 0
+fi
+
 # Prepare to build autoinstall ISO
 if [ ! -d "${PROGDIR}/tmp" ] ; then
   mkdir ${PROGDIR}/tmp
