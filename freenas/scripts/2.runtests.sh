@@ -20,6 +20,7 @@ cd ${PROGDIR}/scripts
 if [ -n "$FREENASLEGACY" ] ; then
   break
 else
+  OUTFILE="/tmp/fnas-build.out.$$"
   kldunload vboxnet >/dev/null 2>/dev/null
   kldstat | grep -q "vmm"
   if [ $? -ne 0 ] ; then
