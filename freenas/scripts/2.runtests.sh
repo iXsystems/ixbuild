@@ -24,10 +24,6 @@ else
   make checkout profile=freenas-10
   OUTFILE="/tmp/fnas-build.out.$$"
   touch /tmp/fnas-build.out.$$
-  kldunload vboxnet >/dev/null 2>/dev/null
-  kldunload vboxnetadp >/dev/null 2>/dev/null
-  kldunload vboxnetflt >/dev/null 2>/dev/null
-  kldunload vboxdrv >/dev/null 2>/dev/null
   kldstat | grep -q "vmm"
   if [ $? -ne 0 ] ; then
     kldload vmm
