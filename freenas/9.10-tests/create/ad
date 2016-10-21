@@ -10,7 +10,7 @@ REQUIRES="storage system smb"
 export REQUIRES
 
 ad_tests() {
-  set_test_group_text "1 - Create - Active Directory tests" "20"
+  set_test_group_text "1 - Create - Active Directory tests" "21"
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
@@ -80,6 +80,10 @@ ad_tests() {
   echo_test_title "Creating CIFS mountpoint"
   rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
   sync
+
+  echo_test_title "Changing permissions on /mnt/tank/cifs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
+  check_rest_response "201 CREATED"   
 
   sleep 10
 
