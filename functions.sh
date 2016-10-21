@@ -1147,7 +1147,7 @@ jenkins_mkcustard()
   chmod 644 ${OUTFILE}-ovf20.ova
 
   # Export the RAW disk image
-  dimg=`ls /root/VirtualBox\ VMs/custard/custard-builder*.vmdk`
+  dimg=`ls /root/VirtualBox\ VMs/custard/custard*.vmdk`
   vboxmanage clonemedium "$dimg" /root/custard/custard.vmdk --format VMDK --variant Fixed,ESX
   cd /root/custard
   zip -r ${OUTFILE}-vmdk.zip custard-flat.vmdk custard.vmdk

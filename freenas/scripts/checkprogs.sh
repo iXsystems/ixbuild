@@ -41,18 +41,6 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y sysutils/xorriso"
 fi
 
-which VBoxManage >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing emulators/virtualbox-ose.."
-  rc_halt "pkg install -y emulators/virtualbox-ose"
-fi
-
-pkg info -q emulators/virtualbox-ose-kmod
-if [ "$?" != "0" ]; then
-  echo "Installing emulators/virtualbox-ose-kmod.."
-  rc_halt "pkg install -y emulators/virtualbox-ose-kmod"
-fi
-
 pkg info "devel/gmake" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing devel/gmake.."

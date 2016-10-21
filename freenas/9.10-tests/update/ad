@@ -1,22 +1,42 @@
 #!/usr/local/bin/bash
-# Author: Kris Moore
+# Author: Joe Maloney
 # License: BSD
 # Location for tests into REST API of FreeNAS 9.10
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="storage"
+REQUIRES=""
 export REQUIRES
 
-smb_tests()
-{
-  # Set the group text and number of tests
-  set_test_group_text "1 - Create - Samba tests" "17"
+ad_tests() {
+  set_test_group_text "2 - Update - Active Directory tests" "20"
 
-  echo_test_title "Creating CIFS dataset"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
-  check_rest_response "201 CREATED"
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
+     echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing AD settings"
+     return 0
+  fi
+
+  # Enable Active Directory Directory
+  echo_test_title "Enabling Active Directory.."
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":true }'
+  check_rest_response "200 OK"
+
+  # Check Active Directory
+  echo_test_title "Checking Active Directory.."
+  rest_request GET "/directoryservice/activedirectory/"
+  check_rest_response "200 OK" || return 1
+  ADSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ad_enable')
+  echo "ADSTATUS: $ADSTATUS"
+  echo $ADSTATUS | grep -q 'true'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+
+    echo_fail
+  fi
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
@@ -44,12 +64,8 @@ smb_tests()
   sleep 4
 
   echo_test_title "Changing permissions on /mnt/tank/cifs"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 CREATED"
-
-  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 CREATED"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
+  check_rest_response "201 CREATED"   
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating CIFS mountpoint"
@@ -58,8 +74,13 @@ smb_tests()
 
   sleep 10
 
+  # Store credentials file for mount_smb
+  # The ADUSER user must exist in AD with this password
+  echo "[TESTNAS:ADUSER]" > ~/.nsmbrc
+  echo password=12345678 >> ~/.nsmbrc
+
   echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "mount_smbfs -N -I ${ip} -W AD01 //aduser@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
@@ -81,18 +102,25 @@ smb_tests()
 
   echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  # Disable Active Directory Directory
+  echo_test_title "Disabling Active Directory.."
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"false" }'
+  check_rest_response "200 OK"
+
+  return 0
 }
 
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-smb_init()
+ad_init()
 {
-  # Run all the smb tests
+  # Run all the tests
   case $TESTSET in
-        SMOKE) smb_tests ;;
-     COMPLETE) smb_tests ;;
+        SMOKE) ad_tests ; return $? ;;
+     COMPLETE) ad_tests ; return $? ;;
     BENCHMARK) ;;
-            *) smb_tests ;;
+            *) ad_tests ; return $? ;;
   esac
 }

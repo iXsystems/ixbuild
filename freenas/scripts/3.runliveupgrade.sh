@@ -28,6 +28,20 @@ fi
 # Source our resty / jsawk functions
 . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
 
+# Set the default VMBACKEND
+if [ -z "$VMBACKEND" ] ; then
+  echo "Not using a VM.  Skipping console output.."
+fi
+
+# Determine if a VM is being used for upgrades
+case ${VMBACKEND} in
+     esxi)
+           daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
+           sleep 30
+           ;;                                                             
+esac
+
+
 # Clean previous XML results
 clean_xml_results
 
@@ -42,6 +56,28 @@ echo_ok
 
 if [ "$FLAVOR" = "FREENAS" ] ; then
   set_test_group_text "FreeNAS Upgrade Test" "4"
+
+  # Checking for updates
+  echo_test_title "Checking for available updates"
+  rest_request "GET" "/system/update/check/" ""
+  check_rest_response "200 OK"
+
+  # Do the update now
+  echo_test_title "Performing upgrade of system"
+  rest_request "POST" "/system/update/update/" "{}"
+  check_rest_response "200 OK"
+
+  echo_test_title "Rebooting VM"
+  rest_request "POST" "/system/reboot/" "''"
+  echo_ok
+
+  # Wait for system to reboot
+  echo_test_title "Waiting for reboot"
+  sleep 240
+  wait_for_avail
+  echo_ok
+elif [ "${VMBACKEND}" = "esxi" ] ; then
+  set_test_group_text "${BUILDTAG} Upgrade Test" "4"
 
   # Checking for updates
   echo_test_title "Checking for available updates"

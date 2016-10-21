@@ -14,6 +14,42 @@ PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
 # Make sure we have all the required packages installed
 ${PROGDIR}/scripts/checkprogs.sh
 
+# Run the REST tests now
+cd ${PROGDIR}/scripts
+
+if [ -n "$FREENASLEGACY" ] ; then
+  break
+else
+  if [ ! -d "/freenas-build" ] ; then
+    git clone https://www.github.com/freenas/freenas-build.git --depth=1 /freenas-build
+  fi
+  cd /freenas-build && git pull
+  make checkout profile=freenas-10
+  # Display output to stdout
+  OUTFILE="/tmp/fnas-build.out.$$" 
+  touch ${OUTFILE}
+  (tail -f ${OUTFILE} 2>/dev/null) &
+  TPID=$!
+  kldstat | grep -q "vmm"
+  if [ $? -ne 0 ] ; then
+    kldload vmm
+  fi
+  kldstat | grep -q "if_tap"
+  if [ $? -ne 0 ] ; then
+    kldload if_tap
+    sysctl net.link.tap.up_on_open=1
+  fi
+  cd /freenas-10 && make tests profile=freenas-10 BUILD_LOGLEVEL=DEBUG >${OUTFILE} 2>${OUTFILE}
+  if [ $? -ne 0 ] ; then
+    kill -9 $TPID 2>/dev/null
+    echo_fail "Failed running make checkout"
+    exit 1
+  fi
+  kill -9 $TPID 2>/dev/null
+  echo_ok
+  exit 0
+fi
+
 # Prepare to build autoinstall ISO
 if [ ! -d "${PROGDIR}/tmp" ] ; then
   mkdir ${PROGDIR}/tmp
