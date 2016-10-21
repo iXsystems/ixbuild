@@ -250,9 +250,9 @@ do_arm_build() {
 
   fDate="`date '+%Y-%m-%d'`"
   rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img"
-  rc_halt "gzip ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img"
-  md5 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz.md5
-  sha256 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.gz.sha256
+  rc_halt "xz ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img"
+  md5 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz.md5
+  sha256 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz.sha256
 
   rmdir ${PDESTDIR9}
   return 0
