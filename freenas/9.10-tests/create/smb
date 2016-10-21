@@ -12,7 +12,7 @@ export REQUIRES
 smb_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Samba tests" "15"
+  set_test_group_text "1 - Create - Samba tests" "16"
 
   echo_test_title "Creating CIFS dataset"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
@@ -66,6 +66,9 @@ smb_tests()
 
   echo_test_title "Moving CIFS file"
   rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
 
   echo_test_title "Deleting CIFS file 1/2"
   rc_test "rm /tmp/cifs-mnt.$$/testfile" || return 1
