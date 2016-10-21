@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 ad_tests() {
-  set_test_group_text "2 - Update - Active Directory tests" "19"
+  set_test_group_text "2 - Update - Active Directory tests" "20"
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
@@ -91,7 +91,10 @@ ad_tests() {
   echo_test_title "Copying CIFS file"
   rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
 
-  echo_test_title "Deleting CIFS file"
+  echo_test_title "Deleting CIFS file 1/2"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile1" || return 1
+
+  echo_test_title "Deleting CIFS file 2/2"
   rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
 
   echo_test_title "Unmounting CIFS"
