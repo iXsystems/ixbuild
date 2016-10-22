@@ -157,7 +157,44 @@ setup_usr_uzip() {
 
 }
 
-do_arm_build() {
+create_pico_mfsroot() {
+
+  tag="$1"
+
+  if [ -e "${PDESTDIR9}" ]; then
+    echo "Removing ${PDESTDIR9}"
+    umount -f ${PDESTDIR9}/mnt >/dev/null 2>/dev/null
+    umount -f ${PDESTDIR9}/tmp/packages >/dev/null 2>/dev/null
+    umount -f ${PDESTDIR9} >/dev/null 2>/dev/null
+  fi
+
+  rc_halt "cd ${PROGDIR}"
+
+  # Create our MFSROOT image
+  truncate -s 512M mfsroot.img
+  MD=$(mdconfig -f mfsroot.img)
+  rc_halt "newfs -U ${MD}"
+
+  # Mount it
+  rc_halt "mount /dev/${MD} ${PDESTDIR9}"
+
+  # Extract world to image
+  tar xvpf ${ARMDIST} --exclude ./boot --exclude ./usr/lib/debug --exclude ./usr/tests -C ${PDESTDIR9}
+
+  # Copy upgrade overlay
+  tar cvf - -C ${TRUEOSSRC}/overlays/pico-upgrade/ . | tar xvpf - -C ${PDESTDIR9}
+
+  # Cleanup
+  rc_halt "umount -f ${PDESTDIR9}"
+  rc_halt "mdconfig -d -u ${MD}"
+  rc_halt "gzip -9 mfsroot.img"
+
+  rc_halt "mv mfsroot.img.gz ${PROGDIR}/iso/${tag}-upgrade.img.gz"
+  sha256 -q ${PROGDIR}/iso/${tag}-upgrade.img.gz > ${PROGDIR}/iso/${tag}-upgrade.img.gz.sha256
+
+}
+
+do_rpi2_build() {
 
   if [ -e "${PDESTDIR9}" ]; then
     echo "Removing ${PDESTDIR9}"
@@ -189,6 +226,10 @@ do_arm_build() {
   rc_halt "mount /dev/${MD}s2a ${PDESTDIR9}"
 
   extract_dist "${ARMDIST}" "${PDESTDIR9}"
+
+  # Get rid of debug files
+  rc_nohalt "rm -rf ${PDESTDIR9}/usr/lib/debug"
+  rc_nohalt "rm -rf ${PDESTDIR9}/usr/tests"
 
   # Prep for pkg install
   rc_halt "mkdir ${PDESTDIR9}/pkgs"
@@ -271,7 +312,11 @@ fi
 # If building ARM, we can just make a tarball
 echo "$SYS_MAKEFLAGS" | grep -q "armv6"
 if [ $? -eq 0 ] ; then
-  do_arm_build
+  # Create a PICO mfsroot for upgrades
+  create_pico_mfsroot "rpi2"
+
+  # Create the image file
+  do_rpi2_build
   exit $?
 fi
 
