@@ -180,7 +180,14 @@ create_pico_mfsroot() {
   rc_halt "mount /dev/${MD} ${PDESTDIR9}"
 
   # Extract world to image
-  tar xvpf ${ARMDIST} --exclude ./boot --exclude ./usr/lib/debug --exclude ./usr/tests -C ${PDESTDIR9}
+  tar xvpf ${ARMDIST} --exclude ./boot \
+	  --exclude ./usr/lib/debug \
+	  --exclude ./usr/include \
+	  --exclude ./usr/share \
+	  --exclude ./usr/sbin \
+	  --exclude ./usr/bin/clang \
+	  --exclude ./usr/bin/c++ \
+	  --exclude ./usr/tests -C ${PDESTDIR9}
 
   # Copy upgrade overlay
   tar cvf - -C ${TRUEOSSRC}/overlays/pico-upgrade/ . | tar xvpf - -C ${PDESTDIR9}
