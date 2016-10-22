@@ -169,6 +169,7 @@ create_pico_mfsroot() {
   fi
 
   rc_halt "cd ${PROGDIR}"
+  rc_halt "mkdir ${PDESTDIR9}"
 
   # Create our MFSROOT image
   truncate -s 512M mfsroot.img
