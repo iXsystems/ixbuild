@@ -76,9 +76,6 @@ smb_tests()
   echo_test_title "Deleting CIFS file 2/2"
   rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
 
-  echo_test_title "Deleting CIFS file"
-  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
-
   echo_test_title "Unmounting CIFS"
   rc_test "umount /tmp/cifs-mnt.$$" || return 1
 
