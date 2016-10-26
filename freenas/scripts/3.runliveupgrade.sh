@@ -56,7 +56,7 @@ if [ -n "$FREENASLEGACY" ] ; then
   echo_ok
 else
   # Check that the server is up and ready to answer calls
-  set_test_group_text "Testing Connectivity" "1"
+  set_test_group_text "Testing Connectivity to FreeNAS 10" "1"
   echo_test_title "Testing access to REST API"
   wait_for_avail_fn10
   echo_ok
