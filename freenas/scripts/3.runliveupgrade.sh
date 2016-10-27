@@ -55,22 +55,13 @@ if [ -n "$FREENASLEGACY" ] ; then
   wait_for_avail
   echo_ok
 else
-  # Check that the server is up and ready to answer calls
-  set_test_group_text "Testing Connectivity to FreeNAS 10" "1"
-  echo_test_title "Testing access to REST API"
-  wait_for_avail_fn10
-  echo_ok
-
   # Checking for updates / Do the update / Reboot
-  echo_test_title "Checking for available updates"
+  echo_test_title "Running Update Task"
   rest_request "POST" "/update/updatenow/" '[true]'
   check_rest_response "200 OK"
 
-  # Wait for system to reboot
-  echo_test_title "Waiting for reboot"
-  sleep 240
-  wait_for_avail_fn10
-  echo_ok
+  sleep 360
+  echo "Updates have been installed"
   finish_xml_results
   exit 0
 fi
