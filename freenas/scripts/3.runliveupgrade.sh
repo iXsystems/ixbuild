@@ -59,7 +59,7 @@ else
   # Checking for updates / Do the update / Reboot
   echo_test_title "Running Update Task"
   rest_request "POST" "/update/updatenow/" '[true]'
-  check_rest_response "200 OK"
+  check_rest_response "201 OK"
 
   sleep 360
   echo "Updates have been installed"
