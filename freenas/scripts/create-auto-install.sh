@@ -85,9 +85,9 @@ if [ -n "$FREENASLEGACY" ] ; then
   sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
   if [ $? -ne 0 ] ; then exit 1; fi
 else
-  sed -i '' "s|zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
+  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
   if [ $? -ne 0 ] ; then exit 1; fi
-  sed -i '' "s|zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
+  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
   if [ $? -ne 0 ] ; then exit 1; fi
 fi
 
