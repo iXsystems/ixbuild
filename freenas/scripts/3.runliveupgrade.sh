@@ -25,9 +25,6 @@ else
   FLAVOR="FREENAS"
 fi
 
-# Source our resty / jsawk functions
-. ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
-
 # Set the default VMBACKEND
 if [ -z "$VMBACKEND" ] ; then
   echo "Not using a VM.  Skipping console output.."
@@ -49,12 +46,16 @@ clean_xml_results
 start_xml_results "Live Testing"
 
 if [ -n "$FREENASLEGACY" ] ; then
+  # Source our resty / jsawk functions
+  . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
   # Check that the server is up and ready to answer calls
   set_test_group_text "Testing Connectivity" "1"
   echo_test_title "Testing access to REST API"
   wait_for_avail
   echo_ok
 else
+  # Source our resty / jsawk functions
+  . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v2.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
   # Checking for updates / Do the update / Reboot
   echo_test_title "Running Update Task"
   rest_request "POST" "/update/updatenow/" '[true]'
