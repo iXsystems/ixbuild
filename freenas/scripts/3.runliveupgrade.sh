@@ -64,21 +64,13 @@ else
   # Source our resty / jsawk functions
   . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v2.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
 
-  # Clean previous XML results
-  clean_xml_results
-
-  # Start the XML reporting
-  start_xml_results "Live Testing"
-
   # Checking for updates / Do the update / Reboot
-  echo_test_title "Running Update Task"
+  echo "Updating FreeNAS..."
   rest_request "POST" "/update/updatenow/" '[true]'
-  check_rest_response "201"
 
   sleep 360
   echo "Updates have been installed"
 
-  finish_xml_results
   exit 0
 fi
 
