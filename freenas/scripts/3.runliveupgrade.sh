@@ -78,10 +78,6 @@ else
   sleep 360
   echo "Updates have been installed"
 
-  # Check hardware info
-  echo_test_title "Getting hardware info"
-  rest_request "GET" "/system/info/hardware/"
-  check_rest_response "200 OK"
   finish_xml_results
   exit 0
 fi
