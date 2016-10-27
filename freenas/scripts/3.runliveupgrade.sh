@@ -48,6 +48,13 @@ start_xml_results "Live Testing"
 if [ -n "$FREENASLEGACY" ] ; then
   # Source our resty / jsawk functions
   . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
+
+  # Clean previous XML results
+  clean_xml_results
+
+  # Start the XML reporting
+  start_xml_results "Live Testing"
+
   # Check that the server is up and ready to answer calls
   set_test_group_text "Testing Connectivity" "1"
   echo_test_title "Testing access to REST API"
@@ -56,6 +63,13 @@ if [ -n "$FREENASLEGACY" ] ; then
 else
   # Source our resty / jsawk functions
   . ${PROGDIR}/../utils/resty -W "http://${LIVEHOST}:80/api/v2.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${LIVEUSER}:${LIVEPASS}
+
+  # Clean previous XML results
+  clean_xml_results
+
+  # Start the XML reporting
+  start_xml_results "Live Testing"
+
   # Checking for updates / Do the update / Reboot
   echo_test_title "Running Update Task"
   rest_request "POST" "/update/updatenow/" '[true]'
@@ -65,6 +79,7 @@ else
   echo "Updates have been installed"
 
   # Check hardware info
+  echo_test_title "Getting hardware info"
   rest_request "GET" "/system/info/hardware/"
   check_rest_response "200 OK"
   finish_xml_results
