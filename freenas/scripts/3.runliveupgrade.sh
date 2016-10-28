@@ -68,7 +68,7 @@ else
   echo "Updating FreeNAS..."
   rest_request "POST" "/update/updatenow/" '[true]'
 
-  sleep 360
+  sleep 720
   echo "Updates have been installed"
 
   exit 0
