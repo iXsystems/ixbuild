@@ -102,6 +102,7 @@ if [ $? -ne 0 ] ; then exit 1; fi
 # Copy over custom rc.local if it exists
 if [ -e "/atf/rc.local" ] ; then
 cp /atf/rc.local uzipdir/atf/
+fi
 
 # Set the IP address in rc.local
 sed -i '' "s|%%IP%%|${FNASTESTIP}|g" uzipdir/atf/rc.local
