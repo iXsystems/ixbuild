@@ -275,8 +275,10 @@ do_rpi2_build() {
   # Copy over the PICO overlay
   tar cvf - -C ${TRUEOSSRC}/overlays/pico-overlay/ . | tar xvpf - -C ${PDESTDIR9}
 
-  # Grab the latest ARM GO binary
-  rc_halt "fetch -o ${PDESTDIR9}/opt/pico-client http://web.trueos.org/picodist/pico-client"
+  # Grab the latest RPI2 binary
+  rc_halt "fetch -o ${PDESTDIR9}/opt/pico-client http://web.trueos.org/picodist/pico-client-rpi2"
+  rc_halt "fetch -o ${PDESTDIR9}/opt/pico-client.version http://web.trueos.org/picodist/pico-client-rpi2.version"
+  PICOVER=`cat ${PDESTDIR9}/opt/pico-client.version`
   rc_halt "chmod 755 ${PDESTDIR9}/opt/pico-client"
 
   sync
@@ -302,10 +304,19 @@ do_rpi2_build() {
   rc_halt "mdconfig -d -u ${MD}"
 
   fDate="`date '+%Y-%m-%d'`"
-  rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img"
-  rc_halt "xz ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img"
-  md5 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz.md5
-  sha256 -q ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz > ${PROGDIR}/iso/TrueOS-pico-rpi2-${fDate}.img.xz.sha256
+  fName="TrueOS-pico-rpi2-${fDate}.img"
+  rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso/${fName}"
+  rc_halt "xz ${PROGDIR}/iso/${fName}"
+  md5 -q ${PROGDIR}/iso/${fName}.xz > ${PROGDIR}/iso/${fName}.xz.md5
+  sha256 -q ${PROGDIR}/iso/${fName}.xz > ${PROGDIR}/iso/${fName}.xz.sha256
+  SHA=`cat ${PROGDIR}/iso/${fName}.xz.sha256`
+  SHAMFS=`cat ${PROGDIR}/iso/rpi2-upgrade.img.gz.sha256`
+
+  # Create the INDEX file
+  cat >${PROGDIR}/iso/INDEX <<EOF
+${fName}.xz:::${PICOVER}:::${SHA}
+rpi2-upgrade.img.gz:::${SHAMFS}
+EOF
 
   rmdir ${PDESTDIR9}
   return 0
