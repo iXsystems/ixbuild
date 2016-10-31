@@ -12,7 +12,7 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Storage tests" "8"
+  set_test_group_text "1 - Create - Storage tests" "44"
 
 # Set the default VMBACKEND
 if [ -z "$VMBACKEND" ] ; then
@@ -42,26 +42,206 @@ esac
   rest_request "POST" "/storage/volume/" '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "'${disk1}'", "'${disk2}'" ] } ] }'
   check_rest_response "201 CREATED" || return 1
 
-  # Check creating a dataset /share
-  echo_test_title "Creating dataset tank/share"
+  # Check creating a dataset 01/20 /share
+  echo_test_title "Creating dataset 01/20 tank/share"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "share" }'
   check_rest_response "201 CREATED" || return 1
 
-  # Check creating a dataset /jails
-  echo_test_title "Creating dataset tank/jails"
+  # Check creating a dataset 02/20 /jails
+  echo_test_title "Creating dataset 02/20 tank/jails"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
   check_rest_response "201 CREATED" || return 1
 
-  # Set the permissions of the dataset
-  echo_test_title "Changing permissions on /mnt/tank"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  # Check creating a dataset 03/20
+  echo_test_title "Creating dataset 03/20 tank/dataset03"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset03" }'
   check_rest_response "201 CREATED" || return 1
 
-  # Set the permissions of the dataset
+  # Check creating a dataset 04/20
+  echo_test_title "Creating dataset 04/20 tank/dataset04"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset04" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 05/20
+  echo_test_title "Creating dataset 05/20 tank/dataset05"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset05" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 06/20
+  echo_test_title "Creating dataset 06/20 tank/dataset06"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset06" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 07/20
+  echo_test_title "Creating dataset 07/20 tank/dataset07"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset07" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 08/20
+  echo_test_title "Creating dataset 08/20 tank/dataset08"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset08" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 09/20
+  echo_test_title "Creating dataset 09/20 tank/dataset09"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset09" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 10/20
+  echo_test_title "Creating dataset 10/20 tank/dataset10"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset10" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 11/20
+  echo_test_title "Creating dataset 11/20 tank/dataset11"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset11" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 12/20
+  echo_test_title "Creating dataset 12/20 tank/dataset12"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset12" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 13/20
+  echo_test_title "Creating dataset 13/20 tank/dataset13"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset13" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 14/20
+  echo_test_title "Creating dataset 14/20 tank/dataset14"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset14" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 15/20
+  echo_test_title "Creating dataset 15/20 tank/dataset15"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset15" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 16/20
+  echo_test_title "Creating dataset 16/20 tank/dataset16"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset16" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 17/20
+  echo_test_title "Creating dataset 17/20 tank/dataset17"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset17" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 18/20
+  echo_test_title "Creating dataset 18/20 tank/dataset18"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset18" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 19/20
+  echo_test_title "Creating dataset 19/20 tank/dataset19"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset19" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Check creating a dataset 20/20
+  echo_test_title "Creating dataset 20/20 tank/dataset20"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset20" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 01/20
   echo_test_title "Changing permissions on /mnt/tank/share"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 CREATED" || return 1
-  
+
+  # Set the permissions of the dataset 02/20
+  echo_test_title "Changing permissions on /mnt/tank/jails"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/jails", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 03/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset03"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset03", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 04/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset04"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset04", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 05/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset05"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/jails", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 06/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset06"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset06", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 07/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset07"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset07", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 08/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset08"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset08", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 09/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset09"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset09", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 10/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset10"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset11", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 11/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset11"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset11", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 12/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset12"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset12", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 13/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset13"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset13", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 14/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset14"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset14", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 15/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset15"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset15", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 16/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset16"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset16", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 17/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset17"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset17", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 18/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset18"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset18", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 19/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset19"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset19", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
+  # Set the permissions of the dataset 20/20
+  echo_test_title "Changing permissions on /mnt/tank/dataset20"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset20", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED" || return 1
+
   # Check creating a ZFS snapshot
   echo_test_title "Creating a ZFS snapshot tank@test"
   rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
