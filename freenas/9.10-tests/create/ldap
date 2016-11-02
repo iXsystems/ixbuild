@@ -69,7 +69,7 @@ ldap_tests() {
   sync
 
   echo_test_title "Changing permissions on /mnt/tank/cifs"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "LDAP01\\QA", "mp_recursive": true }'
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "qa", "mp_recursive": true }'
   check_rest_response "201 CREATED"   
 
   sleep 10
@@ -80,7 +80,7 @@ ldap_tests() {
   echo password=12345678 >> ~/.nsmbrc
 
   echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} -W AD01 //ldapuser@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "mount_smbfs -N -I ${ip} -W LDAP01 //ldapuser@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
