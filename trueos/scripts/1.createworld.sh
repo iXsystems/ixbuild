@@ -132,7 +132,7 @@ create_base_pkg_files()
   fi
 
   rc_halt "tar cvJf ${PROGDIR}/fbsd-pkg/fbsd-distrib.txz -C ${PROGDIR}/fbsd-distrib ."
-  rc_halt "openssl dgst -sha1 -sign /etc/ssl/pcbsd-pkgng.key -out ${PROGDIR}/fbsd-distrib.txz.sha1 ${PROGDIR}/fbsd-distrib.txz"
+  rc_halt "openssl dgst -sha1 -sign /etc/ssl/pcbsd-pkgng.key -out ${PROGDIR}/fbsd-pkg/fbsd-distrib.txz.sha1 ${PROGDIR}/fbsd-pkg/fbsd-distrib.txz"
   rm -rf ${PROGDIR}/fbsd-distrib
 
   WORLDSRC="$OWORLDSRC"
