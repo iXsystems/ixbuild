@@ -21,7 +21,7 @@ ldap_tests() {
 
   # Enable LDAP
   echo_test_title "Enabling LDAP.."
-  rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_hostname": "'${LDAPHOSTNAME2}'", ldap_bindpw": "'${LDAPBINDPASSWORD2}'", "ldap_binddn": "'${LDAPBINDDN2}'", "ldap_enable": true }'
+  rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN2}'","ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME2}'", ldap_bindpw": "'${LDAPBINDPASSWORD2}'", "ldap_binddn": "'${LDAPBINDDN2}'", "ldap_has_samba_schema": true, "ldap_enable": true }'
   check_rest_response "200 OK"
 
   # Check LDAP
@@ -105,7 +105,7 @@ ldap_tests() {
 
   # Disable LDAP
   echo_test_title "Disabling LDAP.."
-  rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_hostname": "'${LDAPHOSTNAME2}'", ldap_bindpw": "'${LDAPBINDPASSWORD2}'", "ldap_binddn": "'${LDAPBINDDN2}'", "ldap_enable": false }'
+  rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN2}'","ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME2}'", ldap_bindpw": "'${LDAPBINDPASSWORD2}'", "ldap_binddn": "'${LDAPBINDDN2}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   check_rest_response "200 OK"
 
   return 0
