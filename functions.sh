@@ -361,12 +361,18 @@ jenkins_publish_pkg()
   scale="pcbsd@pcbsd-master.scaleengine.net"
   target="/usr/home/pcbsd/mirror/pkg"
 
+  if [ -n "$1" -a "$1" = "edge" ] ; then
+    RTARGET="${TARGETREL}-edge"
+  else
+    RTARGET="${TARGETREL}"
+  fi
+
   # Make sure remote target exists
-  echo "ssh ${scale} mkdir -p ${target}/${TARGETREL}"
-  ssh ${scale} "mkdir -p ${target}/${TARGETREL}" >/dev/null 2>/dev/null
+  echo "ssh ${scale} mkdir -p ${target}/${RTARGET}"
+  ssh ${scale} "mkdir -p ${target}/${RTARGET}" >/dev/null 2>/dev/null
 
   # Copy packages
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/${TARGETREL}/ ${scale}:${target}/${TARGETREL}/
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/${TARGETREL}/ ${scale}:${target}/${RTARGET}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
 }
@@ -378,10 +384,16 @@ jenkins_publish_iso()
     exit 1
   fi
 
+  if [ -n "$1" -a "$1" = "edge" ] ; then
+    RTARGET="${TARGETREL}-edge"
+  else
+    RTARGET="${TARGETREL}"
+  fi
+
   # Set the targets
   scale="pcbsd@pcbsd-master.scaleengine.net"
   target="/usr/home/pcbsd/mirror/iso"
-  ssh ${scale} "mkdir -p ${target}/${TARGETREL}/${ARCH}" >/dev/null 2>/dev/null
+  ssh ${scale} "mkdir -p ${target}/${RTARGET}/${ARCH}" >/dev/null 2>/dev/null
 
   # We sign the ISO's with gpg
   cd ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/
@@ -394,7 +406,7 @@ jenkins_publish_iso()
   done
 
   # Copy the ISOs
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${TARGETREL}/${ARCH}/
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${RTARGET}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
