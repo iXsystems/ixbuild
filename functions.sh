@@ -386,7 +386,7 @@ jenkins_publish_iso()
   # We sign the ISO's with gpg
   cd ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
-  for i in `ls *.iso *.img`
+  for i in `ls *.iso *.img *.xz`
   do
     echo "Signing: $i"
     rm ${i}.sig >/dev/null 2>/dev/null
