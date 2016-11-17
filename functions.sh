@@ -559,9 +559,15 @@ jenkins_freenas_push_nightly()
   DELTAS="1"
   export DELTAS
 
-  # Push the release to download.freenas.org
-  echo "make release-push ${BUILDOPTS}"
-  make release-push ${BUILDOPTS}
+  if [ -z "$JENKINSINTUPDATE" -o "$JENKINSINTUPDATE" = "false" ] ; then
+    PROFILEARGS="${PROFILEARGS}"
+  else
+    PROFILEARGS="${PROFILEARGS} INTERNAL_UPDATE=yes"
+  fi
+
+  # Push the release
+  echo "make release-push ${BUILDOPTS} ${PROFILEARGS}"
+  make release-push ${BUILDOPTS} ${PROFILEARGS}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   return 0
