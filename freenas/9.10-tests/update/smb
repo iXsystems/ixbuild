@@ -23,9 +23,6 @@ smb_tests()
     rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
     check_rest_response "200 OK"
 
-    echo_ok
-  fi
-
   # Wait a moment for samba to spin up
   sleep 4
 
