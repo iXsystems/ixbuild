@@ -362,7 +362,7 @@ jenkins_publish_pkg()
   target="/usr/home/pcbsd/mirror/pkg"
 
   if [ -n "$1" -a "$1" = "edge" ] ; then
-    RTARGET="${TARGETREL}-edge"
+    RTARGET="${TARGETREL}/edge"
   else
     RTARGET="${TARGETREL}"
   fi
@@ -385,7 +385,7 @@ jenkins_publish_iso()
   fi
 
   if [ -n "$1" -a "$1" = "edge" ] ; then
-    RTARGET="${TARGETREL}-edge"
+    RTARGET="${TARGETREL}/edge"
   else
     RTARGET="${TARGETREL}"
   fi
