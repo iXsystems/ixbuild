@@ -6,16 +6,34 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="ssh"
+REQUIRES=""
 export REQUIRES
 
 system_tests() {
-  set_test_group_text "1 - Create - System tests" "1"
+  set_test_group_text "1 - Create - System tests" "4"
 
   # Set the timezone
   echo_test_title "Setting timezone.."
   rest_request "PUT" "/system/settings/" '{ "stg_timezone": "America/New_York" }'
   check_rest_response "200 OK"
+
+ if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
+     echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+     exit 0
+  fi
+ # Configure NTP Settings to prevent offset with Active Directory
+  echo_test_title "Updating NTP Settings for Active Directory.."
+  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
+  check_rest_response "200 OK"
+
+  # Remove Other NTP Servers
+  echo_test_title "Removing non AD NTP servers 1/2"
+  rest_request "DELETE" "/system/ntpserver/2/"
+  check_rest_response "204"
+  echo_test_title "Removing non AD NTP servers 2/2"
+  rest_request "DELETE" "/system/ntpserver/3/"
+  check_rest_response "204"
+
 }
 
 # Init function, this is called after module is sourced
