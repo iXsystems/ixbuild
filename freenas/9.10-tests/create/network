@@ -12,7 +12,7 @@ export REQUIRES
 network_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "0 - Prerequisite - Networking Configuration" "5"
+  set_test_group_text "1 - Create - Network tests" "5"
 
   if [ -z "$FNASTESTIP" ] ; then
      echo "Missing the FNASTESTIP settings, test skipped.."

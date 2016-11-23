@@ -12,11 +12,63 @@ export REQUIRES
 smb_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - Samba tests" "1"
+  set_test_group_text "2 - Update - Samba tests" "18"
 
   echo_test_title "Updating CIFS service"
   rest_request "PUT" "/services/cifs/" '{ "cifs_srv_hostlookup": "false" }'
   check_rest_response "200"
+
+    # Now start the service
+    echo_test_title "Starting CIFS service"
+    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
+    check_rest_response "200 OK"
+
+  # Wait a moment for samba to spin up
+  sleep 4
+
+  echo_test_title "Changing permissions on /mnt/tank/cifs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 CREATED"
+
+  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "201 CREATED"
+
+  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  echo_test_title "Creating CIFS mountpoint"
+  rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
+  sync
+
+  sleep 10
+
+  echo_test_title "Mounting CIFS"
+  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Creating CIFS file"
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Moving CIFS file"
+  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file 1/2"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file 2/2"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting CIFS"
+  rc_test "umount /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS mountpoint"
+  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+    # Now stop the service
+    echo_test_title "Stopping CIFS service"
+    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
+    check_rest_response "200 OK"
 
 }
 

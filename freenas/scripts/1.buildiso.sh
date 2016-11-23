@@ -104,6 +104,19 @@ if [ -n "$BUILDSENV" ] ; then
   BUILDSENV="env $BUILDSENV"
 fi
 
+if [ -d "${FNASBDIR}" ] ; then
+  rc_halt "cd ${FNASBDIR}"
+  OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
+  if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
+     # Branch mismatch, re-clone
+     echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
+     cd ${PROGDIR}
+     rm -rf ${FNASBDIR}
+     chflags -R noschg ${FNASBDIR}
+     rm -rf ${FNASBDIR}
+  fi
+fi
+
 # Make sure we have our freenas sources
 if [ -d "${FNASBDIR}" ]; then
   rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"

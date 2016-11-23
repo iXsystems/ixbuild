@@ -12,7 +12,7 @@ export REQUIRES
 smb_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Samba tests" "17"
+  set_test_group_text "1 - Create - Samba tests" "18"
 
   echo_test_title "Creating CIFS dataset"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
@@ -81,6 +81,11 @@ smb_tests()
 
   echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+    # Now stop the service
+    echo_test_title "Stopping CIFS service"
+    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
+    check_rest_response "200 OK"
 }
 
 # Init function, this is called after module is sourced

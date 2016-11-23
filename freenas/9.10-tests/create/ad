@@ -6,7 +6,7 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="storage system smb"
+REQUIRES="storage smb"
 export REQUIRES
 
 ad_tests() {
@@ -18,19 +18,6 @@ ad_tests() {
      add_xml_result "skipped" "Skipped due to missing AD settings"
      return 0
   fi
-
-  # Configure NTP Settings to prevent offset with Active Directory
-  echo_test_title "Updating NTP Settings for Active Directory.."
-  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
-  check_rest_response "200 OK"
-
-  # Remove Other NTP Servers
-  echo_test_title "Removing non AD NTP servers 1/2"
-  rest_request "DELETE" "/system/ntpserver/2/"
-  check_rest_response "204"
-  echo_test_title "Removing non AD NTP servers 2/2"
-  rest_request "DELETE" "/system/ntpserver/3/"
-  check_rest_response "204"
 
   # Enable Active Directory Directory
   echo_test_title "Enabling Active Directory.."
