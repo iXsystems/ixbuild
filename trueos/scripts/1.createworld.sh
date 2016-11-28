@@ -206,17 +206,16 @@ if [ $? -ne 0 ] ; then
    exit 1 
 fi
 
-# If building ARM, we can just make a tarball
-echo "$SYS_MAKEFLAGS" | grep -q "armv6"
-if [ $? -eq 0 ] ; then
-  # arm
-  create_tarball
-else
-  # amd64
-  create_dist_files
-  if [ -n "$PKGBASE" ] ; then
-    create_base_pkg_files
-  fi
-fi
+case $BUILDTYPE in
+   rpi2) create_tarball
+	 ;;
+ minnowboard) create_tarball ;;
+ *) # amd64
+    create_dist_files
+    if [ -n "$PKGBASE" ] ; then
+      create_base_pkg_files
+    fi
+    ;;
+esac
 
 exit 0

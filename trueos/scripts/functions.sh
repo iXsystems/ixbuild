@@ -55,10 +55,14 @@ PCONFDIR="${TRUEOSSRC}/build-files/conf/desktop" ; export PCONFDIR
 if [ "$SYSBUILD" = "trueos" ] ; then
   PCONFDIR="${TRUEOSSRC}/build-files/conf/server" ; export PCONFDIR
 fi
+
 # Use the PICO config files
-if [ "$PACKAGE_ARCH" = "armv6" ] ; then
-  PCONFDIR="${TRUEOSSRC}/build-files/conf/pico" ; export PCONFDIR
-fi
+case $BUILDTYPE in
+	rpi2|minnowboard) 
+		PCONFDIR="${TRUEOSSRC}/build-files/conf/pico"
+		export PCONFDIR ;;
+	*) ;;
+esac
 
 # Where do we place the log files
 PLOGFILES="${PROGDIR}/log" ; export PLOGFILES
@@ -300,14 +304,24 @@ update_poud_world()
   # Nuke the built-in manifests from poudriere, since they don't match ours
   rm /usr/local/share/poudriere/MANIFESTS/* 2>/dev/null
 
-  if [ "$PACKAGE_ARCH" = "armv6" ] ; then
-    echo "Creating new ARM jail: $PJAILNAME - $JAILVER"
-    poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.armv6 -m tar=${DISTDIR}/fbsd-dist.txz
-    if [ $? -ne 0 ] ; then
-      exit_err "Failed creating poudriere ARM jail"
-    fi
-    return 0
-  fi
+  case $BUILDTYPE in
+	  rpi2) echo "Creating new RPI2 jail: $PJAILNAME - $JAILVER"
+                poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.armv6 -m tar=${DISTDIR}/fbsd-dist.txz
+                if [ $? -ne 0 ] ; then
+                  exit_err "Failed creating poudriere RPI2 jail"
+                fi
+                return 0
+	        ;;
+	  minnowboard)
+	        echo "Creating new MinnowBoard jail: $PJAILNAME - $JAILVER"
+                poudriere jail -c -j $PJAILNAME -v $JAILVER -m tar=${DISTDIR}/fbsd-dist.txz
+                if [ $? -ne 0 ] ; then
+                  exit_err "Failed creating poudriere MinnowBoard jail"
+                fi
+                return 0
+                ;;
+	  *) ;;
+  esac
 
   echo "Creating new jail: $PJAILNAME - $JAILVER"
   poudriere jail -c -j $PJAILNAME -v $JAILVER -m url=file://${DISTDIR}
