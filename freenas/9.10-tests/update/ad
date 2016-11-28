@@ -34,7 +34,6 @@ ad_tests() {
   if [ $? -eq 0 ] ; then
     echo_ok
   else
-
     echo_fail
   fi
 
@@ -107,6 +106,31 @@ ad_tests() {
   echo_test_title "Disabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"false" }'
   check_rest_response "200 OK"
+
+  # Check Active Directory
+  echo_test_title "Verify Active Directory is disabled.."
+  rest_request GET "/directoryservice/activedirectory/"
+  check_rest_response "200 OK" || return 1
+  ADSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ad_enable')
+  echo "ADSTATUS: $ADSTATUS"
+  echo $ADSTATUS | grep -q 'false'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
+
+  echo_test_title "Verify CIFS service is disabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_rest_response "200 OK" || return 1
+  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_enable')
+  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo $CIFSSTATUS | grep -q 'false'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
   return 0
 }
