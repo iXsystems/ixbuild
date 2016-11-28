@@ -64,7 +64,11 @@ ad_tests() {
 
   echo_test_title "Changing permissions on /mnt/tank/cifs"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
-  check_rest_response "201 CREATED"   
+  check_rest_response "201 CREATED" 
+
+  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "201 CREATED"
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating CIFS mountpoint"
@@ -101,6 +105,10 @@ ad_tests() {
 
   echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS share on /mnt/tank/cifs"
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "204"
 
   # Disable Active Directory Directory
   echo_test_title "Disabling Active Directory.."
