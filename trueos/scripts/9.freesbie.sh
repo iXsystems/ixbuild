@@ -328,17 +328,18 @@ then
   exit 1
 fi
 
-# If building ARM, we can just make a tarball
-echo "$SYS_MAKEFLAGS" | grep -q "armv6"
-if [ $? -eq 0 ] ; then
-  # Create a PICO mfsroot for upgrades
-  create_pico_mfsroot "rpi2"
+case $BUILDTYPE in
+ 
+  rpi2) # Create a PICO mfsroot for upgrades
+        create_pico_mfsroot "rpi2"
 
-  # Create the image file
-  do_rpi2_build
-  exit $?
-fi
-
+        # Create the image file
+        do_rpi2_build
+        exit $?
+        ;;
+   minnowboard) ;;
+   *) ;;
+esac
 # Copy over a fresh set of package files for DVD
 cp_iso_pkg_files
 
