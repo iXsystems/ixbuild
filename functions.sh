@@ -1008,7 +1008,15 @@ jenkins_freenas_run_tests()
 
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
+  echo "Output from console:"
+  echo "-----------------------------------------"
+  cat /tmp/console.log
   echo ""
+  sleep 10
+  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+  echo ""
+  echo "Output from REST API calls:"
+  echo "-----------------------------------------"
   echo "Running test group create 1/3"
   touch $VM-tests-create.log 2>/dev/null
   tail -f /tmp/$VM-tests-create.log 2>/dev/null &
@@ -1030,12 +1038,6 @@ jenkins_freenas_run_tests()
   ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
   kill -9 $tpid
   echo ""
-  echo "Output from console:"
-  echo "-----------------------------------------"
-  cat /tmp/console.log
-  echo ""
-  sleep 10
-  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
 
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
