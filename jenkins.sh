@@ -86,6 +86,8 @@ unset ADUSERNAME
 unset ADPASSWORD
 unset LDAPBINDDN
 unset LDAPBINDPASSWORD
+unset LDAPBINDDN2
+unset LDAPBINDPASSWORD2
 
 case $TYPE in
     world|trueos-world) jenkins_world ;;
