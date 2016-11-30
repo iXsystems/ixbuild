@@ -1020,14 +1020,14 @@ jenkins_freenas_run_tests()
   touch $VM-tests-update.log 2>/dev/null
   tail -f /tmp/$VM-tests-update.log 2>/dev/null &
   tpid=$!
-  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log | daemon -p /tmp/$VM-tests-update.pid
+  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
   kill -9 $tpid
   echo ""
   echo "Running test group delete 3/3"
   touch $VM-tests-delete.log 2>/dev/null
   tail -f /tmp/$VM-tests-delete.log 2>/dev/null &
   tpid=$!
-  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log | daemon -p /tmp/$VM-tests-delete.pid tail -f /tmp/$VM-tests-delete.log 2>/dev/null &
+  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
   kill -9 $tpid
   echo ""
   echo "Output from console:"
