@@ -328,8 +328,7 @@ then
   exit 1
 fi
 
-case $BUILDTYPE in
- 
+case ${PICOFLAVOR} in
   rpi2) # Create a PICO mfsroot for upgrades
         create_pico_mfsroot "rpi2"
 

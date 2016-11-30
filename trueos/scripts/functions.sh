@@ -57,10 +57,9 @@ if [ "$SYSBUILD" = "trueos" ] ; then
 fi
 
 # Use the PICO config files
-case $BUILDTYPE in
-	minnowboard|rpi2|rpi3) 
-		PCONFDIR="${TRUEOSSRC}/build-files/conf/pico"
-		export PCONFDIR ;;
+case ${BUILDTYPE} in
+	PICO) PCONFDIR="${TRUEOSSRC}/build-files/conf/pico"
+              export PCONFDIR ;;
 	*) ;;
 esac
 
@@ -304,7 +303,7 @@ update_poud_world()
   # Nuke the built-in manifests from poudriere, since they don't match ours
   rm /usr/local/share/poudriere/MANIFESTS/* 2>/dev/null
 
-  case $BUILDTYPE in
+  case ${PICOFLAVOR} in
 	  minnowboard)
 	        echo "Creating new MinnowBoard jail: $PJAILNAME - $JAILVER"
                 poudriere jail -c -j $PJAILNAME -v $JAILVER -m tar=${DISTDIR}/fbsd-dist.txz
@@ -327,7 +326,6 @@ update_poud_world()
                 fi
                 return 0
 	        ;;
-	  *) ;;
 	  *) ;;
   esac
 

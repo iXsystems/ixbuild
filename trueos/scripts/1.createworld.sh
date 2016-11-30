@@ -206,16 +206,14 @@ if [ $? -ne 0 ] ; then
    exit 1 
 fi
 
-case $BUILDTYPE in
-  minnowboard|rpi2|rpi3) 
-    create_tarball
-    ;;
- *) # amd64
-    create_dist_files
-    if [ -n "$PKGBASE" ] ; then
-      create_base_pkg_files
-    fi
-    ;;
+case ${BUILDTYPE} in
+  PICO) create_tarball ; exit 0 ;;
+     *) # amd64
+        create_dist_files
+        if [ -n "$PKGBASE" ] ; then
+          create_base_pkg_files
+        fi
+        ;;
 esac
 
 exit 0
