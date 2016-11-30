@@ -81,6 +81,14 @@ fi
 . functions.sh
 ######################################################
 
+# Disable AD temporarily until issues are resolved
+unset ADUSERNAME
+unset ADPASSWORD
+unset LDAPBINDDN
+unset LDAPBINDPASSWORD
+unset LDAPBINDDN2
+unset LDAPBINDPASSWORD2
+
 case $TYPE in
     world|trueos-world) jenkins_world ;;
         pkg|trueos-pkg) jenkins_pkg "release" ;;
