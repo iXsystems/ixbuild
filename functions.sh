@@ -1010,23 +1010,21 @@ jenkins_freenas_run_tests()
   if [ $? -ne 0 ] ; then exit_clean ; fi
   echo ""
   echo "Running test group create 1/3"
-  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log | daemon -p /tmp/$VM-tests-create.pid tail -f /tmp/$VM-tests-create.log 2>/dev/null &
+  pkill -F /tmp/$VM-tests-create.pid >/dev/null 2>/dev/null
   echo ""
   echo "Running test group update 2/3" 
-  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log | daemon -p /tmp/$VM-tests-update.pid tail -f /tmp/$VM-tests-update.log 2>/dev/null &
+  pkill -F /tmp/$VM-tests-update.pid >/dev/null 2>/dev/null
   echo ""
   echo "Running test group delete 3/3"
-  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
+  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log | daemon -p /tmp/$VM-tests-delete.pid tail -f /tmp/$VM-tests-delete.log 2>/dev/null &
+  pkill -F /tmp/$VM-tests-delete.pid >/dev/null 2>/dev/null
   echo ""
   echo "Output from console:"
   echo "-----------------------------------------"
   cat /tmp/console.log
   echo ""
-  echo "Output from REST API calls:"
-  echo "-----------------------------------------"
-  cat /tmp/$VM-tests-create.log
-  cat /tmp/$VM-tests-update.log
-  cat /tmp/$VM-tests-delete.log
   sleep 10
   pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
 
