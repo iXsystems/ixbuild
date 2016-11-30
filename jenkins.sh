@@ -84,6 +84,8 @@ fi
 # Disable AD temporarily until issues are resolved
 unset ADUSERNAME
 unset ADPASSWORD
+unset LDAPBINDDN
+unset LDAPBINDPASSWORD
 
 case $TYPE in
     world|trueos-world) jenkins_world ;;
