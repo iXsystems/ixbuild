@@ -206,10 +206,14 @@ if [ $? -ne 0 ] ; then
    exit 1 
 fi
 
+if [ -z "$BUILDTYPE" ] ; then
+   BUILDTYPE="amd64"
+fi
+
+echo "Packaging as: $BUILDTYPE"
 case ${BUILDTYPE} in
   PICO) create_tarball ; exit 0 ;;
-     *) # amd64
-        create_dist_files
+     *) create_dist_files
         if [ -n "$PKGBASE" ] ; then
           create_base_pkg_files
         fi
