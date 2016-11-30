@@ -1038,6 +1038,7 @@ jenkins_freenas_run_tests()
   ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
   kill -9 $tpid
   echo ""
+  sleep 10
 
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
