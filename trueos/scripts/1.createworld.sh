@@ -207,9 +207,9 @@ if [ $? -ne 0 ] ; then
 fi
 
 case $BUILDTYPE in
-   rpi2) create_tarball
-	 ;;
- minnowboard) create_tarball ;;
+  minnowboard|rpi2|rpi3) 
+    create_tarball
+    ;;
  *) # amd64
     create_dist_files
     if [ -n "$PKGBASE" ] ; then

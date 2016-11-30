@@ -58,7 +58,7 @@ fi
 
 # Use the PICO config files
 case $BUILDTYPE in
-	rpi2|minnowboard) 
+	minnowboard|rpi2|rpi3) 
 		PCONFDIR="${TRUEOSSRC}/build-files/conf/pico"
 		export PCONFDIR ;;
 	*) ;;
@@ -305,13 +305,6 @@ update_poud_world()
   rm /usr/local/share/poudriere/MANIFESTS/* 2>/dev/null
 
   case $BUILDTYPE in
-	  rpi2) echo "Creating new RPI2 jail: $PJAILNAME - $JAILVER"
-                poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.armv6 -m tar=${DISTDIR}/fbsd-dist.txz
-                if [ $? -ne 0 ] ; then
-                  exit_err "Failed creating poudriere RPI2 jail"
-                fi
-                return 0
-	        ;;
 	  minnowboard)
 	        echo "Creating new MinnowBoard jail: $PJAILNAME - $JAILVER"
                 poudriere jail -c -j $PJAILNAME -v $JAILVER -m tar=${DISTDIR}/fbsd-dist.txz
@@ -320,6 +313,21 @@ update_poud_world()
                 fi
                 return 0
                 ;;
+	  rpi2) echo "Creating new RPI2 jail: $PJAILNAME - $JAILVER"
+                poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.armv6 -m tar=${DISTDIR}/fbsd-dist.txz
+                if [ $? -ne 0 ] ; then
+                  exit_err "Failed creating poudriere RPI2 jail"
+                fi
+                return 0
+	        ;;
+	  rpi3) echo "Creating new RPI3 jail: $PJAILNAME - $JAILVER"
+                poudriere jail -c -j $PJAILNAME -v $JAILVER -a arm.arm64 -m tar=${DISTDIR}/fbsd-dist.txz
+                if [ $? -ne 0 ] ; then
+                  exit_err "Failed creating poudriere RPI3 jail"
+                fi
+                return 0
+	        ;;
+	  *) ;;
 	  *) ;;
   esac
 

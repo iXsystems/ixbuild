@@ -338,6 +338,7 @@ case $BUILDTYPE in
         exit $?
         ;;
    minnowboard) ;;
+   rpi3) ;;
    *) ;;
 esac
 # Copy over a fresh set of package files for DVD
