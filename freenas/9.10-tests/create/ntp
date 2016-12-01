@@ -1,0 +1,47 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+ntp_tests() {
+  set_test_group_text "1 - Create - NTP tests" "3"
+
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
+     echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+     return 0
+  fi
+
+  # Configure NTP Settings to prevent offset with Active Directory
+  echo_test_title "Updating NTP Settings for Active Directory.."
+  rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
+  check_rest_response "200 OK"
+
+  # Remove Other NTP Servers
+  echo_test_title "Removing non AD NTP servers 1/2"
+  rest_request "DELETE" "/system/ntpserver/2/"
+  check_rest_response "204"
+  echo_test_title "Removing non AD NTP servers 2/2"
+  rest_request "DELETE" "/system/ntpserver/3/"
+  check_rest_response "204"
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+ntp_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) ntp_tests ; return $? ;;
+     COMPLETE) ntp_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) ntp_tests ; return $? ;;
+  esac
+}
