@@ -121,6 +121,11 @@ ldap_tests() {
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN2}'", "ldap_binddn": "'${LDAPBINDDN2}'", "ldap_bindpw": "'${LDAPBINDPASSWORD2}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME2}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   check_rest_response "200 OK"
 
+  # Now stop the SMB service
+  echo_test_title "Stopping CIFS service"
+  rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
+
   # Check LDAP
   echo_test_title "Verify LDAP is disabled.."
   rest_request GET "/directoryservice/ldap/"
