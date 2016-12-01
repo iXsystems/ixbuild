@@ -68,7 +68,7 @@ ad_tests() {
   fi
 
   # Wait a moment for samba to spin up
-  sleep 360
+  sleep 4
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating CIFS mountpoint"
