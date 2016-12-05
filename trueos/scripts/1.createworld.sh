@@ -212,7 +212,7 @@ fi
 
 echo "Packaging as: $BUILDTYPE"
 case ${BUILDTYPE} in
-  PICO) create_tarball ; exit 0 ;;
+  PICO) create_tarball && exit $? ;;
      *) create_dist_files
         if [ -n "$PKGBASE" ] ; then
           create_base_pkg_files
