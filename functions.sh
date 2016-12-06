@@ -62,7 +62,7 @@ create_workdir()
   if [ $? -eq 0 ] ; then
     TBUILDDIR="${MASTERWRKDIR}/freenas"
   else
-    echo "$BUILDTAG" | grep -q "trueos"
+    echo "$BUILDTAG" | grep -q -e "trueos" -e "pico"
     if [ $? -eq 0 ] ; then
       TBUILDDIR="${MASTERWRKDIR}/trueos"
     else
