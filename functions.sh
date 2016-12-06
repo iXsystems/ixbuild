@@ -540,6 +540,7 @@ jenkins_freenas_push()
 
   if [ -n "$RELENG_PASSWORD" ] ; then
     # Set the correct variable release-push expects
+    echo "Setting IX_KEY_PASSWORD from RELENG_PASSWORD"
     IX_KEY_PASSWORD="${RELENG_PASSWORD}"
     export IX_KEY_PASSWORD
   fi
