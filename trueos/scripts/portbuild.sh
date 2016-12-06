@@ -195,6 +195,14 @@ if [ "$target" = "all" ] ; then
     POUDFLAGS="-c"
   fi
 
+  # Selectively nuke any packages?
+  if [ -n "$DELPOUDRIEREPKGS" -a -d "${PPKGDIR}/All" ] ; then
+    cd ${PPKGDIR}/All
+    echo "Removing packages: ${DELPOUDRIEREPKGS}"
+    rm ${DELPOUDRIEREPKGS}
+    cd ${PROGDIR}/scripts
+  fi
+
   # Create the poud config
   mk_poud_config
 
@@ -224,6 +232,14 @@ elif [ "$target" = "iso" ] ; then
   POUDFLAGS=""
   if [ "$WIPEPOUDRIERE" = "true" ] ; then
     POUDFLAGS="-c"
+  fi
+
+  # Selectively nuke any packages?
+  if [ -n "$DELPOUDRIEREPKGS" -a -d "${PPKGDIR}/All" ] ; then
+    cd ${PPKGDIR}/All
+    echo "Removing packages: ${DELPOUDRIEREPKGS}"
+    rm ${DELPOUDRIEREPKGS}
+    cd ${PROGDIR}/scripts
   fi
 
   # Create the poud config
