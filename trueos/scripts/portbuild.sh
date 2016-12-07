@@ -196,10 +196,13 @@ if [ "$target" = "all" ] ; then
   fi
 
   # Selectively nuke any packages?
-  if [ -n "$DELPOUDRIEREPKGS" -a -d "${PPKGDIR}/All" ] ; then
-    cd ${PPKGDIR}/All
+  if [ -n "$DELPOUDRIEREPKGS" ] ; then
     echo "Removing packages: ${DELPOUDRIEREPKGS}"
-    rm ${DELPOUDRIEREPKGS}
+    echo "Changing to ${PPKGDIR}/All"
+    cd ${PPKGDIR}/All
+    if [ $? -eq 0 ] ; then
+      rm ${DELPOUDRIEREPKGS}
+    fi
     cd ${PROGDIR}/scripts
   fi
 
@@ -235,10 +238,13 @@ elif [ "$target" = "iso" ] ; then
   fi
 
   # Selectively nuke any packages?
-  if [ -n "$DELPOUDRIEREPKGS" -a -d "${PPKGDIR}/All" ] ; then
-    cd ${PPKGDIR}/All
+  if [ -n "$DELPOUDRIEREPKGS" ] ; then
     echo "Removing packages: ${DELPOUDRIEREPKGS}"
-    rm ${DELPOUDRIEREPKGS}
+    echo "Changing to ${PPKGDIR}/All"
+    cd ${PPKGDIR}/All
+    if [ $? -eq 0 ] ; then
+      rm ${DELPOUDRIEREPKGS}
+    fi
     cd ${PROGDIR}/scripts
   fi
 
