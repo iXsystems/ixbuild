@@ -377,6 +377,26 @@ jenkins_publish_pkg()
 
 }
 
+jenkins_promote_pkg()
+{
+  # Set target locations
+  scale="pcbsd@pcbsd-master.scaleengine.net"
+  target="/usr/home/pcbsd/mirror/pkg/master"
+
+  # Copy over the amd64-base packages from UNSTABLE -> STABLE
+  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64-base ${target}/amd64-base"
+  echo "Running on remote: $rcmd"
+  ssh ${scale} "$rcmd"
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  # Copy over the amd64 packages from UNSTABLE -> STABLE
+  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64 ${target}/amd64"
+  echo "Running on remote: $rcmd"
+  ssh ${scale} "$rcmd"
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+}
+
 jenkins_publish_iso()
 {
   if [ ! -d "${SFTPFINALDIR}/iso/${TARGETREL}" ] ; then

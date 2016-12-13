@@ -52,6 +52,7 @@ publish-iso     - Upload ISO files to ScaleEngine
 publish-iso-edge- Upload ISO files to ScaleEngine (Bleeding Edge)
 publish-pkg     - Upload PKG files to ScaleEngine
 publish-pkg-edge- Upload PKG files to ScaleEngine (Bleeding Edge)
+promote-pkg	- Promote packages from UNSTABLE -> STABLE
 trueos-docs     - Create TrueOS handbook
 push-trueos-docs- Upload TrueOS handbook
 lumina-docs	- Create lumina handbook
@@ -98,6 +99,7 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
       publish-iso-edge) jenkins_publish_iso "edge" ;;
            publish-pkg) jenkins_publish_pkg ;;
       publish-pkg-edge) jenkins_publish_pkg "edge" ;;
+           promote-pkg) jenkins_promote_pkg ;;
           vm|trueos-vm) jenkins_vm ;;
                   jail) jenkins_jail ;;
                freenas) jenkins_freenas ;;
