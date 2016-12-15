@@ -121,10 +121,10 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg install -y textproc/jq"
 fi
 
-pkg info "devel/llvm38" >/dev/null 2>/dev/null
+pkg info "devel/llvm39" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/llvm38"
-  rc_halt "pkg install -y devel/llvm38"
+  echo "Installing devel/llvm39"
+  rc_halt "pkg install -y devel/llvm39"
 fi
 
 pkg info "sysutils/u-boot-rpi2" >/dev/null 2>/dev/null
