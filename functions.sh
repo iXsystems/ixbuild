@@ -384,13 +384,13 @@ jenkins_promote_pkg()
   target="/usr/home/pcbsd/mirror/pkg/master"
 
   # Copy over the amd64-base packages from UNSTABLE -> STABLE
-  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64-base ${target}/amd64-base"
+  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64-base/ ${target}/amd64-base/"
   echo "Running on remote: $rcmd"
   ssh ${scale} "$rcmd"
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Copy over the amd64 packages from UNSTABLE -> STABLE
-  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64 ${target}/amd64"
+  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64/ ${target}/amd64/"
   echo "Running on remote: $rcmd"
   ssh ${scale} "$rcmd"
   if [ $? -ne 0 ] ; then exit_clean; fi
