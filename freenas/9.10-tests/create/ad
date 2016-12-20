@@ -141,7 +141,7 @@ ad_tests() {
   check_rest_response "200 OK" || return 1
   CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
   echo "CIFSSTATUS: $CIFSSTATUS"
-  echo $CIFSSTATUS | grep -q 'RUNNING'
+  echo $CIFSSTATUS | grep -q 'STOPPED'
   if [ $? -eq 0 ] ; then
     echo_ok
   else
