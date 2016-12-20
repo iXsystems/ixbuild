@@ -79,11 +79,17 @@ if [ $? -ne 0 ] ; then exit 1; fi
 
 # Now setup ATF to run at first boot after install
 
+if [ -n "$FREENASLEGACY" ] ; then
   sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
   if [ $? -ne 0 ] ; then exit 1; fi
   sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
   if [ $? -ne 0 ] ; then exit 1; fi
-
+else
+  sed -i '' "s|# zpool scrub freenas-boot|mkdir -p /tmp/data/conf/base/etc/local/serviced.d; cp -R /atf/etc/ /tmp/data/conf/base/etc/;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
+  if [ $? -ne 0 ] ; then exit 1; fi
+  sed -i '' "s|# zpool scrub freenas-boot|mkdir -p /tmp/data/conf/base/etc/local/serviced.d; cp -R /atf/etc/ /tmp/data/conf/base/etc/;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
+  if [ $? -ne 0 ] ; then exit 1; fi
+fi
 
 # Set serial mode
 sed -i '' 's|# And now move the backup files back in place|chroot \${_mnt} sed -i "" "s;kernel/kernel;kernel/kernel -D -h;g" /boot/grub/grub.cfg|g' uzipdir/conf/default/etc/install.sh
