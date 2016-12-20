@@ -104,6 +104,11 @@ if [ -e "/atf/rc.local" ] ; then
 cp /atf/rc.local uzipdir/atf/
 fi
 
+# Copy over custom etc overlay if it exists
+if [ -d "/atf/etc" ] ; then
+cp -R /atf/etc uzipdir/atf/
+fi
+
 # Set the IP address in rc.local
 sed -i '' "s|%%IP%%|${FNASTESTIP}|g" uzipdir/atf/rc.local
 
