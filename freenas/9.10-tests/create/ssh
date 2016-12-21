@@ -12,7 +12,7 @@ export REQUIRES
 # Run a series of tests on the ssh settings
 # We also leave it enabled, so we have access to VM if something hangs / goes wrong
 ssh_tests() {
-  set_test_group_text "1 - Create - SSH Tests" "2"
+  set_test_group_text "1 - Create - SSH Tests" "3"
 
   echo_test_title "Configuring SSH settings"
   rest_request "PUT" "/services/ssh/" '{ "ssh_rootlogin": true }'
@@ -21,6 +21,18 @@ ssh_tests() {
   echo_test_title "Enabling SSH Service"
   rest_request "PUT" "/services/services/ssh/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
+
+  echo_test_title "Checking to see if SSH service is enabled"
+  rest_request "GET" "/services/services/ssh/"
+  check_rest_response "200 OK" || return 1
+  SSHSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "SSHSTATUS: $SSHSTATUS"
+  echo $SSHSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
 }
 

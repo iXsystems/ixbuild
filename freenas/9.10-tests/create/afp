@@ -12,7 +12,7 @@ export REQUIRES
 afp_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - AFP tests" "5"
+  set_test_group_text "1 - Create - AFP tests" "6"
 
   echo_test_title "Creating AFP dataset"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
@@ -30,6 +30,18 @@ afp_tests()
   echo_test_title "Starting AFP service"
   rest_request "PUT" "/services/services/afp/" '{ "srv_enable": true }'
   check_rest_response "200 OK" || return 1
+
+  echo_test_title "Checking to see if AFP service is enabled"
+  rest_request "GET" "/services/services/afp/"
+  check_rest_response "200 OK" || return 1
+  AFPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "AFPSTATUS: $AFPSTATUS"
+  echo $AFPSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
   echo_test_title "Changing permissions on /mnt/tank/afp"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'

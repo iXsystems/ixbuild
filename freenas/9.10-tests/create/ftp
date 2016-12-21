@@ -10,7 +10,7 @@ REQUIRES="storage user"
 export REQUIRES
 
 ftp_tests() {
-  set_test_group_text "1 - Create - FTP tests" "3"
+  set_test_group_text "1 - Create - FTP tests" "4"
 
   echo_test_title "Configuring ftp service"
   rest_request "PUT" "/services/ftp/" '{ "ftp_clients": 10, "ftp_rootlogin": true }'
@@ -19,6 +19,18 @@ ftp_tests() {
   echo_test_title "Starting ftp service"
   rest_request "PUT" "/services/services/ftp/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
+
+  echo_test_title "Checking to see if FTP service is enabled"
+  rest_request "GET" "/services/services/ftp/"
+  check_rest_response "200 OK" || return 1  
+  FTPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "FTPSTATUS: $FTPSTATUS"
+  echo $FTPSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
   echo_test_title "Fetching file via FTP"
   rc_test "ftp -o /tmp/ftpfile ftp://testuser:test@${ip}/.cshrc"

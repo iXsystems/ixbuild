@@ -12,11 +12,23 @@ export REQUIRES
 afp_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - AFP tests" "1"
+  set_test_group_text "2 - Update - AFP tests" "2"
 
   echo_test_title "Updating AFP service"
   rest_request "PUT" "/services/afp/" '{ "afp_srv_connections_limit": "100"  }'
   check_rest_response "200" || return 1
+
+  echo_test_title "Checking to see if AFP service is enabled"
+  rest_request "GET" "/services/services/afp/"
+  check_rest_response "200 OK" || return 1
+  AFPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "AFPSTATUS: $AFPSTATUS"
+  echo $AFPSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
 }
 
