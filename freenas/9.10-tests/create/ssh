@@ -22,6 +22,18 @@ ssh_tests() {
   rest_request "PUT" "/services/services/ssh/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
 
+  echo_test_title "Checking to see if SSH service is enabled"
+  rest_request "GET" "/services/services/ssh/"
+  check_rest_response "200 OK" || return 1
+  SSHSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "SSHSTATUS: $SSHSTATUS"
+  echo $SSHSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
+
 }
 
 # Init function, this is called after module is sourced
