@@ -12,12 +12,24 @@ export REQUIRES
 nfs_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - NFS tests" "1"
+  set_test_group_text "2 - Update - NFS tests" "2"
 
   # Update NFS server
   echo_test_title "Updating the NFS service"
   rest_request "PUT" "/services/nfs/" '{ "nfs_srv_servers": "50" }'
   check_rest_response "200"
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_rest_response "200 OK" || return 1  
+  NFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "NFSSTATUS: $NFSSTATUS"
+  echo $NFSSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
 }
 

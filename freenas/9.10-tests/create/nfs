@@ -12,7 +12,7 @@ export REQUIRES
 nfs_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - NFS tests" "11"
+  set_test_group_text "1 - Create - NFS tests" "12"
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
@@ -31,6 +31,18 @@ nfs_tests()
   
   # Give NFS time to start
   sleep 30
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_rest_response "200 OK" || return 1
+  NFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "NFSSTATUS: $NFSSTATUS"
+  echo $NFSSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating NFS mountpoint"
