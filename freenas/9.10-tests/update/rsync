@@ -10,11 +10,23 @@ REQUIRES=""
 export REQUIRES
 
 rsync_tests() {
-  set_test_group_text "2 - Update - RSYNC tests" "1"
+  set_test_group_text "2 - Update - RSYNC tests" "2"
 
   echo_test_title "Updating rsync resource"
   rest_request "PUT" "/services/rsyncmod/1/" '{ "rsyncmod_user": "testuser" }'
   check_rest_response "200"
+
+  echo_test_title "Checking to see if rsync service is enabled"
+  rest_request "GET" "/services/services/rsync/"
+  check_rest_response "200 OK" || return 1  
+  RSYNCSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "RSYNCSTATUS: $RSYNCSTATUS"
+  echo $RSYNCSTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
 }
 
