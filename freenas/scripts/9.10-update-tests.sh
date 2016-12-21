@@ -15,6 +15,7 @@ JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 TDIR="${PROGDIR}/9.10-tests/update"
 
 # Source our Testing functions
+. ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
 
 #################################################################
