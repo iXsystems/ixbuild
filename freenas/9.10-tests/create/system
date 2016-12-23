@@ -10,7 +10,11 @@ REQUIRES=""
 export REQUIRES
 
 system_tests() {
-  set_test_group_text "1 - Create - System tests" "1"
+  set_test_group_text "1 - Create - System tests" "2"
+
+  # Get system version
+  rest_request "GET" "/system/version/"
+  check_rest_response "200 OK"
 
   # Set the timezone
   echo_test_title "Setting timezone.."
