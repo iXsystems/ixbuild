@@ -13,6 +13,7 @@ system_tests() {
   set_test_group_text "1 - Create - System tests" "2"
 
   # Get system version
+  echo_test_title "Checking system version.."
   rest_request "GET" "/system/version/"
   check_rest_response "200 OK"
 
