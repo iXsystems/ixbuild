@@ -22,15 +22,15 @@ jail_tests() {
 
   echo_test_title "Configuring jails"
   rest_request "PUT" "/jails/configuration/" '{ "jc_ipv4_network_start": "'"${JAILIP}"'", "jc_path": "/mnt/tank/jails" }'
-  check_rest_response "201 CREATED"
+  check_rest_response "201 Created"
 
   echo_test_title "Creating jail - VNET OFF"
   rest_request "POST" "/jails/jails/" '{ "jail_host": "testjail", "jail_defaultrouter_ipv4": "'"${JAILGW}"'", "jail_ipv4": "'"${JAILIP}"'", "jail_ipv4_netmask": "'"${JAILNETMASK}"'", "jail_vnet": false }'
-  check_rest_response "201 CREATED"
+  check_rest_response "201 Created"
 
   echo_test_title "Mount tank/share into jail"
   rest_request "POST" "/jails/mountpoints/" '{ "destination": "/mnt", "jail": "testjail", "mounted": true, "readonly": false, "source": "/mnt/tank/share" }'
-  check_rest_response "201 CREATED"
+  check_rest_response "201 Created"
 
   echo_test_title "Starting jail"
   rest_request "POST" "/jails/jails/1/start/" ''

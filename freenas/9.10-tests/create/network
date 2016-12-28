@@ -36,7 +36,7 @@ network_tests()
     # Using the bridged adapter settings
     echo_test_title "Setting bridged IP on em1"
     rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
-    check_rest_response "201 CREATED"
+    check_rest_response "201 Created"
 
     # Set the global config stuff
     echo_test_title "Setting default route and DNS"
@@ -46,7 +46,7 @@ network_tests()
     # Using the NAT mode
     echo_test_title "Setting DHCP on em1"
     rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
-    check_rest_response "201 CREATED"
+    check_rest_response "201 Created"
   fi
 }
 

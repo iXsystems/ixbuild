@@ -34,7 +34,7 @@ rsync_tests() {
 
   echo_test_title "Creating rsync resource"
   rest_request "POST" "/services/rsyncmod/" '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/tank/share" }'
-  check_rest_response "201 CREATED"
+  check_rest_response "201 Created"
 
   # Test rsync
   echo_test_title "Testing rsync access"

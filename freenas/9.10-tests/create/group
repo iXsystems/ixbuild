@@ -15,7 +15,7 @@ group_tests() {
   # Create the testgroup
   echo_test_title "Creating group: testgroup"
   rest_request "POST" "/account/groups/" '{ "bsdgrp_gid": 1200,"bsdgrp_group": "testgroup" }'
-  check_rest_response "201 CREATED"
+  check_rest_response "201 Created"
 
   # Get the ID of this group
   groupid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
