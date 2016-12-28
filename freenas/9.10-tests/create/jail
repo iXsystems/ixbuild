@@ -34,15 +34,15 @@ jail_tests() {
 
   echo_test_title "Starting jail"
   rest_request "POST" "/jails/jails/1/start/" ''
-  check_rest_response "202 ACCEPTED"
+  check_rest_response "202 Accepted"
 
   echo_test_title "Restarting jail"
   rest_request "POST" "/jails/jails/1/restart/" ''
-  check_rest_response "202 ACCEPTED"
+  check_rest_response "202 Accepted"
 
   echo_test_title "Stopping jail"
   rest_request "POST" "/jails/jails/1/stop/" ''
-  check_rest_response "202 ACCEPTED"
+  check_rest_response "202 Accepted"
 }
 
 # Init function, this is called after module is sourced

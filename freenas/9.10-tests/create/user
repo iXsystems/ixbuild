@@ -28,7 +28,7 @@ user_tests() {
   # Set the user to part of the 'wheel' / 'ftp' groups
   echo_test_title "Setting user groups: wheel,ftp"
   rest_request "POST" "/account/users/${userid}/groups/" '["wheel","ftp"]'
-  check_rest_response "202 OK"
+  check_rest_response "202 Accepted"
 
   # Create temporary directory for output if needed
   if [ ! -d "${FNASBDIR}" ] ; then
