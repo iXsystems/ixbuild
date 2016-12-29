@@ -14,8 +14,8 @@ bootenv_tests() {
   set_test_group_text "3 - Delete - Boot-Environment Tests" "1"
 
   echo_test_title "Removing a boot-environment: newbe2"
-  rest_request "DELETE" "/system/bootenv/newbe2" ''
-  check_rest_response "204 NO CONTENT" || return 1
+  rest_request "DELETE" "/system/bootenv/newbe2/" ''
+  check_rest_response "204" || return 1
 
   return 0
 }
