@@ -12,7 +12,7 @@ export REQUIRES
 update_storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - Storage tests" "1"
+  set_test_group_text "2 - Update - Storage tests" "3"
 
   # Check updating a ZVOL
   echo_test_title "Updating ZVOL"
