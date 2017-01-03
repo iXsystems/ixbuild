@@ -12,7 +12,7 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Storage tests" "44"
+  set_test_group_text "1 - Create - Storage tests" "45"
 
 # Set the default VMBACKEND
 if [ -z "$VMBACKEND" ] ; then
@@ -245,6 +245,11 @@ esac
   # Check creating a ZFS snapshot
   echo_test_title "Creating a ZFS snapshot tank@test"
   rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
+  check_rest_response "201 Created" || return 1
+
+  # Create a dataset for testing snapshot
+  echo_test_title "Creating dataset for testing snapshot rollback tank/snapcheck"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "snapcheck" }'
   check_rest_response "201 Created" || return 1
 
   # Check creating a ZVOL
