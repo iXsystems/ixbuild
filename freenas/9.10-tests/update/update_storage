@@ -19,6 +19,23 @@ update_storage_tests()
   rest_request "PUT" "/storage/volume/tank/zvols/testzvol/" '{ "volsize" : "50M" }'
   check_rest_response "201" || return 1
 
+  # Check rolling back a ZFS snapshot
+  echo_test_title "Rolling back ZFS snapshot tank@test"
+  rest_request "POST" "/storage/snapshot/tank@test/rollback/" '{ "force": true }'
+  check_rest_response "202" || return 1
+
+  # Check to verify snapshot was rolled back
+  "GET" "/storage/volume/tank/datasets/"
+  check_rest_response "200 OK" || return 1
+  SNAPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
+  echo "SNAPSTATUS: $SNAPSTATUS"
+  echo $SNAPSTATUS | grep -q 'snapcheck'
+  if [ $? -eq 0 ] ; then
+    echo_fail
+  else
+    echo_ok
+  fi
+
   return 0
 }
 
