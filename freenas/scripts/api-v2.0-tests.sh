@@ -16,7 +16,8 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 echo "Using API Address: ${ip}/v2.0"
 
-cd $FNASSRC/src/middlewared/middlewared/pytest
+git clone https://www.github.com/freenas/freenas --depth=1 /freenas
+cd /freenas/src/middlewared/middlewared/pytest
 echo [Target] > target.conf
 echo uri = http://10.20.0.130 >> target.conf
 echo api = /api/v2.0/ >> target.conf
