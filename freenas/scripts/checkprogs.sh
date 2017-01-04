@@ -191,3 +191,9 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y py27-pytest-xdist"
 fi
 
+which py27-pip >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing devel/py27-pip"
+  rc_halt "pkg-static install -y py27-pip"
+fi
+
