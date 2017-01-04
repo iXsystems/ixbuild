@@ -22,7 +22,7 @@ echo "Using API Address: ${ip}/v2.0"
 git clone https://www.github.com/freenas/freenas --depth=1 /freenas
 cd /freenas/src/middlewared/middlewared/pytest
 echo [Target] > target.conf
-echo uri = http://10.20.0.130 >> target.conf
+echo uri = http://${ip} >> target.conf
 echo api = /api/v2.0/ >> target.conf
 echo username = "root" >> target.conf
 echo password = "testing" >> target.conf
