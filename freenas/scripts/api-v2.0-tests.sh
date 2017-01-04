@@ -3,6 +3,9 @@
 # License: BSD
 # Location for tests into REST API of FreeNAS 9.10
 
+# Where is the ixbuild program installed
+PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
