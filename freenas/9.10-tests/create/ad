@@ -11,7 +11,7 @@ export REQUIRES
 
 ad_tests() {
   set_test_group_text "1 - Create - Active Directory tests" "21"
-  CLASSNAME=ixbuild.resty
+  CLASSNAME=ixbuild.resty.functional.
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
