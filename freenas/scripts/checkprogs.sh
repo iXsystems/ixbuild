@@ -119,10 +119,10 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y py27-sphinxcontrib-httpdomain"
 fi
 
-pkg info -q misc/compat9x >/dev/null 2>/dev/null
+pkg info -q misc/compat9x-amd64 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing misc/compat9x.."
-  rc_halt "pkg-static install -y compat9x"
+  echo "Installing misc/compat9x-amd64.."
+  rc_halt "pkg-static install -y compat9x-amd64"
 fi
 
 which pxz >/dev/null 2>/dev/null
