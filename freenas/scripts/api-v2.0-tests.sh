@@ -11,18 +11,18 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 . ${PROGDIR}/scripts/functions-tests.sh
 
 # Installl modules
-pip install requests
+# pip install requests
 
 #################################################################
 # Run the tests now!
 #################################################################
 
-echo "Using API Address: ${ip}/v2.0"
+echo "Using API Address: http://${FNASTESTIP}/api/v2.0"
 
 git clone https://www.github.com/freenas/freenas --depth=1 /freenas
 cd /freenas/src/middlewared/middlewared/pytest
 echo [Target] > target.conf
-echo uri = http://${ip} >> target.conf
+echo uri = http://${FNASTESTIP} >> target.conf
 echo api = /api/v2.0/ >> target.conf
 echo username = "root" >> target.conf
 echo password = "testing" >> target.conf
