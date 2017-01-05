@@ -29,6 +29,6 @@ echo password = "testing" >> target.conf
 sed -i '' "s|'freenas'|'testing'|g" functional/test_0001_authentication.py
 py.test -sv functional --junitxml=$RESULTSDIR/results.xml.v2.0
 TOTALTESTS="14"
-publish_pytest_results
+publish_pytest_results "$TOTALCOUNT"
 
 exit 0
