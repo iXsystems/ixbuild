@@ -13,6 +13,7 @@ storage_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Storage tests" "45"
+  CLASSNAME=ixbuild.resty.functional.create
 
 # Set the default VMBACKEND
 if [ -z "$VMBACKEND" ] ; then

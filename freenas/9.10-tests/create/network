@@ -13,6 +13,7 @@ network_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Network tests" "5"
+  CLASSNAME=ixbuild.resty.functional.create
 
   if [ -z "$FNASTESTIP" ] ; then
      echo "Missing the FNASTESTIP settings, test skipped.."

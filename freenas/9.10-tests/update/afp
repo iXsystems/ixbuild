@@ -13,6 +13,7 @@ afp_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "2 - Update - AFP tests" "2"
+  CLASSNAME=ixbuild.resty.functional.update
 
   echo_test_title "Updating AFP service"
   rest_request "PUT" "/services/afp/" '{ "afp_srv_connections_limit": "100"  }'

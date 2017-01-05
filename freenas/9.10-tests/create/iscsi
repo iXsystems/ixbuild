@@ -13,6 +13,7 @@ iscsi_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "1 - Create - iSCSI tests" "16"
+  CLASSNAME=ixbuild.resty.functional.create
 
   # Add iSCSI initator
   echo_test_title "Add iSCSI initiator"

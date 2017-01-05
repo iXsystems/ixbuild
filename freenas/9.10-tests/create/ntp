@@ -11,6 +11,7 @@ export REQUIRES
 
 ntp_tests() {
   set_test_group_text "1 - Create - NTP tests" "3"
+  CLASSNAME=ixbuild.resty.functional.create
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
