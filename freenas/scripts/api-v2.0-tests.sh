@@ -11,7 +11,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 . ${PROGDIR}/scripts/functions-tests.sh
 
 # Installl modules
-# pip install requests
+pip install requests
 
 #################################################################
 # Run the tests now!
