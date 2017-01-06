@@ -11,6 +11,7 @@ export REQUIRES
 
 group_tests() {
   set_test_group_text "3 - Delete - Group tests" "1"
+  CLASSNAME=ixbuild.resty.functional.delete
 
   # Get the ID of testgroup
   groupid=$(cat ${FNASBDIR}/testgroup)

@@ -11,6 +11,7 @@ export REQUIRES
 
 rsync_tests() {
   set_test_group_text "1 - Create - RSYNC tests" "5"
+  CLASSNAME=ixbuild.resty.functional.create
 
   echo_test_title "Configuring rsyncd service"
   rest_request "PUT" "/services/rsyncd/" '{ "rsyncd_port": 873 }'

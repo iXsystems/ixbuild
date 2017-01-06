@@ -13,6 +13,7 @@ example_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Example test class" "2"
+  CLASSNAME=ixbuild.resty.functional.create
 
   echo_test_title "Example test"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'

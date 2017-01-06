@@ -13,6 +13,7 @@ export REQUIRES
 # We also leave it enabled, so we have access to VM if something hangs / goes wrong
 ssh_tests() {
   set_test_group_text "1 - Create - SSH Tests" "3"
+  CLASSNAME=ixbuild.resty.functional.create
 
   echo_test_title "Configuring SSH settings"
   rest_request "PUT" "/services/ssh/" '{ "ssh_rootlogin": true }'

@@ -11,6 +11,7 @@ export REQUIRES
 
 rsync_tests() {
   set_test_group_text "2 - Update - RSYNC tests" "2"
+  CLASSNAME=ixbuild.resty.functional.update
 
   echo_test_title "Updating rsync resource"
   rest_request "PUT" "/services/rsyncmod/1/" '{ "rsyncmod_user": "testuser" }'

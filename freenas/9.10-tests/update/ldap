@@ -11,6 +11,7 @@ export REQUIRES
 
 ldap_tests() {
   set_test_group_text "2 - Update - LDAP tests" "21"
+  CLASSNAME=ixbuild.resty.functional.update
 
   if [ -z "$LDAPBINDDN2" -o -z "$LDAPBINDPASSWORD2" ] ; then
      echo "Missing the LDAPBINDDN2 / LDAPBINDPASSWORD2 settings, test skipped.."

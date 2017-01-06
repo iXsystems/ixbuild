@@ -11,6 +11,7 @@ export REQUIRES
 
 ftp_tests() {
   set_test_group_text "2 - Update - FTP tests" "4"
+  CLASSNAME=ixbuild.resty.functional.update
 
   echo_test_title "Stopping ftp service"
   rest_request "PUT" "/services/services/ftp/" '{ "srv_enable": false }'
