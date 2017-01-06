@@ -18,9 +18,6 @@ ntp_tests() {
      return 0
   fi
 
-  # Skip NTP test until NTP is fixed
-  return 0
-
   # Configure NTP Settings to prevent offset with Active Directory
   echo_test_title "Updating NTP Settings for Active Directory.."
   rest_request "PUT" "/system/ntpserver/1/" '{ "id": "1", "ntp_address": "'${BRIDGEDOMAIN}'", "ntp_burst": "true", "ntp_iburst": "true", "ntp_maxpoll": "10", "ntp_minpoll": "6", "ntp_prefer": "true", "pk": "1", "force": "true" }'
