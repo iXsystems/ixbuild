@@ -717,17 +717,17 @@ jenkins_sysadm_api()
 
   DDIR=`mktemp -d /tmp/build/XXXX` 
 
-  git clone --depth=1 https://github.com/trueos/sysadm ${DDIR}
+  git clone --depth=1 https://github.com/trueos/sysadm-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
-  cd ${DDIR}/docs/api_reference
+  cd ${DDIR}/api_reference
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
   make html
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   # Now lets sync the API docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/docs/api_reference/_build/html/
+    cd ${DDIR}/api_reference/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/api" >/dev/null 2>/dev/null
@@ -748,17 +748,17 @@ jenkins_sysadm_docs()
 
   DDIR=`mktemp -d /tmp/build/XXXX` 
 
-  git clone --depth=1 https://github.com/trueos/sysadm ${DDIR}
+  git clone --depth=1 https://github.com/trueos/sysadm-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
-  cd ${DDIR}/docs/client_handbook
+  cd ${DDIR}/client_handbook
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
   make html
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   # Now lets sync the client docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/docs/client_handbook/_build/html/
+    cd ${DDIR}/client_handbook/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/client" >/dev/null 2>/dev/null
@@ -766,7 +766,7 @@ jenkins_sysadm_docs()
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
-  cd ${DDIR}/docs/server_handbook
+  cd ${DDIR}/server_handbook
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   make html
@@ -774,7 +774,7 @@ jenkins_sysadm_docs()
 
   # Now lets sync the server docs
   if [ -n "$SFTPHOST" ] ; then
-    cd ${DDIR}/docs/server_handbook/_build/html/
+    cd ${DDIR}/server_handbook/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/server" >/dev/null 2>/dev/null
