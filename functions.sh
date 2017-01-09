@@ -1044,26 +1044,34 @@ jenkins_freenas_run_tests()
   echo ""
   echo "Output from REST API calls:"
   echo "-----------------------------------------"
-  echo "Running test group create 1/3"
+  echo "Running API v1.0 test group create 1/3"
   touch /tmp/$VM-tests-create.log 2>/dev/null
   tail -f /tmp/$VM-tests-create.log 2>/dev/null &
   tpid=$!
   ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
   kill -9 $tpid
   echo ""
-  echo "Running test group update 2/3" 
+  echo "Running API v1.0 test group update 2/3" 
   touch /tmp/$VM-tests-update.log 2>/dev/null
   tail -f /tmp/$VM-tests-update.log 2>/dev/null &
   tpid=$!
   ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
   kill -9 $tpid
   echo ""
-  echo "Running test group delete 3/3"
+  echo "Running API v1.0 test group delete 3/3"
   touch /tmp/$VM-tests-delete.log 2>/dev/null
   tail -f /tmp/$VM-tests-delete.log 2>/dev/null &
   tpid=$!
   ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
   kill -9 $tpid
+  echo ""
+  sleep 10
+  echo "Running API v2.0 tests"
+  touch /tmp/$VM-tests-v2.0.log 2>/dev/null
+  tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
+  tpid=$!
+  ./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
+  kill -9 $tpid 
   echo ""
   sleep 10
 

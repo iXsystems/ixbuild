@@ -134,12 +134,6 @@ https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/create
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/update
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
 
-Tests for 10.0.X should be added to the following directories:
-
-https://github.com/iXsystems/ixbuild/tree/master/freenas/10-tests/create
-https://github.com/iXsystems/ixbuild/tree/master/freenas/10-tests/update
-https://github.com/iXsystems/ixbuild/tree/master/freenas/10-tests/delete
-
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
 

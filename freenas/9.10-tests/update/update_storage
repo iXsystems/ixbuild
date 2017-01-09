@@ -12,7 +12,8 @@ export REQUIRES
 update_storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - Storage tests" "3"
+  set_test_group_text "2 - Update - Storage tests" "2"
+  CLASSNAME=ixbuild.resty.functional.update
 
   # Check updating a ZVOL
   echo_test_title "Updating ZVOL"
@@ -25,16 +26,16 @@ update_storage_tests()
   check_rest_response "202" || return 1
 
   # Check to verify snapshot was rolled back
-  "GET" "/storage/volume/tank/datasets/"
-  check_rest_response "200 OK" || return 1
-  SNAPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
-  echo "SNAPSTATUS: $SNAPSTATUS"
-  echo $SNAPSTATUS | grep -q 'snapcheck'
-  if [ $? -eq 0 ] ; then
-    echo_fail
-  else
-    echo_ok
-  fi
+  # "GET" "/storage/volume/tank/datasets/"
+  # check_rest_response "200 OK" || return 1
+  # SNAPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
+  # echo "SNAPSTATUS: $SNAPSTATUS"
+  # echo $SNAPSTATUS | grep -q 'snapcheck'
+  # if [ $? -eq 0 ] ; then
+  #  echo_fail
+  # else
+  #   echo_ok
+  # fi
 
   return 0
 }

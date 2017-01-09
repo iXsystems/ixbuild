@@ -11,6 +11,7 @@ export REQUIRES
 
 user_tests() {
   set_test_group_text "1 - Create - User tests" "3"
+  CLASSNAME=ixbuild.resty.functional.create
 
   # Create dataset for the home directory
   echo_test_title "Creating home dataset tank/testuser"

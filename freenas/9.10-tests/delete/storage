@@ -13,6 +13,7 @@ storage_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "3 - Delete - Storage tests" "22"
+  CLASSNAME=ixbuild.resty.functional.delete
 
   # Check destroying a ZFS snapshot
   echo_test_title "Destroying ZFS snapshot tank@test"

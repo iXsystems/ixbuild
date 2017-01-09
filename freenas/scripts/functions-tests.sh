@@ -111,6 +111,27 @@ EOF
   fi
 }
 
+publish_pytest_results() {
+  # Set the total number of tests run
+  sed -i '' "s|TOTALTESTS|$1|g" ${XMLRESULTS}
+
+  # Move results to pre-defined location
+  if [ -n "$WORKSPACE" ] ; then
+    if [ ! -d "${WORKSPACE}/results" ] ; then
+      mkdir "${WORKSPACE}/results"
+      chown jenkins:jenkins "${WORKSPACE}/results"
+    fi
+    tStamp=$(date +%s)
+    echo "Saving jUnit results ${RESULTSDIR} -> ${WORKSPACE}/results/"
+    mv $RESULTSDIR/results.xml.* "${WORKSPACE}/results/"
+    chown -R jenkins:jenkins "${WORKSPACE}/results/"
+  else
+    echo "Saving jUnit results to: /tmp/test-results.xml"
+    mv ${XMLRESULTS} /tmp/test-results.xml
+  fi
+}
+
+
 # $1 = RESTY type to run 
 # $2 = RESTY URL
 # $3 = JSON to pass to RESTY

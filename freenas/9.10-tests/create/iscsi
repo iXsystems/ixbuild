@@ -13,6 +13,7 @@ iscsi_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "1 - Create - iSCSI tests" "16"
+  CLASSNAME=ixbuild.resty.functional.create
 
   # Add iSCSI initator
   echo_test_title "Add iSCSI initiator"
@@ -36,7 +37,7 @@ iscsi_tests()
   
   # Add iSCSI extent
   echo_test_title "Add iSCSI extent"
-  rest_request "POST" "/services/iscsi/extent/" '{ "iscsi_target_extent_type": "File", "iscsi_target_extent_name": "extent", "iscsi_target_extent_filesize": "50MB", "iscsi_target_extent_path": "/mnt/tank/iscsi" }'
+  rest_request "POST" "/services/iscsi/extent/" '{ "iscsi_target_extent_type": "File", "iscsi_target_extent_name": "extent", "iscsi_target_extent_filesize": "50MB", "iscsi_target_extent_rpm": "SSD", "iscsi_target_extent_path": "/mnt/tank/iscsi" }'
   check_rest_response "201 Created"
 
   # Associate iSCSI target
