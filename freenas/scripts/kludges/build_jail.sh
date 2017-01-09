@@ -7,6 +7,7 @@
 # KPM - 6-5-2015 - Pulled from poudriere so we can build ports on -CURRENT
 # Set specified version into login.conf
 update_version_env() {
+	echo "Applying kludge to set UNAME_r to $1"
         local release="$1"
         local login_env osversion
                 
