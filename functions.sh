@@ -622,11 +622,13 @@ jenkins_truenas_docs()
 
   make TAG=truenas html
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+  mv ${DDIR}/userguide/processed/_build/html ${DDIR}/html
 
   make TAG=truenas pdf
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   # Put the PDF in the same dir as html
+  mv ${DDIR}/html ${DDIR}/userguide/processed/_build/html
   cp ${DDIR}/userguide/processed/_build/latex/*.pdf ${DDIR}/userguide/processed/_build/html/
 
   # Now lets sync the docs
