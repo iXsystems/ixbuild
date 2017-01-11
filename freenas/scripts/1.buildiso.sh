@@ -245,6 +245,15 @@ if [ "$FREENASLEGACY" = "YES" ] ; then
    if [ $? -eq 0 ] ; then
      pkg delete -y grub2-efi
    fi
+else
+  # Fix an issue building with GRUB and EFI on 11
+  # Disable all the HFS crap
+  cat << EOF >/tmp/xorriso
+ARGS=\`echo \$@ | sed 's|-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label -hfs-bless-by i /System/Library/CoreServices/boot.efi||g'\`
+xorriso \$ARGS
+EOF
+  chmod 755 /tmp/xorriso
+  sed -i '' 's|grub-mkrescue |grub-mkrescue --xorriso=/tmp/xorriso |g' ${FNASSRC}/build/tools/create-iso.py
 fi
 
 # Set to use TMPFS for everything
