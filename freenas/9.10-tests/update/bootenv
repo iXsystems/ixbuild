@@ -12,7 +12,7 @@ export REQUIRES
 # Run a series of tests on the boot-environments
 bootenv_tests() {
   set_test_group_text "2 - Update - Boot-Environment Tests" "1"
-  CLASSNAME=ixbuild.resty.functional.update
+  CLASSNAME=ixbuild.resty.functional.update.bootenv
 
   echo_test_title "Cloning a new boot-environment: newbe2"
   rest_request "POST" "/system/bootenv/" '{ "name": "newbe2", "source": "newbe1" }'

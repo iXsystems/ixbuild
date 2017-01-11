@@ -11,7 +11,7 @@ export REQUIRES
 
 group_tests() {
   set_test_group_text "2 - Update - Group tests" "1"
-  CLASSNAME=ixbuild.resty.functional.update
+  CLASSNAME=ixbuild.resty.functional.update.group
 
   # Get the ID of testgroup
   groupid=$(cat ${FNASBDIR}/testgroup)

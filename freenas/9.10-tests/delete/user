@@ -11,7 +11,7 @@ export REQUIRES
 
 user_tests() {
   set_test_group_text "3 - Delete - User tests" "1"
-  CLASSNAME=ixbuild.resty.functional.delete
+  CLASSNAME=ixbuild.resty.functional.delete.user
 
   # Get the ID of testuser
   userid=$(cat ${FNASBDIR}/testuser)

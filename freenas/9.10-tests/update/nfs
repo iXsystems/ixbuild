@@ -13,7 +13,7 @@ nfs_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "2 - Update - NFS tests" "2"
-  CLASSNAME=ixbuild.resty.functional.update
+  CLASSNAME=ixbuild.resty.functional.update.nfs
 
   # Update NFS server
   echo_test_title "Updating the NFS service"

@@ -13,7 +13,7 @@ iscsi_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "2 - Update - iSCSI tests" "8"
-  CLASSNAME=ixbuild.resty.functional.update
+  CLASSNAME=ixbuild.resty.functional.update.iscsi
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"

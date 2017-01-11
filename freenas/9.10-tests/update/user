@@ -11,7 +11,7 @@ export REQUIRES
 
 user_tests() {
   set_test_group_text "2 - Update - User tests" "2"
-  CLASSNAME=ixbuild.resty.functional.update
+  CLASSNAME=ixbuild.resty.functional.update.user
 
   # Get the ID of testuser
   userid=`cat ${FNASBDIR}/testuser`

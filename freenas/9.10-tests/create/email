@@ -12,7 +12,7 @@ export REQUIRES
 # Run a series of tests on the email settings
 email_tests() {
   set_test_group_text "1 - Create - E-Mail Tests" "1"
-  CLASSNAME=ixbuild.resty.functional.create
+  CLASSNAME=ixbuild.resty.functional.create.email
 
   echo_test_title "Configuring e-mail settings"
   rest_request "PUT" "/system/email/" '{ "em_fromemail": "william.spam@ixsystems.com", "em_outgoingserver": "mail.ixsystems.com", "em_pass": "changeme", "em_port": 25, "em_security": "plain", "em_smtp": true, "em_user": "william.spam@ixsystems.com" }'

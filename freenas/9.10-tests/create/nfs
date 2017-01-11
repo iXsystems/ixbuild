@@ -13,7 +13,7 @@ nfs_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "1 - Create - NFS tests" "12"
-  CLASSNAME=ixbuild.resty.functional.create
+  CLASSNAME=ixbuild.resty.functional.create.nfs
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
