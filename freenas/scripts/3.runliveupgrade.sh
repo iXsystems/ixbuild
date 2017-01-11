@@ -57,6 +57,7 @@ if [ -n "$FREENASLEGACY" ] ; then
 
   # Check that the server is up and ready to answer calls
   set_test_group_text "Testing Connectivity" "1"
+  CLASSNAME=ixbuild.resty.functional.upgrade
   echo_test_title "Testing access to REST API"
   wait_for_avail
   echo_ok
@@ -76,6 +77,7 @@ fi
 
 if [ "$FLAVOR" = "FREENAS" ] ; then
   set_test_group_text "FreeNAS Upgrade Test" "4"
+  CLASSNAME=ixbuild.resty.functional.upgrade
 
   # Checking for updates
   echo_test_title "Checking for available updates"
@@ -98,6 +100,7 @@ if [ "$FLAVOR" = "FREENAS" ] ; then
   echo_ok
 elif [ "${VMBACKEND}" = "esxi" ] ; then
   set_test_group_text "${BUILDTAG} Upgrade Test" "4"
+  CLASSNAME=ixbuild.resty.functional.upgrade
 
   # Checking for updates
   echo_test_title "Checking for available updates"
@@ -121,6 +124,7 @@ elif [ "${VMBACKEND}" = "esxi" ] ; then
 else
   # For TrueNAS we have to do the update in two stages, one for each head
   set_test_group_text "TrueNAS Upgrade Test" "8"
+  CLASSNAME=ixbuild.resty.functional.upgrade
 
   # Checking for updates on nodeA
   echo_test_title "Checking for available updates"
