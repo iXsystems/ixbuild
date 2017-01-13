@@ -66,6 +66,8 @@ clean_artifacts()
 
 save_artifacts_on_fail()
 {
+  get_bedir
+
   # Move artifacts to pre-defined location
   if [ -n "$ARTIFACTONFAIL" ] ; then
       if [ -n "$WORKSPACE" ] ; then
@@ -83,8 +85,8 @@ save_artifacts_on_fail()
       fi
     fi
     echo "Saving artifacts to: ${WORKSPACE}/artifacts"
-    cp -R "${FNASBDIR}/_BE/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
+    cp -R "${BEDIR}/objs/logs/" "${WORKSPACE}/artifacts/logs/"
+    cp -R "${BEDIR}/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
     chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
@@ -110,8 +112,8 @@ save_artifacts_on_success()
       fi
     fi
     echo "Saving artifacts to: ${WORKSPACE}/artifacts"
-    cp -R "${FNASBDIR}/_BE/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${FNASBDIR}/_BE/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
+    cp -R "${BEDIR}/objs/logs/" "${WORKSPACE}/artifacts/logs/"
+    cp -R "${BEDIR}/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
     chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
@@ -146,3 +148,22 @@ rc_halt()
     exit_err "Error ${STATUS}: ${CMD}"
   fi
 };
+
+# Set the FreeNAS _BE directory location
+get_bedir()
+{
+  if [ "${GITFNASBRANCH}" != "master" ] ; then
+    export BEDIR="${FNASBDIR}/_BE"
+    return 0
+  fi
+
+  if [ -n "$BUILDOPTS" ] ; then
+    eval $BUILDOPTS
+  fi
+
+  if [ "$PROFILE" != "freenas10" ] ; then
+    export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
+  else
+    export BEDIR="${FNASBDIR}/_BE"
+  fi
+}

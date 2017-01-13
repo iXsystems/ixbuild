@@ -68,12 +68,14 @@ if [ -z "$BUILDINCREMENTAL" ] ; then
   BUILDINCREMENTAL="false"
 fi
 
+get_bedir
+
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
   echo "Doing fresh build!"
   cd ${FNASBDIR}
-  chflags -R 0 _BE
-  rm -rf _BE
+  chflags -R 0 ${BEDIR}
+  rm -rf ${BEDIR}
 fi
 
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
@@ -83,7 +85,7 @@ if [ "$BUILDINCREMENTAL" = "true" ] ; then
 
   # Nuke old ISO's / builds
   echo "Removing old build ISOs"
-  rm -rf _BE/release 2>/dev/null
+  rm -rf ${BEDIR}/release 2>/dev/null
 fi
 
 # Figure out the flavor for this test

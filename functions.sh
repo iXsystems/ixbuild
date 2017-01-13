@@ -894,6 +894,24 @@ jenkins_trueos_push_lumina_docs()
   return 0
 }
 
+# Set the FreeNAS _BE directory location
+get_bedir()
+{
+  if [ "${GITFNASBRANCH}" != "master" ] ; then
+    export BEDIR="${FNASBDIR}/_BE"
+    return 0
+  fi
+
+  if [ -n "$BUILDOPTS" ] ; then
+    eval $BUILDOPTS
+  fi
+
+  if [ "$PROFILE" != "freenas10" ] ; then
+    export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
+  else
+    export BEDIR="${FNASBDIR}/_BE"
+  fi
+}
 
 jenkins_freenas()
 {
@@ -901,6 +919,8 @@ jenkins_freenas()
 
   # If we have a saved build state, lets pull that before we begin
   #jenkins_pull_fn_statedir
+
+  get_bedir
 
   # Check if this is a Release Engineer build
   echo ${BUILDTAG} | grep -q "releng"
@@ -922,7 +942,7 @@ jenkins_freenas()
       if [ $? -ne 0 ] ; then exit_clean ; fi
       rm -rf os-base
     else
-      cd ${FNASBDIR}/_BE/release/
+      cd ${BEDIR}/release
       if [ $? -ne 0 ] ; then exit_clean ; fi
     fi
 
@@ -1004,21 +1024,23 @@ jenkins_freenas_tests()
 {
   create_workdir
 
+  get_bedir
+
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   if [ -n "$SFTPHOST" ] ; then
-    # Now lets sync the ISOs
-    if [ -d "${FNASBDIR}/_BE/release" ] ; then
-      rm -rf ${FNASBDIR}/_BE/release
-    fi
 
-    mkdir -p ${FNASBDIR}/_BE/release
-    cd ${FNASBDIR}/_BE/release
+    # Now lets sync the ISOs
+    if [ -d "${BEDIR}/release" ] ; then
+      rm -rf ${BEDIR}/release
+    fi
+    mkdir -p ${BEDIR}/release
+    cd ${BEDIR}/release
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${FNASBDIR}/_BE/release/
+    rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 

@@ -29,12 +29,14 @@ else
 fi
 export FNASBDIR
 
+get_bedir
+
 # Figure out the ISO name
 echo "Finding ISO file..."
 if [ -d "${FNASBDIR}/objs" ] ; then
   ISOFILE=`find ${FNASBDIR}/objs | grep '\.iso$' | head -n 1`
-elif [ -d "${FNASBDIR}/_BE/release" ] ; then
-  ISOFILE=`find ${FNASBDIR}/_BE/release | grep '\.iso$' | head -n 1`
+elif [ -d "${BEDIR}/release" ] ; then
+  ISOFILE=`find ${BEDIR}/release | grep '\.iso$' | head -n 1`
 else
   if [ -n "$1" ] ; then
     ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`
