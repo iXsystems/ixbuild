@@ -920,6 +920,9 @@ jenkins_freenas()
   # If we have a saved build state, lets pull that before we begin
   #jenkins_pull_fn_statedir
 
+  # Make sure we always checkout shallow, save us some bandwidth
+  export CHECKOUT_SHALLOW="YES"
+
   get_bedir
 
   # Check if this is a Release Engineer build
