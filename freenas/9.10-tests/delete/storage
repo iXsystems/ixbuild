@@ -20,9 +20,14 @@ storage_tests()
   rest_request "DELETE" "/storage/snapshot/tank@test/"
   check_rest_response "204" || return 1
 
-  # Check destroying a ZVOL
-  echo_test_title "Destroying ZVOL"
-  rest_request "DELETE" "/storage/volume/tank/zvols/testzvol/"
+  # Check destroying a ZVOL 1/2
+  echo_test_title "Destroying ZVOL 1/2"
+  rest_request "DELETE" "/storage/volume/tank/zvols/testzvol1/"
+  check_rest_response "204" || return 1
+
+  # Check destroying a ZVOL 2/2
+  echo_test_title "Destroying ZVOL 2/2"
+  rest_request "DELETE" "/storage/volume/tank/zvols/testzvol2/"
   check_rest_response "204" || return 1
 
   # Check destroying a dataset 01/20
