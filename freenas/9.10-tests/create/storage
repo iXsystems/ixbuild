@@ -253,9 +253,14 @@ esac
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "snapcheck" }'
   check_rest_response "201 Created" || return 1
 
-  # Check creating a ZVOL
-  echo_test_title "Creating a ZVOL"
-  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol", "volsize": "10M" }'
+  # Check creating a ZVOL 1/2
+  echo_test_title "Creating a ZVOL 1/2"
+  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol1", "volsize": "10M" }'
+  check_rest_response "201" || return 1
+
+  # Check creating a ZVOL 2/2
+  echo_test_title "Creating a ZVOL 2/2"
+  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol2", "volsize": "10M" }'
   check_rest_response "201" || return 1
 
   return 0
