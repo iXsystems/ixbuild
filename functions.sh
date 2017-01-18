@@ -1363,6 +1363,13 @@ do_build_env_setup()
   fi
 }
 
+jenkins_iocage_pkgs()
+{
+  echo "Starting iocage package build..."
+  ${PROGDIR}/iocage/run-poudriere.sh
+  exit $?
+}
+
 # Set the builds directory
 BDIR="./builds"
 export BDIR

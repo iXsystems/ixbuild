@@ -61,6 +61,9 @@ ports-tests	- Test building a repo port files
 sysadm-docs     - Build SysAdm handbook
 sysadm-api      - Build SysAdm API handbook
 
+-- iocage Commands --
+iocage_pkgs     - Build iocage package set
+
 -- PC-BSD Commands --
   world - Build FreeBSD world
    jail - Prep the jail for package build
@@ -102,6 +105,7 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
            promote-pkg) jenkins_promote_pkg ;;
           vm|trueos-vm) jenkins_vm ;;
                   jail) jenkins_jail ;;
+           iocage_pkgs) jenkins_iocage_pkgs ;;
                freenas) jenkins_freenas ;;
          freenas-tests) jenkins_freenas_tests ;;
 	 freenas-run-tests) jenkins_freenas_run_tests ;;
