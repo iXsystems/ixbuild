@@ -1378,5 +1378,6 @@ export BDIR
 case $TYPE in
   ports-tests) ;;
   mkcustard) ;;
+  iocage_pkgs) ;;
   *) do_build_env_setup ;;
 esac
