@@ -3,7 +3,7 @@
 # Change directory
 mypath=`realpath $0`
 cd `dirname $mypath`
-export mypath
+export PROGDIR="`realpath`"
 
 if [ -z "$JENKINS_DO_UPDATE" ] ; then
   # Before we begin any build, make sure we are updated from git

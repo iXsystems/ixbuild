@@ -1,6 +1,5 @@
 #!/bin/sh
 
-PROGDIR="$mypath"
 PJAILNAME="iocage"
 PPORTS="iocports"
 POUDCONFDIR="${PROGDIR}/poudriere"
