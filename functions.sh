@@ -1366,7 +1366,7 @@ do_build_env_setup()
 jenkins_iocage_pkgs()
 {
   echo "Starting iocage package build..."
-  ${PROGDIR}/iocage/run-poudriere.sh
+  ${mypath}/iocage/run-poudriere.sh
   exit $?
 }
 
