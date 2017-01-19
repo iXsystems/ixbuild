@@ -2,10 +2,12 @@
 
 PJAILNAME="iocage"
 PPORTS="iocports"
+ZROOT="/poud"
 POUDCONFDIR="${PROGDIR}/poudriere"
 PORTS_GIT_URL="https://github.com/freebsd/freebsd-ports.git"
 PORTS_GIT_BRANCH="master"
 JAILVER="11.0-RELEASE"
+PPKGDIR="${ZROOT}/data/packages/${PJAILNAME}-${PPORTS}"
 
 if [ ! -d "$POUDCONFDIR" ] ; then
   mkdir -p ${POUDCONFDIR}
@@ -57,7 +59,6 @@ fi
 
 # Figure out ZFS settings
 ZPOOL=$(mount | grep 'on / ' | cut -d '/' -f 1)
-ZROOT="/poud"
 
 cat >${POUDCONFDIR}/poudriere.conf << EOF
 ZPOOL=$ZPOOL
@@ -160,4 +161,14 @@ do_portsnap
 poudriere -e ${POUDCONFDIR} bulk ${POUDFLAGS} -j ${PJAILNAME} -p ${PPORTS} -f ${PROGDIR}/iocage/iocage-ports
 if [ $? -ne 0 ] ; then
    echo "Failed poudriere build..."
+   exit 1
 fi
+
+# Build passed, lets rsync it off this node
+if [ -z "$SFTPHOST" ] ; then return 0 ; fi
+
+# Now rsync this sucker
+echo "Copying packages to staging area... ${PPKGDIR}/ -> ${SFTPFINALDIR}/pkg/iocage"
+ssh ${SFTPUSER}@${SFTPHOST} mkdir -p ${SFTPFINALDIR}/pkg/iocage 2>/dev/null >/dev/null
+rsync -a --delete -e 'ssh' ${PPKGDIR}/ ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/iocage
+if [ $? -ne 0 ] ; then exit 1 ; fi
