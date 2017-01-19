@@ -1363,6 +1363,13 @@ do_build_env_setup()
   fi
 }
 
+jenkins_iocage_pkgs()
+{
+  echo "Starting iocage package build..."
+  iocage/run-poudriere.sh
+  exit $?
+}
+
 # Set the builds directory
 BDIR="./builds"
 export BDIR
@@ -1371,5 +1378,6 @@ export BDIR
 case $TYPE in
   ports-tests) ;;
   mkcustard) ;;
+  iocage_pkgs) ;;
   *) do_build_env_setup ;;
 esac
