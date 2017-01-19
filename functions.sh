@@ -1372,7 +1372,7 @@ jenkins_iocage_pkgs()
 
 jenkins_iocage_pkgs_push()
 {
-  if [ ! -d "${SFTPFINALDIR}/pkg/iocage" ] ; then
+  if [ ! -d "/outgoing/pkg/iocage" ] ; then
     echo "Missing packages to push!"
     exit 1
   fi
@@ -1386,7 +1386,7 @@ jenkins_iocage_pkgs_push()
   ssh ${scale} "mkdir -p ${target}" >/dev/null 2>/dev/null
 
   # Copy packages
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/iocage/ ${scale}:${target}/
+  rsync -va --delete-delay --delay-updates -e 'ssh' /outgoing/pkg/iocage/ ${scale}:${target}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
 }
