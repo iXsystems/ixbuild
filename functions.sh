@@ -1370,6 +1370,27 @@ jenkins_iocage_pkgs()
   exit $?
 }
 
+jenkins_iocage_pkgs_push()
+{
+  if [ ! -d "${SFTPFINALDIR}/pkg/iocage" ] ; then
+    echo "Missing packages to push!"
+    exit 1
+  fi
+
+  # Set target locations
+  scale="pcbsd@pcbsd-master.scaleengine.net"
+  target="/usr/home/pcbsd/mirror/pkg/iocage"
+
+  # Make sure remote target exists
+  echo "ssh ${scale} mkdir -p ${target}"
+  ssh ${scale} "mkdir -p ${target}" >/dev/null 2>/dev/null
+
+  # Copy packages
+  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/iocage/ ${scale}:${target}/
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+}
+
 # Set the builds directory
 BDIR="./builds"
 export BDIR
@@ -1378,6 +1399,6 @@ export BDIR
 case $TYPE in
   ports-tests) ;;
   mkcustard) ;;
-  iocage_pkgs) ;;
+  iocage_pkgs|iocage_pkgs_push) ;;
   *) do_build_env_setup ;;
 esac
