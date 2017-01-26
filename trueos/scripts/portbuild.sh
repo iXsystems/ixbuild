@@ -124,6 +124,7 @@ PRIORITY_BOOST="pypy openoffice* paraview webkit* llvm*"
 GIT_URL=${PORTS_GIT_URL}
 USE_COLORS=yes
 NOLINUX=yes
+RESTRICT_NETWORKING=no
 EOF
 
   if [ "$JOBS" = "yes" ] ; then
