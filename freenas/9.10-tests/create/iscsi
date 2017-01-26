@@ -17,8 +17,8 @@ iscsi_tests()
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  rc_test "iscsictl -R -a" || return 1
-  rc_test "umount -A" || return 1
+  iscsictl -R -a
+  umount -A
 
   # Add iSCSI initator
   echo_test_title "Add iSCSI initiator"
