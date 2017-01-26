@@ -12,8 +12,30 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - iSCSI tests" "8"
+  set_test_group_text "2 - Update - iSCSI tests" "11"
   CLASSNAME=ixbuild.resty.functional.update.iscsi
+
+  # Clean up any leftover items from any previous failed runs
+  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
+  rc_test "iscsictl -R -a" || return 1
+  rc_test "umount -A" || return 1
+
+  # Enable the iSCSI service
+  echo_test_title "Enable iSCSI service"
+  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "true" }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verify the iSCSI service is enabled"
+  rest_request "GET" "/services/services/iscsitarget/"
+  check_rest_response "200 OK" || return 1
+  ISCSISTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "ISCSISTATUS: $ISCSISTATUS"   
+  echo $ISCSISTATUS | grep -q 'RUNNING'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
@@ -48,6 +70,23 @@ iscsi_tests()
 
   echo_test_title "Disconnect all targets"
   rc_test "iscsictl -R -a" || return 1
+
+  # Disable the iSCSI service
+  echo_test_title "Disable iSCSI service"
+  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }' 
+  check_rest_response "200 OK"
+
+  echo_test_title "Verify the iSCSI service is disabled"
+  rest_request "GET" "/services/services/iscsitarget/"
+  check_rest_response "200 OK" || return 1
+  ISCSISTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
+  echo "ISCSISTATUS: $ISCSISTATUS"
+  echo $ISCSISTATUS | grep -q 'STOPPED'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 
 }
 
