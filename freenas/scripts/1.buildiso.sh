@@ -252,18 +252,18 @@ fi
 # Set to use TMPFS for everything
 if [ -e "build/config/templates/poudriere.conf" ] ; then
   echo "Enabling USE_TMPFS=all"
+
   sed -i '' 's|USE_TMPFS=yes|USE_TMPFS=all|g' build/config/templates/poudriere.conf
-
-  # Some tuning for our big build boxes
-  CPUS=$(sysctl -n kern.smp.cpus)
-  if [ $CPUS -gt 16 ] ; then
-    echo "Setting POUDRIERE_JOBS=16"
-    export POUDRIERE_JOBS=16
-  fi
-
   # Set the jail name to use for these builds
   export POUDRIERE_JAILNAME="`echo ${BUILDTAG} | sed 's|\.||g'`"
 
+fi
+
+# Some tuning for our big build boxes
+CPUS=$(sysctl -n kern.smp.cpus)
+if [ $CPUS -gt 10 ] ; then
+  echo "Setting POUDRIERE_JOBS=10"
+  export POUDRIERE_JOBS="10"
 fi
 
 # Display output to stdout
