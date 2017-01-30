@@ -95,11 +95,6 @@ EOF
     echo "CCACHE_DIR=/ccache" >> ${POUDCONFDIR}/poudriere.conf
   fi
 
-  # Signing script
-  if [ -n "$PKGSIGNCMD" ] ; then
-    echo "SIGNING_COMMAND=${PKGSIGNCMD}" >> ${POUDCONFDIR}/poudriere.conf
-  fi
-
   # Set any port make options
   if [ ! -d "${POUDCONFDIR}/poudriere.d" ] ; then
     mkdir -p ${POUDCONFDIR}/poudriere.d
@@ -163,6 +158,16 @@ if [ $? -ne 0 ] ; then
    echo "Failed poudriere build..."
    exit 1
 fi
+
+# Signing script
+if [ -n "$PKGSIGNCMD" ] ; then
+  echo "Signing the packages with: ${PKGSIGNCMD}"
+  cd ${PPKGDIR}
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+  pkg repo . signing_command: ${PKGSIGNCMD}
+  if [ $? -ne 0 ] ; then exit 1 ; fi
+fi
+
 
 # Build passed, lets rsync it off this node
 if [ -z "$SFTPHOST" ] ; then return 0 ; fi
