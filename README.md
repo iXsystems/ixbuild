@@ -16,26 +16,26 @@
 Jenkins build framework for iX projects
 ===========
 
-The scripts in this repo will allow you to build PC-BSD or FreeNAS, either
+The scripts in this repo will allow you to build TrueOS or FreeNAS, either
 as an automated job from Jenkins or manually. It includes support to build
 the following:
 
  * FreeNAS 9.10 / 10.0
- * PC-BSD 10.2 / 10.3 / 11.0-CURRENT
+ * TrueOS
 
 
 Requirements
 ============
 
-A system running PC-BSD/FreeBSD 11.0-CURRENT, with at minimum 16GB of memory.
-(Building PC-BSD packages in a reasonable time works best with 48GB or more)
+A system running TrueOS, with at minimum 16GB of memory.
+(Building TrueOS packages in a reasonable time works best with 48GB or more)
 
 Recommended:
 * CPU: 8 Cores or more
-* Memory: 16GB (For FreeNAS) 48GB (For PC-BSD)
-* Disk: 20GB (For FreeNAS) 200GB (For PC-BSD)
+* Memory: 16GB (For FreeNAS) 48GB (For TrueOS)
+* Disk: 20GB (For FreeNAS) 200GB (For TrueOS)
 
-[PC-BSD Download Site](http://download.pcbsd.org/iso/)
+[TrueOS Download Site](http://download.trueos.org/master/amd64/)
 
 
 Getting Started
@@ -82,14 +82,6 @@ FreeNAS 9.10
  # cd freenas/scripts && ./9.10-delete-tests.sh
 ````
 
-FreeNAS 10.0
-
-````
- # cd freenas/scripts && ./10-create-tests.sh
- # cd freenas/scripts && ./10-update-tests.sh
- # cd freenas/scripts && ./10-delete-tests.sh
-```
-
 ```
  *Optional* arguments for test scripts
 
@@ -131,7 +123,9 @@ should be added to delete folder.
 New tests can be written for FreeNAS 9.10.X by adding a test "module" to the 9.10 testing directories:
 
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/create
+
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/update
+
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
 
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
@@ -147,7 +141,8 @@ The tests for FreeNAS 9.10.X are currently being run on-commit. Committers will 
 an e-mail with results and log files on testing failures.
 
 Tests / log output can be viewed at the following location:
-https://builds.ixsystems.com/jenkins/view/FreeNAS%20ATF/
+
+https://builds.ixsystems.com/jenkins/view/QA%20Tests/
 
 
 Use Jenkins FreeNAS or TrueNAS update servers (iX Internal only)
