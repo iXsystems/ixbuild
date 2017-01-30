@@ -82,14 +82,6 @@ FreeNAS 9.10
  # cd freenas/scripts && ./9.10-delete-tests.sh
 ````
 
-FreeNAS 10.0
-
-````
- # cd freenas/scripts && ./10-create-tests.sh
- # cd freenas/scripts && ./10-update-tests.sh
- # cd freenas/scripts && ./10-delete-tests.sh
-```
-
 ```
  *Optional* arguments for test scripts
 
@@ -131,7 +123,9 @@ should be added to delete folder.
 New tests can be written for FreeNAS 9.10.X by adding a test "module" to the 9.10 testing directories:
 
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/create
+
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/update
+
 https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
 
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
