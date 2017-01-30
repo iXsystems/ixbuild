@@ -21,21 +21,21 @@ as an automated job from Jenkins or manually. It includes support to build
 the following:
 
  * FreeNAS 9.10 / 10.0
- * PC-BSD 10.2 / 10.3 / 11.0-CURRENT
+ * TrueOS
 
 
 Requirements
 ============
 
-A system running PC-BSD/FreeBSD 11.0-CURRENT, with at minimum 16GB of memory.
-(Building PC-BSD packages in a reasonable time works best with 48GB or more)
+A system running TrueOS, with at minimum 16GB of memory.
+(Building TrueOS packages in a reasonable time works best with 48GB or more)
 
 Recommended:
 * CPU: 8 Cores or more
 * Memory: 16GB (For FreeNAS) 48GB (For PC-BSD)
 * Disk: 20GB (For FreeNAS) 200GB (For PC-BSD)
 
-[PC-BSD Download Site](http://download.pcbsd.org/iso/)
+[TrueOS Download Site](http://download.trueos.org/master/amd64/)
 
 
 Getting Started
