@@ -141,7 +141,8 @@ The tests for FreeNAS 9.10.X are currently being run on-commit. Committers will 
 an e-mail with results and log files on testing failures.
 
 Tests / log output can be viewed at the following location:
-https://builds.ixsystems.com/jenkins/view/FreeNAS%20ATF/
+
+https://builds.ixsystems.com/jenkins/view/QA Tests/
 
 
 Use Jenkins FreeNAS or TrueNAS update servers (iX Internal only)
