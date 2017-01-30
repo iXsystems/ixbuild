@@ -16,7 +16,7 @@
 Jenkins build framework for iX projects
 ===========
 
-The scripts in this repo will allow you to build PC-BSD or FreeNAS, either
+The scripts in this repo will allow you to build TrueOS or FreeNAS, either
 as an automated job from Jenkins or manually. It includes support to build
 the following:
 
@@ -32,8 +32,8 @@ A system running TrueOS, with at minimum 16GB of memory.
 
 Recommended:
 * CPU: 8 Cores or more
-* Memory: 16GB (For FreeNAS) 48GB (For PC-BSD)
-* Disk: 20GB (For FreeNAS) 200GB (For PC-BSD)
+* Memory: 16GB (For FreeNAS) 48GB (For TrueOS)
+* Disk: 20GB (For FreeNAS) 200GB (For TrueOS)
 
 [TrueOS Download Site](http://download.trueos.org/master/amd64/)
 
