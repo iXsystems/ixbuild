@@ -1,7 +1,7 @@
 multimedia/plexmediaserver
 net/syncthing
 net-p2p/btsync
-irc/quassel
+irc/quassel-core
 www/nextcloud
 www/nginx
 www/subsonic-standalone
