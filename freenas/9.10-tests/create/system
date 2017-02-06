@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 system_tests() {
-  set_test_group_text "1 - Create - System tests" "2"
+  set_test_group_text "1 - Create - System tests" "3"
   CLASSNAME=ixbuild.resty.functional.create.system
 
   # Get system version
@@ -22,6 +22,11 @@ system_tests() {
   echo_test_title "Setting timezone.."
   rest_request "PUT" "/system/settings/" '{ "stg_timezone": "America/New_York" }'
   check_rest_response "200 OK"
+
+  # Create loader tunable
+  echo_test_title "Creating system tunable 'linux_load'.."
+  rest_request "POST" "/system/tunable/" '{ "tun_var": "linux_load", "tun_enabled": true, "tun_value": "YES", "tun_type": "loader" }'
+  check_rest_response "201 Created"
 }
 
 # Init function, this is called after module is sourced
