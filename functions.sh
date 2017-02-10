@@ -897,6 +897,11 @@ jenkins_trueos_push_lumina_docs()
 # Set the FreeNAS _BE directory location
 get_bedir()
 {
+  if [ -d "${FNASBDIR}/${PROFILE}/_BE" ] ; then
+    export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
+    return 0
+  fi
+
   if [ "${GITFNASBRANCH}" != "master" ] ; then
     export BEDIR="${FNASBDIR}/_BE"
     return 0
