@@ -153,6 +153,10 @@ rc_halt()
 get_bedir()
 {
 
+  if [ -n "$BUILDOPTS" ] ; then
+    eval $BUILDOPTS
+  fi
+
   if [ -d "${FNASBDIR}/${PROFILE}/_BE" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
     return 0
@@ -161,10 +165,6 @@ get_bedir()
   if [ "${GITFNASBRANCH}" != "master" ] ; then
     export BEDIR="${FNASBDIR}/_BE"
     return 0
-  fi
-
-  if [ -n "$BUILDOPTS" ] ; then
-    eval $BUILDOPTS
   fi
 
   if [ "$PROFILE" != "freenas10" ] ; then
