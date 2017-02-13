@@ -86,7 +86,7 @@ save_artifacts_on_fail()
     fi
     echo "Saving artifacts to: ${WORKSPACE}/artifacts"
     cp -R "${BEDIR}/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${BEDIR}/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
+    cp -R "${BEDIR}/objs/ports/data/" "${WORKSPACE}/artifacts/ports/"
     chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Skip saving artificats on failure / ARTIFACTONFAIL not set"
@@ -113,7 +113,7 @@ save_artifacts_on_success()
     fi
     echo "Saving artifacts to: ${WORKSPACE}/artifacts"
     cp -R "${BEDIR}/objs/logs/" "${WORKSPACE}/artifacts/logs/"
-    cp -R "${BEDIR}/objs/ports/logs/" "${WORKSPACE}/artifacts/ports/"
+    cp -R "${BEDIR}/objs/ports/data/" "${WORKSPACE}/artifacts/ports/"
     chown -R jenkins:jenkins "${WORKSPACE}/artifacts/"
   else
     echo "Skip saving artificats on success / ARTIFACTONSUCCESS not set"
