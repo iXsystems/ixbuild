@@ -27,6 +27,19 @@ system_tests() {
   echo_test_title "Creating system tunable 'linux_load'.."
   rest_request "POST" "/system/tunable/" '{ "tun_var": "linux_load", "tun_enabled": true, "tun_value": "YES", "tun_type": "loader" }'
   check_rest_response "201 Created"
+
+  # Check loader tunable
+  echo_test_title "Checking system tunable 'linux_load'.."
+  rest_request GET "/system/tunable/"
+  check_rest_response "200 OK" || return 1
+  TUNSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.tun_var')
+  echo "TUNSTATUS: $TUNSTATUS"
+  echo $TUNSTATUS | grep -q 'linux_load'
+  if [ $? -eq 0 ] ; then
+    echo_ok
+  else
+    echo_fail
+  fi
 }
 
 # Init function, this is called after module is sourced
