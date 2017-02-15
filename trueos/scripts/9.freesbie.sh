@@ -321,7 +321,127 @@ EOF
   rmdir ${PDESTDIR9}
   return 0
 }
-    
+
+do_rpi3_build() {
+
+  if [ -e "${PDESTDIR9}" ]; then
+    echo "Removing ${PDESTDIR9}"
+    umount -f ${PDESTDIR9}/mnt >/dev/null 2>/dev/null
+    umount -f ${PDESTDIR9}/tmp/packages >/dev/null 2>/dev/null
+    umount -f ${PDESTDIR9} >/dev/null 2>/dev/null
+  fi
+
+  # Copy over the pkgs
+  rc_halt "cp -r ${PPKGDIR}/All ${PROGDIR}/pkgs"
+
+  rc_halt "cd ${PROGDIR}/"
+
+  truncate -s 2g arm.img
+  MD=$(mdconfig -f arm.img)
+
+  # Create the disk image
+  rc_halt "gpart create -s MBR ${MD}"
+  gpart add -t '!12' -a 63 -s 50m ${MD}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  rc_halt "gpart set -a active -i 1 ${MD}"
+  rc_halt "newfs_msdos -F 16 /dev/${MD}s1"
+  rc_halt "gpart add -t freebsd -a 4m ${MD}"
+  rc_halt "gpart create -s BSD ${MD}s2"
+  rc_halt "gpart add -t freebsd-ufs ${MD}s2"
+  rc_halt "newfs -U ${MD}s2a"
+  rc_halt "mkdir -p ${PDESTDIR9}"
+  rc_halt "mount /dev/${MD}s2a ${PDESTDIR9}"
+
+  extract_dist "${ARMDIST}" "${PDESTDIR9}"
+
+  # Get rid of debug files
+  rc_nohalt "rm -rf ${PDESTDIR9}/usr/lib/debug"
+  rc_nohalt "rm -rf ${PDESTDIR9}/usr/tests"
+
+  # Prep for pkg install
+  rc_halt "mkdir ${PDESTDIR9}/pkgs"
+  rc_halt "mount_nullfs ${PROGDIR}/pkgs ${PDESTDIR9}/pkgs"
+  rc_halt "mount -t devfs devfs ${PDESTDIR9}/dev"
+
+  # Copy over the qemu binary
+  rc_halt "cp /usr/local/bin/qemu-arm-static ${PDESTDIR9}/qemu-arm-static"
+  rc_halt "chmod 755 ${PDESTDIR9}/qemu-arm-static"
+
+  # Boot-strap PKGNG
+  pname=`ls ${PDESTDIR9}/pkgs/pkg-[0-9]*.txz`
+  pname=$(basename ${pname})
+  pkg -c ${PDESTDIR9} add /pkgs/${pname}
+  if [ $? -ne 0 ] ; then exit 1; fi
+
+  # Loop through and add pkgs
+  while read line
+  do
+    pname=`ls ${PDESTDIR9}/pkgs/${line}-[0-9]*.txz`
+    pname=$(basename ${pname})
+    # pkg -c ${PDESTDIR9} add /pkgs/${pname}
+    chroot ${PDESTDIR9} /qemu-arm-static pkg add /pkgs/${pname}
+    if [ $? -ne 0 ] ; then exit 1; fi
+  done < ${PCONFDIR}/installcd-packages
+
+  # Cleanup the qemu binary
+  rc_halt "rm ${PDESTDIR9}/qemu-arm-static"
+
+  # Copy bootloader files
+  rc_halt "cp ${PDESTDIR9}/boot/ubldr ${PROGDIR}/"
+  rc_halt "cp ${PDESTDIR9}/boot/dtb/rpi2.dtb ${PROGDIR}/"
+  rc_halt "mkdir ${PDESTDIR9}/boot/msdos"
+
+  # Copy over the PICO overlay
+  tar cvf - -C ${TRUEOSSRC}/overlays/pico-overlay/ . | tar xvpf - -C ${PDESTDIR9}
+
+  # Grab the latest RPI3 binary
+  rc_halt "fetch -o ${PDESTDIR9}/opt/pico-client http://web.trueos.org/picodist/pico-client-rpi3"
+  rc_halt "fetch -o ${PDESTDIR9}/opt/pico-client.version http://web.trueos.org/picodist/pico-client-rpi3.version"
+  PICOVER=`cat ${PDESTDIR9}/opt/pico-client.version`
+  rc_halt "chmod 755 ${PDESTDIR9}/opt/pico-client"
+
+  sync
+  sleep 2
+  rc_halt "umount -f ${PDESTDIR9}/pkgs"
+  rc_halt "umount -f ${PDESTDIR9}/dev"
+  rc_halt "umount -f ${PDESTDIR9}"
+
+  # Copy the boot-loader files
+  rc_halt "mount_msdosfs /dev/${MD}s1 ${PDESTDIR9}"
+  rc_halt "cp /usr/local/share/u-boot/u-boot-rpi3/* ${PDESTDIR9}/"
+  rc_halt "cp ${PROGDIR}/ubldr ${PDESTDIR9}/"
+  rc_halt "cp ${PROGDIR}/rpi2.dtb ${PDESTDIR9}/"
+
+  # Disable TV overscan by default
+  echo "disable_overscan=1" >> ${PDESTDIR9}/config.txt
+  # Set some options for 32bpp
+  echo "framebuffer_depth=32" >> ${PDESTDIR9}/config.txt
+  echo "framebuffer_ignore_alpha=1" >> ${PDESTDIR9}/config.txt
+
+  # Cleanup
+  rc_halt "umount -f ${PDESTDIR9}"
+  rc_halt "mdconfig -d -u ${MD}"
+
+  fDate="`date '+%Y-%m-%d'`"
+  fName="TrueOS-pico-rpi3-${fDate}.img"
+  rc_halt "mv ${PROGDIR}/arm.img ${PROGDIR}/iso/${fName}"
+  rc_halt "xz ${PROGDIR}/iso/${fName}"
+  md5 -q ${PROGDIR}/iso/${fName}.xz > ${PROGDIR}/iso/${fName}.xz.md5
+  sha256 -q ${PROGDIR}/iso/${fName}.xz > ${PROGDIR}/iso/${fName}.xz.sha256
+  SHA=`cat ${PROGDIR}/iso/${fName}.xz.sha256`
+  SHAMFS=`cat ${PROGDIR}/iso/rpi3-upgrade.img.gz.sha256`
+
+  # Create the INDEX file
+  cat >${PROGDIR}/iso/INDEX <<EOF
+${fName}.xz:::${PICOVER}:::${SHA}
+rpi2-upgrade.img.gz:::${SHAMFS}
+EOF
+
+  rmdir ${PDESTDIR9}
+  return 0
+}
+
 if [ -z ${PDESTDIR} ]
 then
   echo "ERROR: PDESTDIR is still unset!"
@@ -337,7 +457,12 @@ case ${PICOFLAVOR} in
         exit $?
         ;;
    minnowboard) ;;
-   rpi3) ;;
+   rpi3) create_pico_mfsroot "rpi3"
+
+         # Create the image file
+         do_rpi3_build
+         exit $?
+	 ;;
    *) ;;
 esac
 # Copy over a fresh set of package files for DVD
