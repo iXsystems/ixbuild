@@ -153,6 +153,9 @@ rc_halt()
 get_bedir()
 {
 
+  if [ -n "$OLDBUILDOPTS" ] ; then
+    eval $OLDBUILDOPTS
+  fi
   if [ -n "$BUILDOPTS" ] ; then
     eval $BUILDOPTS
   fi
