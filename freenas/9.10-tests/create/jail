@@ -21,6 +21,9 @@ jail_tests() {
      return 0
   fi
 
+  # Timeout if specifying jail dataset hangs
+  . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass} -m 60
+
   echo_test_title "Configuring jails"
   rest_request "PUT" "/jails/configuration/" '{ "jc_ipv4_network_start": "'"${JAILIP}"'", "jc_path": "/mnt/tank/jails" }'
   check_rest_response "201 Created"
