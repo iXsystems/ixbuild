@@ -150,6 +150,7 @@ if [ -n "$BUILDOPTS" ] ; then
   PROFILEARGS="$PROFILEARGS $BUILDOPTS"
 
   # Unset so we don't conflict with anything
+  export OLDBUILDOPTS="$BUILDOPTS"
   unset BUILDOPTS
 fi
 
