@@ -207,6 +207,7 @@ if [ "$BUILDTAG" = "trueos-ino64" ] ; then
 	cd sys/kern && touch syscalls.master && make sysent
 	cd ${WORLDSRC}
 	cd sys/compat/freebsd32 && touch syscalls.master && make sysent
+	cd ${WORLDSRC}
 fi
 
 make -j $CPUS buildworld buildkernel ${SYS_MAKEFLAGS}
