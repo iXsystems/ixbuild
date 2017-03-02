@@ -1,0 +1,47 @@
+#!/usr/local/bin/bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+iscsi_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "3 - Delete - iSCSI tests" "2"
+  CLASSNAME=ixbuild.resty.functional.delete.iscsi
+
+  # Clean up any leftover items from any previous failed runs
+  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
+  iscsictl -R -a
+  umount -A
+
+  # Remove iSCSI target
+  echo_test_title "Delete iSCSI target"
+  rest_request "DELETE" "/services/iscsi/target/1/"
+  check_rest_response "204"
+
+  # Remove iSCSI extent
+  echo_test_title "Delete iSCSI extent"
+  rest_request "DELETE" "/services/iscsi/extent/1/"
+  check_rest_response "204"
+
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+iscsi_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) iscsi_tests ;;
+     COMPLETE) iscsi_tests ;;
+    BENCHMARK) ;;
+            *) iscsi_tests ;;
+  esac
+}

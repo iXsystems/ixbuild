@@ -200,6 +200,16 @@ cd ${WORLDSRC}
 
 CPUS=`sysctl -n kern.smp.cpus`
 
+if [ "$BUILDTAG" = "trueos-ino64" ] ; then
+	# Special build instructions
+	echo "Doing ino64 setup..."
+	cd ${WORLDSRC}
+	cd sys/kern && touch syscalls.master && make sysent
+	cd ${WORLDSRC}
+	cd sys/compat/freebsd32 && touch syscalls.master && make sysent
+	cd ${WORLDSRC}
+fi
+
 make -j $CPUS buildworld buildkernel ${SYS_MAKEFLAGS}
 if [ $? -ne 0 ] ; then
    echo "Failed running: make buildworld buildkernel ${SYS_MAKEFLAGS}"
