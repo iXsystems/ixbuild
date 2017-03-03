@@ -28,7 +28,7 @@ ldap_tests() {
 
   # Set auxilary parameters to allow mount_smbfs to work with ldap
   echo_test_title "Setting auxilary parameters for mount_smbfs.."
-  PUT /services/cifs/ '{ "cifs_srv_smb_options": "lanman auth = yes\nntlm auth = yes \nraw NTLMv2 auth = yes" }'
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = yes\nntlm auth = yes \nraw NTLMv2 auth = yes" }'
   check_rest_response "200 OK"
 
   # Enable LDAP
