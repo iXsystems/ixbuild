@@ -6,7 +6,7 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="system"
+REQUIRES=""
 export REQUIRES
 
 network_tests()
@@ -22,7 +22,7 @@ network_tests()
      return 0
   fi
 
-  echo_test_title "Waiting for $VM to start"
+  echo_test_title "Waiting for ${VM} to start"
   wait_for_avail
   echo_ok
 

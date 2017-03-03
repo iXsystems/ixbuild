@@ -47,9 +47,13 @@ system_tests() {
   check_rest_response "202"
 
   # Wait for network come back up
-  echo_test_title "Waiting for $VM to verify tunables.."
+  echo_test_title "Waiting for ${VM} to verify tunables.."
   sleep 30
   wait_for_avail
+  echo_ok
+
+  # Wait 30 seconds before trying more REST queries again
+  sleep 30
 
   # Verify loader tunable
   echo_test_title "Verify system tunable 'dummynet_load'.."
