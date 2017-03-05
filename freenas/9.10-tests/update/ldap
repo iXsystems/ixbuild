@@ -27,7 +27,8 @@ ldap_tests() {
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
 
   # Set auxilary parameters to allow mount_smbfs to work with ldap
-  PUT /services/cifs/ '{ "cifs_srv_smb_options": "lanman auth = yes\nntlm auth = yes \nraw NTLMv2 auth = yes" }'
+  echo_test_title "Set auxilary parameters for mount_smbfs.."
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = yes\nntlm auth = yes \nraw NTLMv2 auth = yes" }'
   check_rest_response "200 OK"
 
   # Enable LDAP

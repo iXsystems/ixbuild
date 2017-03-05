@@ -169,7 +169,7 @@ rc_test()
     if [ $? -ne 0 ] ; then
       echo_fail 
       if [ -n "$2" ] ; then 
-	eval "${2}"
+        eval "${2}"
       fi
       echo "Failed running: $1"
       return 1
@@ -212,6 +212,43 @@ rc_test()
   eval "${2}"
   echo "Timeout running: $1"
   return 1
+}
+
+# $1 = Command to run
+# $2 = Command to run if $1 fails
+# $3 = Optional timeout
+ssh_test()
+{
+  export TESTSTDOUT="/tmp/.sshCmdTestStdOut"
+  export TESTSTDERR="/tmp/.sshCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  sshserver=${ip}
+  if [ -z "$sshserver" ] ; then
+    sshserver=$FNASTESTIP
+  fi
+
+  if [ -z "$sshserver" ] ; then
+    echo "SSH server IP address required for ssh_test()."
+    return 1
+  fi
+
+  # Test fuser and fpass values
+  if [ -z "${fpass}" ] || [ -z "${fuser}" ] ; then
+    echo "SSH server username and password required for ssh_test()."
+    return 1
+  fi
+
+  # Make SSH connection
+  sshpass -p ${fpass} ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${fuser}@${sshserver} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
+  SSH_COMMAND_RESULTS=$?
+
+  if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
+    echo "Failed on test module: $1"
+    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
+    return 1
+  fi
 }
 
 echo_ok()
