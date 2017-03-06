@@ -26,10 +26,23 @@ merge_trueos_src_ports()
    local portsdir="$2"
    distCache="/usr/ports/distfiles"
 
-   rc_halt "cd ${gitdir}" >/dev/null 2>/dev/null
-     
+   # Copy over the ports-overlay from trueos-core
+   tar cvf - -C ${gitdir}/overlays/ports-overlay . 2>/dev/null | tar xvf - -C ${portsdir}
+   if [ $? -ne 0 ] ; then
+	   echo "Error copying ports-overlay"
+	   exit 1
+   fi
+
+   # Make sure these ports are in top-level Makefile
+   rc_halt "cd ${gitdir}/overlays/ports-overlay"
+   for sdir in `ls`
+   do
+     massage_subdir "$sdir"
+     rc_halt "cd ${gitdir}/overlays/ports-overlay"
+   done
+
    # Jump back to where we belong
-   rc_halt "cd $mcwd" >/dev/null 2>/dev/null
+   rc_halt "cd $mcwd"
 
    # If on 10.x we can stop now
    if [ -n "$TRUEOSLEGACY" ] ; then return 0 ; fi
@@ -42,6 +55,35 @@ merge_trueos_src_ports()
      rc_halt "./mkport.sh ${portsdir} ${distCache}"
      rc_halt "cd $mcwd" >/dev/null 2>/dev/null
    done < ${gitdir}/build-files/conf/desktop/external-port-repos
+}
+
+massage_subdir() {
+  cd "$1"
+  if [ $? -ne 0 ] ; then
+     echo "SKIPPING $i"
+     return 0
+  fi
+
+comment="`cat Makefile | grep 'COMMENT ='`"
+
+  echo "# \$FreeBSD\$
+#
+
+$comment
+" > Makefile.tmp
+
+  for d in `ls`
+  do
+    if [ "$d" = ".." ]; then continue ; fi
+    if [ "$d" = "." ]; then continue ; fi
+    if [ "$d" = "Makefile" ]; then continue ; fi
+    if [ ! -f "$d/Makefile" ]; then continue ; fi
+    echo "    SUBDIR += $d" >> Makefile.tmp
+  done
+  echo "" >> Makefile.tmp
+  echo ".include <bsd.port.subdir.mk>" >> Makefile.tmp
+  mv Makefile.tmp Makefile
+
 }
 
 mk_metapkg_bulkfile()
