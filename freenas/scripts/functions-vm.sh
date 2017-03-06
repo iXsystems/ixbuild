@@ -365,7 +365,7 @@ exit $res
 
 revert_vmware()
 {
-  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ]; then 
+  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ] && [ ! -z ${VI_CFG} ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
     return 1
@@ -377,7 +377,7 @@ revert_vmware()
   fi
 
   #vmware-cmd revertsnapshot
-  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER revertsnapshot
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" revertsnapshot
   return $?
 }
 
@@ -386,7 +386,7 @@ start_vmware()
 {
   TIMEOUT_SECONDS=$1
 
-  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ]; then 
+  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ] && [ ! -z ${VI_CFG} ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
     return 1
@@ -398,7 +398,7 @@ start_vmware()
   fi
 
   #vmware-cmd start
-  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER start
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" start
   CMD_RESULTS=$?
 
   # If timeout arg is supplied, send SIGTERM once reached, send SIGKILL if
@@ -414,7 +414,7 @@ start_vmware()
 
 stop_vmware()
 {
-  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ]; then 
+  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ] && [ ! -z ${VI_CFG} ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
     return 1
@@ -426,6 +426,6 @@ stop_vmware()
   fi
 
   #vmware-cmd stop
-  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER stop
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" stop hard
   return $?
 }

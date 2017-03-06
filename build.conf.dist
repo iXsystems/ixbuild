@@ -27,6 +27,7 @@ export SFTPWORKDIR
 # VI_SERVER
 # VI_USERNAME
 # VI_PASSWORD
+# VI_CFG
 
 ###########################################################################
 # FreeNAS specific settings
