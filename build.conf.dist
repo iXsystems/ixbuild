@@ -24,7 +24,7 @@ export SFTPWORKDIR
 # export IXBUILDBRANCH
 
 # (Optional) Settings for vmware-vsphere-cli
-# VI_HOST
+# VI_SERVER
 # VI_USERNAME
 # VI_PASSWORD
 

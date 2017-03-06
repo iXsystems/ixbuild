@@ -363,3 +363,69 @@ cat /tmp/$VM-tests-delete.log
 exit $res
 }
 
+revert_vmware()
+{
+  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
+  fi
+
+  if [ ! `which -s vmware-cmd` ]; then
+    echo "vmware-cmd: command not found."
+    return 1
+  fi
+
+  #vmware-cmd revertsnapshot
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER revertsnapshot
+  return $?
+}
+
+# $1 = Optional timeout (seconds)
+start_vmware()
+{
+  TIMEOUT_SECONDS=$1
+
+  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
+  fi
+
+  if [ ! `which -s vmware-cmd` ]; then
+    echo "vmware-cmd: command not found."
+    return 1
+  fi
+
+  #vmware-cmd start
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER start
+  CMD_RESULTS=$?
+
+  # If timeout arg is supplied, send SIGTERM once reached, send SIGKILL if
+  # unresponsive after additional 5 seconds.
+  if [ $TIMEOUT_SECONDS ] && [ `which -s timeout` ]; then
+    timeout -k $((TIMEOUT_SECONDS + 5)) $TIMEOUT_SECONDS wait_for_avail
+  else
+    wait_for_avail
+  fi
+
+  return $CMD_RESULTS
+}
+
+stop_vmware()
+{
+  if [ ! -z ${VI_SERVER} ] || [ ! -z ${VI_USERNAME} ] || [ ! -z ${VI_PASSWORD} ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
+  fi
+
+  if [ ! `which -s vmware-cmd` ]; then
+    echo "vmware-cmd: command not found."
+    return 1
+  fi
+
+  #vmware-cmd stop
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER stop
+  return $?
+}
