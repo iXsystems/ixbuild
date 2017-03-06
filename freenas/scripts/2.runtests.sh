@@ -80,12 +80,12 @@ fi
 case ${VMBACKEND} in
      bhyve) start_bhyve ;;
      esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
-	   daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
-	   sleep 30
+     daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
+     sleep 30
            clean_xml_results
            exit 0
-	   ;;
-	*) start_vbox ;;
+     ;;
+  *) start_vbox ;;
 esac
 
 # Cleanup old test results before running tests

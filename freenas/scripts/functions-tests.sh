@@ -366,9 +366,9 @@ run_module() {
 
       echo $FAILEDMODULES | grep -q ":::${i}:::"
       if [ $? -eq 0 ] ; then
-	CLASSNAME="$1"
-	TESTNAME="all"
-	TIMESTART="0"
+        CLASSNAME="$1"
+        TESTNAME="all"
+        TIMESTART="0"
         TOTALCOUNT=`expr $TOTALCOUNT + 1`
         echo "***** Skipping test module: $1 ($i failed) *****"
         add_xml_result "skipped" "Skipped due to $i requirement failing"
