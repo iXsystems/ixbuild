@@ -83,6 +83,10 @@ case ${VMBACKEND} in
      daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
      sleep 30
            clean_xml_results
+	   revert_vmware
+	   stop_vmware
+	   start_vmware
+	   start_vmware
            exit 0
      ;;
   *) start_vbox ;;
