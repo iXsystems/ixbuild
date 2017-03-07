@@ -1,0 +1,57 @@
+#!/usr/local/bin/bash
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage ssh"
+export REQUIRES
+
+cronjob_tests() {
+  set_test_group_text "1 - Create - Cron tests" "3"
+  CLASSNAME=ixbuild.resty.functional.create.cron
+
+  TESTFILE="/tmp/.testFileCreatedViaCronjob"
+
+  echo_test_title "Creating new cron job which will run every minute"
+  rest_request "POST" "/tasks/cronjob/" '{ "cron_user": "root", "cron_command": "touch '${TESTFILE}'", "cron_minute": "*/1" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Checking to see if Cronjob was created and enabled"
+  rest_request "GET" "/tasks/cronjob/"
+  check_rest_response "200 OK" || return 1
+  CRONJOBENABLED=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cron_enabled')
+  echo -n "CRONJOBENABLED: $CRONJOBENABLED"
+  echo $CRONJOBENABLED | grep -q 'true'
+  if [ $? -eq 0 ]; then
+    echo_ok
+  else
+    echo_fail
+  fi
+
+  # Give time for cron to create the test file on the remote system
+  sleep 61
+
+  echo_test_title "Verifying that the cronjob created a new file on the remote system"
+  ssh_test "test -f ${TESTFILE}"
+  if [ $? -eq 0 ]; then
+    echo_ok
+  else
+    echo_fail
+  fi
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+cronjob_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) cronjob_tests ;;
+     COMPLETE) cronjob_tests ;;
+    BENCHMARK) ;;
+            *) cronjob_tests ;;
+  esac
+}
