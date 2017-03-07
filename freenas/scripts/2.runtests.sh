@@ -85,9 +85,11 @@ case ${VMBACKEND} in
            clean_xml_results
 	   revert_vmware
 	   stop_vmware
+           sleep 30
 	   start_vmware
+	   sleep 720
 	   start_vmware
-           exit 0
+           sleep 2000
      ;;
   *) start_vbox ;;
 esac
@@ -101,6 +103,8 @@ run_tests
 # Determine which VM backend to stop
 case ${VMBACKEND} in
     bhyve) stop_bhyve ;;
-    esxi ) stop_esxi ;;
+    esxi ) stop_vmware
+       revert_vmware
+       ;;
        * ) stop_vbox ;;
 esac
