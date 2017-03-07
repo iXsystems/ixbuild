@@ -83,8 +83,10 @@ case ${VMBACKEND} in
      daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
      sleep 30
            clean_xml_results
+           echo "Shutting down any previous instances of ${VM}.."
 	   stop_vmware
            sleep 60
+           echo "Reverting to snapshot..."
            revert_vmware
            sleep 30
 	   export TIMEOUT_SECONDS="720"
