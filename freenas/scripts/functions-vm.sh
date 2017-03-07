@@ -405,10 +405,7 @@ install_vmware()
 
   #Get console output for install
   tpid=$!
-  tail -f /tmp/console.log 2>/dev/null &
-
-  #Wait for install to finish
-  sleep 960
+  tail -f /tmp/console.log | sed '/^Installation Finished. No error reported.$/ q' >/dev/null 2>/dev/null
 
   #Stop console output
   kill -9 $tpid
@@ -439,10 +436,7 @@ boot_vmware()
 
   #Get console output for bootup
   tpid=$!
-  tail -f /tmp/console.log 2>/dev/null &
-
-  #Wait for bootup to finish
-  sleep 2000
+  tail -f /tmp/console.log | sed '/^Starting cron.$/ q' >/dev/null 2>/dev/null
 
   return $CMD_RESULTS
 }
