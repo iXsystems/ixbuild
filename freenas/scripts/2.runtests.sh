@@ -84,15 +84,15 @@ case ${VMBACKEND} in
      sleep 30
            clean_xml_results
 	   stop_vmware
-           sleep 30
+           sleep 60
            revert_vmware
            sleep 30
-	   start_vmware
+	   export TIMEOUT_SECONDS="720"
            echo "Installing ${VM}..."
-	   sleep 720
 	   start_vmware
+           export TIMEOUT_SECONDS="2000"
            echo "Booting ${VM}..."
-           sleep 2000
+	   start_vmware
      ;;
   *) start_vbox ;;
 esac
