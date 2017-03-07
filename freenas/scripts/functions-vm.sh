@@ -383,7 +383,7 @@ revert_vmware()
 }
 
 # $1 = Optional timeout (seconds)
-start_vmware()
+install_vmware()
 {
   TIMEOUT_SECONDS=$1
 
@@ -403,13 +403,50 @@ start_vmware()
   vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" start
   CMD_RESULTS=$?
 
-  # If timeout arg is supplied, send SIGTERM once reached, send SIGKILL if
-  # unresponsive after additional 5 seconds.
-  if [ $TIMEOUT_SECONDS ] && [ `which -s timeout` ]; then
-    timeout -k $((TIMEOUT_SECONDS + 5)) $TIMEOUT_SECONDS wait_for_avail
-  else
-    wait_for_avail
+  echo "Installing ${VM}..."
+
+  #Get console output for install
+  tpid=$!
+  tail -f /tmp/console.log 2>/dev/null &
+
+  #Wait for install to finish
+  sleep 720
+
+  #Stop console output
+  kill -9 $tpid
+
+  return $CMD_RESULTS
+}
+
+# $1 = Optional timeout (seconds)
+boot_vmware()
+{
+  TIMEOUT_SECONDS=$1
+
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
   fi
+
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
+    return 1
+  fi
+
+  #vmware-cmd start
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" start
+  CMD_RESULTS=$?
+
+  echo "Booting ${VM}..."
+
+  #Get console output for bootup
+  tpid=$!
+  tail -f /tmp/console.log 2>/dev/null &
+
+  #Wait for bootup to finish
+  sleep 2000
 
   return $CMD_RESULTS
 }

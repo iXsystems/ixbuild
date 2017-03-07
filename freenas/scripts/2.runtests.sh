@@ -84,17 +84,14 @@ case ${VMBACKEND} in
      sleep 30
            clean_xml_results
            echo "Shutting down any previous instances of ${VM}.."
-	   stop_vmware
+     stop_vmware
            sleep 60
            echo "Reverting to snapshot..."
            revert_vmware
            sleep 30
-	   export TIMEOUT_SECONDS="720"
-           echo "Installing ${VM}..."
-	   start_vmware
-           export TIMEOUT_SECONDS="2000"
-           echo "Booting ${VM}..."
-	   start_vmware
+     install_vmware
+           sleep 60
+     boot_vmware
      ;;
   *) start_vbox ;;
 esac

@@ -1067,9 +1067,6 @@ jenkins_freenas_run_tests()
 
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
-  echo "Output from console:"
-  echo "-----------------------------------------"
-  cat /tmp/console.log
   echo ""
   sleep 10
   pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
