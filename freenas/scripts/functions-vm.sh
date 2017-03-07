@@ -365,7 +365,7 @@ exit $res
 
 revert_vmware()
 {
-  if [ ! -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
     return 1
@@ -387,7 +387,7 @@ start_vmware()
 {
   TIMEOUT_SECONDS=$1
 
-  if [ ! -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
     return 1
@@ -416,7 +416,7 @@ start_vmware()
 
 stop_vmware()
 {
-  if [ ! -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
     return 1
