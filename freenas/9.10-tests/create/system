@@ -57,7 +57,6 @@ system_tests() {
 
   # Verify loader tunable
   echo_test_title "Verify system tunable 'dummynet_load'.."
-  set_defaults
   ssh_test "kldstat -m dummynet"
   if [ ! $? -eq 0 ] ; then
     echo "KLDSTAT: $KLDSTAT_LINUX_LOAD"
