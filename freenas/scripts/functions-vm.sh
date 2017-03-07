@@ -371,8 +371,9 @@ revert_vmware()
     return 1
   fi
 
-  if [ ! `which -s vmware-cmd` ]; then
-    echo "vmware-cmd: command not found."
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
     return 1
   fi
 
@@ -392,8 +393,9 @@ start_vmware()
     return 1
   fi
 
-  if [ ! `which -s vmware-cmd` ]; then
-    echo "vmware-cmd: command not found."
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
     return 1
   fi
 
@@ -420,8 +422,9 @@ stop_vmware()
     return 1
   fi
 
-  if [ ! `which -s vmware-cmd` ]; then
-    echo "vmware-cmd: command not found."
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
     return 1
   fi
 
