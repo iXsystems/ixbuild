@@ -385,8 +385,6 @@ revert_vmware()
 # $1 = Optional timeout (seconds)
 install_vmware()
 {
-  TIMEOUT_SECONDS=$1
-
   if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
@@ -410,7 +408,7 @@ install_vmware()
   tail -f /tmp/console.log 2>/dev/null &
 
   #Wait for install to finish
-  sleep 720
+  sleep 960
 
   #Stop console output
   kill -9 $tpid
@@ -421,8 +419,6 @@ install_vmware()
 # $1 = Optional timeout (seconds)
 boot_vmware()
 {
-  TIMEOUT_SECONDS=$1
-
   if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
     echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
     echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
