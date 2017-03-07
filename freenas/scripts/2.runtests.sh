@@ -83,12 +83,15 @@ case ${VMBACKEND} in
      daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
      sleep 30
            clean_xml_results
-	   revert_vmware
 	   stop_vmware
            sleep 30
+           revert_vmware
+           sleep 30
 	   start_vmware
+           echo "Installing ${VM}..."
 	   sleep 720
 	   start_vmware
+           echo "Booting ${VM}..."
            sleep 2000
      ;;
   *) start_vbox ;;
@@ -104,6 +107,7 @@ run_tests
 case ${VMBACKEND} in
     bhyve) stop_bhyve ;;
     esxi ) stop_vmware
+       sleep 30
        revert_vmware
        ;;
        * ) stop_vbox ;;
