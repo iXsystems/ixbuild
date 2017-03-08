@@ -12,13 +12,13 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Storage tests" "45"
+  set_test_group_text "1 - Create - Storage tests" "46"
   CLASSNAME=ixbuild.resty.functional.create.storage
 
 # Set the default VMBACKEND
 if [ -z "$VMBACKEND" ] ; then
   VMBACKEND="vbox"
-  echo $VMBACKEND
+  echo "No virtual machine backend specified, defaulting to '${VMBACKEND}'."
 fi
 
 # Determine which VM backend to use for storage

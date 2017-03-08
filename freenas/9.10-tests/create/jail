@@ -15,7 +15,7 @@ jail_tests() {
   CLASSNAME=ixbuild.resty.functional.create.jail
 
  if [ -z "$JAILIP" -o -z "$JAILNETMASK" ] ; then
-     echo "Missing the JAILIP / JAILNETMASK settings, test skipped.."
+     echo -n "Missing the JAILIP / JAILNETMASK settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing jail settings"
      return 0

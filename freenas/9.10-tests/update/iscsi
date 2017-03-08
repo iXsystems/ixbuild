@@ -29,7 +29,7 @@ iscsi_tests()
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
   ISCSISTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "ISCSISTATUS: $ISCSISTATUS"   
+  echo -n "ISCSISTATUS: $ISCSISTATUS"   
   echo $ISCSISTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok
@@ -80,7 +80,7 @@ iscsi_tests()
   rest_request "GET" "/services/services/iscsitarget/"
   check_rest_response "200 OK" || return 1
   ISCSISTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "ISCSISTATUS: $ISCSISTATUS"
+  echo -n "ISCSISTATUS: $ISCSISTATUS"
   echo $ISCSISTATUS | grep -q 'STOPPED'
   if [ $? -eq 0 ] ; then
     echo_ok

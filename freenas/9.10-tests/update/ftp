@@ -30,7 +30,7 @@ ftp_tests() {
   rest_request "GET" "/services/services/ftp/"
   check_rest_response "200 OK" || return 1  
   FTPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "FTPSTATUS: $FTPSTATUS"
+  echo -n "FTPSTATUS: $FTPSTATUS"
   echo $FTPSTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok

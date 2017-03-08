@@ -14,7 +14,7 @@ dyndns_tests() {
   CLASSNAME=ixbuild.resty.functional.create.dyndns
 
   if [ -z "$NOIPUSERNAME" -o -z "$NOIPPASSWORD" -o -z "$NOIPHOST" ] ; then
-     echo "Missing the NOIPUSERNAME / NOIPPASSWORD / NOIPHOST settings, test skipped.."
+     echo -n "Missing the NOIPUSERNAME / NOIPPASSWORD / NOIPHOST settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing NOIPUSERNAME settings"
      return 0

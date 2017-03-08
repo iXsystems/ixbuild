@@ -37,7 +37,7 @@ smb_tests()
   rest_request "GET" "/services/services/cifs/"
   check_rest_response "200 OK" || return 1
   CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo -n "CIFSSTATUS: $CIFSSTATUS"
   echo $CIFSSTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok
@@ -97,7 +97,7 @@ smb_tests()
   rest_request "GET" "/services/services/cifs/"
   check_rest_response "200 OK" || return 1
   CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo -n "CIFSSTATUS: $CIFSSTATUS"
   echo $CIFSSTATUS | grep -q 'STOPPED'
   if [ $? -eq 0 ] ; then
     echo_ok

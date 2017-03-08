@@ -36,7 +36,7 @@ afp_tests()
   rest_request "GET" "/services/services/afp/"
   check_rest_response "200 OK" || return 1
   AFPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "AFPSTATUS: $AFPSTATUS"
+  echo -n "AFPSTATUS: $AFPSTATUS"
   echo $AFPSTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok

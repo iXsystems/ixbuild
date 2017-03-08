@@ -14,8 +14,9 @@ ntp_tests() {
   CLASSNAME=ixbuild.resty.functional.create.ntp
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
-     echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
-     return 0
+    echo -n "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+    echo_skipped
+    return 0
   fi
 
   # Configure NTP Settings to prevent offset with Active Directory

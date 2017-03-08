@@ -33,7 +33,7 @@ system_tests() {
   rest_request GET "/system/tunable/"
   check_rest_response "200 OK" || return 1
   TUNSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.tun_var')
-  echo "TUNSTATUS: $TUNSTATUS"
+  echo -n "TUNSTATUS: $TUNSTATUS"
   echo $TUNSTATUS | grep -q 'dummynet_load'
   if [ $? -eq 0 ] ; then
     echo_ok
@@ -59,8 +59,10 @@ system_tests() {
   echo_test_title "Verify system tunable 'dummynet_load'.."
   ssh_test "kldstat -m dummynet"
   if [ ! $? -eq 0 ] ; then
-    echo "KLDSTAT: $KLDSTAT_LINUX_LOAD"
+    echo_fail
     return 1
+  else
+    echo_ok
   fi
 }
 

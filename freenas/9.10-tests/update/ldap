@@ -14,7 +14,7 @@ ldap_tests() {
   CLASSNAME=ixbuild.resty.functional.update.ldap
 
   if [ -z "$LDAPBINDDN2" -o -z "$LDAPBINDPASSWORD2" ] ; then
-     echo "Missing the LDAPBINDDN2 / LDAPBINDPASSWORD2 settings, test skipped.."
+     echo -n "Missing the LDAPBINDDN2 / LDAPBINDPASSWORD2 settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing LDAP settings"
      return 0
@@ -41,7 +41,7 @@ ldap_tests() {
   rest_request GET "/directoryservice/ldap/"
   check_rest_response "200 OK" || return 1
   LDAPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ldap_enable')
-  echo "LDAPSTATUS: $LDAPSTATUS"
+  echo -n "LDAPSTATUS: $LDAPSTATUS"
   echo $LDAPSTATUS | grep -q 'true'
   if [ $? -eq 0 ] ; then
     echo_ok
@@ -137,7 +137,7 @@ ldap_tests() {
   rest_request GET "/directoryservice/ldap/"
   check_rest_response "200 OK" || return 1
   LDAPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ldap_enable')
-  echo "LDAPSTATUS: $LDAPSTATUS"
+  echo -n "LDAPSTATUS: $LDAPSTATUS"
   echo $LDAPSTATUS | grep -q 'false'
   if [ $? -eq 0 ] ; then
     echo_ok

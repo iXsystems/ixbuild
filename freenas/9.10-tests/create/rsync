@@ -25,7 +25,7 @@ rsync_tests() {
   rest_request "GET" "/services/services/rsync/"
   check_rest_response "200 OK" || return 1  
   RSYNCSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "RSYNCSTATUS: $RSYNCSTATUS"
+  echo -n "RSYNCSTATUS: $RSYNCSTATUS"
   echo $RSYNCSTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok

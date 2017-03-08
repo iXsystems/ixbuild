@@ -9,7 +9,7 @@ REQUIRES=""
 export REQUIRES
 
 cronjob_tests() {
-  set_test_group_text "1 - Update - Cron tests" "3"
+  set_test_group_text "1 - Update - Cron tests" "5"
   CLASSNAME=ixbuild.resty.functional.delete.cron
 
   TESTFILE="/tmp/.testFileCreatedViaCronjob"
@@ -17,7 +17,7 @@ cronjob_tests() {
   CRONJOB_ID=1
 
   # Update cronjob test filename in cron_command
-  echo_test_title "Updating cron job status to disabled, updating command.."
+  echo_test_title "Updating cronjob test filename in cron_command.."
   rest_request "PUT" "/tasks/cronjob/${CRONJOB_ID}/" '{ "cron_command": "touch '${UPDATED_TESTFILE}'" }'
   check_rest_response "200"
 

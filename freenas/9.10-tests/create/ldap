@@ -14,7 +14,7 @@ ldap_tests() {
   CLASSNAME=ixbuild.resty.functional.create.ldap
 
   if [ -z "$LDAPBINDDN" -o -z "$LDAPBINDPASSWORD" ] ; then
-     echo "Missing the LDAPBINDDN / LDAPBINDPASSWORD settings, test skipped.."
+     echo -n "Missing the LDAPBINDDN / LDAPBINDPASSWORD settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing LDAP settings"
      return 0

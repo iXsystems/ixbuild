@@ -14,7 +14,7 @@ ad_tests() {
   CLASSNAME=ixbuild.resty.functional.create.ad
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
-     echo "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+     echo -n "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing AD settings"
      return 0
@@ -48,7 +48,7 @@ ad_tests() {
   rest_request "GET" "/services/services/cifs/"
   check_rest_response "200 OK" || return 1
   CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo -n "CIFSSTATUS: $CIFSSTATUS"
   echo $CIFSSTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok
@@ -124,7 +124,7 @@ ad_tests() {
   rest_request GET "/directoryservice/activedirectory/"
   check_rest_response "200 OK" || return 1
   ADSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ad_enable')
-  echo "ADSTATUS: $ADSTATUS"
+  echo -n "ADSTATUS: $ADSTATUS"
   echo $ADSTATUS | grep -q 'false'
   if [ $? -eq 0 ] ; then
     echo_ok
@@ -136,7 +136,7 @@ ad_tests() {
   rest_request "GET" "/services/services/cifs/"
   check_rest_response "200 OK" || return 1
   CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "CIFSSTATUS: $CIFSSTATUS"
+  echo -n "CIFSSTATUS: $CIFSSTATUS"
   echo $CIFSSTATUS | grep -q 'STOPPED'
   if [ $? -eq 0 ] ; then
     echo_ok

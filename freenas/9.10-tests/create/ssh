@@ -27,7 +27,7 @@ ssh_tests() {
   rest_request "GET" "/services/services/ssh/"
   check_rest_response "200 OK" || return 1
   SSHSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "SSHSTATUS: $SSHSTATUS"
+  echo -n "SSHSTATUS: $SSHSTATUS"
   echo $SSHSTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok

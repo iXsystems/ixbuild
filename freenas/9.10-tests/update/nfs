@@ -24,7 +24,7 @@ nfs_tests()
   rest_request "GET" "/services/services/nfs/"
   check_rest_response "200 OK" || return 1  
   NFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "NFSSTATUS: $NFSSTATUS"
+  echo -n "NFSSTATUS: $NFSSTATUS"
   echo $NFSSTATUS | grep -q 'RUNNING'
   if [ $? -eq 0 ] ; then
     echo_ok

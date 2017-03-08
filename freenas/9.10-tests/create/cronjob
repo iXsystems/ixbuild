@@ -40,10 +40,6 @@ cronjob_tests() {
   else
     echo_fail
   fi
-
-  # Clean up
-  rest_request "DELETE" "/tasks/cronjob/1/"
-  ssh_test "rm ${TESTFILE}"
 }
 
 # Init function, this is called after module is sourced

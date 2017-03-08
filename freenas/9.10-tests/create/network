@@ -27,7 +27,7 @@ network_tests()
   echo_ok
 
   # Add $FNASTESTIP to database
-  "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "em0" }'
+  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "em0" }'
 
   # Wait 30 seconds before trying more REST queries again
   sleep 30
