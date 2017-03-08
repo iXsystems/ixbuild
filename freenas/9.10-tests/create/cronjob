@@ -5,7 +5,7 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="storage ssh"
+REQUIRES="storage"
 export REQUIRES
 
 cronjob_tests() {
@@ -18,7 +18,7 @@ cronjob_tests() {
   rest_request "POST" "/tasks/cronjob/" '{ "cron_user": "root", "cron_command": "touch '${TESTFILE}'", "cron_minute": "*/1" }'
   check_rest_response "201 Created"
 
-  echo_test_title "Checking to see if Cronjob was created and enabled"
+  echo_test_title "Checking to see if cronjob was created and enabled"
   rest_request "GET" "/tasks/cronjob/"
   check_rest_response "200 OK" || return 1
   CRONJOBENABLED=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cron_enabled')
@@ -40,6 +40,10 @@ cronjob_tests() {
   else
     echo_fail
   fi
+
+  # Clean up
+  rest_request "DELETE" "/tasks/cronjob/1/"
+  ssh_test "rm ${TESTFILE}"
 }
 
 # Init function, this is called after module is sourced

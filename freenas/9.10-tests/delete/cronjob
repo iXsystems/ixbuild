@@ -1,0 +1,56 @@
+#!/usr/local/bin/bash
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+cronjob_tests() {
+  set_test_group_text "1 - Delete - Cron tests" "3"
+  CLASSNAME=ixbuild.resty.functional.delete.cron
+
+  TESTFILE="/tmp/.testFileUpdatedViaCronjob"
+  CRONJOB_ID=1
+
+  # Delete cronjob from API
+  echo_test_title "Deleting cron job which will run every minute"
+  rest_request "DELETE" "/tasks/cronjob/${CRONJOB_ID}/"
+  check_rest_response "204"
+
+  # Check that cronjob was deleted from API
+  echo_test_title "Check that the API reports the cronjob as deleted.."
+  rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
+  check_rest_response "404"
+
+  # Clean up test file now that the cronjob has been removed
+  ssh_test "rm -f ${TESTFILE}"
+
+  # Give time for cronjob to run again, then ensure no file was created
+  sleep 61
+
+  # Ensure test file does not exist
+  echo_test_title "Verify cronjob has been removed and is no longer creating test file.."
+  ssh_test "test -f ${TESTFILE}"
+  if [ $? -eq 1 ]; then
+    echo_ok
+  else
+    echo_failed
+  fi
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+cronjob_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) cronjob_tests ;;
+     COMPLETE) cronjob_tests ;;
+    BENCHMARK) ;;
+            *) cronjob_tests ;;
+  esac
+}
