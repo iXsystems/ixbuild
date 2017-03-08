@@ -241,7 +241,11 @@ ssh_test()
   fi
 
   # Make SSH connection
-  sshpass -p ${fpass} ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${fuser}@${sshserver} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
+  sshpass -p ${fpass} \
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${fuser}@${sshserver} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
   SSH_COMMAND_RESULTS=$?
 
   if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
@@ -249,6 +253,8 @@ ssh_test()
     FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
     return 1
   fi
+
+  return $SSH_COMMAND_RESULTS
 }
 
 # $1 = Command to run
@@ -272,7 +278,11 @@ osx_test()
   fi
 
   # Make SSH connection
-  sshpass -p ${OSX_PASSWORD} ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${OSX_USERNAME}@${OSX_HOST} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
+  sshpass -p ${OSX_PASSWORD} \
+    ssh -o StrictHostKeyChecking=no
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${OSX_USERNAME}@${OSX_HOST} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
   SSH_COMMAND_RESULTS=$?
 
   if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
