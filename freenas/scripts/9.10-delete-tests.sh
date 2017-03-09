@@ -84,4 +84,9 @@ echo "$RESULT - $TOTALCOUNT tests run - REST API testing complete!"
 
 finish_xml_results "$TOTALCOUNT"
 
+# Grab some additional files for debugging when needed
+echo "Copying log files to ${WORKSPACE}.."
+sshpass -p $fpass scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o VerifyHostKeyDNS=no $fuser@$FNASTESTIP:/var/log/messages ${WORKSPACE}/messages
+sshpass -p $fpass scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o VerifyHostKeyDNS=no $fuser@$FNASTESTIP:/var/log/debug.log ${WORKSPACE}/debug.log
+
 exit 0
