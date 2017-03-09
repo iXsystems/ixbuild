@@ -415,7 +415,7 @@ install_vmware()
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before installation finished. Exiting."
-      exit 1
+        break
     fi  
     sleep 2
   done
@@ -458,8 +458,8 @@ boot_vmware()
   while ! grep -q "Starting cron." /tmp/console.log
   do
     if [ $(date +%s) -gt $timeout_when ]; then
-      echo "Timeout reached before bootup finished. Exiting."
-      exit 1
+      echo "Timeout reached before bootup finished."
+      break
     fi  
     sleep 2
   done
