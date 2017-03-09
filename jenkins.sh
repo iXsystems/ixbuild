@@ -23,13 +23,13 @@ export USING_JENKINS="YES"
 
 display_usage() {
 
-	 cat << EOF
+   cat << EOF
 Available Commands:
 
 -- FreeNAS Commands --
       freenas        - Builds FreeNAS release
 freenas-tests        - Runs FreeNAS VM API tests against built release
-freenas-run-tests	-Runs FreeNAS tests with other VM backend
+freenas-run-tests    - Runs FreeNAS tests with other VM backend
 freenas-combo        - Build release and run VM API tests against it automatically
 freenas-ltest        - Runs the FreeNAS "live" tests against a target system
 freenas-lupgrade     - Runs the FreeNAS "live" upgrade against a target system
@@ -53,12 +53,12 @@ publish-iso     - Upload ISO files to ScaleEngine
 publish-iso-edge- Upload ISO files to ScaleEngine (Bleeding Edge)
 publish-pkg     - Upload PKG files to ScaleEngine
 publish-pkg-edge- Upload PKG files to ScaleEngine (Bleeding Edge)
-promote-pkg	- Promote packages from UNSTABLE -> STABLE
+promote-pkg  - Promote packages from UNSTABLE -> STABLE
 trueos-docs     - Create TrueOS handbook
 push-trueos-docs- Upload TrueOS handbook
-lumina-docs	- Create lumina handbook
+lumina-docs  - Create lumina handbook
 push-lumina-docs- Upload lumina handbook
-ports-tests	- Test building a repo port files
+ports-tests  - Test building a repo port files
 sysadm-docs     - Build SysAdm handbook
 sysadm-api      - Build SysAdm API handbook
 
@@ -111,7 +111,7 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
       iocage_pkgs_push) jenkins_iocage_pkgs_push ;;
                freenas) jenkins_freenas ;;
          freenas-tests) jenkins_freenas_tests ;;
-	 freenas-run-tests) jenkins_freenas_run_tests ;;
+     freenas-run-tests) jenkins_freenas_run_tests ;;
          freenas-ltest) jenkins_freenas_live_tests ;;
       freenas-lupgrade) jenkins_freenas_live_upgrade ;;
        freenas-tn-docs) jenkins_truenas_docs ;;
@@ -123,11 +123,11 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
   freenas-push-nightly) jenkins_freenas_push_nightly ;;
           freenas-push) jenkins_freenas_push ;;
          freenas-combo) jenkins_freenas
-   		        jenkins_freenas_tests ;;
-	     mkcustard)	jenkins_mkcustard ;;
+               jenkins_freenas_tests ;;
+             mkcustard)  jenkins_mkcustard ;;
            ports-tests) jenkins_ports_tests ;;
                      *) echo "Invalid command: $1" 
-         		display_usage
+             display_usage
          exit 1
          ;;
 esac

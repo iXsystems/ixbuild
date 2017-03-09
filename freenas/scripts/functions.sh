@@ -70,16 +70,16 @@ save_artifacts_on_fail()
 
   # Move artifacts to pre-defined location
   if [ -n "$ARTIFACTONFAIL" ] ; then
-      if [ -n "$WORKSPACE" ] ; then
-        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-            mkdir "${WORKSPACE}/artifacts"
-            chown jenkins:jenkins "${WORKSPACE}/artifacts"
-              if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
-                mkdir "${WORKSPACE}/artifacts/logs"
-	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
-		  mkdir "${WORKSPACE}/artifacts/ports"
-                  chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
+    if [ -n "$WORKSPACE" ] ; then
+      if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+        mkdir "${WORKSPACE}/artifacts"
+        chown jenkins:jenkins "${WORKSPACE}/artifacts"
+        if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
+          mkdir "${WORKSPACE}/artifacts/logs"
+          chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
+          if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
+            mkdir "${WORKSPACE}/artifacts/ports"
+            chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
           fi
         fi
       fi
@@ -98,15 +98,15 @@ save_artifacts_on_success()
   # Move artifacts to pre-defined location
   if [ -n "$ARTIFACTONSUCCESS" ] ; then
     if [ -n "$WORKSPACE" ] ; then
-        if [ ! -d "${WORKSPACE}/artifacts" ] ; then
-            mkdir "${WORKSPACE}/artifacts"
-            chown jenkins:jenkins "${WORKSPACE}/artifacts"
-              if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
-                mkdir "${WORKSPACE}/artifacts/logs"
-	        chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
-                if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
-		  mkdir "${WORKSPACE}/artifacts/ports"
-                  chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
+      if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+        mkdir "${WORKSPACE}/artifacts"
+        chown jenkins:jenkins "${WORKSPACE}/artifacts"
+        if [ ! -d "${WORKSPACE}/artifacts/logs" ] ; then
+          mkdir "${WORKSPACE}/artifacts/logs"
+          chown jenkins:jenkins "${WORKSPACE}/artifacts/logs"
+          if [ ! -d "${WORKSPACE}/artifacts/ports" ] ; then
+            mkdir "${WORKSPACE}/artifacts/ports"
+            chown jenkins:jenkins "${WORKSPACE}/artifacts/ports"
           fi
         fi
       fi

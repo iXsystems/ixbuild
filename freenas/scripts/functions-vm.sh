@@ -363,3 +363,105 @@ cat /tmp/$VM-tests-delete.log
 exit $res
 }
 
+revert_vmware()
+{
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
+  fi
+
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
+    return 1
+  fi
+
+  #vmware-cmd revertsnapshot
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" revertsnapshot
+  return $?
+}
+
+# $1 = Optional timeout (seconds)
+install_vmware()
+{
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
+  fi
+
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
+    return 1
+  fi
+
+  #vmware-cmd start
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" start
+  CMD_RESULTS=$?
+
+  echo "Installing ${VM}..."
+
+  #Get console output for install
+  tpid=$!
+  tail -f /tmp/console.log 2>/dev/null &
+
+  #Wait for install to finish
+  sleep 960
+
+  #Stop console output
+  kill -9 $tpid
+
+  return $CMD_RESULTS
+}
+
+# $1 = Optional timeout (seconds)
+boot_vmware()
+{
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
+  fi
+
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
+    return 1
+  fi
+
+  #vmware-cmd start
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" start
+  CMD_RESULTS=$?
+
+  echo "Booting ${VM}..."
+
+  #Get console output for bootup
+  tpid=$!
+  tail -f /tmp/console.log 2>/dev/null &
+
+  #Wait for bootup to finish
+  sleep 2000
+
+  return $CMD_RESULTS
+}
+
+stop_vmware()
+{
+  if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then 
+    echo -n "VMWare start|stop|revert commands require the VI_SERVER, "
+    echo "VI_USERNAME and VI_PASSWORD config variables to be set in the build.conf"
+    return 1
+  fi
+
+  pkg info "net/vmware-vsphere-cli" >/dev/null 2>/dev/null
+    if [ "$?" != "0" ]; then
+    echo "Please install net/vmware-vsphere-cli"
+    return 1
+  fi
+
+  #vmware-cmd stop
+  vmware-cmd -U $VI_USERNAME -P $VI_PASSWORD -H $VI_SERVER "${VI_CFG}" stop hard
+  return $?
+}

@@ -251,6 +251,37 @@ ssh_test()
   fi
 }
 
+# $1 = Command to run
+# $2 = Command to run if $1 fails
+# $3 = Optional timeout
+osx_test()
+{
+  export TESTSTDOUT="/tmp/.osxCmdTestStdOut"
+  export TESTSTDERR="/tmp/.osxCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  if [ -z "${OSX_HOST}" ] ; then
+    echo "SSH server IP address required for osx_test()."
+    return 1
+  fi
+
+  if [ -z "${OSX_USERNAME}" ] || [ -z "${OSX_PASSWORD}" ] ; then
+    echo "SSH server username and password required for osx_test()."
+    return 1
+  fi
+
+  # Make SSH connection
+  sshpass -p ${OSX_PASSWORD} ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${OSX_USERNAME}@${OSX_HOST} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
+  SSH_COMMAND_RESULTS=$?
+
+  if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
+    echo "Failed on test module: $1"
+    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
+    return 1
+  fi
+}
+
 echo_ok()
 {
   echo -e " - OK"
@@ -366,9 +397,9 @@ run_module() {
 
       echo $FAILEDMODULES | grep -q ":::${i}:::"
       if [ $? -eq 0 ] ; then
-	CLASSNAME="$1"
-	TESTNAME="all"
-	TIMESTART="0"
+        CLASSNAME="$1"
+        TESTNAME="all"
+        TIMESTART="0"
         TOTALCOUNT=`expr $TOTALCOUNT + 1`
         echo "***** Skipping test module: $1 ($i failed) *****"
         add_xml_result "skipped" "Skipped due to $i requirement failing"

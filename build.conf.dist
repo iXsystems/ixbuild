@@ -24,9 +24,10 @@ export SFTPWORKDIR
 # export IXBUILDBRANCH
 
 # (Optional) Settings for vmware-vsphere-cli
-# VI_HOST
+# VI_SERVER
 # VI_USERNAME
 # VI_PASSWORD
+# VI_CFG
 
 ###########################################################################
 # FreeNAS specific settings
@@ -72,6 +73,12 @@ export SFTPWORKDIR
 # ADUSERNAME=""
 # ADPASSWORD=""
 # export ADUSERNAME ADPASSWORD
+
+# Set this information to use for testing AFP/OSX filesharing
+# OSX_HOST=""
+# OSX_USERNAME=""
+# OSX_PASSWORD=""
+# export OSX_HOST OSX_USERNAME OSX_PASSWORD
 
 # Set this to be the information required for testing LDAP
 # LDAPHOSTNAME=""

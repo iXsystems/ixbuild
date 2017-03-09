@@ -80,12 +80,20 @@ fi
 case ${VMBACKEND} in
      bhyve) start_bhyve ;;
      esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
-	   daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
-	   sleep 30
+     daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
+     sleep 30
            clean_xml_results
-           exit 0
-	   ;;
-	*) start_vbox ;;
+           echo "Shutting down any previous instances of ${VM}.."
+     stop_vmware
+           sleep 60
+           echo "Reverting to snapshot..."
+           revert_vmware
+           sleep 30
+     install_vmware
+           sleep 60
+     boot_vmware
+     ;;
+  *) start_vbox ;;
 esac
 
 # Cleanup old test results before running tests
@@ -97,6 +105,9 @@ run_tests
 # Determine which VM backend to stop
 case ${VMBACKEND} in
     bhyve) stop_bhyve ;;
-    esxi ) stop_esxi ;;
+    esxi ) stop_vmware
+       sleep 30
+       revert_vmware
+       ;;
        * ) stop_vbox ;;
 esac

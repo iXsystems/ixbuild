@@ -38,10 +38,10 @@ while [ $# -gt 0 ] ; do
 
   case "$key" in
     testset|TESTSET) case "$val" in
-			SMOKE|smoke) export TESTSET="SMOKE" ;;
-	  	  COMPLETE|complete) export TESTSET="COMPLETE" ;;
-		BENCHMARK|benchmark) export TESTSET="BENCHMARK" ;;
-			*) ;;
+      SMOKE|smoke) export TESTSET="SMOKE" ;;
+        COMPLETE|complete) export TESTSET="COMPLETE" ;;
+    BENCHMARK|benchmark) export TESTSET="BENCHMARK" ;;
+      *) ;;
                      esac
                      ;; 
      module|MODULE) runmod="$val $runmod" ;;

@@ -23,14 +23,14 @@ fi
 
 # Determine which VM backend to use for storage
 case ${VMBACKEND} in
-         esxi)
-	 	export disk1="da0"
-	 	export disk2="da1"
-	 	;;
-	 vbox)
-         	export disk1="ada1"
-	 	export disk2="ada2"
-         	;;
+  esxi)
+    export disk1="da0"
+    export disk2="da1"
+    ;;
+  vbox)
+    export disk1="ada1"
+    export disk2="ada2"
+    ;;
 esac
 
   # Check getting disks

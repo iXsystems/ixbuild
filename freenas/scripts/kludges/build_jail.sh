@@ -7,15 +7,15 @@
 # KPM - 6-5-2015 - Pulled from poudriere so we can build ports on -CURRENT
 # Set specified version into login.conf
 update_version_env() {
-	echo "Applying kludge to set UNAME_r to $1"
-        local release="$1"
-        local login_env osversion
-                
-        osversion=`awk '/\#define __FreeBSD_version/ { print $3 }' ${NANO_WORLDDIR}/usr/include/sys/param.h`
-        login_env=",UNAME_r=${release% *},UNAME_v=FreeBSD ${release},OSVERSION=${osversion}"
-        
-        sed -i "" -e "s/,UNAME_r.*:/:/ ; s/:\(setenv.*\):/:\1${login_env}:/" ${NANO_WORLDDIR}/etc/login.conf
-        cap_mkdb ${NANO_WORLDDIR}/etc/login.conf
+  echo "Applying kludge to set UNAME_r to $1"
+  local release="$1"
+  local login_env osversion
+
+  osversion=`awk '/\#define __FreeBSD_version/ { print $3 }' ${NANO_WORLDDIR}/usr/include/sys/param.h`
+  login_env=",UNAME_r=${release% *},UNAME_v=FreeBSD ${release},OSVERSION=${osversion}"
+
+  sed -i "" -e "s/,UNAME_r.*:/:/ ; s/:\(setenv.*\):/:\1${login_env}:/" ${NANO_WORLDDIR}/etc/login.conf
+  cap_mkdb ${NANO_WORLDDIR}/etc/login.conf
 }  
 
 umask 022
