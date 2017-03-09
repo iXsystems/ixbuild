@@ -42,7 +42,7 @@ cronjob_tests() {
 
   # Ensure updated test file does exist
   echo_test_title "Verify cronjob has created the test file.."
-  ssh_test "test -f ${TESTFILE}"
+  ssh_test "test -f ${UPDATED_TESTFILE}"
   if [ $? -eq 0 ]; then
     echo_ok
   else

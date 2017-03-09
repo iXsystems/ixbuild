@@ -245,7 +245,7 @@ ssh_test()
     ssh -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
-        ${fuser}@${sshserver} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
+        ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
   SSH_COMMAND_RESULTS=$?
 
   if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
@@ -282,7 +282,7 @@ osx_test()
     ssh -o StrictHostKeyChecking=no
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
-        ${OSX_USERNAME}@${OSX_HOST} "${1}" >$TESTSTDOUT 2>$TESTSTDERR
+        ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
   SSH_COMMAND_RESULTS=$?
 
   if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then

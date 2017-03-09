@@ -33,7 +33,7 @@ cronjob_tests() {
 
   # Ensure test file does not exist
   echo_test_title "Verify cronjob has been removed and is no longer creating test file.."
-  ssh_test "test -f ${TESTFILE}; test $? -eq 1"
+  ssh_test 'test -f '${TESTFILE}'; test $? -eq 1'
   if [ $? -eq 0 ]; then
     echo_ok
   else
