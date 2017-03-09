@@ -407,7 +407,7 @@ install_vmware()
   tpid=$!
   tail -f /tmp/console.log 2>/dev/null &
 
-  timeout_seconds=720
+  timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   # Wait for installation to finish
@@ -451,7 +451,7 @@ boot_vmware()
   tpid=$!
   tail -f /tmp/console.log 2>/dev/null &
 
-  timeout_seconds=2000
+  timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   # Wait for bootup to finish
