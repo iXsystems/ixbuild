@@ -455,7 +455,7 @@ boot_vmware()
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   # Wait for bootup to finish
-  while ! grep -q "Starting cron." /tmp/console.log
+  while ! grep -q "Starting nginx." /tmp/console.log
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before bootup finished."
