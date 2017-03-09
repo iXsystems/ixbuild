@@ -105,9 +105,6 @@ run_tests
 # Determine which VM backend to stop
 case ${VMBACKEND} in
     bhyve) stop_bhyve ;;
-    esxi ) stop_vmware
-       sleep 30
-       revert_vmware
-       ;;
+    esxi ) stop_vmware ;;
        * ) stop_vbox ;;
 esac
