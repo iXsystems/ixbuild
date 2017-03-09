@@ -407,8 +407,18 @@ install_vmware()
   tpid=$!
   tail -f /tmp/console.log 2>/dev/null &
 
-  #Wait for install to finish
-  sleep 960
+  timeout_seconds=720
+  timeout_when=$(( $(date +%s) + $timeout_seconds ))
+
+  # Wait for installation to finish
+  while ! grep -q "Installation finished. No error reported." /tmp/console.log
+  do
+    if [ $(date +%s) -gt $timeout_when ]; then
+      echo "Timeout reached before installation finished. Exiting."
+      exit 1
+    fi  
+    sleep 2
+  done
 
   #Stop console output
   kill -9 $tpid
@@ -441,8 +451,18 @@ boot_vmware()
   tpid=$!
   tail -f /tmp/console.log 2>/dev/null &
 
-  #Wait for bootup to finish
-  sleep 2000
+  timeout_seconds=2000
+  timeout_when=$(( $(date +%s) + $timeout_seconds ))
+
+  # Wait for bootup to finish
+  while ! grep -q "Starting cron." /tmp/console.log
+  do
+    if [ $(date +%s) -gt $timeout_when ]; then
+      echo "Timeout reached before bootup finished. Exiting."
+      exit 1
+    fi  
+    sleep 2
+  done
 
   return $CMD_RESULTS
 }
