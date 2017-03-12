@@ -35,7 +35,7 @@ create_dist_files() {
   cd ${WORLDSRC}/release
   make clean ${SYS_MAKEFLAGS}
 
-  # Dirty dirty hack to get llvm39 into our base packages
+  # Dirty dirty hack to get llvm40 into our base packages
   # specifically for buildign in poudriere
   rm -rf ${DISTDIR}/llvm-src 2>/dev/null
   chflags -R noschg ${DISTDIR}/llvm-src 2>/dev/null
@@ -48,9 +48,9 @@ create_dist_files() {
      exit 1
   fi
 
-  pkg info -l llvm39 | tail -n +2 | awk '{print $1}' > /tmp/.llvmPlist
+  pkg info -l llvm40 | tail -n +2 | awk '{print $1}' > /tmp/.llvmPlist
 
-  echo "Extracting llvm39 to base"
+  echo "Extracting llvm40 to base"
   tar cvf - -T /tmp/.llvmPlist 2>/dev/null | tar xvpf - -C ${DISTDIR}/llvm-src
 
   tar cvJf ${DISTDIR}/base.txz -C ${DISTDIR}/llvm-src .
