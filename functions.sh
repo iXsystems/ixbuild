@@ -377,6 +377,23 @@ jenkins_publish_pkg()
 
 }
 
+jenkins_publish_pkg_ipfs()
+{
+  if [ ! -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
+    echo "Missing packages to push!"
+    exit 1
+  fi
+
+  # Copy packages
+  go-ipfs add -r -w --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  # TODO
+  # Pruning of old pinned hashes
+  # Publish HASH to trueos-ipfs-unstable file
+
+}
+
 jenkins_promote_pkg()
 {
   # Set target locations
