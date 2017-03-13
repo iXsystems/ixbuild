@@ -1,0 +1,60 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+system_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "1 - System tests" "7"
+
+  echo_test_title "Checking system hardware.."
+  GET /system/info/hardware/
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system load average.."  
+  GET /system/info/load_avg/
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system version.."
+  GET /system/info/version/
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system uname.."
+  GET /system/info/uname_full/
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system ui.."
+  GET /system/ui/
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system general.."
+  GET /system/general/
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system time.."
+  GET /system/time/
+  check_rest_response "200 OK"
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+system_init()
+{
+  # Run all the system tests
+  case $TESTSET in
+        SMOKE) system_tests ; return $? ;;
+     COMPLETE) system_tests ; return $? ;;
+    BENCHMARK) system_tests ; return $? ;;
+            *) system_tests ; return $? ;;
+  esac
+}

@@ -1085,8 +1085,8 @@ jenkins_freenas_tests()
 
 jenkins_freenas_run_tests()
 {
+if [ -n "$FREENASLEGACY" ] ; then
   create_workdir
-
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
   echo ""
@@ -1125,6 +1125,16 @@ jenkins_freenas_run_tests()
   kill -9 $tpid 
   echo ""
   sleep 10
+else
+  echo "Running API v2.0 tests"
+  touch /tmp/$VM-tests-v2.0.log 2>/dev/null
+  tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
+  tpid=$!
+  ./10-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
+  kill -9 $tpid
+  echo ""
+  sleep 10
+fi
 
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
