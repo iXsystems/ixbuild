@@ -11,20 +11,33 @@ export REQUIRES
 
 afp_tests()
 {
+  # Set the test count based on config settings
+  TESTS_CNT="7"
+  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+    TESTS_CNT="10"
+  fi
+
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - AFP tests" "6"
+  set_test_group_text "1 - Create - AFP tests" "${TESTS_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.afp
 
+  AFP_SHARE="My AFP Share"
+  AFP_PATH="/mnt/tank/afp"
+
   echo_test_title "Creating AFP dataset"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Enabling AFP service"
-  rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true }'
+  if [ -z "${BRIDGEIP}" ]; then
+    rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true, "afp_srv_bindip": "'"${BRIDGEIP}"'" }'
+  else
+    rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true }'
+  fi
   check_rest_response "200 OK" || return 1
 
   echo_test_title "Creating a AFP share on /mnt/tank/afp"
-  rest_request "POST" "/sharing/afp/" '{ "afp_name": "My AFP share", "afp_path": "/mnt/tank/afp" }'
+  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "/mnt/tank/afp" }'
   check_rest_response "201 Created" || return 1
 
   # Now start the service
@@ -44,11 +57,52 @@ afp_tests()
     echo_fail
   fi
 
-  echo_test_title "Changing permissions on /mnt/tank/afp"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/afp", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  echo_test_title "Changing permissions on ${AFP_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
-  # At this time I'm not sure how to mount AFP on FreeBSD for testing
+  # Verify mountability and permissions of AFP share
+  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+    # Mount share on OSX system and create a test file
+    echo_test_title "Mounting AFP share via OSX and creating a test file"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      return 1
+    fi
+
+    # Move test file to a new location on the AFP share
+    echo_test_title "Moving AFP test file into a new directory"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'/tmp" && mv "/Volumes/'"${AFP_SHARE}"'/testfile.txt" "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt"'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      return 1
+    fi
+
+    # Delete test file and test directory from AFP share
+    echo_test_title "Deleting test file and directory from AFP share"
+    osx_test 'rm -f "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${AFP_SHARE}"'/tmp" && find -- "/Volumes/'"${AFP_SHARE}"'/" -prune -type d -empty | grep -q .'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      return 1
+    fi
+
+    # Clean up mounted AFP share
+    echo_test_title "Unmount AFP share"
+    osx_test 'umount "/Volumes/'"${AFP_SHARE}"'"'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+    fi
+  fi
+
   return 0
 }
 
