@@ -160,10 +160,14 @@ get_bedir()
     eval $BUILDOPTS
   fi
 
+  export BEDIR="${FNASBDIR}/_BE"
+  return 0
+
+  # Not reached
   if [ -d "${FNASBDIR}/${PROFILE}/_BE" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
     return 0
-  fi 
+  fi
 
   if [ "${GITFNASBRANCH}" != "master" ] ; then
     export BEDIR="${FNASBDIR}/_BE"

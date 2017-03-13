@@ -918,6 +918,11 @@ get_bedir()
     eval $BUILDOPTS
   fi
 
+  # Building profiles in a sub-dir was reverted
+  export BEDIR="${FNASBDIR}/_BE"
+  return 0
+
+  # Not reached
   if [ -d "${FNASBDIR}/${PROFILE}/_BE" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
     return 0
