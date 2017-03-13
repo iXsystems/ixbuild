@@ -25,6 +25,9 @@ afp_tests()
   AFP_SHARE="My AFP Share"
   AFP_PATH="/mnt/tank/afp"
 
+  # Clean up any leftover items from previous failed AFP runs
+  osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
+
   echo_test_title "Updating AFP service"
   rest_request "PUT" "/services/afp/" '{ "afp_srv_connections_limit": "100"  }'
   check_rest_response "200" || return 1

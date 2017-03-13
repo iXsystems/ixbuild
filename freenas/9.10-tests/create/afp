@@ -11,6 +11,7 @@ export REQUIRES
 
 afp_tests()
 {
+
   # Set the test count based on config settings
   TESTS_CNT="7"
   if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
@@ -23,6 +24,9 @@ afp_tests()
 
   AFP_SHARE="My AFP Share"
   AFP_PATH="/mnt/tank/afp"
+
+  # Clean up any leftover items from previous failed AFP runs
+  osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
 
   echo_test_title "Creating AFP dataset"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
