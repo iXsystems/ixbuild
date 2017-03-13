@@ -11,22 +11,21 @@ export REQUIRES
 
 afp_tests()
 {
+  AFP_SHARE="My AFP Share"
+  AFP_PATH="/mnt/tank/afp"
 
   # Set the test count based on config settings
   TEST_CNT="2"
   if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
     TEST_CNT="6"
+
+    # Clean up any leftover items from previous failed AFP runs
+    osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
   fi
 
   # Set the group text and number of tests
   set_test_group_text "2 - Update - AFP tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.update.afp
-
-  AFP_SHARE="My AFP Share"
-  AFP_PATH="/mnt/tank/afp"
-
-  # Clean up any leftover items from previous failed AFP runs
-  osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
 
   echo_test_title "Updating AFP service"
   rest_request "PUT" "/services/afp/" '{ "afp_srv_connections_limit": "100"  }'
