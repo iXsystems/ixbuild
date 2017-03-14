@@ -1126,6 +1126,15 @@ if [ -n "$FREENASLEGACY" ] ; then
   echo ""
   sleep 10
 else
+  create_workdir
+  cd ${TBUILDDIR}/scripts/
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+  echo ""
+  sleep 10
+  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+  echo ""
+  echo "Output from REST API calls:"
+  echo "-----------------------------------------"
   echo "Running API v2.0 tests"
   touch /tmp/$VM-tests-v2.0.log 2>/dev/null
   tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
