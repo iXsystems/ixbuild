@@ -13,33 +13,34 @@ system_tests()
 {
   # Set the group text and number of tests
   set_test_group_text "1 - System tests" "7"
+  CLASSNAME=ixbuild.resty.functional.system
 
   echo_test_title "Checking system hardware.."
-  GET /system/info/hardware/
+  rest_request "GET" "/system/info/hardware/"
   check_rest_response "200 OK"
 
   echo_test_title "Checking system load average.."  
-  GET /system/info/load_avg/
+  rest_request "GET" "/system/info/load_avg/"
   check_rest_response "200 OK"
 
   echo_test_title "Checking system version.."
-  GET /system/info/version/
+  rest_request "GET" "/system/info/version/"
   check_rest_response "200 OK"
 
   echo_test_title "Checking system uname.."
-  GET /system/info/uname_full/
+  rest_request "GET" "/system/info/uname_full/"
   check_rest_response "200 OK"
 
   echo_test_title "Checking system ui.."
-  GET /system/ui/
+  rest_request "GET" "/system/ui/"
   check_rest_response "200 OK"
 
   echo_test_title "Checking system general.."
-  GET /system/general/
+  rest_request "GET" "/system/general/"
   check_rest_response "200 OK"
 
   echo_test_title "Checking system time.."
-  GET /system/time/
+  rest_request "GET" "/system/time/"
   check_rest_response "200 OK"
 
   return 0
