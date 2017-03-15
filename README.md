@@ -145,9 +145,14 @@ FreeNAS
  # cd freenas/scripts && ./9.10-delete-tests.sh
 ```
 
-FreeNAS
+Corral
 ```
  # cd freenas/scripts && ./10-tests.sh
+```
+
+Corral CLI (from a Corral host only)
+```
+cli -D_batch=yes -Dexit_on_error=yes -e 'source ${cli_src_path + "/examples/freenas-test/run.cli"}'
 ```
 
 ```
