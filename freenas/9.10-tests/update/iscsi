@@ -27,15 +27,7 @@ iscsi_tests()
 
   echo_test_title "Verify the iSCSI service is enabled"
   rest_request "GET" "/services/services/iscsitarget/"
-  check_rest_response "200 OK" || return 1
-  ISCSISTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "ISCSISTATUS: $ISCSISTATUS"   
-  echo $ISCSISTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "RUNNING"
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
@@ -78,16 +70,9 @@ iscsi_tests()
 
   echo_test_title "Verify the iSCSI service is disabled"
   rest_request "GET" "/services/services/iscsitarget/"
-  check_rest_response "200 OK" || return 1
-  ISCSISTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "ISCSISTATUS: $ISCSISTATUS"
-  echo $ISCSISTATUS | grep -q 'STOPPED'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "STOPPED"
 
+  return 0
 }
 
 # Init function, this is called after module is sourced

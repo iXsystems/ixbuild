@@ -16,7 +16,7 @@ afp_tests()
 
   # Set the test count based on config settings
   TEST_CNT="2"
-  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+  if [ -n "${OSX_HOST}" -o -n "${BRIDGEIP}" ]; then
     TEST_CNT="6"
 
     # Clean up any leftover items from previous failed AFP runs
@@ -33,56 +33,29 @@ afp_tests()
 
   echo_test_title "Checking to see if AFP service is enabled"
   rest_request "GET" "/services/services/afp/"
-  check_rest_response "200 OK" || return 1
-  AFPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "AFPSTATUS: $AFPSTATUS"
-  echo $AFPSTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "RUNNING" || return 1
 
   # Verify mountability and permissions of AFP share after config changes
-  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+  if [ -n "${OSX_HOST}" -o -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
     echo_test_title "Mounting AFP share via OSX and creating a test file"
     osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      return 1
-    fi  
+    check_exit_status || return 1
 
     # Move test file to a new location on the AFP share
     echo_test_title "Moving AFP test file into a new directory"
     osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'/tmp" && mv "/Volumes/'"${AFP_SHARE}"'/testfile.txt" "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt"'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      return 1
-    fi  
+    check_exit_status || return 1
 
     # Delete test file and test directory from AFP share
     echo_test_title "Deleting test file and directory from AFP share"
     osx_test 'rm -f "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${AFP_SHARE}"'/tmp" && find -- "/Volumes/'"${AFP_SHARE}"'/" -prune -type d -empty | grep -q .'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      return 1
-    fi  
+    check_exit_status || return 1
 
     # Clean up mounted AFP share
     echo_test_title "Unmount AFP share"
     osx_test 'umount "/Volumes/'"${AFP_SHARE}"'"'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-    fi  
+    check_exit_status || return 1
   fi  
 }
 

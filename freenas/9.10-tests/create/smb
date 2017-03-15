@@ -27,14 +27,8 @@ smb_tests()
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_rest_response "200 OK" || return 1
-  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "CIFSSTATUS: $CIFSSTATUS"
-  echo $CIFSSTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-
+  check_service_status -q "return this.srv_state" "RUNNING"
+  check_exit_status -q && echo_ok || (
     echo_test_title "Enabling CIFS service"
     rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
     check_rest_response "200 OK"
@@ -43,24 +37,14 @@ smb_tests()
     echo_test_title "Starting CIFS service"
     rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
     check_rest_response "200 OK"
-
-    echo_ok
-  fi
+  )
 
   # Wait a moment for samba to spin up
   sleep 4
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_rest_response "200 OK" || return 1
-  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "CIFSSTATUS: $CIFSSTATUS"
-  echo $CIFSSTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "RUNNING" || return 1
 
   echo_test_title "Changing permissions on /mnt/tank/cifs"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
@@ -105,22 +89,14 @@ smb_tests()
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "204"
 
-    # Now stop the service
-    echo_test_title "Stopping CIFS service"
-    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
-    check_rest_response "200 OK"
+  # Now stop the service
+  echo_test_title "Stopping CIFS service"
+  rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
 
   echo_test_title "Verify CIFS service is disabled"
   rest_request "GET" "/services/services/cifs/"
-  check_rest_response "200 OK" || return 1
-  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "CIFSSTATUS: $CIFSSTATUS"
-  echo $CIFSSTATUS | grep -q 'STOPPED'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "STOPPED"
 }
 
 # Init function, this is called after module is sourced

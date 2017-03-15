@@ -23,15 +23,7 @@ rsync_tests() {
 
   echo_test_title "Checking to see if rsync service is enabled"
   rest_request "GET" "/services/services/rsync/"
-  check_rest_response "200 OK" || return 1  
-  RSYNCSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "RSYNCSTATUS: $RSYNCSTATUS"
-  echo $RSYNCSTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "RUNNING" || return 1
 
   echo_test_title "Creating rsync resource"
   rest_request "POST" "/services/rsyncmod/" '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/tank/share" }'

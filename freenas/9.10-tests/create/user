@@ -24,7 +24,7 @@ user_tests() {
   check_rest_response "201 Created"
 
   # Get the ID of this user
-  userid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
+  userid=`cat ${RESTYOUT} | ${JSAWK} 'return this.id'`
 
   # Set the user to part of the 'wheel' / 'ftp' groups
   echo_test_title "Setting user groups: wheel,ftp"
@@ -33,7 +33,7 @@ user_tests() {
 
   # Create temporary directory for output if needed
   if [ ! -d "${FNASBDIR}" ] ; then
-  mkdir "${FNASBDIR}"
+    mkdir "${FNASBDIR}"
   fi
 
   # Save the ID of this user for other jobs

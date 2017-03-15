@@ -31,15 +31,7 @@ system_tests() {
   # Check loader tunable
   echo_test_title "Checking system tunable 'dummynet'.."
   rest_request GET "/system/tunable/"
-  check_rest_response "200 OK" || return 1
-  TUNSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.tun_var')
-  echo -n "TUNSTATUS: $TUNSTATUS"
-  echo $TUNSTATUS | grep -q 'dummynet_load'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.tun_var" "dummynet_load"
 
   # Reboot system to enable tunable
   echo_test_title "Reboot system to enable tunable.."
@@ -58,12 +50,7 @@ system_tests() {
   # Verify loader tunable
   echo_test_title "Verify system tunable 'dummynet_load'.."
   ssh_test "kldstat -m dummynet"
-  if [ ! $? -eq 0 ] ; then
-    echo_fail
-    return 1
-  else
-    echo_ok
-  fi
+  check_exit_status || return 1
 }
 
 # Init function, this is called after module is sourced

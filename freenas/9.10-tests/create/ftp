@@ -23,15 +23,7 @@ ftp_tests() {
 
   echo_test_title "Checking to see if FTP service is enabled"
   rest_request "GET" "/services/services/ftp/"
-  check_rest_response "200 OK" || return 1  
-  FTPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "FTPSTATUS: $FTPSTATUS"
-  echo $FTPSTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "RUNNING"
 
   echo_test_title "Fetching file via FTP"
   rc_test "ftp -o /tmp/ftpfile ftp://testuser:test@${ip}/.cshrc"
