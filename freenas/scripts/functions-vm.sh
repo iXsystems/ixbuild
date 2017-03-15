@@ -455,12 +455,13 @@ boot_vmware()
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   # Wait for bootup to finish
-  while ! grep -q "Starting nginx." /tmp/console.log
+  # Wait for bootup to finish
+  while ! ((grep -q "Starting nginx." /tmp/console.log) || (grep -q "Plugin loaded: SSHPlugin" /tmp/console.log))
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before bootup finished."
       break
-    fi  
+    fi
     sleep 2
   done
 

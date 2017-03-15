@@ -11,8 +11,20 @@ export REQUIRES
 
 afp_tests()
 {
+  AFP_SHARE="My AFP Share"
+  AFP_PATH="/mnt/tank/afp"
+
+  # Set the test count based on config settings
+  TEST_CNT="2"
+  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+    TEST_CNT="6"
+
+    # Clean up any leftover items from previous failed AFP runs
+    osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
+  fi
+
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - AFP tests" "2"
+  set_test_group_text "2 - Update - AFP tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.update.afp
 
   echo_test_title "Updating AFP service"
@@ -31,6 +43,47 @@ afp_tests()
     echo_fail
   fi
 
+  # Verify mountability and permissions of AFP share after config changes
+  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+    # Mount share on OSX system and create a test file
+    echo_test_title "Mounting AFP share via OSX and creating a test file"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      return 1
+    fi  
+
+    # Move test file to a new location on the AFP share
+    echo_test_title "Moving AFP test file into a new directory"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'/tmp" && mv "/Volumes/'"${AFP_SHARE}"'/testfile.txt" "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt"'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      return 1
+    fi  
+
+    # Delete test file and test directory from AFP share
+    echo_test_title "Deleting test file and directory from AFP share"
+    osx_test 'rm -f "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${AFP_SHARE}"'/tmp" && find -- "/Volumes/'"${AFP_SHARE}"'/" -prune -type d -empty | grep -q .'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      return 1
+    fi  
+
+    # Clean up mounted AFP share
+    echo_test_title "Unmount AFP share"
+    osx_test 'umount "/Volumes/'"${AFP_SHARE}"'"'
+    if [ $? -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+    fi  
+  fi  
 }
 
 # Init function, this is called after module is sourced

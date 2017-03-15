@@ -143,57 +143,56 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y sshpass"
 fi
 
-which py27-pytest >/dev/null 2>/dev/null
+which pip3 > /dev/null 2>&1
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest"
-  rc_halt "pkg-static install -y py27-pytest"
+  echo "Installing pip"
+  rc_halt "python3 -m ensurepip"
 fi
 
-which py27-pytest-cache >/dev/null 2>/dev/null
+python3 -c "import pytest" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest-cache"
-  rc_halt "pkg-static install -y py27-pytest-cache"
+  echo "Installing pytest"
+  rc_halt "pip3 install pytest"
 fi
 
-which py27-pytest-capturelog >/dev/null 2>/dev/null
+python3 -c "import pytest_cache" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest-capturelog"
-  rc_halt "pkg-static install -y py27-pytest-capturelog"
+  echo "Installing pytest-cache"
+  rc_halt "pip3 install pytest-cache"
 fi
 
-which py27-pytest-localserver >/dev/null 2>/dev/null
+python3 -c "import pytest_capturelog" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest-localserver"
-  rc_halt "pkg-static install -y py27-pytest-localserver"
+  echo "Installing pytest-capturelog"
+  rc_halt "pip3 install pytest-capturelog"
 fi
 
-which py27-pytest-runner >/dev/null 2>/dev/null
+python3 -c "import pytest_localserver" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest-runner"
-  rc_halt "pkg-static install -y py27-pytest-runner"
+  echo "Installing pytest-localserver"
+  rc_halt "pip3 install pytest-localserver"
 fi
 
-which py27-pytest-cache >/dev/null 2>/dev/null
+python3 -c "import pytest_runner" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest-cache"
-  rc_halt "pkg-static install -y py27-pytest-timeout"
+  echo "Installing pytest-runner"
+  rc_halt "pip3 install pytest-runner"
 fi
 
-which py27-pytest-tornado >/dev/null 2>/dev/null
+python3 -c "import pytest_cache" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest-tornado"
-  rc_halt "pkg-static install -y py27-pytest-tornado"
+  echo "Installing pytest-cache"
+  rc_halt "pip3 install pytest-cache"
 fi
 
-which py27-pytest-xdist >/dev/null 2>/dev/null
+python3 -c "import pytest_tornado" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pytest-xdist"
-  rc_halt "pkg-static install -y py27-pytest-xdist"
+  echo "Installing pytest-tornado"
+  rc_halt "pip3 install pytest-tornado"
 fi
 
-which py27-pip >/dev/null 2>/dev/null
+python3 -c "import pytest_xdist" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/py27-pip"
-  rc_halt "pkg-static install -y py27-pip"
+  echo "Installing pytest-xdist"
+  rc_halt "pip3 install pytest-xdist"
 fi
-

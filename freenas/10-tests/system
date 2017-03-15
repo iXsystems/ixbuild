@@ -1,0 +1,72 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+system_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "1 - System tests" "7"
+  CLASSNAME=ixbuild.resty.functional.system
+
+  if [ -z "$FNASTESTIP" ] ; then
+     echo "Missing the FNASTESTIP settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing FNASTESTIP settings"
+     return 0
+  fi
+
+  echo_test_title "Waiting for ${VM} to start"
+  wait_for_avail
+  echo_ok
+
+  echo_test_title "Checking system hardware.."
+  rest_request "GET" "/system/info/hardware/"
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system load average.."  
+  rest_request "GET" "/system/info/load_avg/"
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system version.."
+  rest_request "GET" "/system/info/version/"
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system uname.."
+  rest_request "GET" "/system/info/uname_full/"
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system ui.."
+  rest_request "GET" "/system/ui/"
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system general.."
+  rest_request "GET" "/system/general/"
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking system time.."
+  rest_request "GET" "/system/time/"
+  check_rest_response "200 OK"
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+system_init()
+{
+  # Run all the system tests
+  case $TESTSET in
+        SMOKE) system_tests ; return $? ;;
+     COMPLETE) system_tests ; return $? ;;
+    BENCHMARK) system_tests ; return $? ;;
+            *) system_tests ; return $? ;;
+  esac
+}

@@ -279,7 +279,7 @@ osx_test()
 
   # Make SSH connection
   sshpass -p ${OSX_PASSWORD} \
-    ssh -o StrictHostKeyChecking=no
+    ssh -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
@@ -367,6 +367,7 @@ fpass="testing"
 
 wait_for_avail()
 {
+if [ -n "$FREENASLEGACY" ] ; then
   count=0
   while :
   do
@@ -381,6 +382,22 @@ wait_for_avail()
     fi
     count=`expr $count + 1`
   done
+else
+  count=0
+  while :
+  do
+    GET /system/info/hardware/ -v 2>${RESTYERR} >${RESTYOUT}
+    check_rest_response_continue "200 OK"
+    if [ $? -eq 0 ] ; then break; fi
+    echo -e ".\c"
+    sleep 60
+    if [ $count -gt 12 ] ; then
+       echo_fail
+       exit 1
+    fi
+    count=`expr $count + 1`
+  done
+fi
 }
 
 run_module() {
