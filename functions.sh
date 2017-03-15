@@ -385,7 +385,7 @@ jenkins_publish_pkg_ipfs()
   fi
 
   # Copy packages
-  go-ipfs add -r -w --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/
+  go-ipfs add -r --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # TODO
