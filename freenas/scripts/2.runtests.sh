@@ -101,10 +101,3 @@ clean_xml_results
 
 # Run tests now
 run_tests
-
-# Determine which VM backend to stop
-case ${VMBACKEND} in
-    bhyve) stop_bhyve ;;
-    esxi ) stop_vmware ;;
-       * ) stop_vbox ;;
-esac
