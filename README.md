@@ -64,10 +64,11 @@ Setting options for jenkins
 ============
 
 A few common options for FreeNAS builds:
-
+```
 export BUILDINCREMENTAL=true
 export ARTIFACTONFAIL=yes
 export ARTIFACTONSUCCESS=yes
+```
 
 For more options including VM backends for QA tests see:
 
