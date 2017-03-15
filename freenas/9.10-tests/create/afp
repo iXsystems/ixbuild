@@ -50,15 +50,7 @@ afp_tests()
 
   echo_test_title "Checking to see if AFP service is enabled"
   rest_request "GET" "/services/services/afp/"
-  check_rest_response "200 OK" || return 1
-  AFPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "AFPSTATUS: $AFPSTATUS"
-  echo $AFPSTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_state" "RUNNING" || return 1
 
   echo_test_title "Changing permissions on ${AFP_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
@@ -69,41 +61,22 @@ afp_tests()
     # Mount share on OSX system and create a test file
     echo_test_title "Mounting AFP share via OSX and creating a test file"
     osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      return 1
-    fi
+    check_exit_status || return 1
 
     # Move test file to a new location on the AFP share
     echo_test_title "Moving AFP test file into a new directory"
     osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'/tmp" && mv "/Volumes/'"${AFP_SHARE}"'/testfile.txt" "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt"'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      return 1
-    fi
+    check_exit_status || return 1
 
     # Delete test file and test directory from AFP share
     echo_test_title "Deleting test file and directory from AFP share"
     osx_test 'rm -f "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${AFP_SHARE}"'/tmp" && find -- "/Volumes/'"${AFP_SHARE}"'/" -prune -type d -empty | grep -q .'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      return 1
-    fi
+    check_exit_status || return 1
 
     # Clean up mounted AFP share
     echo_test_title "Unmount AFP share"
     osx_test 'umount "/Volumes/'"${AFP_SHARE}"'"'
-    if [ $? -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-    fi
+    check_exit_status || return 1
   fi
 
   return 0

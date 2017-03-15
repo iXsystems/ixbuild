@@ -316,6 +316,46 @@ echo_skipped()
   add_xml_result "skipped" "Skipped test!"
 }
 
+# Checks the exit status_code from previous command
+check_exit_status()
+{
+  STATUSCODE=$?
+  if [ $STATUSCODE -eq 0 ]; then
+    echo_ok
+    return 0
+  else
+    echo_fail
+    return 1
+  fi  
+}
+
+# $1 = JSON service property to check using JSAWK syntax
+# $2 = Expected status indicator of service
+check_service_status()
+{
+  export TESTSTDOUT="$RESTYOUT"
+  export TESTSTDERR="$RESTYERR"
+
+  grep -q "200 OK" ${RESTYERR}
+  if [ $? -ne 0 ] ; then
+    cat ${RESTYERR}
+    cat ${RESTYOUT}
+    echo_fail
+    return 1
+  fi  
+
+  SRVSTATUS=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
+  echo $SRVSTATUS | grep -q $2
+  if [ $? -ne 0 ]; then
+    echo_fail
+    echo "Expected: \"${2}\", Observed: \"${SRVSTATUS}\""
+    return 1
+  fi  
+
+  echo_ok
+  return 0
+}
+
 # Check for $1 REST response, error out if not found
 check_rest_response()
 { 
