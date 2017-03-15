@@ -279,7 +279,7 @@ osx_test()
 
   # Make SSH connection
   sshpass -p ${OSX_PASSWORD} \
-    ssh -o StrictHostKeyChecking=no
+    ssh -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR

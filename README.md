@@ -60,6 +60,59 @@ Once a new "master" is deployed, you can access your Jenkins interface from:
 [http://localhost:8180/jenkins/](http://localhost:8180/jenkins/)
 
 
+Setting options for jenkins
+============
+
+A few common options for FreeNAS builds:
+```
+export BUILDINCREMENTAL=true
+export ARTIFACTONFAIL=yes
+export ARTIFACTONSUCCESS=yes
+```
+
+For more options including VM backends for QA tests see:
+
+https://github.com/iXsystems/ixbuild/blob/master/build.conf.dist
+
+Build FreeNAS with jenkins
+============
+
+FreeNAS 9.10
+```
+sudo /ixbuild/jenkins.sh freenas freenas-9.10
+```
+FreeNAS 10
+```
+sudo /ixbuild/jenkins.sh freenas freenas-10
+```
+
+
+Running test framework with ISO built from jenkins
+============
+
+FreeNAS 9.10
+```
+sudo /ixbuild/jenkins.sh freenas-tests freenas-9.10
+```
+FreeNAS 10
+```
+sudo /ixbuild/jenkins.sh freenas-tests freenas-10
+```
+
+
+Running test framework with prexisting install from jenkins
+============
+
+FreeNAS 9.10
+```
+sudo /ixbuild/jenkins.sh freenas-run-tests freenas-9.10
+```
+FreeNAS 10
+```
+sudo /ixbuild/jenkins.sh freenas-run-tests freenas-10
+```
+
+
 Manually running test framework
 =======
 
@@ -80,7 +133,12 @@ FreeNAS 9.10
  # cd freenas/scripts && ./9.10-create-tests.sh
  # cd freenas/scripts && ./9.10-update-tests.sh
  # cd freenas/scripts && ./9.10-delete-tests.sh
-````
+```
+
+FreeNAS 10
+```
+ # cd freenas/scripts && ./10-tests.sh
+```
 
 ```
  *Optional* arguments for test scripts
@@ -131,8 +189,13 @@ https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
 
-For more details, click the link above and checkout the README file.
+New tests can be written for FreeNAS 10.X by adding a test "module" to the 10 testing directory:
 
+https://github.com/iXsystems/ixbuild/tree/master/freenas/10-tests/
+
+FreeNAS 10 CLI tests can be found here:
+
+https://github.com/freenas/cli/tree/master/freenas/cli/examples/freenas-test
 
 Where are tests run?
 ---
