@@ -20,7 +20,8 @@ The scripts in this repo will allow you to build TrueOS or FreeNAS, either
 as an automated job from Jenkins or manually. It includes support to build
 the following:
 
- * FreeNAS 9.10 / 10.0
+ * FreeNAS
+ * Corral
  * TrueOS
 
 
@@ -74,44 +75,53 @@ For more options including VM backends for QA tests see:
 
 https://github.com/iXsystems/ixbuild/blob/master/build.conf.dist
 
-Build FreeNAS with jenkins
+Build iX progjects with jenkins
 ============
 
-FreeNAS 9.10
+FreeNAS
 ```
 sudo /ixbuild/jenkins.sh freenas freenas-9.10
 ```
-FreeNAS 10
+Corral
 ```
 sudo /ixbuild/jenkins.sh freenas freenas-10
 ```
+TrueOS
+```
+sudo /ixbuild/jenkins.sh trueos-world trueos-current production
+sudo /ixbuild/jenkins.sh trueos-pkg trueos-current production
+sudo /ixbuild/jenkins.sh trueos-iso-pkg trueos-current production
+sudo /ixbuild/jenkins.sh trueos-iso trueos-current production
+```
 
 
-Running test framework with ISO built from jenkins
+Running test framework from jenkins
 ============
 
-FreeNAS 9.10
+FreeNAS
 ```
 sudo /ixbuild/jenkins.sh freenas-tests freenas-9.10
 ```
-FreeNAS 10
+Corral
 ```
 sudo /ixbuild/jenkins.sh freenas-tests freenas-10
 ```
+TrueOS
+```
+sudo /ixbuild/jenkins.sh ports-tests
+```
 
-
-Running test framework with prexisting install from jenkins
+Running test framework with pre-existing install from jenkins
 ============
 
-FreeNAS 9.10
+FreeNAS
 ```
 sudo /ixbuild/jenkins.sh freenas-run-tests freenas-9.10
 ```
-FreeNAS 10
+Corral
 ```
 sudo /ixbuild/jenkins.sh freenas-run-tests freenas-10
 ```
-
 
 Manually running test framework
 =======
@@ -127,7 +137,7 @@ before executing checkprogs:
 Tests are located in the freenas/scripts directory.  These scripts can also be run 
 directly by pointing them at a FreeNAS instance with the following syntax:
 
-FreeNAS 9.10
+FreeNAS
 
 ```
  # cd freenas/scripts && ./9.10-create-tests.sh
@@ -135,7 +145,7 @@ FreeNAS 9.10
  # cd freenas/scripts && ./9.10-delete-tests.sh
 ```
 
-FreeNAS 10
+FreeNAS
 ```
  # cd freenas/scripts && ./10-tests.sh
 ```
@@ -189,18 +199,18 @@ https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
 
-New tests can be written for FreeNAS 10.X by adding a test "module" to the 10 testing directory:
+New tests can be written for Corral by adding a test "module" to the 10 testing directory:
 
 https://github.com/iXsystems/ixbuild/tree/master/freenas/10-tests/
 
-FreeNAS 10 CLI tests can be found here:
+Corral CLI tests can be found here:
 
 https://github.com/freenas/cli/tree/master/freenas/cli/examples/freenas-test
 
 Where are tests run?
 ---
 
-The tests for FreeNAS 9.10.X are currently being run on-commit. Committers will automatically get
+The tests for FreeNAS are currently being run on-commit. Committers will automatically get
 an e-mail with results and log files on testing failures.
 
 Tests / log output can be viewed at the following location:

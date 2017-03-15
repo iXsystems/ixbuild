@@ -1,4 +1,0 @@
-pcbsd-build: {
-               url: "http://pkg.cdn.pcbsd.org/%RELVERSION%/%ARCH%",
-               enabled: true
-              }
