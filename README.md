@@ -20,7 +20,8 @@ The scripts in this repo will allow you to build TrueOS or FreeNAS, either
 as an automated job from Jenkins or manually. It includes support to build
 the following:
 
- * FreeNAS / Corral
+ * FreeNAS
+ * Corral
  * TrueOS
 
 
@@ -74,7 +75,7 @@ For more options including VM backends for QA tests see:
 
 https://github.com/iXsystems/ixbuild/blob/master/build.conf.dist
 
-Build FreeNAS with jenkins
+Build iX progjects with jenkins
 ============
 
 FreeNAS
@@ -84,6 +85,13 @@ sudo /ixbuild/jenkins.sh freenas freenas-9.10
 Corral
 ```
 sudo /ixbuild/jenkins.sh freenas freenas-10
+```
+TrueOS
+```
+sudo /ixbuild/jenkins.sh trueos-world trueos-current production
+sudo /ixbuild/jenkins.sh trueos-pkg trueos-current production
+sudo /ixbuild/jenkins.sh trueos-iso-pkg trueos-current production
+sudo /ixbuild/jenkins.sh trueos-iso trueos-current production
 ```
 
 
@@ -110,6 +118,10 @@ sudo /ixbuild/jenkins.sh freenas-run-tests freenas-9.10
 Corral
 ```
 sudo /ixbuild/jenkins.sh freenas-run-tests freenas-10
+```
+TrueOS
+```
+sudo /ixbuild/jenkins.sh ports-tests
 ```
 
 
