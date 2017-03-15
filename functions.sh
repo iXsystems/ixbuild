@@ -582,8 +582,8 @@ jenkins_freenas_push()
     export IX_KEY_PASSWORD
   fi
 
-  # Only do 1 delta right now
-  DELTAS="1"
+  # Skip deltas for now
+  DELTAS="0"
   export DELTAS
 
   # Push the release to download.freenas.org
@@ -605,8 +605,8 @@ jenkins_freenas_push_nightly()
   cd ${FNASBDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  # Only do 1 delta right now
-  DELTAS="1"
+  # Skip deltas
+  DELTAS="0"
   export DELTAS
 
   if [ -z "$JENKINSINTUPDATE" -o "$JENKINSINTUPDATE" = "false" ] ; then
