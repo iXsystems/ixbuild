@@ -319,12 +319,22 @@ echo_skipped()
 # Checks the exit status_code from previous command
 check_exit_status()
 {
+  SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
   STATUSCODE=$?
   if [ $STATUSCODE -eq 0 ]; then
-    echo_ok
+    if [ "$SILENT" == "false" ]; then
+      echo_ok
+    fi
     return 0
   else
-    echo_fail
+    if [ "$SILENT" == "false" ]; then
+      echo_fail
+    fi
     return 1
   fi  
 }
@@ -336,23 +346,35 @@ check_service_status()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
+  SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
   grep -q "200 OK" ${RESTYERR}
   if [ $? -ne 0 ] ; then
-    cat ${RESTYERR}
-    cat ${RESTYOUT}
-    echo_fail
+    if [ "$SILENT" == "false" ]; then
+      cat ${RESTYERR}
+      cat ${RESTYOUT}
+      echo_fail
+    fi
     return 1
   fi  
 
   SRVSTATUS=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
   echo $SRVSTATUS | grep -q $2
   if [ $? -ne 0 ]; then
-    echo_fail
-    echo "Expected: \"${2}\", Observed: \"${SRVSTATUS}\""
+    if [ "$SILENT" == "false" ]; then
+      echo_fail
+      echo "Expected: \"${2}\", Observed: \"${SRVSTATUS}\""
+    fi
     return 1
   fi  
 
-  echo_ok
+  if [ "$SILENT" == "false" ]; then
+    echo_ok
+  fi
   return 0
 }
 
