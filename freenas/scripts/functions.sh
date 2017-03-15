@@ -160,11 +160,17 @@ get_bedir()
     eval $BUILDOPTS
   fi
 
-  if [ -d "${FNASBDIR}/${PROFILE}/_BE" ] ; then
+  if [ "${GITFNASBRANCH}" != "master" ] ; then
+    export BEDIR="${FNASBDIR}/_BE"
+    return 0
+  fi
+
+  if [ "$GITFNASURL" = "https://github.com/freenas/build.git" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
     return 0
   else
     export BEDIR="${FNASBDIR}/_BE"
     return 0
   fi
+
 }
