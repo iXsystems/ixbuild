@@ -95,7 +95,7 @@ sudo /ixbuild/jenkins.sh trueos-iso trueos-current production
 ```
 
 
-Running test framework with ISO built from jenkins
+Running test framework from jenkins
 ============
 
 FreeNAS
@@ -106,9 +106,12 @@ Corral
 ```
 sudo /ixbuild/jenkins.sh freenas-tests freenas-10
 ```
+TrueOS
+```
+sudo /ixbuild/jenkins.sh ports-tests
+```
 
-
-Running test framework with prexisting install from jenkins
+Running test framework with pre-existing install from jenkins
 ============
 
 FreeNAS
@@ -119,11 +122,6 @@ Corral
 ```
 sudo /ixbuild/jenkins.sh freenas-run-tests freenas-10
 ```
-TrueOS
-```
-sudo /ixbuild/jenkins.sh ports-tests
-```
-
 
 Manually running test framework
 =======
