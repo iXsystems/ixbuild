@@ -150,11 +150,6 @@ Corral
  # cd freenas/scripts && ./10-tests.sh
 ```
 
-Corral CLI (from a Corral host only)
-```
-cli -D_batch=yes -Dexit_on_error=yes -e 'source ${cli_src_path + "/examples/freenas-test/run.cli"}'
-```
-
 ```
  *Optional* arguments for test scripts
 
@@ -180,6 +175,11 @@ tests will be run.
  password=<FreeNASpassword>
 
  FreeNAS password for REST auth
+```
+
+Corral CLI (from a Corral host only)
+```
+cli -D_batch=yes -Dexit_on_error=yes -e 'source ${cli_src_path + "/examples/freenas-test/run.cli"}'
 ```
 
 
