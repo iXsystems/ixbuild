@@ -149,6 +149,12 @@ if [ "$?" != "0" ]; then
   rc_halt "python3 -m ensurepip"
 fi
 
+python3 -c "import requests" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing requests"
+  rc_halt "pip3 install requests"
+fi
+
 python3 -c "import pytest" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest"
