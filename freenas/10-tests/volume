@@ -12,7 +12,7 @@ export REQUIRES
 volume_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - volume tests" "7"
+  set_test_group_text "1 - volume tests" "1"
   CLASSNAME=ixbuild.resty.functional.volume
 
   if [ -z "$FNASTESTIP" ] ; then

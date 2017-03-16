@@ -12,7 +12,7 @@ export REQUIRES
 dataset_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - dataset tests" "7"
+  set_test_group_text "1 - dataset tests" "1"
   CLASSNAME=ixbuild.resty.functional.dataset
 
   if [ -z "$FNASTESTIP" ] ; then
