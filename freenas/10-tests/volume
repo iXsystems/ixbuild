@@ -26,6 +26,8 @@ volume_tests()
   ssh_test 'cli -e "volume create tank disks=ada1,ada2"'
   check_exit_status || return 1
 
+  sleep 5
+
   return 0
 }
 

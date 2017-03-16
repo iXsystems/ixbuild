@@ -6,14 +6,14 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="system volume"
+REQUIRES="system volume dataset"
 export REQUIRES
 
-dataset_tests()
+account_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "1 - dataset tests" "1"
-  CLASSNAME=ixbuild.resty.functional.dataset
+  set_test_group_text "1 - account tests" "1"
+  CLASSNAME=ixbuild.resty.functional.account
 
   if [ -z "$FNASTESTIP" ] ; then
      echo "Missing the FNASTESTIP settings, test skipped.."
@@ -22,8 +22,8 @@ dataset_tests()
      return 0
   fi
 
-  echo_test_title "Check creating dataset.."
-  ssh_test 'cli -e "volume tank dataset create tank/smbshare"'
+  echo_test_title "Check creating account for qa.."
+  ssh_test 'cli -e "account user create qa set password=abcd1234"'
   check_exit_status || return 1
 
   sleep 5
@@ -34,13 +34,13 @@ dataset_tests()
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-dataset_init()
+account_init()
 {
-  # Run all the dataset tests
+  # Run all the account tests
   case $TESTSET in
-        SMOKE) dataset_tests ; return $? ;;
-     COMPLETE) dataset_tests ; return $? ;;
-    BENCHMARK) dataset_tests ; return $? ;;
-            *) dataset_tests ; return $? ;;
+        SMOKE) account_tests ; return $? ;;
+     COMPLETE) account_tests ; return $? ;;
+    BENCHMARK) account_tests ; return $? ;;
+            *) account_tests ; return $? ;;
   esac
 }
