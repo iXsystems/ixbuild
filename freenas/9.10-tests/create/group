@@ -19,7 +19,7 @@ group_tests() {
   check_rest_response "201 Created"
 
   # Get the ID of this group
-  groupid=$(cat ${RESTYOUT} | ${JSAWK} 'return this.id')
+  groupid=`cat ${RESTYOUT} | ${JSAWK} 'return this.id'`
 
   # Create temporary directory for output if needed
   if [ ! -d "${FNASBDIR}" ] ; then

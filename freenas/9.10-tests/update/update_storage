@@ -26,16 +26,8 @@ update_storage_tests()
   check_rest_response "202" || return 1
 
   # Check to verify snapshot was rolled back
-  # "GET" "/storage/volume/tank/datasets/"
-  # check_rest_response "200 OK" || return 1
-  # SNAPSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.name')
-  # echo "SNAPSTATUS: $SNAPSTATUS"
-  # echo $SNAPSTATUS | grep -q 'snapcheck'
-  # if [ $? -eq 0 ] ; then
-  #  echo_fail
-  # else
-  #   echo_ok
-  # fi
+  # rest_request "GET" "/storage/volume/tank/datasets/"
+  # check_service_status "return this.name" "snapcheck"
 
   return 0
 }

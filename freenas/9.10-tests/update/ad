@@ -34,26 +34,12 @@ ad_tests() {
   # Check Active Directory
   echo_test_title "Checking Active Directory.."
   rest_request GET "/directoryservice/activedirectory/"
-  check_rest_response "200 OK" || return 1
-  ADSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ad_enable')
-  echo -n "ADSTATUS: $ADSTATUS"
-  echo $ADSTATUS | grep -q 'true'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.ad_enable" "true" || return 1
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_rest_response "200 OK" || return 1
-  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo "CIFSSTATUS: $CIFSSTATUS"
-  echo $CIFSSTATUS | grep -q 'RUNNING'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-
+  check_service_status -q "return this.srv_state" "RUNNING"
+  check_exit_status -q && echo_ok || (
     echo_test_title "Enabling CIFS service"
     rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
     check_rest_response "200 OK"
@@ -62,9 +48,7 @@ ad_tests() {
     echo_test_title "Starting CIFS service"
     rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
     check_rest_response "200 OK"
-
-    echo_ok
-  fi
+  )
 
   # Wait a moment for samba to spin up
   sleep 4
@@ -125,27 +109,11 @@ ad_tests() {
   # Check Active Directory
   echo_test_title "Verify Active Directory is disabled.."
   rest_request GET "/directoryservice/activedirectory/"
-  check_rest_response "200 OK" || return 1
-  ADSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.ad_enable')
-  echo -n "ADSTATUS: $ADSTATUS"
-  echo $ADSTATUS | grep -q 'false'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.ad_enable" "false"
 
   echo_test_title "Verify CIFS service is disabled"
   rest_request "GET" "/services/services/cifs/"
-  check_rest_response "200 OK" || return 1
-  CIFSSTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.srv_state')
-  echo -n "CIFSSTATUS: $CIFSSTATUS"
-  echo $CIFSSTATUS | grep -q 'STOPPED'
-  if [ $? -eq 0 ] ; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.srv_status" "STOPPED"
 
   return 0
 }

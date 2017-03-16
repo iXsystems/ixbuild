@@ -20,26 +20,16 @@ cronjob_tests() {
 
   echo_test_title "Checking to see if cronjob was created and enabled"
   rest_request "GET" "/tasks/cronjob/"
-  check_rest_response "200 OK" || return 1
-  CRONJOBENABLED=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cron_enabled')
-  echo -n "CRONJOBENABLED: $CRONJOBENABLED"
-  echo $CRONJOBENABLED | grep -q 'true'
-  if [ $? -eq 0 ]; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.cron_enabled" "true" || return 1
 
   # Give time for cron to create the test file on the remote system
   sleep 61
 
   echo_test_title "Verifying that the cronjob created a new file on the remote system"
   ssh_test "test -f ${TESTFILE}"
-  if [ $? -eq 0 ]; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_exit_status || return 1
+
+  return 0
 }
 
 # Init function, this is called after module is sourced

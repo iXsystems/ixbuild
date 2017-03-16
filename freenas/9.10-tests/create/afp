@@ -16,7 +16,7 @@ afp_tests()
 
   # Set the test count based on config settings
   TESTS_CNT="7"
-  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+  if [ -n "${OSX_HOST}" -o -n "${BRIDGEIP}" ]; then
     TESTS_CNT="10"
 
     # Clean up any leftover items from previous failed AFP runs
@@ -57,7 +57,7 @@ afp_tests()
   check_rest_response "201 Created" || return 1
 
   # Verify mountability and permissions of AFP share
-  if [ ! -z "${OSX_HOST}" -o ! -z "${BRIDGEIP}" ]; then
+  if [ -n "${OSX_HOST}" -o -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
     echo_test_title "Mounting AFP share via OSX and creating a test file"
     osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'

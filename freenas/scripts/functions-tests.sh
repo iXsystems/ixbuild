@@ -320,11 +320,21 @@ echo_skipped()
 check_exit_status()
 {
   STATUSCODE=$?
+  SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
   if [ $STATUSCODE -eq 0 ]; then
-    echo_ok
+    if [ "$SILENT" == "false" ]; then
+      echo_ok
+    fi
     return 0
   else
-    echo_fail
+    if [ "$SILENT" == "false" ]; then
+      echo_fail
+    fi
     return 1
   fi  
 }
@@ -336,23 +346,35 @@ check_service_status()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
+  SILENT="false"
+  if [ "${1}" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
   grep -q "200 OK" ${RESTYERR}
   if [ $? -ne 0 ] ; then
-    cat ${RESTYERR}
-    cat ${RESTYOUT}
-    echo_fail
+    if [ "$SILENT" == "false" ]; then
+      cat ${RESTYERR}
+      cat ${RESTYOUT}
+      echo_fail
+    fi
     return 1
   fi  
 
   SRVSTATUS=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
   echo $SRVSTATUS | grep -q $2
   if [ $? -ne 0 ]; then
-    echo_fail
-    echo "Expected: \"${2}\", Observed: \"${SRVSTATUS}\""
+    if [ "$SILENT" == "false" ]; then
+      echo_fail
+      echo "Expected: \"${2}\", Observed: \"${SRVSTATUS}\""
+    fi
     return 1
   fi  
 
-  echo_ok
+  if [ "$SILENT" == "false" ]; then
+    echo_ok
+  fi
   return 0
 }
 
@@ -401,43 +423,35 @@ echo_test_title()
 #
 set_defaults()
 {
-fuser="root"
-fpass="testing"
+  fuser="root"
+  fpass="testing"
 }
 
 wait_for_avail()
 {
-if [ -n "$FREENASLEGACY" ] ; then
+  # Sum: wait for 720 secs
+  LOOP_SLEEP=3
+  LOOP_LIMIT=240
+  ENDPOINT="/system/info/hardware/"
+
+  if [ -n "$FREENASLEGACY" ] ; then
+    ENDPOINT="/storage/disk/"
+  fi
+
   count=0
   while :
   do
-    GET /storage/disk/ -v 2>${RESTYERR} >${RESTYOUT}
+    GET "${ENDPOINT}" -v 2>${RESTYERR} >${RESTYOUT}
     check_rest_response_continue "200 OK"
     if [ $? -eq 0 ] ; then break; fi
-    echo -e ".\c"
-    sleep 60
-    if [ $count -gt 12 ] ; then
+    echo -n "."
+    sleep $LOOP_SLEEP
+    if [ $count -gt $LOOP_LIMIT ] ; then
        echo_fail
        exit 1
     fi
     count=`expr $count + 1`
   done
-else
-  count=0
-  while :
-  do
-    GET /system/info/hardware/ -v 2>${RESTYERR} >${RESTYOUT}
-    check_rest_response_continue "200 OK"
-    if [ $? -eq 0 ] ; then break; fi
-    echo -e ".\c"
-    sleep 60
-    if [ $count -gt 12 ] ; then
-       echo_fail
-       exit 1
-    fi
-    count=`expr $count + 1`
-  done
-fi
 }
 
 run_module() {

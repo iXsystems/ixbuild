@@ -19,7 +19,7 @@ debug_tests() {
   check_rest_response "200 OK" || return 1
 
   # Get the URL of the debug file
-  dlurl=$(cat ${RESTYOUT} | ${JSAWK} 'return this.url')
+  dlurl=`cat ${RESTYOUT} | ${JSAWK} 'return this.url'`
   echo "Debug URL: http://${ip}$dlurl"
   # KPM - 02-05-2016 - Need to figure out magic to do login + fetch
   #fetch -o /tmp/debug.tgz http://${io}${durl}
