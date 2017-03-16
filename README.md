@@ -13,7 +13,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Jenkins build framework for iX projects
+Jenkins automation framework for iX projects
 ===========
 
 The scripts in this repo will allow you to build TrueOS or FreeNAS, either
@@ -23,6 +23,7 @@ the following:
  * FreeNAS
  * Corral
  * TrueOS
+ * iocage
 
 
 Requirements
@@ -93,7 +94,10 @@ sudo /ixbuild/jenkins.sh trueos-pkg trueos-current production
 sudo /ixbuild/jenkins.sh trueos-iso-pkg trueos-current production
 sudo /ixbuild/jenkins.sh trueos-iso trueos-current production
 ```
-
+iocage
+```
+sudo /ixbuild/jenkins.sh iocage_pkgs
+```
 
 Running test framework from jenkins
 ============
