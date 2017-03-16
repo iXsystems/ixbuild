@@ -75,7 +75,7 @@ For more options including VM backends for QA tests see:
 
 https://github.com/iXsystems/ixbuild/blob/master/build.conf.dist
 
-Build iX progjects with jenkins
+Build iX projects with jenkins
 ============
 
 FreeNAS
