@@ -19,7 +19,7 @@ cronjob_tests() {
   # Update cronjob test filename in cron_command
   echo_test_title "Updating cronjob test filename in cron_command.."
   rest_request "PUT" "/tasks/cronjob/${CRONJOB_ID}/" '{ "cron_command": "touch '${UPDATED_TESTFILE}'" }'
-  check_rest_response "200"
+  check_rest_response "200 OK"
 
   # Remove old test file from remote system
   ssh_test "rm -f ${TESTFILE}"
@@ -27,15 +27,7 @@ cronjob_tests() {
   # Check that cronjob is reported as having the command updated
   echo_test_title "Checking that API reports the cronjob as updated.."
   rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
-  check_rest_response "200 OK" || return 1
-  CRONJOBCMD=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cron_command')
-  echo -n "CRONJOBCMD: $CRONJOBCMD"
-  echo $CRONJOBCMD | grep -q "touch ${UPDATED_TESTFILE}"
-  if [ $? -eq 0 ]; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_service_status "return this.cron_command" "touch ${UPDATED_TESTFILE}" || return 1
 
   # Give time for cronjob to run again, then ensure the file was created
   sleep 61
@@ -43,29 +35,19 @@ cronjob_tests() {
   # Ensure updated test file does exist
   echo_test_title "Verify cronjob has created the test file.."
   ssh_test "test -f ${UPDATED_TESTFILE}"
-  if [ $? -eq 0 ]; then
-    echo_ok
-  else
-    echo_fail
-  fi
+  check_exit_status || return 1
 
   # Update cronjob to disabled with new cron_command
   echo_test_title "Updating cron job status to disabled, updating command.."
   rest_request "PUT" "/tasks/cronjob/${CRONJOB_ID}/" '{ "cron_enabled": "true", "cron_command": "touch '${UPDATED_TESTFILE}'" }'
-  check_rest_response "200"
+  check_rest_response "200 OK" || return 1
 
   # Check that cronjob is reported as having the command updated
   echo_test_title "Checking that API reports the cronjob as updated.."
   rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
-  check_rest_response "200 OK" || return 1
-  CRONJOBENABLED=$(cat ${RESTYOUT} | ${JSAWK} 'return this.cron_enabled')
-  echo -n "CRONJOBENABLED: $CRONJOBENABLED"
-  echo $CRONJOBENABLED | grep -q 'true'
-  if [ $? -eq 0 ]; then
-    echo_ok
-  else
-    echo_fail
-  fi  
+  check_service_status "return this.cron_enabled" "true" || return 1
+
+  return 0
 }
 
 # Init function, this is called after module is sourced

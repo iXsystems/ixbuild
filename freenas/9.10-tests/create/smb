@@ -29,6 +29,7 @@ smb_tests()
   rest_request "GET" "/services/services/cifs/"
   check_service_status -q "return this.srv_state" "RUNNING"
   check_exit_status -q && echo_ok || (
+    echo "... CIFS not running, continuing on to enable and start service. - OK"
     echo_test_title "Enabling CIFS service"
     rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
     check_rest_response "200 OK"

@@ -40,7 +40,7 @@ system_tests() {
 
   # Wait for network come back up
   echo_test_title "Waiting for ${VM} to verify tunables.."
-  sleep 30
+  sleep 15
   wait_for_avail
   echo_ok
 
