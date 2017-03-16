@@ -363,7 +363,7 @@ check_service_status()
   fi  
 
   SRVSTATUS=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
-  echo $SRVSTATUS | grep -q $2
+  echo $SRVSTATUS | grep -q "${2}"
   if [ $? -ne 0 ]; then
     if [ "$SILENT" == "false" ]; then
       echo_fail
