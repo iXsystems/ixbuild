@@ -9,6 +9,7 @@ ${PROGDIR}/scripts/checkprogs.sh
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
+. ${PROGDIR}/scripts/functions-vm.sh
 
 # Set variable to call jsawk utility
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"
@@ -35,6 +36,9 @@ case ${VMBACKEND} in
      esxi)
            daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
            sleep 30
+           revert_vmware
+           sleep 30
+           boot_vmware
            ;;                                                             
 esac
 
