@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 # Author: Joe Maloney
 # License: BSD
 # Location for tests into REST API of FreeNAS 9.10

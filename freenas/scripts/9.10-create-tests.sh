@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 # Author: Kris Moore
 # License: BSD
 # Location for tests into REST API of FreeNAS 9.10
@@ -6,7 +6,7 @@
 # jsawk: https://github.com/micha/jsawk
 
 # Where is the pcbsd-build program installed
-PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+PROGDIR="`realpath . | sed 's|/scripts||g'`" ; export PROGDIR
 
 # Set variable to call jsawk utility
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"

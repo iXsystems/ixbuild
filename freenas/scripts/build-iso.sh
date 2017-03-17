@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # FreeNAS Build configuration settings
 
 # Where is the pcbsd-build program installed

@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 # Author: Kris Moore
 # License: BSD
 # Location for tests into REST API of FreeNAS 9.10

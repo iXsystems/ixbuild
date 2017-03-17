@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Source our functions
 if [ -z "$PROGDIR" ] ; then

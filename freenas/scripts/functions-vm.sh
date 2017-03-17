@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Where is the ixbuild program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR

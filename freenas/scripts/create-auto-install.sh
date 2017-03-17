@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 # Author: Kris Moore / iXsystems
 # Usage: ./create-auto-install.sh <ISO>
 ########################################################

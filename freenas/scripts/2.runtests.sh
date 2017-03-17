@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 
 # Where is the pcbsd-build program installed
 PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
