@@ -20,7 +20,7 @@ cronjob_tests() {
 
   echo_test_title "Checking to see if cronjob was created and enabled"
   rest_request "GET" "/tasks/cronjob/"
-  check_service_status "return this.cron_enabled" "true" || return 1
+  check_property_value "return this.cron_enabled" "true" || return 1
 
   # Give time for cron to create the test file on the remote system
   sleep 61

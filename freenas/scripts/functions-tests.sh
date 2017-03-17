@@ -318,6 +318,7 @@ echo_skipped()
 }
 
 # Checks the exit status_code from previous command
+# (Optional) -q switch as first argument silences std_out
 check_exit_status()
 {
   STATUSCODE=$?
@@ -340,9 +341,23 @@ check_exit_status()
   fi  
 }
 
-# $1 = JSON service property to check using JSAWK syntax
-# $2 = Expected status indicator of service
+# $1 = Expected status value for service state property (STOPPED|RUNNING|CRASHED)
+# (Optional) -q switch as first argument silences std_out
 check_service_status()
+{
+  SRV_PROPERTY='return this.srv_state'
+  if [ "${1}" == "-q" ]; then
+    check_property_value $1 "${SRV_PROPERTY}" $2
+  else
+    check_property_value "${SRV_PROPERTY}" $1
+  fi
+  return $?
+}
+
+# $1 = JSON property to check $2 (value) against, using JSAWK syntax
+# $2 = Expected value returned by API property specified in $1
+# (Optional) -q switch as first argument silences std_out
+check_property_value()
 {
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
@@ -363,12 +378,20 @@ check_service_status()
     return 1
   fi  
 
-  SRVSTATUS=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
-  echo $SRVSTATUS | grep -q "${2}"
+  PROP_VALUE=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
+  # If 'srv_state' property not found, return 'SKIPPED' status
+  # This can be removed once the API is in sync with TrueNAS/FreeNAS stable - 03/17/17, CD
+  if [ "${1}" == "return this.srv_state" -a -z "$PROP_VALUE" ]; then
+    if [ "$SILENT" == "false" ]; then
+      echo_skipped
+    fi
+    return 0
+  fi
+  echo $PROP_VALUE | grep -q "${2}"
   if [ $? -ne 0 ]; then
     if [ "$SILENT" == "false" ]; then
       echo_fail
-      echo "Expected: \"${2}\", Observed: \"${SRVSTATUS}\""
+      echo "Expected: \"${2}\", Observed: \"${PROP_VALUE}\""
     fi
     return 1
   fi  

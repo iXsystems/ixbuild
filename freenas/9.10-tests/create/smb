@@ -11,15 +11,27 @@ export REQUIRES
 
 smb_tests()
 {
+
+  SMB_SHARE="TestShare"
+  SMB_PATH="/mnt/tank/cifs"
+
+  TEST_CNT=18
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    TEST_CNT=21
+
+    # Clean up any leftover items from previous failed SMB runs
+    osx_test 'umount -f "/Volumes/'"${SMB_NAME}"'"; rmdir "/Volumes/'"${SMB_SHARE}"'"; exit 0' 
+  fi
+    
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Samba tests" "18"
+  set_test_group_text "1 - Create - Samba tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.smb
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'",  "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
 
   echo_test_title "Creating CIFS dataset"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
@@ -27,7 +39,7 @@ smb_tests()
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status -q "return this.srv_state" "RUNNING"
+  check_service_status -q "RUNNING"
   check_exit_status -q && echo_ok || (
     echo "... CIFS not running, continuing on to enable and start service. - OK"
     echo_test_title "Enabling CIFS service"
@@ -45,14 +57,14 @@ smb_tests()
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status "return this.srv_state" "RUNNING" || return 1
+  check_service_status "RUNNING" || return 1
 
   echo_test_title "Changing permissions on /mnt/tank/cifs"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created"
 
   echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
@@ -83,11 +95,29 @@ smb_tests()
   echo_test_title "Unmounting CIFS"
   rc_test "umount /tmp/cifs-mnt.$$" || return 1
 
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    echo_test_title "Mounting CIFS as guest on OSX system and test write access"
+    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'" && mount -t smbfs "smb://guest@'"${BRIDGEIP}"'/'"${SMB_SHARE}"'" "/Volumes/'"${SMB_SHARE}"'" && touch "/Volumes/'"${SMB_SHARE}"'/testfile.txt"'
+    check_exit_status || return 1
+
+    echo_test_title "Moving CIFS test file into a new directory"
+    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'/tmp" && mv "/Volumes/'"${SMB_SHARE}"'/testfile.txt" "/Volumes/'"${SMB_SHARE}"'/tmp/testfile.txt"'
+    check_exit_status || return 1
+
+    echo_test_title "Deleting test file and directory from CIFS share"
+    osx_test 'rm -f "/Volumes/'"${SMB_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${SMB_SHARE}"'/tmp" && find -- "/Volumes/'"${SMB_SHARE}"'/" -prune -type d -empty | grep -q .'
+    check_exit_status || return 1
+
+    echo_test_title "Unmount CIFS share"
+    osx_test 'umount "/Volumes/'"${SMB_SHARE}"'"'
+    check_exit_status || return 1
+  fi
+
   echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Removing CIFS share on /mnt/tank/cifs"
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "204"
 
   # Now stop the service
@@ -97,7 +127,7 @@ smb_tests()
 
   echo_test_title "Verify CIFS service is disabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status "return this.srv_state" "STOPPED"
+  check_service_status "STOPPED"
 }
 
 # Init function, this is called after module is sourced

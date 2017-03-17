@@ -34,11 +34,11 @@ ad_tests() {
   # Check Active Directory
   echo_test_title "Checking Active Directory.."
   rest_request GET "/directoryservice/activedirectory/"
-  check_service_status "return this.ad_enable" "true" || return 1
+  check_property_value "return this.ad_enable" "true" || return 1
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status -q "return this.srv_state" "RUNNING"
+  check_service_status -q "RUNNING"
   check_exit_status -q && echo_ok || (
     echo_test_title "Enabling CIFS service"
     rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
@@ -109,11 +109,11 @@ ad_tests() {
   # Check Active Directory
   echo_test_title "Verify Active Directory is disabled.."
   rest_request GET "/directoryservice/activedirectory/"
-  check_service_status "return this.ad_enable" "false"
+  check_property_value "return this.ad_enable" "false"
 
   echo_test_title "Verify CIFS service is disabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status "return this.srv_state" "STOPPED"
+  check_service_status "STOPPED"
 
   return 0
 }

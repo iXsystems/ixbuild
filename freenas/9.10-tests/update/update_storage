@@ -27,7 +27,7 @@ update_storage_tests()
 
   # Check to verify snapshot was rolled back
   # rest_request "GET" "/storage/volume/tank/datasets/"
-  # check_service_status "return this.name" "snapcheck"
+  # check_property_value "return this.name" "snapcheck"
 
   return 0
 }

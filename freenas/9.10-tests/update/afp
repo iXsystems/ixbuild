@@ -16,7 +16,7 @@ afp_tests()
 
   # Set the test count based on config settings
   TEST_CNT="2"
-  if [ -n "${OSX_HOST}" -o -n "${BRIDGEIP}" ]; then
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     TEST_CNT="6"
 
     # Clean up any leftover items from previous failed AFP runs
@@ -33,10 +33,10 @@ afp_tests()
 
   echo_test_title "Checking to see if AFP service is enabled"
   rest_request "GET" "/services/services/afp/"
-  check_service_status "return this.srv_state" "RUNNING" || return 1
+  check_service_status "RUNNING" || return 1
 
   # Verify mountability and permissions of AFP share after config changes
-  if [ -n "${OSX_HOST}" -o -n "${BRIDGEIP}" ]; then
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
     echo_test_title "Mounting AFP share via OSX and creating a test file"
     osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'

@@ -27,7 +27,7 @@ iscsi_tests()
 
   echo_test_title "Verify the iSCSI service is enabled"
   rest_request "GET" "/services/services/iscsitarget/"
-  check_service_status "return this.srv_state" "RUNNING"
+  check_service_status "RUNNING"
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
@@ -42,7 +42,7 @@ iscsi_tests()
   echo_test_title "Creating iSCSI mountpoint"
   rc_test "mkdir /tmp/iscsi-mnt.$$" || return 1
 
-  # echo_test_title "Mount the target volume"
+  echo_test_title "Mount the target volume"
   rc_test "mount /dev/${devname} /tmp/iscsi-mnt.$$" || return 1
 
   echo_test_title "Creating 45MB file to verify vzol size increase"
@@ -70,7 +70,7 @@ iscsi_tests()
 
   echo_test_title "Verify the iSCSI service is disabled"
   rest_request "GET" "/services/services/iscsitarget/"
-  check_service_status "return this.srv_state" "STOPPED"
+  check_service_status "STOPPED"
 
   return 0
 }

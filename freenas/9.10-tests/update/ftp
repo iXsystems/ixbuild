@@ -28,7 +28,7 @@ ftp_tests() {
 
   echo_test_title "Checking to see if FTP service is enabled"
   rest_request "GET" "/services/services/ftp/"
-  check_service_status "return this.srv_state" "RUNNING" || return 1
+  check_service_status "RUNNING" || return 1
 
   return 0
 }

@@ -27,7 +27,7 @@ cronjob_tests() {
   # Check that cronjob is reported as having the command updated
   echo_test_title "Checking that API reports the cronjob as updated.."
   rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
-  check_service_status "return this.cron_command" "touch ${UPDATED_TESTFILE}" || return 1
+  check_property_value "return this.cron_command" "touch ${UPDATED_TESTFILE}" || return 1
 
   # Give time for cronjob to run again, then ensure the file was created
   sleep 61
@@ -45,7 +45,7 @@ cronjob_tests() {
   # Check that cronjob is reported as having the command updated
   echo_test_title "Checking that API reports the cronjob as updated.."
   rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
-  check_service_status "return this.cron_enabled" "true" || return 1
+  check_property_value "return this.cron_enabled" "true" || return 1
 
   return 0
 }

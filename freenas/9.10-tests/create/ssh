@@ -25,7 +25,7 @@ ssh_tests() {
 
   echo_test_title "Checking to see if SSH service is enabled"
   rest_request "GET" "/services/services/ssh/"
-  check_service_status "return this.srv_state" "RUNNING"
+  check_service_status "RUNNING"
 
 }
 
