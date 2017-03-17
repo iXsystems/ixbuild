@@ -1,0 +1,46 @@
+#!/usr/local/bin/bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="system volume"
+export REQUIRES
+
+dataset_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "1 - dataset tests" "1"
+  CLASSNAME=ixbuild.resty.functional.dataset
+
+  if [ -z "$FNASTESTIP" ] ; then
+     echo "Missing the FNASTESTIP settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing FNASTESTIP settings"
+     return 0
+  fi
+
+  echo_test_title "Check creating dataset.."
+  ssh_test 'cli -e "volume tank dataset create tank/smbshare"'
+  check_exit_status || return 1
+
+  sleep 5
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+dataset_init()
+{
+  # Run all the dataset tests
+  case $TESTSET in
+        SMOKE) dataset_tests ; return $? ;;
+     COMPLETE) dataset_tests ; return $? ;;
+    BENCHMARK) dataset_tests ; return $? ;;
+            *) dataset_tests ; return $? ;;
+  esac
+}
