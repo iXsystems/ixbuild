@@ -41,25 +41,23 @@ ldap_tests() {
   rest_request GET "/directoryservice/ldap/"
   check_service_status "return this.ldap_enable" "true" || return 1
 
-  echo_test_title "Checking to see if CIFS service is enabled"
-  rest_request "GET" "/services/services/cifs/"
-  check_service_status "return this.srv_state" "RUNNING"
-  # check_exit_status || (
-  if [ $? -ne 0 ] ; then
-    echo_test_title "Enabling CIFS service"
-    rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
-    check_rest_response "200 OK"
+  echo_test_title "Enabling CIFS service"
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
+  check_rest_response "200 OK"
 
-    # Now start the service
-    echo_test_title "Starting CIFS service"
-    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
-    check_rest_response "200 OK"
-  fi
+  # Now start the service
+  echo_test_title "Starting CIFS service"
+  rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
 
   # Wait a moment for samba to spin up
   sleep 4
 
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  echo_test_title "Checking to see if CIFS service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_service_status "return this.srv_state" "RUNNING"
+
+  # Now check if we can mount CIFS / create / rename / copy / delete / umount
   echo_test_title "Creating CIFS mountpoint"
   rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
   sync
