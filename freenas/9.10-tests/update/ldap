@@ -124,7 +124,7 @@ ldap_tests() {
 
   echo_test_title "Verify CIFS service is disabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status "return this.srv_state" "STOPPED" || return 1
+  check_service_status "return this.srv_enable" "false" || return 1
 
   return 0
 }
