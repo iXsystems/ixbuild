@@ -408,7 +408,7 @@ check_rest_response()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
-  grep -q "$1" ${RESTYERR}
+  grep -qi "$1" ${RESTYERR}
   if [ $? -ne 0 ] ; then
     cat ${RESTYERR}
     cat ${RESTYOUT}
