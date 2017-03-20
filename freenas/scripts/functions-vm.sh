@@ -468,7 +468,6 @@ boot_vmware()
   return $CMD_RESULTS
 }
 
-# $1 = Optional timeout (seconds)
 resume_vmware()
 {
   if [ -z  "$VI_SERVER" -o -z "$VI_USERNAME" -o -z "$VI_PASSWORD" -o -z "$VI_CFG" ]; then
