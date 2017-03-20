@@ -38,7 +38,7 @@ case ${VMBACKEND} in
            sleep 30
            revert_vmware
            sleep 30
-           boot_vmware
+           resume_vmware
            ;;                                                             
 esac
 
