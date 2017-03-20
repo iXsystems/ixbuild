@@ -55,7 +55,7 @@ ldap_tests() {
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status "return this.srv_state" "RUNNING"
+  check_service_status "RUNNING"
 
   # Now check if we can mount CIFS / create / rename / copy / delete / umount
   echo_test_title "Creating CIFS mountpoint"
