@@ -37,20 +37,22 @@ smb_tests()
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
   check_rest_response "201 Created"
 
+  # Now start the service
+  echo_test_title "Starting CIFS service"
+  rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
+
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
-  check_service_status -q "RUNNING"
-  check_exit_status -q && echo_ok || (
-    echo "... CIFS not running, continuing on to enable and start service. - OK"
-    echo_test_title "Enabling CIFS service"
-    rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
-    check_rest_response "200 OK"
+  check_service_status "RUNNING" || return 1
 
-    # Now start the service
-    echo_test_title "Starting CIFS service"
-    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
-    check_rest_response "200 OK"
-  )
+  echo_test_title "Changing permissions on /mnt/tank/cifs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "201 Created"
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
