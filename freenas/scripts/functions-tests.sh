@@ -383,7 +383,6 @@ check_property_value()
   # This can be removed once the API is in sync with TrueNAS/FreeNAS stable - 03/17/17, CD
   if [ "${1}" == "return this.srv_state" -a -z "$PROP_VALUE" ]; then
     if [ "$SILENT" == "false" ]; then
-      sleep 30
       echo_skipped
     fi
     return 0
