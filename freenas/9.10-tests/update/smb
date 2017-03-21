@@ -31,8 +31,8 @@ smb_tests()
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'",  "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  umount /tmp/cifs-mnt.$$
-  rmdir /tmp/cifs-mnt.$$
+  umount -A
+  rmdir /tmp/cifs-mnt.*
 
   echo_test_title "Updating CIFS service"
   rest_request "PUT" "/services/cifs/" '{ "cifs_srv_hostlookup": "false" }'
