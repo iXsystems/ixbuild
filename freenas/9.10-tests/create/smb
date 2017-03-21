@@ -75,10 +75,10 @@ smb_tests()
   sleep 10
 
   echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" "rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Creating CIFS file"
-  rc_test "touch /tmp/cifs-mnt.$$/testfile" "umount /tmp/cifs-mnt.$$ ; rmdir /tmp/cifs-mnt.$$" || return 1
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" || return 1
 
   echo_test_title "Moving CIFS file"
   rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
