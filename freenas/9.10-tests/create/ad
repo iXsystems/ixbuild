@@ -78,7 +78,7 @@ ad_tests()
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     echo_test_title "Mounting CIFS as guest on OSX system and test write access"
-    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'" && mount -t smbfs "smb://AD01:ADUSER:12345678@'"${BRIDGEIP}"'/'"${SMB_SHARE}"'" "/Volumes/'"${SMB_SHARE}"'" && touch "/Volumes/'"${SMB_SHARE}"'/testfile.txt"'
+    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'" && mount -t smbfs "smb://aduser:12345678@'"${BRIDGEIP}"'/'"${SMB_SHARE}"'" "/Volumes/'"${SMB_SHARE}"'" && touch "/Volumes/'"${SMB_SHARE}"'/testfile.txt"'
     check_exit_status || return 1
 
     echo_test_title "Moving CIFS test file into a new directory"
