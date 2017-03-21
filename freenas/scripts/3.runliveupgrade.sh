@@ -26,18 +26,10 @@ else
   FLAVOR="FREENAS"
 fi
 
-# Set the default VMBACKEND
-if [ -z "$VMBACKEND" ] ; then
-  echo "Not using a VM.  Skipping console output.."
-fi
-
 # Determine if a VM is being used for upgrades
 case ${VMBACKEND} in
      esxi)
-           daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
-           sleep 30
            revert_vmware
-           sleep 30
            resume_vmware
            ;;                                                             
 esac
