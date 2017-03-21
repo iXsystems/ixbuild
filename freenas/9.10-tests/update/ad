@@ -23,7 +23,7 @@ ad_tests()
     osx_test 'umount -f "/Volumes/'"${SMB_NAME}"'"; rmdir "/Volumes/'"${SMB_SHARE}"'"; exit 0'
   fi
 
-  set_test_group_text "2 - Update - Active Directory tests" "13"
+  set_test_group_text "2 - Update - Active Directory tests" "12"
   CLASSNAME=ixbuild.resty.functional.update.ad
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
