@@ -9,7 +9,20 @@
 REQUIRES=""
 export REQUIRES
 
-ad_tests() {
+ad_tests() 
+{
+
+  SMB_SHARE="TestShare"
+  SMB_PATH="/mnt/tank/cifs"
+
+  TEST_CNT=18
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    TEST_CNT=21
+
+    # Clean up any leftover items from previous failed SMB runs
+    osx_test 'umount -f "/Volumes/'"${SMB_NAME}"'"; rmdir "/Volumes/'"${SMB_SHARE}"'"; exit 0'
+  fi
+
   set_test_group_text "2 - Update - Active Directory tests" "20"
   CLASSNAME=ixbuild.resty.functional.update.ad
 
@@ -27,6 +40,11 @@ ad_tests() {
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   umount -A
   rmdir /tmp/cifs-mnt.*
+
+  # Set auxilary parameters to allow mount_smbfs to work with ldap
+  echo_test_title "Setting auxilary parameters for mount_smbfs.."
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = yes\nntlm auth = yes \nraw NTLMv2 auth = yes" }'
+  check_rest_response "200 OK"
 
   # Enable Active Directory Directory
   echo_test_title "Enabling Active Directory.."
@@ -52,9 +70,6 @@ ad_tests() {
     check_rest_response "200 OK"
   )
 
-  # Wait a moment for samba to spin up
-  sleep 4
-
   echo_test_title "Changing permissions on /mnt/tank/cifs"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
   check_rest_response "201 Created" 
@@ -63,45 +78,23 @@ ad_tests() {
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Creating CIFS mountpoint"
-  rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
-  sync
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    echo_test_title "Mounting CIFS as guest on OSX system and test write access"
+    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'" && mount -t smbfs "smb://guest@'"${BRIDGEIP}"'/'"${SMB_SHARE}"'" "/Volumes/'"${SMB_SHARE}"'" && touch "/Volumes/'"${SMB_SHARE}"'/testfile.txt"'
+    check_exit_status || return 1
 
-  sleep 10
+    echo_test_title "Moving CIFS test file into a new directory"
+    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'/tmp" && mv "/Volumes/'"${SMB_SHARE}"'/testfile.txt" "/Volumes/'"${SMB_SHARE}"'/tmp/testfile.txt"'
+    check_exit_status || return 1
 
-  # Store credentials file for mount_smb
-  # The ADUSER user must exist in AD with this password
-  echo "[TESTNAS:ADUSER]" > ~/.nsmbrc
-  echo password=12345678 >> ~/.nsmbrc
+    echo_test_title "Deleting test file and directory from CIFS share"
+    osx_test 'rm -f "/Volumes/'"${SMB_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${SMB_SHARE}"'/tmp" && find -- "/Volumes/'"${SMB_SHARE}"'/" -prune -type d -empty | grep -q .'
+    check_exit_status || return 1
 
-  echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} -W AD01 //aduser@testnas/TestShare /tmp/cifs-mnt.$$" || return 1
-
-  echo_test_title "Creating CIFS file"
-  rc_test "touch /tmp/cifs-mnt.$$/testfile" || return 1
-
-  echo_test_title "Moving CIFS file"
-  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
-
-  echo_test_title "Copying CIFS file"
-  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
-
-  echo_test_title "Deleting CIFS file 1/2"
-  rc_test "rm /tmp/cifs-mnt.$$/testfile" || return 1
-
-  echo_test_title "Deleting CIFS file 2/2"
-  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
-
-  echo_test_title "Unmounting CIFS"
-  rc_test "umount /tmp/cifs-mnt.$$" || return 1
-
-  echo_test_title "Removing CIFS mountpoint"
-  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
-
-  echo_test_title "Removing CIFS share on /mnt/tank/cifs"
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "204"
+    echo_test_title "Unmount CIFS share"
+    osx_test 'umount "/Volumes/'"${SMB_SHARE}"'"'
+    check_exit_status || return 1
+  fi
 
   # Disable Active Directory Directory
   echo_test_title "Disabling Active Directory.."

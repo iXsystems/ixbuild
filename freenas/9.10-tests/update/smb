@@ -11,6 +11,7 @@ export REQUIRES
 
 smb_tests()
 {
+
   SMB_SHARE="TestShare"
   SMB_PATH="/mnt/tank/cifs"
 
@@ -31,8 +32,6 @@ smb_tests()
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'",  "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  umount -A
-  rmdir /tmp/cifs-mnt.*
 
   echo_test_title "Updating CIFS service"
   rest_request "PUT" "/services/cifs/" '{ "cifs_srv_hostlookup": "false" }'
@@ -42,9 +41,6 @@ smb_tests()
   echo_test_title "Starting CIFS service"
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
-
-  # Wait a moment for samba to spin up
-  sleep 4
 
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
@@ -57,34 +53,6 @@ smb_tests()
   echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
-
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
-  echo_test_title "Creating CIFS mountpoint"
-  rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
-  sync
-
-  sleep 10
-
-  echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} //guest@testnas/TestShare /tmp/cifs-mnt.$$" || return 1
-
-  echo_test_title "Creating CIFS file"
-  rc_test "touch /tmp/cifs-mnt.$$/testfile" || return 1
-
-  echo_test_title "Moving CIFS file"
-  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
-
-  echo_test_title "Copying CIFS file"
-  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
-
-  echo_test_title "Deleting CIFS file 1/2"
-  rc_test "rm /tmp/cifs-mnt.$$/testfile" || return 1
-
-  echo_test_title "Deleting CIFS file 2/2"
-  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
-
-  echo_test_title "Unmounting CIFS"
-  rc_test "umount /tmp/cifs-mnt.$$" || return 1
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     echo_test_title "Mounting CIFS as guest on OSX system and test write access"
@@ -103,9 +71,6 @@ smb_tests()
     osx_test 'umount "/Volumes/'"${SMB_SHARE}"'"'
     check_exit_status || return 1
   fi  
-
-  echo_test_title "Removing CIFS mountpoint"
-  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
 
   echo_test_title "Removing CIFS share on /mnt/tank/cifs"
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
