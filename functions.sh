@@ -58,7 +58,7 @@ create_workdir()
     cp -r /ixbuild/builds ${MASTERWRKDIR}/builds
   fi
 
-  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas"
+  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas" -e "corral"
   if [ $? -eq 0 ] ; then
     TBUILDDIR="${MASTERWRKDIR}/freenas"
   else
@@ -1322,7 +1322,7 @@ do_build_env_setup()
   # Source build conf and set some vars
   cd ${BDIR}/${BUILD}
 
-  echo "$TYPE" | grep -q "freenas"
+  echo "$TYPE" | grep -q -e "freenas" -e "corral"
   if [ $? -eq 0 ] ; then
     BRANCH="production"
     . freenas.cfg
