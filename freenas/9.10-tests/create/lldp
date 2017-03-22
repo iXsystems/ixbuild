@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage user"
+export REQUIRES
+
+lldp_tests() {
+  LOCATION="Maryville, TN"
+  COUNTRY="US"
+  INTDESC="true"
+
+  set_test_group_text "1 - Create - LLDP tests" "4"
+  CLASSNAME=ixbuild.resty.functional.create.lldp
+
+  echo_test_title "Configuring LLDP service"
+  rest_request "PUT" "/services/lldp/" '{"lldp_country": "'"${COUNTRY}"'", "lldp_intdesc": '"${INTDESC}"', "lldp_location": "'"${LOCATION}"'"}'
+  check_rest_response "200" || return 1
+
+  echo_test_title "Checking that API reports LLDP service"
+  rest_request "GET" "/services/lldp/"
+  check_rest_response "200 OK" || return 1
+
+  echo_test_title "Checking that API reports LLDP configuration as saved"
+  check_property_value -q "this.lldp_country" "${COUNTRY}" \
+    && check_property_value -q "this.lldp_intdesc" "${INTDESC}" \
+    && check_property_value -q "this.lldp_location" "${LOCATION}" \
+    && echo_ok || echo_fail && return 1
+
+  echo_test_title "Enable LLDP service"
+  rest_request "PUT" "/services/services/lldp/" '{ "srv_enable": true }'
+  check_rest_response "200 OK" || return 1
+
+  echo_test_title "Checking to see if LLDP service is running"
+  rest_request "GET" "/services/services/lldp/"
+  check_service_status "RUNNING" || return 1
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+lldp_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) lldp_tests ;;
+     COMPLETE) lldp_tests ;;
+    BENCHMARK) ;;
+            *) lldp_tests ;;
+  esac
+}
