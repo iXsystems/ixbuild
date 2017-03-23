@@ -15,9 +15,9 @@ smb_tests()
   SMB_SHARE="TestShare"
   SMB_PATH="/mnt/tank/cifs"
 
-  TEST_CNT=12
+  TEST_CNT=10
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=15
+    TEST_CNT=13
 
     # Clean up any leftover items from previous failed SMB runs
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0' 
@@ -96,6 +96,14 @@ smb_tests()
   echo_test_title "Verify CIFS service is disabled"
   rest_request "GET" "/services/services/cifs/"
   check_service_status "STOPPED"
+
+  # Check destroying a CIFS dataset
+  echo_test_title "Destroying CIFS dataset"
+  rest_request "DELETE" "/storage/volume/1/datasets/cifs/"
+  check_rest_response "204" || return 1
+
+  return 0
+
 }
 
 # Init function, this is called after module is sourced
