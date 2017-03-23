@@ -89,7 +89,7 @@ ldap_tests()
     check_exit_status || return 1
 
     echo_test_title "Unmount CIFS share"
-    osx_test 'umount "/Volumes/'"${BRIDGEHOST}"'"'
+    osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
   fi
 
