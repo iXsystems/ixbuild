@@ -12,8 +12,8 @@ export REQUIRES
 ad_tests() 
 {
 
-  SMB_SHARE="TestShare"
-  SMB_PATH="/mnt/tank/cifs"
+  SMB_SHARE="TestShare-$$"
+  SMB_PATH="/mnt/tank/cifs-$$"
 
   TEST_CNT=11
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
