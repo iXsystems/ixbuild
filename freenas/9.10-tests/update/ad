@@ -20,7 +20,7 @@ ad_tests()
     TEST_CNT=21
 
     # Clean up any leftover items from previous failed SMB runs
-    osx_test 'umount -f "/Volumes/'"${SMB_NAME}"'"; rmdir "/Volumes/'"${SMB_SHARE}"'"; exit 0'
+    osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
   fi
 
   set_test_group_text "2 - Update - Active Directory tests" "12"
@@ -73,19 +73,19 @@ ad_tests()
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     echo_test_title "Mounting CIFS as guest on OSX system and test write access"
-    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'" && mount -t smbfs "smb://aduser:12345678@'"${BRIDGEIP}"'/'"${SMB_SHARE}"'" "/Volumes/'"${SMB_SHARE}"'" && touch "/Volumes/'"${SMB_SHARE}"'/testfile.txt"'
+    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'" && mount -t smbfs "smb://aduser:12345678@'"${BRIDGEIP}"'/'"${SMB_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'" && touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
     check_exit_status || return 1
 
     echo_test_title "Moving CIFS test file into a new directory"
-    osx_test 'mkdir -p "/Volumes/'"${SMB_SHARE}"'/tmp" && mv "/Volumes/'"${SMB_SHARE}"'/testfile.txt" "/Volumes/'"${SMB_SHARE}"'/tmp/testfile.txt"'
+    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'/tmp" && mv "/Volumes/'"${BRIDGEHOST}"'/testfile.txt" "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt"'
     check_exit_status || return 1
 
     echo_test_title "Deleting test file and directory from CIFS share"
-    osx_test 'rm -f "/Volumes/'"${SMB_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${SMB_SHARE}"'/tmp" && find -- "/Volumes/'"${SMB_SHARE}"'/" -prune -type d -empty | grep -q .'
+    osx_test 'rm -f "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${BRIDGEHOST}"'/tmp" && find -- "/Volumes/'"${BRIDGEHOST}"'/" -prune -type d -empty | grep -q .'
     check_exit_status || return 1
 
     echo_test_title "Unmount CIFS share"
-    osx_test 'umount "/Volumes/'"${SMB_SHARE}"'"'
+    osx_test 'umount "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
   fi
 
