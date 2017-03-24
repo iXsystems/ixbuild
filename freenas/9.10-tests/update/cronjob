@@ -9,43 +9,26 @@ REQUIRES=""
 export REQUIRES
 
 cronjob_tests() {
-  set_test_group_text "1 - Update - Cron tests" "5"
+  set_test_group_text "1 - Update - Cron tests" "3"
   CLASSNAME=ixbuild.resty.functional.delete.cron
 
   TESTFILE="/tmp/.testFileCreatedViaCronjob"
-  UPDATED_TESTFILE="/tmp/.testFileUpdatedViaCronjob"
   CRONJOB_ID=1
 
-  # Update cronjob test filename in cron_command
-  echo_test_title "Updating cronjob test filename in cron_command.."
-  rest_request "PUT" "/tasks/cronjob/${CRONJOB_ID}/" '{ "cron_command": "touch '${UPDATED_TESTFILE}'" }'
-  check_rest_response "200 OK"
-
-  # Remove old test file from remote system
-  ssh_test "rm -f ${TESTFILE}"
-
-  # Check that cronjob is reported as having the command updated
-  echo_test_title "Checking that API reports the cronjob as updated.."
-  rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
-  check_property_value "return this.cron_command" "touch ${UPDATED_TESTFILE}" || return 1
-
-  # Give time for cronjob to run again, then ensure the file was created
-  sleep 61
-
-  # Ensure updated test file does exist
+  # Ensure test file does exist
   echo_test_title "Verify cronjob has created the test file.."
-  ssh_test "test -f ${UPDATED_TESTFILE}"
+  ssh_test "test -f ${TESTFILE}"
   check_exit_status || return 1
 
   # Update cronjob to disabled with new cron_command
   echo_test_title "Updating cron job status to disabled, updating command.."
-  rest_request "PUT" "/tasks/cronjob/${CRONJOB_ID}/" '{ "cron_enabled": "true", "cron_command": "touch '${UPDATED_TESTFILE}'" }'
+  rest_request "PUT" "/tasks/cronjob/${CRONJOB_ID}/" '{ "cron_enabled": false }'
   check_rest_response "200 OK" || return 1
 
-  # Check that cronjob is reported as having the command updated
+  # Check that cronjob is disabled
   echo_test_title "Checking that API reports the cronjob as updated.."
   rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
-  check_property_value "return this.cron_enabled" "true" || return 1
+  check_property_value "return this.cron_enabled" "false" || return 1
 
   return 0
 }
