@@ -36,10 +36,6 @@ afp_tests()
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "afp" }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Changing permissions on ${AFP_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 Created" || return 1
-
   echo_test_title "Enabling AFP service"
   if [ -z "${BRIDGEIP}" ]; then
     rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true, "afp_srv_bindip": "'"${BRIDGEIP}"'" }'
@@ -47,10 +43,6 @@ afp_tests()
     rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true }'
   fi
   check_rest_response "200 OK" || return 1
-
-  echo_test_title "Creating a AFP share on /mnt/tank/afp"
-  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "/mnt/tank/afp" }'
-  check_rest_response "201 Created" || return 1
 
   # Now start the service
   echo_test_title "Starting AFP service"
@@ -60,6 +52,14 @@ afp_tests()
   echo_test_title "Checking to see if AFP service is enabled"
   rest_request "GET" "/services/services/afp/"
   check_service_status "RUNNING" || return 1
+
+  echo_test_title "Changing permissions on ${AFP_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Creating a AFP share on /mnt/tank/afp"
+  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "/mnt/tank/afp" }'
+  check_rest_response "201 Created" || return 1
 
   # Verify mountability and permissions of AFP share
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
