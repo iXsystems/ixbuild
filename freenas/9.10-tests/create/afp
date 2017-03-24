@@ -23,6 +23,11 @@ afp_tests()
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
   fi
 
+  # Clean up any leftover items from previous failed runs
+  rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
+  rest_request "DELETE" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "/mnt/tank/afp" }'
+  rest_request "DELETE" "/storage/volume/1/datasets/afp/"
+
   # Set the group text and number of tests
   set_test_group_text "1 - Create - AFP tests" "${TESTS_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.afp
@@ -78,6 +83,16 @@ afp_tests()
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
   fi
+
+  # Test disable AFP
+  echo_test_title "Verify AFP service can be disabled.."
+  rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
+  check_rest_response "200 OK" || return 1
+
+  # Test delete AFP dataset
+  echo_test_title "Verify AFP dataset can be destroyed.."
+  rest_request "DELETE" "/storage/volume/1/datasets/afp/"
+  check_rest_response "204" || return 1
 
   return 0
 }
