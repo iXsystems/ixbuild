@@ -33,7 +33,7 @@ afp_tests()
   CLASSNAME=ixbuild.resty.functional.create.afp
 
   echo_test_title "Creating AFP dataset"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "afp" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Enabling AFP service"
