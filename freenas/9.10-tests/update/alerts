@@ -37,7 +37,7 @@ alerts_tests()
 {
   ALERT_MSG="Testing system alerts with failure."
 
-  set_test_group_text "2 - Update - System Alert tests" "1"
+  set_test_group_text "2 - Update - System Alert tests" "2"
   CLASSNAME=ixbuild.resty.functional.update.alerts
 
   echo_test_title "Polling API endpoint for new system alert"

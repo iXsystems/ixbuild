@@ -17,7 +17,7 @@ ldap_tests()
 
   TEST_CNT=14
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=17
+    TEST_CNT=20
 
     # Clean up any leftover items from previous failed SMB runs
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
@@ -76,20 +76,36 @@ ldap_tests()
   check_rest_response "201 Created"
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    echo_test_title "Mounting CIFS as guest on OSX system and test write access"
-    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'" && mount -t smbfs "smb://ldapuser:12345678@'"${BRIDGEIP}"'/'"${SMB_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'" && touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
+    # Mount share on OSX system and create a test file
+    echo_test_title "Create mount-point for SMB on OSX system"
+    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
 
-    echo_test_title "Moving CIFS test file into a new directory"
+    echo_test_title "Mount SMB share on OSX system"
+    osx_test 'mount -t smbfs "smb://ldapuser:12345678@'${BRIDGEIP}'/'"${SMB_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'"'
+    check_exit_status || return 1
+
+    echo_test_title "Create file on SMB share via OSX to test permissions"
+    osx_test 'touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
+    check_exit_status || return 1
+
+    # Move test file to a new location on the SMB share
+    echo_test_title "Moving SMB test file into a new directory"
     osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'/tmp" && mv "/Volumes/'"${BRIDGEHOST}"'/testfile.txt" "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt"'
     check_exit_status || return 1
 
-    echo_test_title "Deleting test file and directory from CIFS share"
-    osx_test 'rm -f "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${BRIDGEHOST}"'/tmp" && find -- "/Volumes/'"${BRIDGEHOST}"'/" -prune -type d -empty | grep -q .'
+    # Delete test file and test directory from SMB share
+    echo_test_title "Deleting test file and directory from SMB share"
+    osx_test 'rm -f "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${BRIDGEHOST}"'/tmp"'
     check_exit_status || return 1
 
-    echo_test_title "Unmount CIFS share"
-    osx_test 'umount "/Volumes/'"${BRIDGEHOST}"'"'
+    echo_test_title "Verifying that test file and directory were successfully removed"
+    osx_test 'find -- "/Volumes/'"${BRIDGEHOST}"'/" -prune -type d -empty | grep -q .'
+    check_exit_status || return 1
+
+    # Clean up mounted SMB share
+    echo_test_title "Unmount SMB share"
+    osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
   fi
 

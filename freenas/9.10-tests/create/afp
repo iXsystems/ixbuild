@@ -17,7 +17,7 @@ afp_tests()
   # Set the test count based on config settings
   TESTS_CNT="8"
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TESTS_CNT="12"
+    TESTS_CNT="15"
 
     # Clean up any leftover items from previous failed AFP runs
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
@@ -64,8 +64,16 @@ afp_tests()
   # Verify mountability and permissions of AFP share
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
-    echo_test_title "Mounting AFP share via OSX and creating a test file"
-    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'" && touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
+    echo_test_title "Create mount-point for AFP on OSX system"
+    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'"'
+    check_exit_status || return 1
+
+    echo_test_title "Mount AFP share on OSX system"
+    osx_test 'mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'"'
+    check_exit_status || return 1
+
+    echo_test_title "Create file on AFP share via OSX to test permissions"
+    osx_test 'touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
     check_exit_status || return 1
 
     # Move test file to a new location on the AFP share
@@ -75,7 +83,11 @@ afp_tests()
 
     # Delete test file and test directory from AFP share
     echo_test_title "Deleting test file and directory from AFP share"
-    osx_test 'rm -f "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${BRIDGEHOST}"'/tmp" && find -- "/Volumes/'"${BRIDGEHOST}"'/" -prune -type d -empty | grep -q .'
+    osx_test 'rm -f "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${BRIDGEHOST}"'/tmp"'
+    check_exit_status || return 1
+
+    echo_test_title "Verifying that test file and directory were successfully removed"
+    osx_test 'find -- "/Volumes/'"${BRIDGEHOST}"'/" -prune -type d -empty | grep -q .'
     check_exit_status || return 1
 
     # Clean up mounted AFP share
