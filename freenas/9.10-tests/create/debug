@@ -11,7 +11,7 @@ export REQUIRES
 
 # Run a series of tests on the boot-environments
 debug_tests() {
-  set_test_group_text "1 - Create - Debugging Tests" "1"
+  set_test_group_text "1 - Create - Debugging Tests" "3"
   CLASSNAME=ixbuild.resty.functional.create.debug
 
   echo_test_title "Creating diagnostic file"

@@ -13,7 +13,7 @@ lldp_tests() {
   COUNTRY="US"
   INTDESC="true"
 
-  set_test_group_text "1 - Create - LLDP tests" "4"
+  set_test_group_text "1 - Create - LLDP tests" "5"
   CLASSNAME=ixbuild.resty.functional.create.lldp
 
   echo_test_title "Configuring LLDP service"
