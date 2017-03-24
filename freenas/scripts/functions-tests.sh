@@ -258,6 +258,64 @@ ssh_test()
   return $SSH_COMMAND_RESULTS
 }
 
+# $1 = Local file to copy to the remote host
+# $2 = Location to store file on remote host
+scp_to_test()
+{
+  _scp_test "${1}" "${fuser}@${sshserver}:${2}"
+}
+
+# $1 = File to copy from the remote host
+# $2 = Location to copy file to
+scp_from_test()
+{
+  _scp_test "${fuser}@${sshserver}:${1}" "${2}"
+}
+
+# Private method, see scp_from_test or scp_to_test
+# $1 = SCP from [[user@]host1:]file1
+# $2 = SCP to [[user@]host1:]file1
+_scp_test()
+{
+  export TESTSTDOUT="/tmp/.scpCmdTestStdOut"
+  export TESTSTDERR="/tmp/.scpCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  sshserver=${ip}
+
+  if [ -z "$sshserver" ]; then
+    sshserver=$FNASTESTIP
+  fi
+
+  if [ -z "$sshserver" ]; then
+    echo "SCP server IP address request for scp_test()."
+    return 1
+  fi
+
+  # Test fuser and fpass values
+  if [ -z "${fpass}" ] || [ -z "${fuser}" ]; then
+    echo "SCP server username and password required for scp_test()."
+    return 1
+  fi
+
+  # SCP connection
+  sshpass -p ${fpass} \
+    scp -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  SCP_CMD_RESULTS=$?
+
+  if [ $SCP_CMD_RESULTS -ne 0 ]; then
+    echo "Failed on test module: $1"
+    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
+    return 1
+  fi
+
+  return $SCP_CMD_RESULTS
+}
+
 # $1 = Command to run
 # $2 = Command to run if $1 fails
 # $3 = Optional timeout
