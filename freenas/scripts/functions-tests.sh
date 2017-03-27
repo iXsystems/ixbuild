@@ -247,15 +247,7 @@ ssh_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  SSH_COMMAND_RESULTS=$?
-
-  if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
-    echo "Failed on test module: $1"
-    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
-    return 1
-  fi
-
-  return $SSH_COMMAND_RESULTS
+  return $?
 }
 
 # $1 = Local file to copy to the remote host
@@ -525,7 +517,7 @@ wait_for_avail()
   do
     GET "${ENDPOINT}" -v 2>${RESTYERR} >${RESTYOUT}
     check_rest_response_continue "200 OK"
-    if [ $? -eq 0 ] ; then break; fi
+    check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
     if [ $count -gt $LOOP_LIMIT ] ; then
@@ -534,6 +526,31 @@ wait_for_avail()
     fi
     count=`expr $count + 1`
   done
+}
+
+wait_for_afp_service()
+{
+  # ssh into freenas and run:
+  # lsof -ln -i :548 -S | awk '$10 ~ "LISTEN" || $10 ~ "ESTABLISHED"'
+
+  LOOP_SLEEP=8
+  LOOP_LIMIT=100
+  AFP_PORT=":548"
+
+  loop_cnt=0
+  while :
+  do
+    ssh_test "lsof -ln -i ${AFP_PORT} -S | awk '\$10 ~ \"LISTEN\" ||  \$10 ~ \"ESTABLISHED\" '"
+    check_exit_status -q && break
+    echo -n "."
+    sleep $LOOP_SLEEP
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      echo_fail
+      return 1
+    fi
+    loop_cnt=`expr $loop_cnt + 1`
+  done
+  return 0
 }
 
 run_module() {

@@ -63,6 +63,9 @@ afp_tests()
 
   # Verify mountability and permissions of AFP share
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    echo_test_title "Poll FreeNAS to ensure AFP service is up and running before continuing"
+    wait_for_afp_service && echo_ok || (echo_fail && return 1)
+
     # Mount share on OSX system and create a test file
     echo_test_title "Create mount-point for AFP on OSX system"
     osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'"'
