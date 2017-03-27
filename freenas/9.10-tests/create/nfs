@@ -31,7 +31,9 @@ nfs_tests()
   check_rest_response "200 OK"
   
   # Give NFS time to start
-  sleep 30
+  echo_test_title "Verify that NFS service has started"
+  ssh_test "netstat -lap tcp | grep nfsd | awk '\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\" '" 
+  check_exit_status || return 1
 
   echo_test_title "Checking to see if NFS service is enabled"
   rest_request "GET" "/services/services/nfs/"

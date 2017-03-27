@@ -539,7 +539,7 @@ wait_for_avail_port()
   PORT=$1
 
   if [ -z "${PORT}" ]; then
-    echo "\nwait_for_avail_port(): \$1 argument should be a port number to verify"
+    echo -n " wait_for_avail_port(): \$1 argument should be a port number to verify"
     return 1
   fi
 

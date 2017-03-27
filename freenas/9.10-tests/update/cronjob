@@ -30,6 +30,11 @@ cronjob_tests() {
   rest_request "GET" "/tasks/cronjob/${CRONJOB_ID}/"
   check_property_value "return this.cron_enabled" "false" || return 1
 
+  # Delete test file so we can verify it is no longer being created later in the delete/cronjob test
+  echo_test_title "Deleting test file created by cronjob"
+  ssh_test "rm -f ${TESTFILE}"
+  check_exit_status || return 1
+
   return 0
 }
 
