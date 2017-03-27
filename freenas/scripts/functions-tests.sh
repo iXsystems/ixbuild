@@ -528,24 +528,59 @@ wait_for_avail()
   done
 }
 
-wait_for_afp_service()
+# Use netcat to determine if a service port is open on FreeNAS
+# $1 = Port number to check against
+# $2 = (optional) Override $LOOP_SLEEP which determines how long to wait before retrying command
+# $3 = (optional) Override $LOOP_LIMIT which determines how many loops before exiting with failure
+wait_for_avail_port()
 {
-  # ssh into freenas and run:
-  # lsof -ln -i :548 -S | awk '$10 ~ "LISTEN" || $10 ~ "ESTABLISHED"'
+  LOOP_SLEEP=1
+  LOOP_LIMIT=10
+  PORT=$1
 
-  LOOP_SLEEP=8
-  LOOP_LIMIT=100
-  AFP_PORT=":548"
+  if [ -z "${PORT}" ]; then
+    echo "\nwait_for_avail_port(): \$1 argument should be a port number to verify"
+    return 1
+  fi
+
+  if [ -n "${2}" ]; then
+    LOOP_SLEEP=$2
+  fi
+
+  if [ -n "${3}" ]; then
+    LOOP_LIMIT=$3
+  fi
 
   loop_cnt=0
   while :
   do
-    ssh_test "lsof -ln -i ${AFP_PORT} -S | awk '\$10 ~ \"LISTEN\" ||  \$10 ~ \"ESTABLISHED\" '"
+    nc -z -n -v ${FNASTESTIP} ${PORT} 2>&1 | grep -q 'succeeded!'
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
-      echo_fail
+      return 1
+    fi
+    loop_cnt=`expr $loop_cnt + 1`
+  done
+  return 0
+}
+
+# SSH into OSX box and poll FreeNAS for running AFP service
+wait_for_afp_from_osx()
+{
+  LOOP_SLEEP=1
+  LOOP_LIMIT=10
+  AFP_PORT="548"
+
+  loop_cnt=0
+  while :
+  do
+    osx_test "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} ${AFP_PORT} ${AFP_PORT} | grep ${AFP_PORT}"
+    check_exit_status -q && break
+    echo -n "."
+    sleep $LOOP_SLEEP
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
       return 1
     fi
     loop_cnt=`expr $loop_cnt + 1`

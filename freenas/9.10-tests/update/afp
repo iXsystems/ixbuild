@@ -68,8 +68,11 @@ afp_tests()
   # Verify mountability and permissions of AFP share after config changes
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     echo_test_title "Poll FreeNAS to ensure AFP service is up and running before continuing"
-    wait_for_afp_service && echo_ok || (echo_fail && return 1)
-    osx_test "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} 548 548 | grep 548"
+    wait_for_avail_port "548"
+    check_exit_status || return 1
+
+    echo_test_title "Check to see if AFP can be accessed from OS X"
+    wait_for_afp_from_osx
     check_exit_status || return 1
 
     # Mount share on OSX system and create a test file
