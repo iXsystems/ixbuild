@@ -554,7 +554,7 @@ wait_for_avail_port()
   loop_cnt=0
   while :
   do
-    nc -z -n -v ${FNASTESTIP} ${PORT} 2>&1 | grep -q 'succeeded!'
+    nc -z -n -v ${FNASTESTIP} ${PORT} 2>&1 | awk '$5 == "succeeded!" || $5 == "open"' >/dev/null 2>/dev/null
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
