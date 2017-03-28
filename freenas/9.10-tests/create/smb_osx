@@ -12,7 +12,7 @@ export REQUIRES
 smb_osx_tests()
 {
 
-  SMB_SHARE="TestShare"
+  SMB_NAME="TestShare"
   SMB_PATH="/mnt/tank/cifs"
 
   TEST_CNT=13
@@ -31,17 +31,28 @@ smb_osx_tests()
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'",  "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
 
   echo_test_title "Creating CIFS dataset"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
   check_rest_response "201 Created"
 
-  # Now start the service
   echo_test_title "Starting CIFS service"
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
 
+  echo_test_title "Checking to see if CIFS service is running"
+  rest_request "GET" "/services/services/cifs/"
+  check_service_status "RUNNING" || return 1
+
+  echo_test_title "Changing permissions on ${SMB_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Creating a CIFS share on ${SMB_PATH}"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "201 Created"
+
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
   check_service_status "RUNNING" || return 1
@@ -51,19 +62,7 @@ smb_osx_tests()
   check_rest_response "201 Created"
 
   echo_test_title "Creating a CIFS share on ${SMB_PATH}"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 Created"
-
-  echo_test_title "Checking to see if CIFS service is enabled"
-  rest_request "GET" "/services/services/cifs/"
-  check_service_status "RUNNING" || return 1
-
-  echo_test_title "Changing permissions on ${SMB_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 Created"
-
-  echo_test_title "Creating a CIFS share on ${SMB_PATH}"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
@@ -73,7 +72,7 @@ smb_osx_tests()
     check_exit_status || return 1
 
     echo_test_title "Mount SMB share on OSX system"
-    osx_test 'mount -t smbfs "smb://guest@'${BRIDGEIP}'/'"${SMB_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'"'
+    osx_test 'mount -t smbfs "smb://guest@'${BRIDGEIP}'/'"${SMB_NAME}"'" "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"
@@ -101,7 +100,7 @@ smb_osx_tests()
   fi
 
   echo_test_title "Removing CIFS share on ${SMB_PATH}"
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "204"
 
   # Now stop the service

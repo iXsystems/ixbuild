@@ -11,17 +11,15 @@ export REQUIRES
 
 afp_bsd_tests()
 {
-  AFP_SHARE="My AFP Share"
-  AFP_PATH="/mnt/tank/afp_bsd"
-
   # Set the test count based on config settings
-  TEST_CNT="2"
-  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT="6"
-
-    # Clean up any leftover items from previous failed AFP runs
-    osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
+  TEST_CNT="4"
+  if [ -n "${BRIDGEIP}" ]; then
+    TEST_CNT="5"
   fi
+
+  # Clean up any leftover items from previous failed AFP runs
+  rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
+  rest_request "DELETE" "/storage/volume/1/datasets/afp_bsd/"
 
   # Set the group text and number of tests
   set_test_group_text "2 - Update - AFP BSD tests" "${TEST_CNT}"
@@ -36,27 +34,23 @@ afp_bsd_tests()
   check_service_status "RUNNING" || return 1
 
   # Verify mountability and permissions of AFP share after config changes
-  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    # Mount share on OSX system and create a test file
-    echo_test_title "Mounting AFP share via OSX and creating a test file"
-    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'
-    check_exit_status || return 1
-
-    # Move test file to a new location on the AFP share
-    echo_test_title "Moving AFP test file into a new directory"
-    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'/tmp" && mv "/Volumes/'"${AFP_SHARE}"'/testfile.txt" "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt"'
-    check_exit_status || return 1
-
-    # Delete test file and test directory from AFP share
-    echo_test_title "Deleting test file and directory from AFP share"
-    osx_test 'rm -f "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${AFP_SHARE}"'/tmp" && find -- "/Volumes/'"${AFP_SHARE}"'/" -prune -type d -empty | grep -q .'
-    check_exit_status || return 1
-
-    # Clean up mounted AFP share
-    echo_test_title "Unmount AFP share"
-    osx_test 'umount "/Volumes/'"${AFP_SHARE}"'"'
+  if [ -n "${BRIDGEIP}" ]; then
+    echo_test_title "Poll VM to ensure AFP service is up and running"
+    wait_for_avail_port "548"
     check_exit_status || return 1
   fi  
+
+  # Test disable AFP
+  echo_test_title "Verify AFP service can be disabled.."
+  rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
+  check_rest_response "200 OK" || return 1
+
+  # Test delete AFP dataset
+  echo_test_title "Verify AFP dataset can be destroyed.."
+  rest_request "DELETE" "/storage/volume/1/datasets/afp_bsd/"
+  check_rest_response "204" || return 1
+
+  return 0
 }
 
 # Init function, this is called after module is sourced

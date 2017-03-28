@@ -18,7 +18,7 @@ iscsi_tests()
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   iscsictl -R -a
-  umount -A
+  umount -A &>/dev/null
 
   # Enable the iSCSI service
   echo_test_title "Enable iSCSI service"

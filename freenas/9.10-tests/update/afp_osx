@@ -11,7 +11,7 @@ export REQUIRES
 
 afp_osx_tests()
 {
-  AFP_SHARE="My AFP Share"
+  AFP_NAME="My AFP Share"
   AFP_PATH="/mnt/tank/afp_osx"
 
   # Set the test count based on config settings
@@ -25,7 +25,7 @@ afp_osx_tests()
 
   # Clean up any leftover items from previous failed runs
   rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
-  rest_request "DELETE" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "'"${APF_PATH}"'" }'
+  rest_request "DELETE" "/sharing/afp/" '{ "afp_name": "'"${AFP_NAME}"'", "afp_path": "'"${APF_PATH}"'" }'
   rest_request "DELETE" "/storage/volume/1/datasets/afp_osx/"
 
   # Set the group text and number of tests
@@ -41,7 +41,7 @@ afp_osx_tests()
   check_rest_response "200" || return 1
 
   echo_test_title "Enabling AFP service"
-  if [ -z "${BRIDGEIP}" ]; then
+  if [ -n "${BRIDGEIP}" ]; then
     rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true, "afp_srv_bindip": "'"${BRIDGEIP}"'" }'
   else
     rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true }'
@@ -62,12 +62,12 @@ afp_osx_tests()
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Creating a AFP share on ${AFP_PATH}"
-  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "'"${AFP_PATH}"'" }'
+  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_NAME}"'", "afp_path": "'"${AFP_PATH}"'" }'
   check_rest_response "201 Created" || return 1
 
   # Verify mountability and permissions of AFP share after config changes
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    echo_test_title "Poll FreeNAS to ensure AFP service is up and running before continuing"
+    echo_test_title "Poll VM to ensure AFP service is up and running"
     wait_for_avail_port "548"
     check_exit_status || return 1
 
@@ -81,7 +81,7 @@ afp_osx_tests()
     check_exit_status || return 1
 
     echo_test_title "Mount AFP share on OSX system"
-    osx_test 'mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'"'
+    osx_test 'mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_NAME}"'" "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
 
     echo_test_title "Create file on AFP share via OSX to test permissions"

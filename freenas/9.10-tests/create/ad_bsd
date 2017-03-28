@@ -9,7 +9,11 @@
 REQUIRES="storage ntp"
 export REQUIRES
 
-ad_bsd_tests() {
+ad_bsd_tests()
+{
+  SMB_NAME="TestShare"
+  SMB_PATH="/mnt/tank/cifs"
+
   set_test_group_text "1 - Create - Active Directory BSD tests" "18"
   CLASSNAME=ixbuild.resty.functional.create.ad_bsd
 
@@ -24,16 +28,19 @@ ad_bsd_tests() {
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'",  "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  umount -A
-  rmdir /tmp/cifs-mnt.*
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "DELETE" "/storage/volume/1/datasets/cifs/"
+  umount -A &>/dev/null
+  rmdir /tmp/cifs-mnt.* &>/dev/null
 
-  # Enable Active Directory Directory
+  echo_test_title "Creating CIFS dataset"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
+  check_rest_response "201 Created"
+
   echo_test_title "Enabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"true" }'
   check_rest_response "200 OK"
 
-  # Check Active Directory
   echo_test_title "Checking Active Directory.."
   rest_request GET "/directoryservice/activedirectory/"
   check_property_value "return this.ad_enable" "true" || return 1
@@ -57,12 +64,12 @@ ad_bsd_tests() {
   rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
   sync
 
-  echo_test_title "Changing permissions on /mnt/tank/cifs"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
+  echo_test_title "Changing permissions on ${SMB_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
   check_rest_response "201 Created"   
 
-  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  echo_test_title "Creating a CIFS share on ${SMB_PATH}"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
   sleep 10
@@ -73,7 +80,7 @@ ad_bsd_tests() {
   echo password=12345678 >> ~/.nsmbrc
 
   echo_test_title "Mounting CIFS"
-  rc_test "mount_smbfs -N -I ${ip} -W AD01 //aduser@testnas/TestShare /tmp/cifs-mnt.$$" || return 1
+  rc_test "mount_smbfs -N -I ${ip} -W AD01 //aduser@testnas/${SMB_NAME} /tmp/cifs-mnt.$$" || return 1
 
   sleep 5
 
@@ -98,8 +105,8 @@ ad_bsd_tests() {
   echo_test_title "Removing CIFS mountpoint"
   rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
 
-  echo_test_title "Removing CIFS share on /mnt/tank/cifs"
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  echo_test_title "Removing CIFS share on ${SMB_PATH}"
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "204"
 
   # Disable Active Directory Directory
@@ -115,6 +122,11 @@ ad_bsd_tests() {
   echo_test_title "Verify CIFS service is disabled"
   rest_request "GET" "/services/services/cifs/"
   check_service_status "STOPPED" || return 1
+
+  # Check destroying a CIFS dataset
+  echo_test_title "Destroying CIFS dataset"
+  rest_request "DELETE" "/storage/volume/1/datasets/cifs/"
+  check_rest_response "204" || return 1
 
   return 0
 }
