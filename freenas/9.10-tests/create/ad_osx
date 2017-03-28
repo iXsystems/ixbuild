@@ -9,7 +9,7 @@
 REQUIRES="storage ntp"
 export REQUIRES
 
-ad_tests() 
+ad_osx_tests() 
 {
 
   SMB_SHARE="TestShare"
@@ -23,8 +23,8 @@ ad_tests()
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
   fi
 
-  set_test_group_text "1 - Create - Active Directory tests" "${TEST_CNT}"
-  CLASSNAME=ixbuild.resty.functional.create.ad
+  set_test_group_text "1 - Create - Active Directory OS X tests" "${TEST_CNT}"
+  CLASSNAME=ixbuild.resty.functional.create.ad_osx
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
      echo -n "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
@@ -135,13 +135,13 @@ ad_tests()
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-ad_init()
+ad_osx_init()
 {
   # Run all the tests
   case $TESTSET in
-        SMOKE) ad_tests ; return $? ;;
-     COMPLETE) ad_tests ; return $? ;;
+        SMOKE) ad_osx_tests ; return $? ;;
+     COMPLETE) ad_osx_tests ; return $? ;;
     BENCHMARK) ;;
-            *) ad_tests ; return $? ;;
+            *) ad_osx_tests ; return $? ;;
   esac
 }

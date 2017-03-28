@@ -9,7 +9,7 @@
 REQUIRES="storage"
 export REQUIRES
 
-ldap_tests() 
+ldap_osx_tests() 
 {
 
   SMB_SHARE="TestShare"
@@ -23,8 +23,8 @@ ldap_tests()
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
   fi
 
-  set_test_group_text "1 - Create - LDAP tests" "${TEST_CNT}"
-  CLASSNAME=ixbuild.resty.functional.create.ldap
+  set_test_group_text "1 - Create - LDAP OS X tests" "${TEST_CNT}"
+  CLASSNAME=ixbuild.resty.functional.create.ldap_osx
 
   if [ -z "$LDAPBINDDN" -o -z "$LDAPBINDPASSWORD" ] ; then
      echo -n "Missing the LDAPBINDDN / LDAPBINDPASSWORD settings, test skipped.."
@@ -139,13 +139,13 @@ ldap_tests()
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-ldap_init()
+ldap_osx_init()
 {
   # Run all the tests
   case $TESTSET in
-        SMOKE) ldap_tests ; return $? ;;
-     COMPLETE) ldap_tests ; return $? ;;
+        SMOKE) ldap_osx_tests ; return $? ;;
+     COMPLETE) ldap_osx_tests ; return $? ;;
     BENCHMARK) ;;
-            *) ldap_tests ; return $? ;;
+            *) ldap_osx_tests ; return $? ;;
   esac
 }

@@ -9,22 +9,9 @@
 REQUIRES=""
 export REQUIRES
 
-ldap_osx_tests() 
-{
-
-  SMB_SHARE="TestShare"
-  SMB_PATH="/mnt/tank/cifs"
-
-  TEST_CNT=14
-  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=20
-
-    # Clean up any leftover items from previous failed SMB runs
-    osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
-  fi
-
-  set_test_group_text "2 - Update - LDAP OS X tests" "${TEST_CNT}"
-  CLASSNAME=ixbuild.resty.functional.update.ldap_osx
+ldap_bsd_tests() {
+  set_test_group_text "2 - Update - LDAP BSD tests" "22"
+  CLASSNAME=ixbuild.resty.functional.update.ldap_bsd
 
   if [ -z "$LDAPBINDDN2" -o -z "$LDAPBINDPASSWORD2" ] ; then
      echo -n "Missing the LDAPBINDDN2 / LDAPBINDPASSWORD2 settings, test skipped.."
@@ -37,12 +24,14 @@ ldap_osx_tests()
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_anonbind": false, "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
-  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  rest_request "DELETE" "/storage/volume/1/datasets/cifs/"
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  umount -A
+  rmdir /tmp/cifs-mnt.*
 
-  echo_test_title "Creating CIFS dataset"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
-  check_rest_response "201 Created"  
+  # Set auxilary parameters to allow mount_smbfs to work with ldap
+  echo_test_title "Set auxilary parameters for mount_smbfs.."
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = yes\nntlm auth = yes \nraw NTLMv2 auth = yes" }'
+  check_rest_response "200 OK"
 
   # Enable LDAP
   echo_test_title "Enabling LDAP.."
@@ -63,51 +52,60 @@ ldap_osx_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
 
+  # Wait a moment for samba to spin up
+  sleep 4
+
   echo_test_title "Checking to see if CIFS service is enabled"
   rest_request "GET" "/services/services/cifs/"
   check_service_status "RUNNING"
 
-  echo_test_title "Changing permissions on ${SMB_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "qa", "mp_recursive": true }'
+  # Now check if we can mount CIFS / create / rename / copy / delete / umount
+  echo_test_title "Creating CIFS mountpoint"
+  rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
+  sync
+
+  echo_test_title "Changing permissions on /mnt/tank/cifs"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/cifs", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "qa", "mp_recursive": true }'
   check_rest_response "201 Created"   
 
-  echo_test_title "Creating a CIFS share on ${SMB_PATH}"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_SHARE}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  echo_test_title "Creating a CIFS share on /mnt/tank/cifs"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
-  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    # Mount share on OSX system and create a test file
-    echo_test_title "Create mount-point for SMB on OSX system"
-    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'"'
-    check_exit_status || return 1
+  sleep 10
 
-    echo_test_title "Mount SMB share on OSX system"
-    osx_test 'mount -t smbfs "smb://ldapuser:12345678@'${BRIDGEIP}'/'"${SMB_SHARE}"'" "/Volumes/'"${BRIDGEHOST}"'"'
-    check_exit_status || return 1
+  # Store credentials file for mount_smb
+  # The LDAPUSER user must exist in LDAP with this password
+  echo "[TESTNAS:LDAPUSER]" > ~/.nsmbrc
+  echo password=12345678 >> ~/.nsmbrc
 
-    echo_test_title "Create file on SMB share via OSX to test permissions"
-    osx_test 'touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
-    check_exit_status || return 1
+  echo_test_title "Mounting CIFS"
+  rc_test "mount_smbfs -N -I ${ip} -W LDAP02 //ldapuser@testnas/TestShare /tmp/cifs-mnt.$$" || return 1
 
-    # Move test file to a new location on the SMB share
-    echo_test_title "Moving SMB test file into a new directory"
-    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'/tmp" && mv "/Volumes/'"${BRIDGEHOST}"'/testfile.txt" "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt"'
-    check_exit_status || return 1
+  echo_test_title "Creating CIFS file"
+  rc_test "touch /tmp/cifs-mnt.$$/testfile" || return 1
 
-    # Delete test file and test directory from SMB share
-    echo_test_title "Deleting test file and directory from SMB share"
-    osx_test 'rm -f "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${BRIDGEHOST}"'/tmp"'
-    check_exit_status || return 1
+  echo_test_title "Moving CIFS file"
+  rc_test "mv /tmp/cifs-mnt.$$/testfile /tmp/cifs-mnt.$$/testfile2" || return 1
 
-    echo_test_title "Verifying that test file and directory were successfully removed"
-    osx_test 'find -- "/Volumes/'"${BRIDGEHOST}"'/" -prune -type d -empty | grep -q .'
-    check_exit_status || return 1
+  echo_test_title "Copying CIFS file"
+  rc_test "cp /tmp/cifs-mnt.$$/testfile2 /tmp/cifs-mnt.$$/testfile" || return 1
 
-    # Clean up mounted SMB share
-    echo_test_title "Unmount SMB share"
-    osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"'
-    check_exit_status || return 1
-  fi
+  echo_test_title "Deleting CIFS file 1/2"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile" || return 1
+
+  echo_test_title "Deleting CIFS file 2/2"
+  rc_test "rm /tmp/cifs-mnt.$$/testfile2" || return 1
+
+  echo_test_title "Unmounting CIFS"
+  rc_test "umount /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS mountpoint"
+  rc_test "rmdir /tmp/cifs-mnt.$$" || return 1
+
+  echo_test_title "Removing CIFS share on /mnt/tank/cifs"
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "/mnt/tank/cifs", "cifs_name": "TestShare", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "204"
 
   # Disable LDAP
   echo_test_title "Disabling LDAP.."
@@ -128,24 +126,19 @@ ldap_osx_tests()
   rest_request "GET" "/services/services/cifs/"
   check_service_status "STOPPED" || return 1
 
-  # Check destroying a CIFS dataset
-  echo_test_title "Destroying CIFS dataset"
-  rest_request "DELETE" "/storage/volume/1/datasets/cifs/"
-  check_rest_response "204" || return 1
-
   return 0
 }
 
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-ldap_osx_init()
+ldap_bsd_init()
 {
   # Run all the tests
   case $TESTSET in
-        SMOKE) ldap_osx_tests ; return $? ;;
-     COMPLETE) ldap_osx_tests ; return $? ;;
+        SMOKE) ldap_bsd_tests ; return $? ;;
+     COMPLETE) ldap_bsd_tests ; return $? ;;
     BENCHMARK) ;;
-            *) ldap_osx_tests ; return $? ;;
+            *) ldap_bsd_tests ; return $? ;;
   esac
 }

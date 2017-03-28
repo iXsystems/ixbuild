@@ -9,10 +9,10 @@
 REQUIRES="storage"
 export REQUIRES
 
-afp_tests()
+afp_osx_tests()
 {
   AFP_SHARE="My AFP Share"
-  AFP_PATH="/mnt/tank/afp"
+  AFP_PATH="/mnt/tank/afp_osx"
 
   # Set the test count based on config settings
   TESTS_CNT="14"
@@ -25,15 +25,15 @@ afp_tests()
 
   # Clean up any leftover items from previous failed runs
   rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
-  rest_request "DELETE" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "/mnt/tank/afp" }'
-  rest_request "DELETE" "/storage/volume/1/datasets/afp/"
+  rest_request "DELETE" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "'"${AFP_PATH}"'" }'
+  rest_request "DELETE" "/storage/volume/1/datasets/afp_osx/"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - AFP tests" "${TESTS_CNT}"
-  CLASSNAME=ixbuild.resty.functional.create.afp
+  set_test_group_text "1 - Create - AFP OS X tests" "${TESTS_CNT}"
+  CLASSNAME=ixbuild.resty.functional.create.afp_osx
 
   echo_test_title "Creating AFP dataset"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "afp" }'
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "afp_osx" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Enabling AFP service"
@@ -57,8 +57,8 @@ afp_tests()
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Creating a AFP share on /mnt/tank/afp"
-  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "/mnt/tank/afp" }'
+  echo_test_title "Creating a AFP share on ${AFP_PATH}"
+  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "'"${AFP_PATH}"'" }'
   check_rest_response "201 Created" || return 1
 
   # Verify mountability and permissions of AFP share
@@ -111,7 +111,7 @@ afp_tests()
 
   # Test delete AFP dataset
   echo_test_title "Verify AFP dataset can be destroyed.."
-  rest_request "DELETE" "/storage/volume/1/datasets/afp/"
+  rest_request "DELETE" "/storage/volume/1/datasets/afp_osx/"
   check_rest_response "204" || return 1
 
   return 0
@@ -120,14 +120,14 @@ afp_tests()
 # Init function, this is called after module is sourced
 # Pre-Set variables
 # TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
-afp_init()
+afp_osx_init()
 {
   # Run all the smb tests
   case $TESTSET in
-        SMOKE) afp_tests ; return $? ;;
-     COMPLETE) afp_tests ; return $? ;;
+        SMOKE) afp_osx_tests ; return $? ;;
+     COMPLETE) afp_osx_tests ; return $? ;;
     BENCHMARK) ;;
-            *) afp_tests ; return $? ;;
+            *) afp_osx_tests ; return $? ;;
   esac
 }
 

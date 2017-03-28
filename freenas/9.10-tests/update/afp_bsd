@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+afp_bsd_tests()
+{
+  AFP_SHARE="My AFP Share"
+  AFP_PATH="/mnt/tank/afp_bsd"
+
+  # Set the test count based on config settings
+  TEST_CNT="2"
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    TEST_CNT="6"
+
+    # Clean up any leftover items from previous failed AFP runs
+    osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
+  fi
+
+  # Set the group text and number of tests
+  set_test_group_text "2 - Update - AFP BSD tests" "${TEST_CNT}"
+  CLASSNAME=ixbuild.resty.functional.update.afp_bsd
+
+  echo_test_title "Updating AFP service"
+  rest_request "PUT" "/services/afp/" '{ "afp_srv_connections_limit": "100"  }'
+  check_rest_response "200" || return 1
+
+  echo_test_title "Checking to see if AFP service is enabled"
+  rest_request "GET" "/services/services/afp/"
+  check_service_status "RUNNING" || return 1
+
+  # Verify mountability and permissions of AFP share after config changes
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    # Mount share on OSX system and create a test file
+    echo_test_title "Mounting AFP share via OSX and creating a test file"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'
+    check_exit_status || return 1
+
+    # Move test file to a new location on the AFP share
+    echo_test_title "Moving AFP test file into a new directory"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'/tmp" && mv "/Volumes/'"${AFP_SHARE}"'/testfile.txt" "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt"'
+    check_exit_status || return 1
+
+    # Delete test file and test directory from AFP share
+    echo_test_title "Deleting test file and directory from AFP share"
+    osx_test 'rm -f "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${AFP_SHARE}"'/tmp" && find -- "/Volumes/'"${AFP_SHARE}"'/" -prune -type d -empty | grep -q .'
+    check_exit_status || return 1
+
+    # Clean up mounted AFP share
+    echo_test_title "Unmount AFP share"
+    osx_test 'umount "/Volumes/'"${AFP_SHARE}"'"'
+    check_exit_status || return 1
+  fi  
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+afp_bsd_init()
+{
+  # Run all the smb tests
+  case $TESTSET in
+        SMOKE) afp_bsd_tests ; return $? ;;
+     COMPLETE) afp_bsd_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) afp_bsd_tests ; return $? ;;
+  esac
+}
+
