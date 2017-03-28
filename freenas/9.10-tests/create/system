@@ -9,8 +9,9 @@
 REQUIRES="ssh"
 export REQUIRES
 
-system_tests() {
-  set_test_group_text "1 - Create - System tests" "7"
+system_tests()
+{
+  set_test_group_text "1 - Create - System tests" "9"
   CLASSNAME=ixbuild.resty.functional.create.system
 
   # Get system version
@@ -36,16 +37,31 @@ system_tests() {
   # Reboot system to enable tunable
   echo_test_title "Reboot system to enable tunable.."
   rest_request "POST" "/system/reboot"
-  check_rest_response "202"
+  check_rest_response "202" || return 1
 
-  # Wait for network come back up
-  echo_test_title "Waiting for ${VM} to verify tunables.."
-  sleep 15
-  wait_for_avail
-  echo_ok
+  # Ensure shutdown is complete before polling for initialization
+  echo_test_title "Waiting for FreeNAS to shut down"
+  loop_cnt=0
+  while :
+  do
+    ping -c1 ${FNASTESTIP} &>/dev/null
+    if [ $? -ne 0 ]; then
+      # Pinging FreeNAS has ceased responding
+      echo_ok && break;
+    fi
+    (( loop_cnt++ ))
+    if [ $loop_cnt -gt 30 ]; then
+      echo_fail
+      return 1
+    fi
+    sleep 1 && echo -n ".";
+  done
 
-  # Wait 30 seconds before trying more REST queries again
-  sleep 30
+  echo_test_title "Waiting for HTTP server and API initialization after reboot"
+  wait_for_avail_port "80" && wait_for_avail && echo_ok || (echo_fail && return 1)
+
+  echo_test_title "Verifying SSH server initialization after reboot"
+  wait_for_avail_port "22" && echo_ok || (echo_fail && return 1)
 
   # Verify loader tunable
   echo_test_title "Verify system tunable 'dummynet_load'.."
