@@ -40,13 +40,13 @@ system_tests()
   check_rest_response "202" || return 1
 
   # Ensure shutdown is complete before polling for initialization
-  echo_test_title "Waiting for FreeNAS to shut down"
+  echo_test_title "Waiting for VM to shut down"
   loop_cnt=0
   while :
   do
     ping -c1 ${FNASTESTIP} &>/dev/null
     if [ $? -ne 0 ]; then
-      # Pinging FreeNAS has ceased responding
+      # Ping response from VM has ceased responding
       echo_ok && break;
     fi
     (( loop_cnt++ ))

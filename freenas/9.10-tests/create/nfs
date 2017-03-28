@@ -11,8 +11,10 @@ export REQUIRES
 
 nfs_tests()
 {
+  MNT_PATH="/mnt/tank/share"
+
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - NFS tests" "12"
+  set_test_group_text "1 - Create - NFS tests" "14"
   CLASSNAME=ixbuild.resty.functional.create.nfs
 
   # Enable NFS server
@@ -21,8 +23,8 @@ nfs_tests()
   check_rest_response "200 OK"
 
   # Check creating a NFS share
-  echo_test_title "Creating a NFS share on /mnt/tank/share"
-  rest_request "POST" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["/mnt/tank/share"], "nfs_security": "sys" }'
+  echo_test_title "Creating a NFS share on ${MNT_PATH}"
+  rest_request "POST" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${MNT_PATH}"'"], "nfs_security": "sys" }'
   check_rest_response "201 Created"
 
   # Now start the service
@@ -31,8 +33,12 @@ nfs_tests()
   check_rest_response "200 OK"
   
   # Give NFS time to start
-  echo_test_title "Verify that NFS service has started"
+  echo_test_title "Verify that nfsd shows up in netstat results"
   ssh_test "netstat -lap tcp | grep nfsd | awk '\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\" '" 
+  check_exit_status || return 1
+
+  echo_test_title "Verify NFS server on host"
+  ssh_test "showmount -e | grep -q '${MNT_PATH}'"
   check_exit_status || return 1
 
   echo_test_title "Checking to see if NFS service is enabled"
@@ -44,7 +50,7 @@ nfs_tests()
   rc_test "mkdir /tmp/nfs-mnt.$$" || return 1
 
   echo_test_title "Mounting NFS"
-  rc_test "mount_nfs ${ip}:/mnt/tank/share /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
+  rc_test "mount_nfs ${ip}:${MNT_PATH} /tmp/nfs-mnt.$$" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" "60" || return 1
 
   echo_test_title "Creating NFS file"
   rc_test "touch /tmp/nfs-mnt.$$/testfile" "umount /tmp/nfs-mnt.$$ ; rmdir /tmp/nfs-mnt.$$" || return 1
