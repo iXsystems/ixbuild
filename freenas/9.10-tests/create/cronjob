@@ -9,7 +9,7 @@ REQUIRES="storage"
 export REQUIRES
 
 cronjob_tests() {
-  set_test_group_text "1 - Create - Cron tests" "2"
+  set_test_group_text "1 - Create - Cron tests" "3"
   CLASSNAME=ixbuild.resty.functional.create.cron
 
   TESTFILE="/tmp/.testFileCreatedViaCronjob"
@@ -21,6 +21,13 @@ cronjob_tests() {
   echo_test_title "Checking to see if cronjob was created and enabled"
   rest_request "GET" "/tasks/cronjob/"
   check_property_value "return this.cron_enabled" "true" || return 1
+
+  # Give time for cron to create the test file on the remote system
+  sleep 61
+
+  echo_test_title "Verifying that the cronjob created a new file on the remote system"
+  ssh_test "test -f ${TESTFILE}"
+  check_exit_status || return 1
 
   return 0
 }

@@ -65,12 +65,6 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y spidermonkey24"
 fi
 
-which wget >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing wget.."
-  rc_halt "pkg-static install -y wget"
-fi
-
 pkg info -q lang/python27 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing lang/python27.."

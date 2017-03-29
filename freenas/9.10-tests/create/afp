@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+afp_tests()
+{
+  AFP_SHARE="My AFP Share"
+  AFP_PATH="/mnt/tank/afp"
+
+  # Set the test count based on config settings
+  TESTS_CNT="7"
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    TESTS_CNT="10"
+
+    # Clean up any leftover items from previous failed AFP runs
+    osx_test 'umount -f "/Volumes/'"${AFP_SHARE}"'"; rmdir "/Volumes/'"${AFP_SHARE}"'"; exit 0'
+  fi
+
+  # Set the group text and number of tests
+  set_test_group_text "1 - Create - AFP tests" "${TESTS_CNT}"
+  CLASSNAME=ixbuild.resty.functional.create.afp
+
+  echo_test_title "Creating AFP dataset"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Enabling AFP service"
+  if [ -z "${BRIDGEIP}" ]; then
+    rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true, "afp_srv_bindip": "'"${BRIDGEIP}"'" }'
+  else
+    rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true }'
+  fi
+  check_rest_response "200 OK" || return 1
+
+  echo_test_title "Creating a AFP share on /mnt/tank/afp"
+  rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_SHARE}"'", "afp_path": "/mnt/tank/afp" }'
+  check_rest_response "201 Created" || return 1
+
+  # Now start the service
+  echo_test_title "Starting AFP service"
+  rest_request "PUT" "/services/services/afp/" '{ "srv_enable": true }'
+  check_rest_response "200 OK" || return 1
+
+  echo_test_title "Checking to see if AFP service is enabled"
+  rest_request "GET" "/services/services/afp/"
+  check_service_status "RUNNING" || return 1
+
+  echo_test_title "Changing permissions on ${AFP_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created" || return 1
+
+  # Verify mountability and permissions of AFP share
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    # Mount share on OSX system and create a test file
+    echo_test_title "Mounting AFP share via OSX and creating a test file"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'" && mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_SHARE}"'" "/Volumes/'"${AFP_SHARE}"'" && touch "/Volumes/'"${AFP_SHARE}"'/testfile.txt"'
+    check_exit_status || return 1
+
+    # Move test file to a new location on the AFP share
+    echo_test_title "Moving AFP test file into a new directory"
+    osx_test 'mkdir -p "/Volumes/'"${AFP_SHARE}"'/tmp" && mv "/Volumes/'"${AFP_SHARE}"'/testfile.txt" "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt"'
+    check_exit_status || return 1
+
+    # Delete test file and test directory from AFP share
+    echo_test_title "Deleting test file and directory from AFP share"
+    osx_test 'rm -f "/Volumes/'"${AFP_SHARE}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${AFP_SHARE}"'/tmp" && find -- "/Volumes/'"${AFP_SHARE}"'/" -prune -type d -empty | grep -q .'
+    check_exit_status || return 1
+
+    # Clean up mounted AFP share
+    echo_test_title "Unmount AFP share"
+    osx_test 'umount "/Volumes/'"${AFP_SHARE}"'"'
+    check_exit_status || return 1
+  fi
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+afp_init()
+{
+  # Run all the smb tests
+  case $TESTSET in
+        SMOKE) afp_tests ; return $? ;;
+     COMPLETE) afp_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) afp_tests ; return $? ;;
+  esac
+}
+
