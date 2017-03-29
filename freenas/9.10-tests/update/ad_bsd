@@ -14,7 +14,7 @@ ad_bsd_tests()
   SMB_NAME="TestShare"
   SMB_PATH="/mnt/tank/cifs"
 
-  set_test_group_text "2 - Update - Active Directory BSD tests" "20"
+  set_test_group_text "2 - Update - Active Directory BSD tests" "22"
   CLASSNAME=ixbuild.resty.functional.update.ad_bsd
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then

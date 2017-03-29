@@ -12,7 +12,7 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - iSCSI tests" "13"
+  set_test_group_text "2 - Update - iSCSI tests" "14"
   CLASSNAME=ixbuild.resty.functional.update.iscsi
 
   # Clean up any leftover items from any previous failed runs
