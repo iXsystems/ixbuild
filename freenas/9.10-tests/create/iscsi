@@ -59,6 +59,10 @@ iscsi_tests()
   rest_request "GET" "/services/services/iscsitarget/"
   check_service_status "RUNNING"
 
+  echo_test_title "Poll VM to ensure iSCSI service is up and running"
+  wait_for_avail_port "3260"
+  check_exit_status || return 1
+
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
   rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
