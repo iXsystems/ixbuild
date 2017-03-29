@@ -77,7 +77,11 @@ ad_bsd_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test CIFS Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  # Now check if we can mount SMB / create / rename / copy / delete / umount
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
+
   echo_test_title "Creating CIFS mountpoint"
   rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
   sync
