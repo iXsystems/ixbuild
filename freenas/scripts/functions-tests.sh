@@ -607,6 +607,39 @@ wait_for_afp_from_osx()
   return 0
 }
 
+# Poll the FreeNAS host to verify when a share has been created by checking showmount -e results
+# $1 = Mount path to check showmount results for
+# $2 = (Optional) Access type of share (eg, "Everyone")
+wait_for_fnas_mnt()
+{
+  LOOP_SLEEP=2
+  LOOP_LIMIT=40
+
+  mntpoint=$1
+  permissions=""
+
+  if [ -n "${2}" ]; then
+    PERMISSIONS="${2}"
+  fi
+
+  while :
+  do
+    if [ -n "${permissions}" ]; then
+      ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\" && \$2 == \"${permissions}\"' "
+    else
+      ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\"' "
+    fi
+    check_exit_status -q && break
+    echo -n "."
+    sleep $LOOP_SLEEP
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      return 1
+    fi
+    (( loop_cnt++ ))
+  done
+  return 0
+}
+
 run_module() {
   unset REQUIRES
 
