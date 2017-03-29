@@ -11,18 +11,22 @@ export REQUIRES
 
 # Run a series of tests on the boot-environments
 debug_tests() {
-  set_test_group_text "1 - Create - Debugging Tests" "1"
+  set_test_group_text "1 - Create - Debugging Tests" "3"
   CLASSNAME=ixbuild.resty.functional.create.debug
 
   echo_test_title "Creating diagnostic file"
   rest_request "POST" "/system/debug/" '{ "name": "newbe1", "source": "default" }'
   check_rest_response "200 OK" || return 1
 
-  # Get the URL of the debug file
-  dlurl=`cat ${RESTYOUT} | ${JSAWK} 'return this.url'`
-  echo "Debug URL: http://${ip}$dlurl"
-  # KPM - 02-05-2016 - Need to figure out magic to do login + fetch
-  #fetch -o /tmp/debug.tgz http://${io}${durl}
+  echo_test_title "Verify that API returns WWW download path"
+  check_property_value "this.url" "/system/debug/download/" || return 1
+
+  # Currently there is no way to create an authenticated session with FreeNAS
+  # WWW via the API, so fetch file with SCP and the expected path. CD - 03/24/17
+  echo_test_title "Fetch debug file from URL"
+  scp_from_test "/var/db/system/ixdiagnose/ixdiagnose.tgz" "/tmp/${VM}/debug.tgz"
+  check_exit_status || return 1
+
   return 0
 }
 

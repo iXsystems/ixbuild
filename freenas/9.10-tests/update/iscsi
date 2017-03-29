@@ -12,13 +12,13 @@ export REQUIRES
 iscsi_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - iSCSI tests" "11"
+  set_test_group_text "2 - Update - iSCSI tests" "14"
   CLASSNAME=ixbuild.resty.functional.update.iscsi
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   iscsictl -R -a
-  umount -A
+  umount -A &>/dev/null
 
   # Enable the iSCSI service
   echo_test_title "Enable iSCSI service"
@@ -28,6 +28,10 @@ iscsi_tests()
   echo_test_title "Verify the iSCSI service is enabled"
   rest_request "GET" "/services/services/iscsitarget/"
   check_service_status "RUNNING"
+
+  echo_test_title "Poll VM to ensure iSCSI service is up and running"
+  wait_for_avail_port "3260"
+  check_exit_status || return 1
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"

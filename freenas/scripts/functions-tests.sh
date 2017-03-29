@@ -247,15 +247,65 @@ ssh_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  SSH_COMMAND_RESULTS=$?
+  return $?
+}
 
-  if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
+# $1 = Local file to copy to the remote host
+# $2 = Location to store file on remote host
+scp_to_test()
+{
+  _scp_test "${1}" "${fuser}@${sshserver}:${2}"
+}
+
+# $1 = File to copy from the remote host
+# $2 = Location to copy file to
+scp_from_test()
+{
+  _scp_test "${fuser}@${sshserver}:${1}" "${2}"
+}
+
+# Private method, see scp_from_test or scp_to_test
+# $1 = SCP from [[user@]host1:]file1
+# $2 = SCP to [[user@]host1:]file1
+_scp_test()
+{
+  export TESTSTDOUT="/tmp/.scpCmdTestStdOut"
+  export TESTSTDERR="/tmp/.scpCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  sshserver=${ip}
+
+  if [ -z "$sshserver" ]; then
+    sshserver=$FNASTESTIP
+  fi
+
+  if [ -z "$sshserver" ]; then
+    echo "SCP server IP address request for scp_test()."
+    return 1
+  fi
+
+  # Test fuser and fpass values
+  if [ -z "${fpass}" ] || [ -z "${fuser}" ]; then
+    echo "SCP server username and password required for scp_test()."
+    return 1
+  fi
+
+  # SCP connection
+  sshpass -p ${fpass} \
+    scp -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  SCP_CMD_RESULTS=$?
+
+  if [ $SCP_CMD_RESULTS -ne 0 ]; then
     echo "Failed on test module: $1"
     FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
     return 1
   fi
 
-  return $SSH_COMMAND_RESULTS
+  return $SCP_CMD_RESULTS
 }
 
 # $1 = Command to run
@@ -284,13 +334,8 @@ osx_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  SSH_COMMAND_RESULTS=$?
 
-  if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
-    echo "Failed on test module: $1"
-    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
-    return 1
-  fi
+  return $?
 }
 
 echo_ok()
@@ -467,7 +512,7 @@ wait_for_avail()
   do
     GET "${ENDPOINT}" -v 2>${RESTYERR} >${RESTYOUT}
     check_rest_response_continue "200 OK"
-    if [ $? -eq 0 ] ; then break; fi
+    check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
     if [ $count -gt $LOOP_LIMIT ] ; then
@@ -476,6 +521,143 @@ wait_for_avail()
     fi
     count=`expr $count + 1`
   done
+}
+
+# Use netcat to determine if a service port is open on FreeNAS
+# $1 = Port number to check against
+# $2 = (optional) Override $LOOP_SLEEP which determines how long to wait before retrying command
+# $3 = (optional) Override $LOOP_LIMIT which determines how many loops before exiting with failure
+wait_for_avail_port()
+{
+  LOOP_SLEEP=1
+  LOOP_LIMIT=10
+  PORT=$1
+
+  if [ -z "${PORT}" ]; then
+    echo -n " wait_for_avail_port(): \$1 argument should be a port number to verify"
+    return 1
+  fi
+
+  if [ -n "${2}" ]; then
+    LOOP_SLEEP=$2
+  fi
+
+  if [ -n "${3}" ]; then
+    LOOP_LIMIT=$3
+  fi
+
+  loop_cnt=0
+  while :
+  do
+    nc -z -n -v ${FNASTESTIP} ${PORT} 2>&1 | awk '$5 == "succeeded!" || $5 == "open"' >/dev/null 2>/dev/null
+    check_exit_status -q && break
+    echo -n "."
+    sleep $LOOP_SLEEP
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      return 1
+    fi
+    loop_cnt=`expr $loop_cnt + 1`
+  done
+  return 0
+}
+
+# Use mount -l[ist] to determine if mounted share shows up
+# $1 = Mountpoint to be used by share
+# $2 = Share filesystem type (eg, smbfs)
+wait_for_bsd_mnt()
+{
+  LOOP_SLEEP=5
+  LOOP_LIMIT=60
+
+  loop_cnt=0
+
+  while :
+  do
+    mount -l | grep -q "${1}" && break
+    (( loop_cnt++ ))
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      return 1
+    fi
+    sleep $LOOP_SLEEP
+  done
+
+  return 0
+}
+
+# Use mount to determine if mounted share shows up on OSX
+# $1 = Mountpoint to be used by share
+wait_for_osx_mnt()
+{
+  LOOP_SLEEP=5
+  LOOP_LIMIT=60
+
+  pattern="${1}"
+  loop_cnt=0
+
+  while :
+  do
+    osx_test "mount | grep -q \"${pattern}\""
+    check_exit_status -q && break
+    (( loop_cnt++ ))
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      return 1
+    fi
+    sleep $LOOP_SLEEP
+  done
+
+  return 0
+}
+
+
+# SSH into OSX box and poll FreeNAS for running AFP service
+wait_for_afp_from_osx()
+{
+  LOOP_SLEEP=1
+  LOOP_LIMIT=10
+  AFP_PORT="548"
+
+  loop_cnt=0
+  while :
+  do
+    osx_test "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} ${AFP_PORT} ${AFP_PORT} | grep ${AFP_PORT}"
+    check_exit_status -q && break
+    echo -n "."
+    sleep $LOOP_SLEEP
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      return 1
+    fi
+    loop_cnt=`expr $loop_cnt + 1`
+  done
+  return 0
+}
+
+# Poll the FreeNAS host to verify when a share has been created by checking showmount -e results
+# $1 = Mount path to check showmount results for
+# $2 = (Optional) Access type of share (eg, "Everyone")
+wait_for_fnas_mnt()
+{
+  LOOP_SLEEP=2
+  LOOP_LIMIT=40
+
+  mntpoint=$1
+  permissions=""
+
+  if [ -n "${2}" ]; then
+    permissions=" && \$2 == \"${2}\""
+  fi
+
+  while :
+  do
+    ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\"${permissions}' "
+    check_exit_status -q && break
+    echo -n "."
+    sleep $LOOP_SLEEP
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      return 1
+    fi
+    (( loop_cnt++ ))
+  done
+  return 0
 }
 
 run_module() {
