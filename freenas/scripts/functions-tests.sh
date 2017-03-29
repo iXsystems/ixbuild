@@ -561,6 +561,30 @@ wait_for_avail_port()
   return 0
 }
 
+# Use mount -l[ist] to determine if mounted share shows up
+# $1 = Mountpoint to be used by share
+# $2 = Share filesystem type (eg, smbfs)
+wait_for_bsd_mnt()
+{
+  LOOP_SLEEP=1
+  LOOP_LIMIT=30
+
+  pattern="${1} (${2})"
+  loop_cnt=0
+
+  while :
+  do
+    mount -l | grep -q "${pattern}" && break
+    (( loop_cnt++ ))
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+      return 1
+    fi
+    sleep $LOOP_SLEEP
+  done
+
+  return 0
+}
+
 # SSH into OSX box and poll FreeNAS for running AFP service
 wait_for_afp_from_osx()
 {

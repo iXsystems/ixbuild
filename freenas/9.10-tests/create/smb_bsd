@@ -14,7 +14,7 @@ smb_bsd_tests()
   SMB_NAME="TestShare"
   SMB_PATH="/mnt/tank/smb-bsd"
   MOUNTPOINT="/tmp/smb-mnt.$$"
-  TEST_CNT=22
+  TEST_CNT=21
     
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Samba BSD tests" "${TEST_CNT}"
@@ -42,6 +42,10 @@ smb_bsd_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
 
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
+
   echo_test_title "Checking to see if SMB service is running"
   rest_request "GET" "/services/services/cifs/"
   check_service_status "RUNNING" || return 1
@@ -54,19 +58,7 @@ smb_bsd_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
-  echo_test_title "Checking to see if SMB service is enabled"
-  rest_request "GET" "/services/services/cifs/"
-  check_service_status "RUNNING" || return 1
-
-  echo_test_title "Changing permissions on ${SMB_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 Created"
-
-  echo_test_title "Creating a SMB share on ${SMB_PATH}"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 Created"
-
-  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  # Now check if we can mount SMB / create / rename / copy / delete / umount
   echo_test_title "Creating SMB mountpoint"
   rc_test "mkdir ${MOUNTPOINT}" || return 1
   sync
@@ -74,7 +66,9 @@ smb_bsd_tests()
   echo_test_title "Mounting SMB"
   rc_test "mount_smbfs -N -I ${ip} //guest@testnas/${SMB_NAME} ${MOUNTPOINT}" || return 1
 
-  return 0
+  echo_test_title "Verify that SMB share has been mounted"
+  wait_for_bsd_mnt "${MOUNTPOINT}" "smbfs"
+  check_exit_status || return 1
 
   echo_test_title "Creating SMB file"
   rc_test "touch ${MOUNTPOINT}/testfile" || return 1
