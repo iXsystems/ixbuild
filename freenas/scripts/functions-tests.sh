@@ -334,13 +334,8 @@ osx_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  SSH_COMMAND_RESULTS=$?
 
-  if [ ${SSH_COMMAND_RESULTS} -ne 0 ] ; then
-    echo "Failed on test module: $1"
-    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
-    return 1
-  fi
+  return $?
 }
 
 echo_ok()

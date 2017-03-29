@@ -25,6 +25,18 @@ afp_bsd_tests()
   set_test_group_text "2 - Update - AFP BSD tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.update.afp_bsd
 
+  echo_test_title "Creating AFP dataset"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "afp_bsd" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Enabling AFP service"
+  if [ -n "${BRIDGEIP}" ]; then
+    rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true, "afp_srv_bindip": "'"${BRIDGEIP}"'" }'
+  else
+    rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": true }'
+  fi
+  check_rest_response "200 OK" || return 1
+
   echo_test_title "Updating AFP service"
   rest_request "PUT" "/services/afp/" '{ "afp_srv_connections_limit": "100"  }'
   check_rest_response "200" || return 1
