@@ -17,7 +17,7 @@ afp_bsd_tests()
   # Set the test count based on config settings
   TESTS_CNT="7"
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TESTS_CNT="10"
+    TESTS_CNT="9"
 
     # Clean up any leftover items from previous failed AFP runs
     osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'

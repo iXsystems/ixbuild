@@ -15,7 +15,7 @@ ldap_osx_tests()
   SMB_NAME="TestShare"
   SMB_PATH="/mnt/tank/cifs"
 
-  set_test_group_text "1 - Create - LDAP OS X tests" "20"
+  set_test_group_text "1 - Create - LDAP OS X tests" "21"
   CLASSNAME=ixbuild.resty.functional.create.ldap_osx
 
   if [ -z "$LDAPBINDDN" -o -z "$LDAPBINDPASSWORD" -o -z "$OSX_HOST" -o -z "$BRIDGEIP" -o -z "$ADUSERNAME" ] ; then

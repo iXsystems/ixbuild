@@ -9,7 +9,7 @@ REQUIRES=""
 export REQUIRES
 
 cronjob_tests() {
-  set_test_group_text "1 - Update - Cron tests" "3"
+  set_test_group_text "1 - Update - Cron tests" "4"
   CLASSNAME=ixbuild.resty.functional.delete.cron
 
   TESTFILE="/tmp/.testFileCreatedViaCronjob"

@@ -32,6 +32,11 @@ smb_bsd_tests()
   umount -A &>/dev/null
   rmdir /tmp/cifs-mnt.* &>/dev/null
 
+  # Set auxilary parameters to allow mount_smbfs to work
+  echo_test_title "Setting auxilary parameters for mount_smbfs.."
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = yes\nntlm auth = yes \nraw NTLMv2 auth = yes" }'
+  check_rest_response "200 OK"
+
   echo_test_title "Creating CIFS dataset"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "cifs" }'
   check_rest_response "201 Created"

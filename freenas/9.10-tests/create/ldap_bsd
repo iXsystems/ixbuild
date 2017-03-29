@@ -14,7 +14,7 @@ ldap_bsd_tests()
   SMB_NAME="TestShare"
   SMB_PATH="/mnt/tank/cifs"
 
-  set_test_group_text "1 - Create - LDAP BSD tests" "22"
+  set_test_group_text "1 - Create - LDAP BSD tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.ldap_bsd
 
   if [ -z "$LDAPBINDDN" -o -z "$LDAPBINDPASSWORD" ] ; then

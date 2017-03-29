@@ -55,10 +55,11 @@ smb_bsd_tests()
   rc_test "mkdir /tmp/cifs-mnt.$$" || return 1
   sync
 
-  sleep 10
-
   echo_test_title "Mounting CIFS"
   rc_test "mount_smbfs -N -I ${ip} //guest@testnas/${SMB_NAME} /tmp/cifs-mnt.$$" || return 1
+
+  # TODO - some kind of verification that smbfs has mounted?
+  sleep 5
 
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile" || return 1
