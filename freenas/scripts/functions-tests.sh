@@ -619,16 +619,12 @@ wait_for_fnas_mnt()
   permissions=""
 
   if [ -n "${2}" ]; then
-    PERMISSIONS="${2}"
+    permissions=" && \$2 == \"${2}\""
   fi
 
   while :
   do
-    if [ -n "${permissions}" ]; then
-      ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\" && \$2 == \"${permissions}\"' "
-    else
-      ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\"' "
-    fi
+    ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\"${permissions}' "
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
