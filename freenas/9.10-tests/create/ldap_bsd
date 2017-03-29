@@ -92,6 +92,10 @@ ldap_bsd_tests()
   echo_test_title "Mounting CIFS"
   rc_test "mount_smbfs -N -I ${ip} -W LDAP01 //ldapuser@testnas/${SMB_NAME} /tmp/cifs-mnt.$$" || return 1
 
+  echo_test_title "Verify CIFS share has finished mounting"
+  wait_for_bsd_mnt "/tmp/cifs-mnt.$$"
+  check_exit_status || return 1
+
   echo_test_title "Creating CIFS file"
   rc_test "touch /tmp/cifs-mnt.$$/testfile"  || return 1
 

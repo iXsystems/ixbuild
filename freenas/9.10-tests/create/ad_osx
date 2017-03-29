@@ -89,6 +89,11 @@ ad_osx_tests()
     osx_test 'mount -t smbfs "smb://aduser:12345678@'${BRIDGEIP}'/'"${SMB_NAME}"'" "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
 
+    echo_test_title "Verify SMB share has been mounted on OSX"
+    # //aduser@10.20.20.191/TestShare on /Volumes/fn910mtest (smbfs, nodev, nosuid, mounted by jenkins)
+    wait_for_osx_mnt "/Volumes/${BRIDGEHOST}"
+    check_exit_status || return 1
+
     echo_test_title "Create file on SMB share via OSX to test permissions"
     osx_test 'touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
     check_exit_status || return 1

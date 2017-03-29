@@ -83,6 +83,10 @@ ldap_osx_tests()
     osx_test 'mount -t smbfs "smb://ldapuser:12345678@'${BRIDGEIP}'/'"${SMB_NAME}"'" "/Volumes/'"${BRIDGEHOST}"'"'
     check_exit_status || return 1
 
+    echo_test_title "Verify SMB share mounted on OSX system"
+    wait_for_osx_mnt "/Volumes/${BRIDGEHOST}"
+    check_exit_status || return 1
+
     echo_test_title "Create file on SMB share via OSX to test permissions"
     osx_test 'touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
     check_exit_status || return 1
