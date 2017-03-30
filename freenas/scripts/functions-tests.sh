@@ -166,7 +166,7 @@ rc_test()
   touch $TESTSTDERR
 
   if [ -z "$3" ] ; then
-    ${1} >${TESTSTDOUT} 2>${TESTSTDERR}
+    eval "${1}" >${TESTSTDOUT} 2>${TESTSTDERR}
     if [ $? -ne 0 ] ; then
       echo_fail 
       if [ -n "$2" ] ; then 
@@ -499,15 +499,15 @@ set_defaults()
 wait_for_avail()
 {
   # Sum: wait for 720 secs
-  LOOP_SLEEP=3
-  LOOP_LIMIT=240
-  ENDPOINT="/system/info/hardware/"
+  local LOOP_SLEEP=3
+  local LOOP_LIMIT=240
+  local ENDPOINT="/system/info/hardware/"
 
   if [ -n "$FREENASLEGACY" ] ; then
     ENDPOINT="/storage/disk/"
   fi
 
-  count=0
+  local count=0
   while :
   do
     GET "${ENDPOINT}" -v 2>${RESTYERR} >${RESTYOUT}
@@ -519,7 +519,7 @@ wait_for_avail()
        echo_fail
        exit 1
     fi
-    count=`expr $count + 1`
+    (( count++ ))
   done
 }
 
@@ -529,9 +529,9 @@ wait_for_avail()
 # $3 = (optional) Override $LOOP_LIMIT which determines how many loops before exiting with failure
 wait_for_avail_port()
 {
-  LOOP_SLEEP=1
-  LOOP_LIMIT=10
-  PORT=$1
+  local LOOP_SLEEP=1
+  local LOOP_LIMIT=10
+  local PORT=$1
 
   if [ -z "${PORT}" ]; then
     echo -n " wait_for_avail_port(): \$1 argument should be a port number to verify"
@@ -539,14 +539,14 @@ wait_for_avail_port()
   fi
 
   if [ -n "${2}" ]; then
-    LOOP_SLEEP=$2
+    local LOOP_SLEEP=$2
   fi
 
   if [ -n "${3}" ]; then
-    LOOP_LIMIT=$3
+    local LOOP_LIMIT=$3
   fi
 
-  loop_cnt=0
+  local loop_cnt=0
   while :
   do
     nc -z -n -v ${FNASTESTIP} ${PORT} 2>&1 | awk '$5 == "succeeded!" || $5 == "open"' >/dev/null 2>/dev/null
@@ -556,7 +556,7 @@ wait_for_avail_port()
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
       return 1
     fi
-    loop_cnt=`expr $loop_cnt + 1`
+    (( loop_cnt++ ))
   done
   return 0
 }
@@ -566,10 +566,10 @@ wait_for_avail_port()
 # $2 = Share filesystem type (eg, smbfs)
 wait_for_bsd_mnt()
 {
-  LOOP_SLEEP=5
-  LOOP_LIMIT=60
+  local LOOP_SLEEP=5
+  local LOOP_LIMIT=60
 
-  loop_cnt=0
+  local loop_cnt=0
 
   while :
   do
@@ -588,11 +588,11 @@ wait_for_bsd_mnt()
 # $1 = Mountpoint to be used by share
 wait_for_osx_mnt()
 {
-  LOOP_SLEEP=5
-  LOOP_LIMIT=60
+  local LOOP_SLEEP=5
+  local LOOP_LIMIT=60
 
-  pattern="${1}"
-  loop_cnt=0
+  local pattern="${1}"
+  local loop_cnt=0
 
   while :
   do
@@ -612,11 +612,11 @@ wait_for_osx_mnt()
 # SSH into OSX box and poll FreeNAS for running AFP service
 wait_for_afp_from_osx()
 {
-  LOOP_SLEEP=1
-  LOOP_LIMIT=10
-  AFP_PORT="548"
+  local LOOP_SLEEP=1
+  local LOOP_LIMIT=10
+  local AFP_PORT="548"
 
-  loop_cnt=0
+  local loop_cnt=0
   while :
   do
     osx_test "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} ${AFP_PORT} ${AFP_PORT} | grep ${AFP_PORT}"
@@ -626,7 +626,7 @@ wait_for_afp_from_osx()
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
       return 1
     fi
-    loop_cnt=`expr $loop_cnt + 1`
+    (( loop_cnt++ ))
   done
   return 0
 }
@@ -636,11 +636,11 @@ wait_for_afp_from_osx()
 # $2 = (Optional) Access type of share (eg, "Everyone")
 wait_for_fnas_mnt()
 {
-  LOOP_SLEEP=2
-  LOOP_LIMIT=40
+  local LOOP_SLEEP=2
+  local LOOP_LIMIT=40
 
-  mntpoint=$1
-  permissions=""
+  local mntpoint=$1
+  local permissions=""
 
   if [ -n "${2}" ]; then
     permissions=" && \$2 == \"${2}\""
