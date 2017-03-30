@@ -11,9 +11,10 @@ export REQUIRES
 
 smb_bsd_tests()
 {
-  SMB_NAME="TestShare"
-  SMB_PATH="/mnt/tank/smb-bsd"
-  MOUNTPOINT="/tmp/smb-mnt.$$"
+  local DATASET="smb-bsd"
+  local SMB_NAME="TestShare"
+  local SMB_PATH="/mnt/tank/${DATASET}"
+  local MOUNTPOINT="/tmp/smb-mnt.$$"
   TEST_CNT=21
     
   # Set the group text and number of tests
@@ -25,7 +26,7 @@ smb_bsd_tests()
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'",  "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  rest_request "DELETE" "/storage/volume/1/datasets/smb-bsd/"
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   umount -A &>/dev/null
   rmdir /tmp/smb-mnt.* &>/dev/null
 
@@ -35,7 +36,7 @@ smb_bsd_tests()
   check_rest_response "200 OK"
 
   echo_test_title "Creating SMB dataset"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "smb-bsd" }'
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created"
 
   echo_test_title "Starting SMB service"
@@ -106,7 +107,7 @@ smb_bsd_tests()
 
   # Check destroying a SMB dataset
   echo_test_title "Destroying SMB dataset"
-  rest_request "DELETE" "/storage/volume/1/datasets/smb-bsd/"
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   check_rest_response "204" || return 1
 
   return 0

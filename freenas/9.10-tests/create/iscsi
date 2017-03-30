@@ -17,6 +17,13 @@ iscsi_tests()
   set_test_group_text "1 - Create - iSCSI tests" "23"
   CLASSNAME=ixbuild.resty.functional.create.iscsi
 
+  ps -aux | grep -q "iscsid"
+  if [ $? -ne 0 ]; then
+    echo "iSCSI service does not appear to be running."
+    echo_skipped
+    return 0
+  fi
+
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   iscsictl -R -a

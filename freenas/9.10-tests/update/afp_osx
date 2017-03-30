@@ -11,8 +11,10 @@ export REQUIRES
 
 afp_osx_tests()
 {
-  AFP_NAME="My AFP Share"
-  AFP_PATH="/mnt/tank/afp_osx"
+  local DATASET="afp-osx"
+  local AFP_NAME="My AFP Share"
+  local AFP_PATH="/mnt/tank/${DATASET}"
+  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
 
   # Set the test count based on config settings
   TEST_CNT="14"
@@ -20,20 +22,20 @@ afp_osx_tests()
     TEST_CNT="18"
 
     # Clean up any leftover items from previous failed AFP runs
-    osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"; rmdir "/Volumes/'"${BRIDGEHOST}"'"; exit 0'
+    osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
   fi
 
   # Clean up any leftover items from previous failed runs
   rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
   rest_request "DELETE" "/sharing/afp/" '{ "afp_name": "'"${AFP_NAME}"'", "afp_path": "'"${APF_PATH}"'" }'
-  rest_request "DELETE" "/storage/volume/1/datasets/afp_osx/"
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
 
   # Set the group text and number of tests
   set_test_group_text "2 - Update - AFP OS X tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.update.afp_osx
 
   echo_test_title "Creating AFP dataset"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "afp_osx" }'
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Updating AFP service"
@@ -77,34 +79,34 @@ afp_osx_tests()
 
     # Mount share on OSX system and create a test file
     echo_test_title "Create mount-point for AFP on OSX system"
-    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'"'
+    osx_test "mkdir -p '${MOUNTPOINT}'"
     check_exit_status || return 1
 
     echo_test_title "Mount AFP share on OSX system"
-    osx_test 'mount -t afp "afp://'${BRIDGEIP}'/'"${AFP_NAME}"'" "/Volumes/'"${BRIDGEHOST}"'"'
+    osx_test "mount -t afp 'afp://${BRIDGEIP}/${AFP_NAME}' '${MOUNTPOINT}'"
     check_exit_status || return 1
 
     echo_test_title "Create file on AFP share via OSX to test permissions"
-    osx_test 'touch "/Volumes/'"${BRIDGEHOST}"'/testfile.txt"'
+    osx_test "touch '${MOUNTPOINT}/testfile.txt'"
     check_exit_status || return 1
 
     # Move test file to a new location on the AFP share
     echo_test_title "Moving AFP test file into a new directory"
-    osx_test 'mkdir -p "/Volumes/'"${BRIDGEHOST}"'/tmp" && mv "/Volumes/'"${BRIDGEHOST}"'/testfile.txt" "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt"'
+    osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'"
     check_exit_status || return 1
 
     # Delete test file and test directory from AFP share
     echo_test_title "Deleting test file and directory from AFP share"
-    osx_test 'rm -f "/Volumes/'"${BRIDGEHOST}"'/tmp/testfile.txt" && rmdir "/Volumes/'"${BRIDGEHOST}"'/tmp"'
+    osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'"
     check_exit_status || return 1
 
     echo_test_title "Verifying that test file and directory were successfully removed"
-    osx_test 'find -- "/Volumes/'"${BRIDGEHOST}"'/" -prune -type d -empty | grep -q .'
+    osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ."
     check_exit_status || return 1
 
     # Clean up mounted AFP share
     echo_test_title "Unmount AFP share"
-    osx_test 'umount -f "/Volumes/'"${BRIDGEHOST}"'"'
+    osx_test "umount -f '${MOUNTPOINT}'"
     check_exit_status || return 1
   fi
 
@@ -115,7 +117,7 @@ afp_osx_tests()
 
   # Test delete AFP dataset
   echo_test_title "Verify AFP dataset can be destroyed.."
-  rest_request "DELETE" "/storage/volume/1/datasets/afp_osx/"
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   check_rest_response "204" || return 1
 
   return 0
