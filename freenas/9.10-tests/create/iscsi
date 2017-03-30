@@ -11,14 +11,17 @@ export REQUIRES
 
 iscsi_tests()
 {
+  local MOUNTPOINT="/tmp/iscsi-mnt.$$"
+
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - iSCSI tests" "20"
+  set_test_group_text "1 - Create - iSCSI tests" "23"
   CLASSNAME=ixbuild.resty.functional.create.iscsi
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   iscsictl -R -a
   umount -A &>/dev/null
+  rmdir /tmp/iscsi-mnt.* &>/dev/null
 
   # Add iSCSI initator
   echo_test_title "Add iSCSI initiator"
@@ -66,39 +69,43 @@ iscsi_tests()
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
   rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
-  sleep 10
- 
-  # Now check if we can mount target / create / rename / copy / delete / umount
+
+  echo_test_title "Waiting for iscsi connection before grabbing device target"
+  rc_test "iscsictl -L -w 30" || return 1
 
   # Get the device for the connect target
-  devname=`iscsictl | grep ${ip} | tr -d '\t' | awk '{print $4}'`
+  local iscsi_devname=`iscsictl -L | awk '$2 == "'${ip}':3620" && $3 == "Connected:" {print $4}'`
 
-  # echo_test_title "Format the target volume"
-  rc_test "newfs /dev/$devname" || return 1
+  echo_test_title "Ensure we have the iscsi device name"
+  test -n "${iscsi_devname}" && ls "/dev/${iscsi_devname}" >/dev/null
+  check_exit_status || return 1
+
+  echo_test_title "Format the target volume"
+  rc_test "newfs /dev/${iscsi_devname}" || return 1
 
   echo_test_title "Creating iSCSI mountpoint"
-  rc_test "mkdir /tmp/iscsi-mnt.$$" || return 1
+  rc_test "mkdir '${MOUNTPOINT}'" || return 1
 
-  # echo_test_title "Mount the target volume"
-  rc_test "mount /dev/${devname} /tmp/iscsi-mnt.$$" || return 1
+  echo_test_title "Mount the target volume"
+  rc_test "mount '/dev/${iscsi_devname}' '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Creating file"
-  rc_test "touch /tmp/iscsi-mnt.$$/testfile" "umount /tmp/iscsi-mnt.$$ ; rmdir /tmp/iscsi-mnt.$$" || return 1
+  rc_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Moving file"
-  rc_test "mv /tmp/iscsi-mnt.$$/testfile /tmp/iscsi-mnt.$$/testfile2" || return 1
+  rc_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Copying file"
-  rc_test "cp /tmp/iscsi-mnt.$$/testfile2 /tmp/iscsi-mnt.$$/testfile" || return 1
+  rc_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
 
   echo_test_title "Deleting file"
-  rc_test "rm /tmp/iscsi-mnt.$$/testfile2" || return 1
+  rc_test "rm '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Unmounting iSCSI volume"
-  rc_test "umount /tmp/iscsi-mnt.$$" || return 1
+  rc_test "umount '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Removing iSCSI volume mountpoint"
-  rc_test "rmdir /tmp/iscsi-mnt.$$" || return 1
+  rc_test "rmdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Disconnect all targets"
   rc_test "iscsictl -R -a" || return 1
