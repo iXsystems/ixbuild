@@ -8,12 +8,13 @@
 REQUIRES=""
 export REQUIRES
 
-cronjob_tests() {
+cronjob_tests()
+{
   set_test_group_text "1 - Delete - Cron tests" "3"
-  CLASSNAME=ixbuild.resty.functional.delete.cron
+  CLASSNAME=ixbuild.resty.functional.delete.cronjob
 
-  TESTFILE="/tmp/.testFileUpdatedViaCronjob"
-  CRONJOB_ID=1
+  local TESTFILE="/tmp/.testFileUpdatedViaCronjob"
+  local CRONJOB_ID=1
 
   # Ensure test file does not exist
   echo_test_title "Verify cronjob has been removed and is no longer creating test file.."

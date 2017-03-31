@@ -8,15 +8,16 @@
 REQUIRES="storage"
 export REQUIRES
 
-cronjob_tests() {
+cronjob_tests()
+{
   set_test_group_text "1 - Create - Cron tests" "2"
-  CLASSNAME=ixbuild.resty.functional.create.cron
+  CLASSNAME=ixbuild.resty.functional.create.cronjob
 
-  TESTFILE="/tmp/.testFileCreatedViaCronjob"
+  local TESTFILE="/tmp/.testFileCreatedViaCronjob"
 
   echo_test_title "Creating new cron job which will run every minute"
   rest_request "POST" "/tasks/cronjob/" '{ "cron_user": "root", "cron_command": "touch '${TESTFILE}'", "cron_minute": "*/1" }'
-  check_rest_response "201 Created"
+  check_rest_response "201 Created" || return 1
 
   echo_test_title "Checking to see if cronjob was created and enabled"
   rest_request "GET" "/tasks/cronjob/"

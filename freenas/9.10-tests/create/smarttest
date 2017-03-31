@@ -18,8 +18,8 @@ smarttest_tests()
 
   # Get list of disk_identifiers from /storage/disks
   rest_request "GET" "/storage/disk"
-  disk_identifiers=`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.disk_identifier)'`
-  disk_ident_1=`echo ${disk_identifiers} | cut -d " " -f1`
+  local disk_identifiers=`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.disk_identifier)'`
+  local disk_ident_1=`echo ${disk_identifiers} | cut -d " " -f1`
 
   echo_test_title "Create a new SMARTTest"
   rest_request "POST" "/tasks/smarttest/" '{ "smarttest_disks": "'${disk_ident_1}'", "smarttest_type": "L", "smarttest_hour": "*", "smarttest_daymonth": "*", "smarttest_month": "*", "smarttest_dayweek": "*" }'

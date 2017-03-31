@@ -8,10 +8,11 @@
 REQUIRES="storage user"
 export REQUIRES
 
-lldp_tests() {
-  LOCATION="Maryville, TN"
-  COUNTRY="US"
-  INTDESC="true"
+lldp_tests()
+{
+  local LOCATION="Maryville, TN"
+  local COUNTRY="US"
+  local INTDESC="true"
 
   set_test_group_text "1 - Create - LLDP tests" "5"
   CLASSNAME=ixbuild.resty.functional.create.lldp
@@ -28,7 +29,7 @@ lldp_tests() {
   check_property_value -q "this.lldp_country" "${COUNTRY}" \
     && check_property_value -q "this.lldp_intdesc" "${INTDESC}" \
     && check_property_value -q "this.lldp_location" "${LOCATION}" \
-    && echo_ok || (echo_fail && return 1)
+    && echo_ok || echo_fail && return 1
 
   echo_test_title "Enable LLDP service"
   rest_request "PUT" "/services/services/lldp/" '{ "srv_enable": true }'

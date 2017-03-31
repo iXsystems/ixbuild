@@ -51,7 +51,7 @@ nfs_tests()
   rc_test "mkdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Mounting NFS"
-  rc_test "mount_nfs ${ip}:${NFS_PATH} '${MOUNTPOINT}'" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60" || return 1
+  rc_test "mount_nfs ${ip}:${NFS_PATH} ${MOUNTPOINT}" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60" || return 1
 
   echo_test_title "Creating NFS file"
   rc_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'" || return 1

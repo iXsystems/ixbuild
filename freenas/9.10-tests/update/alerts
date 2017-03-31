@@ -10,24 +10,24 @@ export REQUIRES
 
 # $1 = Property name using JSAWK syntax
 # $2 = Expected value
-poll_for_property_value()
+__poll_for_property_value()
 {
-  INTERVAL_SECS=10
-  INTERVAL_LOOPS=30
+  local LOOP_SLEEP=10
+  local LOOP_LIMIT=30
 
-  loop_cnt=0
+  local loop_cnt=0
   while :
   do
     rest_request "GET" "/system/alert/"
     check_property_value -q "${1}" "${2}" && break
 
-    loop_cnt=$(expr $loop_cnt + 1)
-    if [ $loop_cnt -gt $INTERVAL_LOOPS ]; then
+    (( loop_cnt++ ))
+    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
       echo -n " expected value not found."
       return 1
     fi
     echo -n "."
-    sleep $INTERVAL_SECS
+    sleep $LOOP_SLEEP
   done
 
   return 0
@@ -35,13 +35,13 @@ poll_for_property_value()
 
 alerts_tests()
 {
-  ALERT_MSG="Testing system alerts with failure."
+  local ALERT_MSG="Testing system alerts with failure."
 
   set_test_group_text "2 - Update - System Alert tests" "2"
   CLASSNAME=ixbuild.resty.functional.update.alerts
 
   echo_test_title "Polling API endpoint for new system alert"
-  poll_for_property_value "this.message" "${ALERT_MSG}"
+  __poll_for_property_value "this.message" "${ALERT_MSG}"
   check_exit_status -q && echo_ok || return 1
 
   echo_test_title "Validating API alert values"

@@ -10,9 +10,9 @@ export REQUIRES
 
 alerts_tests()
 {
-  ALERT_MSG="Testing system alerts with failure."
-  ALERT_STATUS="FAIL"
-  ALERTS_FILE="/tmp/self-test-alert"
+  local ALERT_MSG="Testing system alerts with failure."
+  local ALERT_STATUS="FAIL"
+  local ALERTS_FILE="/tmp/self-test-alert"
 
   set_test_group_text "1 - Create - System Alert tests" "1"
   CLASSNAME=ixbuild.resty.functional.create.alerts
