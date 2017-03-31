@@ -78,6 +78,8 @@ iscsi_tests()
   rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
 
   echo_test_title "Waiting for iscsi connection before grabbing device target"
+  # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
+  # have been established before -L[isting] results
   rc_test "iscsictl -L -w 30" || return 1
 
   # Get the device for the connect target
