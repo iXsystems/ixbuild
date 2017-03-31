@@ -102,7 +102,7 @@ ad_osx_tests()
     check_exit_status || return 1
     
     echo_test_title "List files on mounted volume"
-    osx_test "cd '${MOUNTPOINT}' && time ls *"
+    osx_test "time ls -la '${MOUNTPOINT}'"
     check_exit_status || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"
