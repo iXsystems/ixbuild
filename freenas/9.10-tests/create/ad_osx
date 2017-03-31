@@ -76,8 +76,8 @@ ad_osx_tests()
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
   check_rest_response "201 Created"
 
-  echo_test_title "Verify permissions on ${SMB_PATH}"
-  ssh_test "ls -la $'{SMB_PATH}' | grep QA"
+  echo_test_title "Checking permissions on ${SMB_NAME}"
+  ssh_test "ls -la /mnt/tank | grep '${SMB_NAME}' | grep qa"
   check_exit_status || return 1  
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
