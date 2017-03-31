@@ -77,7 +77,7 @@ iscsi_tests()
   echo_test_title "Connecting to iSCSI target"
   rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
 
-  echo_test_title "Waiting for iscsi connection before grabbing device target"
+  echo_test_title "Waiting for iscsi connection before grabbing device name"
   # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
   # have been established before -L[isting] results
   rc_test "iscsictl -L -w 30" || return 1
@@ -85,7 +85,7 @@ iscsi_tests()
   # Get the device for the connect target
   local iscsi_devname=`iscsictl -L | awk '$2 == "'${ip}':3620" && $3 == "Connected:" {print $4}'`
 
-  echo_test_title "Ensure we have the iscsi device name"
+  echo_test_title "Ensure we have the iSCSI device name"
   test -n "${iscsi_devname}" && ls "/dev/${iscsi_devname}" >/dev/null
   check_exit_status || return 1
 
