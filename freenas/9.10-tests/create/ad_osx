@@ -74,7 +74,11 @@ ad_osx_tests()
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
-  check_rest_response "201 Created"   
+  check_rest_response "201 Created"
+
+  echo_test_title "Verify permissions on ${SMB_PATH}"
+  ssh_test "ls -la $'{SMB_PATH}' | grep QA"
+  check_exit_status || return 1  
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
@@ -93,6 +97,10 @@ ad_osx_tests()
     echo_test_title "Verify SMB share has been mounted on OSX"
     # //aduser@10.20.20.191/TestShare on /Volumes/fn910mtest (smbfs, nodev, nosuid, mounted by jenkins)
     wait_for_osx_mnt "${MOUNTPOINT}"
+    check_exit_status || return 1
+    
+    echo_test_title "List files on mounted volume"
+    osx_test "cd '${MOUNTPOINT}' && time ls *"
     check_exit_status || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"
