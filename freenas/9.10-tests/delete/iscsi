@@ -15,12 +15,13 @@ iscsi_tests()
   set_test_group_text "3 - Delete - iSCSI tests" "2"
   CLASSNAME=ixbuild.resty.functional.delete.iscsi
 
-  ps -aux | grep -q "[i]scsid"
-  if [ $? -ne 0 ]; then
-    echo -n "iSCSI service does not appear to be running."
-    echo_skipped
-    return 0
-  fi  
+  # TODO - Find correct process name on test executor
+  #ps -aux | grep -q "[i]scsid"
+  #if [ $? -ne 0 ]; then
+  #  echo -n "iSCSI service does not appear to be running."
+  #  echo_skipped
+  #  return 0
+  #fi  
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
