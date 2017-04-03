@@ -17,9 +17,9 @@ iscsi_tests()
   set_test_group_text "1 - Create - iSCSI tests" "23"
   CLASSNAME=ixbuild.resty.functional.create.iscsi
 
-  ps -aux | grep -q "iscsid"
+  ps -aux | grep -q "[i]scsid"
   if [ $? -ne 0 ]; then
-    echo "iSCSI service does not appear to be running."
+    echo -n "iSCSI service does not appear to be running."
     echo_skipped
     return 0
   fi
