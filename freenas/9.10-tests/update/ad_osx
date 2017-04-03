@@ -15,10 +15,11 @@ ad_osx_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local VOL_GROUP="qa"
 
   TEST_CNT=11
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=18
+    TEST_CNT=22
 
     # Clean up any leftover items from previous failed SMB runs
     osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
@@ -74,9 +75,18 @@ ad_osx_tests()
     check_rest_response "200 OK"
   )
 
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
+
   echo_test_title "Changing permissions on ${SMB_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
   check_rest_response "201 Created" 
+
+  local vol_name=$(dirname "${SMB_PATH}")
+  echo_test_title "Checking permissions on ${SMB_NAME}"
+  ssh_test "ls -la '${vol_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+  check_exit_status || return 1
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
@@ -90,6 +100,16 @@ ad_osx_tests()
 
     echo_test_title "Mount SMB share on OSX system"
     osx_test "mount -t smbfs 'smb://aduser:12345678@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'"
+    check_exit_status || return 1
+
+    echo_test_title "Verify SMB share has been mounted on OSX"
+    # //{ADUSERNAME}@{FNASTESTIP}/{SMB_NAME} on {MOUNTPOINT} (smbfs, nodev, nosuid, mounted by jenkins)
+    wait_for_osx_mnt "${MOUNTPOINT}"
+    check_exit_status || return 1
+
+    local device_name=`dirname "${MOUNTPOINT}"`
+    echo_test_title "Checking permissions on ${device_name}"
+    osx_test "time ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
     check_exit_status || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"

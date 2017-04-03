@@ -16,8 +16,9 @@ ldap_bsd_tests()
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/ldap-mnt.$$"
   local LDAP_USER='ldapuser'
+  local VOL_GROUP="qa"
 
-  set_test_group_text "2 - Update - LDAP BSD tests" "25"
+  set_test_group_text "2 - Update - LDAP BSD tests" "27"
   CLASSNAME=ixbuild.resty.functional.update.ldap_bsd
 
   if [ -z "$LDAPBINDDN2" -o -z "$LDAPBINDPASSWORD2" ] ; then
@@ -65,7 +66,9 @@ ldap_bsd_tests()
   check_rest_response "200 OK"
 
   # Wait a moment for samba to spin up
-  sleep 4
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
 
   echo_test_title "Checking to see if SMB service is enabled"
   rest_request "GET" "/services/services/cifs/"
@@ -80,10 +83,6 @@ ldap_bsd_tests()
   check_rest_response "201 Created"
 
   # Now check if we can mount SMB / create / rename / copy / delete / umount
-  echo_test_title "Poll VM to ensure SMB service is up and running"
-  wait_for_avail_port "445"
-  check_exit_status || return 1
-
   echo_test_title "Creating SMB mountpoint"
   rc_test "mkdir '${MOUNTPOINT}'" || return 1
   sync
@@ -97,6 +96,14 @@ ldap_bsd_tests()
 
   echo_test_title "Mounting SMB"
   rc_test "mount_smbfs -N -I ${ip} -W LDAP02 '//${LDAP_USER}@testnas/${SMB_NAME}' '${MOUNTPOINT}'" || return 1
+
+  echo_test_title "Verify SMB share has finished mounting"
+  wait_for_bsd_mnt "${MOUNTPOINT}"
+  check_exit_status || return 1
+
+  local device_name=`dirname "${MOUNTPOINT}"`
+  echo_test_title "Checking permissions on ${device_name}"
+  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
 
   echo_test_title "Creating SMB file"
   rc_test "touch '${MOUNTPOINT}/testfile'" || return 1

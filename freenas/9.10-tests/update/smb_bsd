@@ -15,7 +15,7 @@ smb_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/smb-mnt.$$"
-  TEST_CNT=22
+  TEST_CNT=23
 
   # Set the group text and number of tests
   set_test_group_text "2 - Update - Samba BSD tests" "${TEST_CNT}"
@@ -75,6 +75,10 @@ smb_bsd_tests()
   echo_test_title "Verify that SMB share has been mounted"
   wait_for_bsd_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
+
+  local device_name=`dirname "${MOUNTPOINT}"`
+  echo_test_title "Checking permissions on ${device_name}"
+  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
 
   echo_test_title "Creating SMB file"
   rc_test "touch ${MOUNTPOINT}/testfile" || return 1

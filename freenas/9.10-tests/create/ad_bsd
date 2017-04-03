@@ -15,8 +15,9 @@ ad_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/ad-mnt.$$"
+  local VOL_GROUP="qa"
 
-  set_test_group_text "1 - Create - Active Directory BSD tests" "23"
+  set_test_group_text "1 - Create - Active Directory BSD tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.ad_bsd
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
@@ -72,7 +73,7 @@ ad_bsd_tests()
   check_exit_status || return 1
 
   echo_test_title "Creating SMB mountpoint"
-  rc_test "mkdir '${MOUNTPOINT}'" || return 1
+  rc_test "mkdir -p '${MOUNTPOINT}'" || return 1
   sync
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
@@ -96,6 +97,10 @@ ad_bsd_tests()
   echo_test_title "Verify that SMB share has finished mounting"
   wait_for_bsd_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
+
+  local device_name=`dirname "${MOUNTPOINT}"`
+  echo_test_title "Checking permissions on ${MOUNTPOINT}"
+  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
 
   echo_test_title "Creating SMB file"
   rc_test "touch '${MOUNTPOINT}/testfile'" || return 1

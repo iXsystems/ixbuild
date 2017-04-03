@@ -15,11 +15,12 @@ afp_osx_tests()
   local AFP_NAME="My AFP Share"
   local AFP_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local VOL_GROUP="qa"
 
   # Set the test count based on config settings
   TEST_CNT="14"
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT="18"
+    TEST_CNT="20"
 
     # Clean up any leftover items from previous failed AFP runs
     osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
@@ -59,6 +60,10 @@ afp_osx_tests()
   rest_request "GET" "/services/services/afp/"
   check_service_status "RUNNING" || return 1
 
+  echo_test_title "Poll VM to ensure AFP service is up and running"
+  wait_for_avail_port "548"
+  check_exit_status || return 1
+
   echo_test_title "Changing permissions on ${AFP_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
@@ -69,10 +74,6 @@ afp_osx_tests()
 
   # Verify mountability and permissions of AFP share after config changes
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    echo_test_title "Poll VM to ensure AFP service is up and running"
-    wait_for_avail_port "548"
-    check_exit_status || return 1
-
     echo_test_title "Check to see if AFP can be accessed from OS X"
     wait_for_afp_from_osx
     check_exit_status || return 1
@@ -84,6 +85,15 @@ afp_osx_tests()
 
     echo_test_title "Mount AFP share on OSX system"
     osx_test "mount -t afp 'afp://${BRIDGEIP}/${AFP_NAME}' '${MOUNTPOINT}'"
+    check_exit_status || return 1
+
+    echo_test_title "Verify that AFP share has been mounted"
+    wait_for_osx_mnt "${MOUNTPOINT}"
+    check_exit_status || return 1
+
+    local device_name=`dirname "${MOUNTPOINT}"`
+    echo_test_title "Checking permissions on ${device_name}"
+    osx_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
     check_exit_status || return 1
 
     echo_test_title "Create file on AFP share via OSX to test permissions"

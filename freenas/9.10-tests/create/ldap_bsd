@@ -15,8 +15,9 @@ ldap_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/ldap-mnt.$$"
+  local VOL_GROUP="ga"
 
-  set_test_group_text "1 - Create - LDAP BSD tests" "25"
+  set_test_group_text "1 - Create - LDAP BSD tests" "27"
   CLASSNAME=ixbuild.resty.functional.create.ldap_bsd
 
   if [ -z "$LDAPBINDDN" -o -z "$LDAPBINDPASSWORD" ] ; then
@@ -72,10 +73,6 @@ ldap_bsd_tests()
   wait_for_avail_port "445"
   check_exit_status || return 1
 
-  echo_test_title "Creating SMB mountpoint"
-  rc_test "mkdir -p '${MOUNTPOINT}'" || return 1
-  sync
-
   echo_test_title "Changing permissions on ${SMB_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "qa", "mp_recursive": true }'
   check_rest_response "201 Created"   
@@ -83,6 +80,10 @@ ldap_bsd_tests()
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
+
+  echo_test_title "Creating SMB mountpoint"
+  rc_test "mkdir -p '${MOUNTPOINT}'" || return 1
+  sync
 
   sleep 10
 
@@ -97,6 +98,10 @@ ldap_bsd_tests()
   echo_test_title "Verify SMB share has finished mounting"
   wait_for_bsd_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
+
+  local device_name=`dirname "${MOUNTPOINT}"`
+  echo_test_title "Checking permissions on ${device_name}"
+  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
 
   echo_test_title "Creating SMB file"
   rc_test "touch '${MOUNTPOINT}/testfile'"  || return 1

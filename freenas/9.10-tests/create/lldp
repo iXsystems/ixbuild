@@ -29,7 +29,7 @@ lldp_tests()
   check_property_value -q "this.lldp_country" "${COUNTRY}" \
     && check_property_value -q "this.lldp_intdesc" "${INTDESC}" \
     && check_property_value -q "this.lldp_location" "${LOCATION}" \
-    && echo_ok || echo_fail && return 1
+    && echo_ok || echo_fail
 
   echo_test_title "Enable LLDP service"
   rest_request "PUT" "/services/services/lldp/" '{ "srv_enable": true }'

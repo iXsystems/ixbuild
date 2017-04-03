@@ -17,9 +17,9 @@ ad_osx_tests()
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
   local VOL_GROUP="qa"
 
-  TEST_CNT=11
+  TEST_CNT=12
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=19
+    TEST_CNT=22
 
     # Clean up any leftover items from previous failed SMB runs
     osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOUNT}'; exit 0"
@@ -73,21 +73,22 @@ ad_osx_tests()
     check_rest_response "200 OK"
   )
 
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
+
   echo_test_title "Changing permissions on ${SMB_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
   check_rest_response "201 Created"
 
-  sleep 5
-
-  local vol_name=$(dirname "${SMB_PATH}")
-
-  echo_test_title "Checking permissions on ${SMB_NAME}"
-  ssh_test "ls -la '${vol_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
-  check_exit_status || return 1  
-
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
+
+  local vol_name=$(dirname "${SMB_PATH}")
+  echo_test_title "Checking permissions on ${SMB_NAME}"
+  ssh_test "ls -la '${vol_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+  check_exit_status || return 1  
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
@@ -104,8 +105,9 @@ ad_osx_tests()
     wait_for_osx_mnt "${MOUNTPOINT}"
     check_exit_status || return 1
     
-    echo_test_title "List files on mounted volume"
-    osx_test "time ls -la '${MOUNTPOINT}'"
+    local device_name=`dirname "${MOUNTPOINT}"`
+    echo_test_title "Checking permissions on ${device_name}"
+    osx_test "time ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
     check_exit_status || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"

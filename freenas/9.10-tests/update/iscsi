@@ -14,7 +14,7 @@ iscsi_tests()
   local MOUNTPOINT="/tmp/iscsi-mnt.$$"
 
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - iSCSI tests" "14"
+  set_test_group_text "2 - Update - iSCSI tests" "16"
   CLASSNAME=ixbuild.resty.functional.update.iscsi
 
   ps -aux | grep -q "[i]scsid"

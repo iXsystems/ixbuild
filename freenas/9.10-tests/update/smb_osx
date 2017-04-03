@@ -18,7 +18,7 @@ smb_osx_tests()
 
   TEST_CNT=11
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=18
+    TEST_CNT=21
 
     # Clean up any leftover items from previous failed SMB runs
     osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
@@ -53,17 +53,21 @@ smb_osx_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
 
-  echo_test_title "Checking to see if SMB service is enabled"
-  rest_request "GET" "/services/services/cifs/"
-  check_service_status "RUNNING" || return 1
+  echo_test_title "Creating a SMB share on ${SMB_PATH}"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "201 Created"
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created"
 
-  echo_test_title "Creating a SMB share on ${SMB_PATH}"
-  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 Created"
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
+
+  echo_test_title "Checking to see if SMB service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_service_status "RUNNING" || return 1
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
@@ -73,6 +77,15 @@ smb_osx_tests()
 
     echo_test_title "Mount SMB share on OSX system"
     osx_test "mount -t smbfs 'smb://guest@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'"
+    check_exit_status || return 1
+
+    echo_test_title "Verify SMB share has been mounted on OSX"
+    wait_for_osx_mnt "${MOUNTPOINT}"
+    check_exit_status || return 1
+
+    local device_name=`dirname "${MOUNTPOINT}"`
+    echo_test_title "Checking permissions on ${device_name}"
+    osx_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
     check_exit_status || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"
