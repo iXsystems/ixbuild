@@ -15,6 +15,7 @@ smb_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/smb-mnt.$$"
+  local VOL_GROUP="qa"
   TEST_CNT=23
 
   # Set the group text and number of tests

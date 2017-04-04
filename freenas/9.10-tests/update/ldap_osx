@@ -15,6 +15,7 @@ ldap_osx_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local VOL_GROUP="qa"
   local LDAP_USER="ldapuser"
   local LDAP_PASS="12345678"
 

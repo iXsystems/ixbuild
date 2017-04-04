@@ -15,6 +15,7 @@ smb_osx_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local VOL_GROUP="qa"
 
   TEST_CNT=11
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
