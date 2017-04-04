@@ -64,9 +64,11 @@ EOF
 EOF
   fi
 
-# Optional stdout / stderr logs
+  local ESCAPED_TESTCMD=$(echo $TESTCMD | sed "s|&|&amp;|g")
+
+  # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo -e "         <system-out>Command Run:\n$TESTCMD\n\nResponse:\n" >> ${XMLRESULTS}
+    echo -e "         <system-out>Command Run:\n$ESCAPE_TESTCMD\n\nResponse:\n" >> ${XMLRESULTS}
     echo "`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
@@ -183,7 +185,7 @@ rc_test()
 
   # Running with timeout
   ( ${1} >${TESTSTDOUT} 2>${TESTSTDERR} ; echo $? > /tmp/.rc-result.$$ ) &
-  echo "$!" | sed "s|&&|AND|" > /tmp/.rc-pid.$$
+  echo "$!" > /tmp/.rc-pid.$$
   timeout=0
   while :
   do
