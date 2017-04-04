@@ -183,7 +183,7 @@ rc_test()
 
   # Running with timeout
   ( ${1} >${TESTSTDOUT} 2>${TESTSTDERR} ; echo $? > /tmp/.rc-result.$$ ) &
-  echo "$!" > /tmp/.rc-pid.$$
+  echo "$!" | sed "s|&&|AND|" > /tmp/.rc-pid.$$
   timeout=0
   while :
   do
