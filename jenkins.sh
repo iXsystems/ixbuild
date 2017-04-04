@@ -86,6 +86,12 @@ fi
 # Source our functions
 . build.conf
 . functions.sh
+
+# Look for centralized config and source if found
+if [ -f "/autoinstalls/globalconfig/build.conf" ] ; then
+. /autoinstalls/globalconfig/build.conf
+fi
+
 ######################################################
 
 case $TYPE in
