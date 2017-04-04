@@ -32,10 +32,14 @@ nfs_tests()
   echo_test_title "Starting NFS service"
   rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": true }'
   check_rest_response "200 OK"
-  
+
   # Give NFS time to start
+  echo_test_title "Verify that the NFS port is open on the host"
+  wait_for_avail_port "618"
+  check_exit_status || return 1
+
   echo_test_title "Verify that nfsd shows up in netstat results"
-  ssh_test "netstat -lap tcp | grep nfsd | awk '\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\" '" 
+  ssh_test "netstat -lap tcp | grep nfsd | awk '\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\" '"
   check_exit_status || return 1
 
   echo_test_title "Verify NFS server on host"

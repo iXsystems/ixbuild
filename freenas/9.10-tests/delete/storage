@@ -12,7 +12,7 @@ export REQUIRES
 storage_tests()
 {
   # Set the group text and number of tests
-  set_test_group_text "3 - Delete - Storage tests" "22"
+  set_test_group_text "3 - Delete - Storage tests" "21"
   CLASSNAME=ixbuild.resty.functional.delete.storage
 
   # Check destroying a ZFS snapshot
@@ -21,115 +21,24 @@ storage_tests()
   check_rest_response "204" || return 1
 
   # Check destroying a ZVOL 1/2
-  echo_test_title "Destroying ZVOL 1/2"
+  echo_test_title "Destroying ZVOL 01/20"
   rest_request "DELETE" "/storage/volume/tank/zvols/testzvol1/"
   check_rest_response "204" || return 1
 
   # Check destroying a ZVOL 2/2
-  echo_test_title "Destroying ZVOL 2/2"
+  echo_test_title "Destroying ZVOL 02/20"
   rest_request "DELETE" "/storage/volume/tank/zvols/testzvol2/"
   check_rest_response "204" || return 1
 
-  # Check destroying a dataset 01/20
-  echo_test_title "Destroying dataset 01/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/share/"
-  check_rest_response "204" || return 1
+  local DATASET_CNT=20
+  for count in $(seq -f "%02g" 3 $DATASET_CNT)
+  do
+    echo_test_title "Destroying dataset ${count}/${DATASET_CNT}"
+    rest_request "DELETE" "/storage/volume/1/datasets/dataset${count}/"
+    check_rest_response "204" || return 1
+  done
 
-  # Check destroying a dataset 02/20
-  echo_test_title "Destroying dataset 02/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/jails/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 03/20
-  echo_test_title "Destroying dataset 03/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset03/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 04/20
-  echo_test_title "Destroying dataset 04/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset04/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 05/20
-  echo_test_title "Destroying dataset 05/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset05/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 06/20
-  echo_test_title "Destroying dataset 06/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset06/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 07/20
-  echo_test_title "Destroying dataset 07/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset07/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 08/20
-  echo_test_title "Destroying dataset 08/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset08/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 09/20
-  echo_test_title "Destroying dataset 09/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset09/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 10/20
-  echo_test_title "Destroying dataset 10/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset10/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 11/20
-  echo_test_title "Destroying dataset 11/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset11/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 12/20
-  echo_test_title "Destroying dataset 12/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset12/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 13/20
-  echo_test_title "Destroying dataset 13/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset13/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 14/20
-  echo_test_title "Destroying dataset 14/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset14/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 15/20
-  echo_test_title "Destroying dataset 15/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset15/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 16/20
-  echo_test_title "Destroying dataset 16/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset16/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 17/20
-  echo_test_title "Destroying dataset 17/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset17/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 18/20
-  echo_test_title "Destroying dataset 18/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset18/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 19/20
-  echo_test_title "Destroying dataset 19/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset19/"
-  check_rest_response "204" || return 1
-
-  # Check destroying a dataset 20/20
-  echo_test_title "Destroying dataset 20/20"
-  rest_request "DELETE" "/storage/volume/1/datasets/dataset20/"
-  check_rest_response "204" || return 1
- 
+  return 0
 }
 
 # Init function, this is called after module is sourced

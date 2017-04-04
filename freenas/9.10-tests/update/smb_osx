@@ -84,7 +84,7 @@ smb_osx_tests()
     check_exit_status || return 1
 
     local device_name=`dirname "${MOUNTPOINT}"`
-    echo_test_title "Checking permissions on ${device_name}"
+    echo_test_title "Checking permissions on ${MOUNTPOINT}"
     osx_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
     check_exit_status || return 1
 
