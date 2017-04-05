@@ -65,10 +65,10 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y spidermonkey24"
 fi
 
-which wget >/dev/null 2>/dev/null
+which snmpwalk >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing wget.."
-  rc_halt "pkg-static install -y wget"
+  echo "Installing net-mgmt/net-snmp.."
+  rc_halt "pkg-static install -y net-mgmt/net-snmp"
 fi
 
 pkg info -q lang/python27 >/dev/null 2>/dev/null
