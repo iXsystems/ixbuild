@@ -15,14 +15,14 @@ ad_osx_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
-  local MP_GROUP='AD01\qa'
+  local MP_GROUP="AD01\\qa"
 
   TEST_CNT=12
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     TEST_CNT=22
 
     # Clean up any leftover items from previous failed SMB runs
-    osx_test -q "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOUNT}'; exit 0"
+    osx_test -q "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
   fi
 
   set_test_group_text "1 - Create - Active Directory OS X tests" "${TEST_CNT}"
@@ -83,10 +83,10 @@ ad_osx_tests()
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
-  check_rest_response "201 Created"
+  check_rest_response "201 Created" || return 1
 
   echo_test_title "Checking permissions on ${SMB_PATH}"
-  check_dataset_group "${SMB_PATH}" "${MP_GROUP}"
+  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
