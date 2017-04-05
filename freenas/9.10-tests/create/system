@@ -65,8 +65,9 @@ system_tests()
 
   # Verify loader tunable
   echo_test_title "Verify system tunable 'dummynet_load'.."
-  ssh_test "kldstat -m dummynet"
-  check_exit_status || return 1
+  ssh_test "kldstat -m dummynet" || return 1
+
+  return 0
 }
 
 # Init function, this is called after module is sourced

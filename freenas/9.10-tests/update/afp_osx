@@ -15,15 +15,15 @@ afp_osx_tests()
   local AFP_NAME="My AFP Share"
   local AFP_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
-  local VOL_GROUP="qa"
+  local MP_GROUP="wheel"
 
   # Set the test count based on config settings
   TEST_CNT="14"
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT="20"
+    TEST_CNT="21"
 
     # Clean up any leftover items from previous failed AFP runs
-    osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
+    osx_test -q "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
   fi
 
   # Clean up any leftover items from previous failed runs
@@ -65,12 +65,15 @@ afp_osx_tests()
   check_exit_status || return 1
 
   echo_test_title "Changing permissions on ${AFP_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'${MP_GROUP}'" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Creating a AFP share on ${AFP_PATH}"
   rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_NAME}"'", "afp_path": "'"${AFP_PATH}"'" }'
   check_rest_response "201 Created" || return 1
+
+  echo_test_title "Checking permissions on ${AFP_PATH}"
+  check_dataset_group "${AFP_PATH}" "${MP_GROUP}" || return 1
 
   # Verify mountability and permissions of AFP share after config changes
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
@@ -80,44 +83,35 @@ afp_osx_tests()
 
     # Mount share on OSX system and create a test file
     echo_test_title "Create mount-point for AFP on OSX system"
-    osx_test "mkdir -p '${MOUNTPOINT}'"
-    check_exit_status || return 1
+    osx_test "mkdir -p '${MOUNTPOINT}'" || return 1
 
     echo_test_title "Mount AFP share on OSX system"
-    osx_test "mount -t afp 'afp://${BRIDGEIP}/${AFP_NAME}' '${MOUNTPOINT}'"
-    check_exit_status || return 1
+    osx_test "mount -t afp 'afp://${BRIDGEIP}/${AFP_NAME}' '${MOUNTPOINT}'" || return 1
 
     echo_test_title "Verify that AFP share has been mounted"
     wait_for_osx_mnt "${MOUNTPOINT}"
     check_exit_status || return 1
 
-    local device_name=`dirname "${MOUNTPOINT}"`
-    echo_test_title "Checking permissions on ${MOUNTPOINT}"
-    osx_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
-    check_exit_status || return 1
+    echo_test_title "Checking for ability to list files on ${MOUNTPOINT}"
+    osx_test "time ls -la ${MOUNTPOINT}" || return 1
 
     echo_test_title "Create file on AFP share via OSX to test permissions"
-    osx_test "touch '${MOUNTPOINT}/testfile.txt'"
-    check_exit_status || return 1
+    osx_test "touch '${MOUNTPOINT}/testfile.txt'" || return 1
 
     # Move test file to a new location on the AFP share
     echo_test_title "Moving AFP test file into a new directory"
-    osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'"
-    check_exit_status || return 1
+    osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'" || return 1
 
     # Delete test file and test directory from AFP share
     echo_test_title "Deleting test file and directory from AFP share"
-    osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'"
-    check_exit_status || return 1
+    osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'" || return 1
 
     echo_test_title "Verifying that test file and directory were successfully removed"
-    osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ."
-    check_exit_status || return 1
+    osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ." || return 1
 
     # Clean up mounted AFP share
     echo_test_title "Unmount AFP share"
-    osx_test "umount -f '${MOUNTPOINT}'"
-    check_exit_status || return 1
+    osx_test "umount -f '${MOUNTPOINT}'" || return 1
   fi
 
   # Test disable AFP

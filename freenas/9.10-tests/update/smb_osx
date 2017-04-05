@@ -15,14 +15,14 @@ smb_osx_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
-  local VOL_GROUP="qa"
+  local MP_GROUP="wheel"
 
   TEST_CNT=11
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=21
+    TEST_CNT=22
 
     # Clean up any leftover items from previous failed SMB runs
-    osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
+    osx_test -q "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
   fi
 
   # Set the group text and number of tests
@@ -59,7 +59,7 @@ smb_osx_tests()
   check_rest_response "201 Created"
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'${MP_GROUP}'" }'
   check_rest_response "201 Created"
 
   echo_test_title "Poll VM to ensure SMB service is up and running"
@@ -70,47 +70,41 @@ smb_osx_tests()
   rest_request "GET" "/services/services/cifs/"
   check_service_status "RUNNING" || return 1
 
+  echo_test_title "Checking permissions on ${SMB_PATH}"
+  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
+
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
     echo_test_title "Create mount-point for SMB on OSX system"
-    osx_test "mkdir -p '${MOUNTPOINT}'"
-    check_exit_status || return 1
+    osx_test "mkdir -p '${MOUNTPOINT}'" || return 1
 
     echo_test_title "Mount SMB share on OSX system"
-    osx_test "mount -t smbfs 'smb://guest@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'"
-    check_exit_status || return 1
+    osx_test "mount -t smbfs 'smb://guest@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'" || return 1
 
     echo_test_title "Verify SMB share has been mounted on OSX"
     wait_for_osx_mnt "${MOUNTPOINT}"
     check_exit_status || return 1
 
-    local device_name=`dirname "${MOUNTPOINT}"`
-    echo_test_title "Checking permissions on ${MOUNTPOINT}"
-    osx_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
-    check_exit_status || return 1
+    echo_test_title "Checking for ability to list files on ${MOUNTPOINT}"
+    osx_test "time ls -la ${MOUNTPOINT}" || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"
-    osx_test "touch '${MOUNTPOINT}/testfile.txt'"
-    check_exit_status || return 1
+    osx_test "touch '${MOUNTPOINT}/testfile.txt'" || return 1
 
     # Move test file to a new location on the SMB share
     echo_test_title "Moving SMB test file into a new directory"
-    osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'"
-    check_exit_status || return 1
+    osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'" || return 1
 
     # Delete test file and test directory from SMB share
     echo_test_title "Deleting test file and directory from SMB share"
-    osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'"
-    check_exit_status || return 1
+    osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'" || return 1
 
     echo_test_title "Verifying that test file and directory were successfully removed"
-    osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ."
-    check_exit_status || return 1
+    osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ." || return 1
 
     # Clean up mounted SMB share
     echo_test_title "Unmount SMB share"
-    osx_test "umount -f '${MOUNTPOINT}'"
-    check_exit_status || return 1
+    osx_test "umount -f '${MOUNTPOINT}'" || return 1
   fi  
 
   echo_test_title "Removing SMB share on ${SMB_PATH}"

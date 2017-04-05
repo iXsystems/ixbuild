@@ -15,7 +15,7 @@ nfs_tests()
   local MOUNTPOINT="/tmp/nfs-mnt.$$"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - NFS tests" "14"
+  set_test_group_text "1 - Create - NFS tests" "15"
   CLASSNAME=ixbuild.resty.functional.create.nfs
 
   # Enable NFS server
@@ -39,8 +39,7 @@ nfs_tests()
   check_exit_status || return 1
 
   echo_test_title "Verify that nfsd shows up in netstat results"
-  ssh_test "netstat -lap tcp | grep nfsd | awk '\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\" '"
-  check_exit_status || return 1
+  ssh_test "netstat -lap tcp | grep nfsd | awk '\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\" ' | grep -q nfsd" || return 1
 
   echo_test_title "Verify NFS server on host"
   wait_for_fnas_mnt "${NFS_PATH}" "Everyone"

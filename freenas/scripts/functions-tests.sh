@@ -217,15 +217,20 @@ rc_test()
   return 1
 }
 
+# (Optional) -q switch as first argument silences std_out
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 ssh_test()
 {
   export TESTSTDOUT="/tmp/.sshCmdTestStdOut"
   export TESTSTDERR="/tmp/.sshCmdTestStdErr"
   touch $TESTSTDOUT
   touch $TESTSTDERR
+
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
 
   sshserver=${ip}
   if [ -z "$sshserver" ] ; then
@@ -249,24 +254,50 @@ ssh_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  return $?
+  local EXITSTATUS=$?
+
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed running: $1"
+    fi
+  fi
+
+  return $EXITSTATUS
 }
 
+# (Optional) -q switch as first argument silences std_out
 # $1 = Local file to copy to the remote host
 # $2 = Location to store file on remote host
 scp_to_test()
 {
-  _scp_test "${1}" "${fuser}@${sshserver}:${2}"
+  if [ "$1" == "-q" ]; then
+    shift
+    _scp_test -q "${1}" "${fuser}@${sshserver}:${2}"
+  else
+    _scp_test "${1}" "${fuser}@${sshserver}:${2}"
+  fi
+  return $?
 }
 
+# (Optional) -q switch as first argument silences std_out
 # $1 = File to copy from the remote host
 # $2 = Location to copy file to
 scp_from_test()
 {
-  _scp_test "${fuser}@${sshserver}:${1}" "${2}"
+  if [ "$1" == "-q" ]; then
+    shift
+    _scp_test -q "${fuser}@${sshserver}:${1}" "${2}"
+  else
+    _scp_test "${fuser}@${sshserver}:${1}" "${2}"
+  fi
+  return $?
 }
 
 # Private method, see scp_from_test or scp_to_test
+# (Optional) -q switch as first argument silences std_out
 # $1 = SCP from [[user@]host1:]file1
 # $2 = SCP to [[user@]host1:]file1
 _scp_test()
@@ -276,8 +307,13 @@ _scp_test()
   touch $TESTSTDOUT
   touch $TESTSTDERR
 
-  sshserver=${ip}
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
 
+  sshserver=${ip}
   if [ -z "$sshserver" ]; then
     sshserver=$FNASTESTIP
   fi
@@ -299,26 +335,34 @@ _scp_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
-  SCP_CMD_RESULTS=$?
+  local EXITSTATUS=$?
 
-  if [ $SCP_CMD_RESULTS -ne 0 ]; then
-    echo "Failed on test module: $1"
-    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
-    return 1
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed while SCPing from $1 to $2"
+    fi
   fi
 
-  return $SCP_CMD_RESULTS
+  return $EXITSTATUS
 }
 
+# (Optional) -q switch as first argument silences std_out
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 osx_test()
 {
   export TESTSTDOUT="/tmp/.osxCmdTestStdOut"
   export TESTSTDERR="/tmp/.osxCmdTestStdErr"
   touch $TESTSTDOUT
   touch $TESTSTDERR
+
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
 
   if [ -z "${OSX_HOST}" ] ; then
     echo "SSH server IP address required for osx_test()."
@@ -336,8 +380,18 @@ osx_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  local EXITSTATUS=$?
 
-  return $?
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed running: $1"
+    fi
+  fi
+
+  return $EXITSTATUS
 }
 
 echo_ok()
@@ -364,12 +418,44 @@ echo_skipped()
   add_xml_result "skipped" "Skipped test!"
 }
 
+# (Optional) -q switch as first argument silences std_out
+# $1 = Full path to dataset
+# $2 = Expected group name of dataset
+check_dataset_group()
+{
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
+  local dir_name=`dirname "${1}"`
+  local base_name=`basename "${1}"` 
+  local group_name=$(printf "%q" $2)
+
+  # (ls) List directory with dataset in it (eg /mnt/tank/)
+  # (awk) Only return line from list which matches the group ($2) and dataset name ($base_name)
+  # (grep) Make sure awk returned the dataset ($base_name)
+  ssh_test -q "ls -la '${dir_name}' | awk '\$4 == \"${group_name}\" && \$9 == \"${base_name}\/\"' | grep -q \"${base_name}\"";
+  local EXITSTATUS=$?
+
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+    fi
+  fi
+
+  return $EXITSTATUS
+}
+
 # Checks the exit status_code from previous command
 # (Optional) -q switch as first argument silences std_out
 check_exit_status()
 {
-  STATUSCODE=$?
-  SILENT="false"
+  local STATUSCODE=$?
+  local SILENT="false"
   if [ "$1" == "-q" ]; then
     SILENT="true"
     shift
@@ -598,7 +684,7 @@ wait_for_osx_mnt()
 
   while :
   do
-    osx_test "mount | grep -q \"${pattern}\""
+    osx_test -q "mount | grep -q \"${pattern}\""
     check_exit_status -q && break
     (( loop_cnt++ ))
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
@@ -621,7 +707,7 @@ wait_for_afp_from_osx()
   local loop_cnt=0
   while :
   do
-    osx_test "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} ${AFP_PORT} ${AFP_PORT} | grep ${AFP_PORT}"
+    osx_test -q "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} ${AFP_PORT} ${AFP_PORT} | grep ${AFP_PORT}"
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
@@ -650,7 +736,7 @@ wait_for_fnas_mnt()
 
   while :
   do
-    ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\"${permissions}' "
+    ssh_test -q "showmount -e | awk '\$1 == \"${mntpoint}\"${permissions}' "
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
