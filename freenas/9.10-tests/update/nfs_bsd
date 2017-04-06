@@ -90,9 +90,8 @@ nfs_bsd_tests()
   echo_test_title "Verify NFSv3 is running over TCP"
   rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=3 proto=tcp | grep -q nfs" || return 1
 
-  # NFSv4 does not show up in rpcinfo results at this time, skipping
-  #echo_test_title "Verify NFSv4 is running over TCP"
-  #rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=4 proto=tcp | grep -q nfs" || return 1
+  echo_test_title "Verify NFSv4 is running"
+  rc_test "rpcinfo -t ${NFS_HOST} nfs | grep -q 'version 4'" || return 1
 
   echo_test_title "Update NFS service to also run over UDP"
   rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${NFS_HOST}"'", "nfs_srv_mountd_port": '${NFS_PORT}', "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": true, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": true, "nfs_srv_v4_krb": false, "id": 1 }'
@@ -103,10 +102,6 @@ nfs_bsd_tests()
 
   echo_test_title "Verify NFSv3 is running over UDP"
   rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=3 proto=udp | grep -q nfs" || return 1
-
-  # NFSv4 does not show up in rpcinfo results at this time, skipping
-  #echo_test_title "Verify NFSv4 is running over UDP"
-  #rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=4 proto=udp | grep -q nfs" || return 1
 
   echo_test_title "Removing NFS share on ${NFS_PATH}"
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
