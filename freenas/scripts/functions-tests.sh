@@ -736,7 +736,7 @@ wait_for_fnas_mnt()
 
   while :
   do
-    ssh_test -q "showmount -e | awk '\$1 == \"${mntpoint}\"${permissions}' "
+    ssh_test -q "showmount -e | awk 'NR>1 && \$1 == \"${mntpoint}\"${permissions} {print \$1}' | grep -q '${mntpoint}'"
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
