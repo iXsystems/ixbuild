@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
-PROGDIR="$(realpath $(dirname $(dirname $0)))"
+PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"
 
 # Source our functions
-. ${PROGDIR}/scripts/functions.sh
+. "${PROGDIR}/scripts/functions.sh"
 
 # Make sure we have some  directories we need
-mkdir -p ${PROGDIR}/iso >/dev/null 2>/dev/null
-mkdir -p ${PROGDIR}/log >/dev/null 2>/dev/null
+mkdir -p "${PROGDIR}/iso" >/dev/null 2>/dev/null
+mkdir -p "${PROGDIR}/log" >/dev/null 2>/dev/null
 
 which git >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
