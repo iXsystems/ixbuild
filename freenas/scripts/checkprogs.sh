@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-PROGDIR=$(realpath $(dirname $(dirname $0)))
+PROGDIR="$(realpath $(dirname $(dirname $0)))"
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
