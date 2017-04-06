@@ -2,10 +2,10 @@
 
 # Source our functions
 if [ -z "$PROGDIR" ] ; then
-  . functions.sh
-else
-  . ${PROGDIR}/scripts/functions.sh
+  PROGDIR="`realpath $0 | sed 's|/scripts$||g'`"
 fi
+
+. ${PROGDIR}/scripts/functions.sh
 
 # Make sure we have some  directories we need
 mkdir -p ${PROGDIR}/iso >/dev/null 2>/dev/null
