@@ -1,10 +1,7 @@
 #!/usr/bin/env sh
+PROGDIR=$(realpath $(dirname $(dirname $0)))
 
 # Source our functions
-if [ -z "$PROGDIR" ] ; then
-  PROGDIR="`realpath $0 | sed 's|/scripts$||g'`"
-fi
-
 . ${PROGDIR}/scripts/functions.sh
 
 # Make sure we have some  directories we need
