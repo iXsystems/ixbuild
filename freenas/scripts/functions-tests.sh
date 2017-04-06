@@ -729,6 +729,7 @@ wait_for_fnas_mnt()
 
   local mntpoint=$1
   local permissions=""
+  local loop_cnt=0
 
   if [ -n "${2}" ]; then
     permissions=" && \$2 == \"${2}\""
@@ -740,7 +741,7 @@ wait_for_fnas_mnt()
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
-    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+    if [ $loop_cnt -ge $LOOP_LIMIT ]; then
       return 1
     fi
     (( loop_cnt++ ))
