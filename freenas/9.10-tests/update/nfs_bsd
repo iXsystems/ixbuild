@@ -27,7 +27,7 @@ nfs_bsd_tests()
   fi
 
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - NFS tests" "21"
+  set_test_group_text "2 - Update - NFS BSD tests" "21"
   CLASSNAME=ixbuild.resty.functional.update.nfs_bsd
 
   # Clean up any leftover items from previous failed NFS runs

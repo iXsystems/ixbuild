@@ -27,7 +27,7 @@ nfs_bsd_tests()
   fi
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - NFS tests" "24"
+  set_test_group_text "1 - Create - NFS BSD tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.nfs_bsd
 
   # Clean up any leftover items from previous failed NFS runs

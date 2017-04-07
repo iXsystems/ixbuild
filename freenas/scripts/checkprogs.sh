@@ -60,6 +60,7 @@ which js24 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing lang/spidermonkey24.."
   rc_halt "pkg-static install -y spidermonkey24"
+  rc_halt "pkg-static lock -y spidermonkey24"
 fi
 
 which snmpwalk >/dev/null 2>/dev/null
