@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+nfs_osx_tests()
+{
+  local DATASET="nfs-osx"
+  local NFS_PATH="/mnt/tank/${DATASET}"
+  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local NFS_HOST=${BRIDGEIP}
+  local NFS_PORT=618
+  local MP_GROUP="wheel"
+
+  if [ -z "$OSX_HOST" -o -z "${BRIDGEIP}" -o -z "${BRIDGEHOST}" ]; then
+    echo "OSX_HOST, BRIDGEIP and BRIDGEHOST settings required for NFS OSX tests"
+    echo_skipped
+    return 0
+  fi
+
+  # Set the group text and number of tests
+  set_test_group_text "1 - Create - NFS OSX tests" "24"
+  CLASSNAME=ixbuild.resty.functional.create.nfs_osx
+
+  # Clean up any leftover items from previous failed NFS runs
+  rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
+  osx_test -q "umount -f \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
+
+  # Create a dataset to use with NFS
+  echo_test_title "Creating dataset ${DATASET}"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  # Set the permissions of the dataset
+  echo_test_title "Changing permissions on ${NFS_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${NFS_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  # Enable NFS server
+  echo_test_title "Creating the NFS server"
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${NFS_HOST}"'", "nfs_srv_mountd_port": '${NFS_PORT}', "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": true, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": true, "nfs_srv_v4_krb": false, "id": 1 }'
+  check_rest_response "200 OK"
+
+  # Check creating a NFS share
+  echo_test_title "Creating a NFS share on ${NFS_PATH}"
+  rest_request "POST" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  check_rest_response "201 Created"
+
+  # Now start the service
+  echo_test_title "Starting NFS service"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
+
+  # Give NFS time to start
+  echo_test_title "Verify that the NFS port is open on the host"
+  wait_for_avail_port "${NFS_PORT}"
+  check_exit_status || return 1
+
+  echo_test_title "Verify that nfsd shows up in netstat results"
+  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd" || return 1
+
+  echo_test_title "Verify NFS on host in showmount results"
+  wait_for_fnas_mnt "${NFS_PATH}" "Everyone"
+  check_exit_status || return 1
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_service_status "RUNNING" || return 1
+
+  echo_test_title "Checking permissions on ${NFS_PATH}"
+  check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
+
+  # Perform our create/update/delete tests
+  echo_test_title "Create mount-point for NFS on OSX"
+  osx_test "mkdir -p '${MOUNTPOINT}' && sync" || return 1
+
+  echo_test_title "Mount NFSv2 share to OSX system over TCP"
+  osx_test "mount -o tcp -o vers=2 -o sync -o mountport=${NFS_PORT} -t nfs \"${NFS_HOST}:${NFS_PATH}\" \"${MOUNTPOINT}\"" || return 1
+
+  echo_test_title "Verify NFS share has been mounted on OSX"
+  wait_for_osx_mnt "${MOUNTPOINT}"
+  check_exit_status || return 1
+
+  echo_test_title "Check ability to list files on ${MOUNTPOINT}"
+  osx_test "time ls -la \"${MOUNTPOINT}\"" || return 1
+
+  echo_test_title "Create file on NFS share via OSX to test permissions"
+  osx_test "touch \"${MOUNTPOINT}/testfile.txt\"" || return 1
+
+  echo_test_title "Move test file into a new directory"
+  osx_test "mkdir -p \"${MOUNTPOINT}/tmp\" && mv \"${MOUNTPOINT}/testfile.txt\" \"${MOUNTPOINT}/tmp/testfile.txt\"" || return 1
+
+  echo_test_title "Delete test file and directory from NFS share"
+  osx_test "rm -f \"${MOUNTPOINT}/tmp/testfile.txt\" && rmdir \"${MOUNTPOINT}/tmp\"" || return 1
+
+  echo_test_title "Verify that test file and directory were successfully removed"
+  osx_test "find -- \"${MOUNTPOINT}/\" -prune -type d -empty | grep -q ." || return 1
+
+  echo_test_title "Unmount NFS share"
+  osx_test "umount -f \"${MOUNTPOINT}\""
+
+  echo_test_title "Removing NFS share on ${NFS_PATH}"
+  rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  check_rest_response "204"
+
+  echo_test_title "Stopping NFS service"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verifying NFS service is disabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_service_status "STOPPED"
+
+  echo_test_title "Destroying NFS dataset ${DATASET}"
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  check_rest_response "204" || return 1
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+nfs_osx_init()
+{
+  # Run all the nfs tests
+  case $TESTSET in
+        SMOKE) nfs_osx_tests ;;
+     COMPLETE) nfs_osx_tests ;;
+    BENCHMARK) ;;
+            *) nfs_osx_tests ;;
+  esac
+}
+
