@@ -85,6 +85,10 @@ afp_osx_tests()
     echo_test_title "Mount AFP share on OSX system"
     osx_test "mount -t afp 'afp://${BRIDGEIP}/${AFP_NAME}' '${MOUNTPOINT}'" || return 1
 
+    echo_test_title "Verify AFP share has been mounted on OSX"
+    wait_for_osx_mnt "${MOUNTPOINT}"
+    check_exit_status || return 1
+
     echo_test_title "Checking for ability to list files on ${MOUNTPOINT}"
     osx_test "time ls -la ${MOUNTPOINT}" || return 1
 
