@@ -46,7 +46,7 @@ nfs_osx_tests()
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
-  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${NFS_HOST}"'", "nfs_srv_mountd_port": '${NFS_PORT}', "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": true, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": true, "nfs_srv_v4_krb": false, "id": 1 }'
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${NFS_HOST}"'", "nfs_srv_mountd_port": '${NFS_PORT}', "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
   check_rest_response "200 OK"
 
   # Check creating a NFS share
@@ -77,6 +77,15 @@ nfs_osx_tests()
 
   echo_test_title "Checking permissions on ${NFS_PATH}"
   check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
+
+  echo_test_title "Verify NFSv2 is running over TCP"
+  rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=2 proto=tcp | grep -q nfs" || return 1
+
+  echo_test_title "Verify NFSv3 is running over TCP"
+  rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=3 proto=tcp | grep -q nfs" || return 1
+
+  echo_test_title "Verify NFSv4 is not running"
+  rc_test "rpcinfo -t ${NFS_HOST} nfs | grep -q 'version 4'; test \$? -ne 0" || return 1
 
   # Perform our create/update/delete tests
   echo_test_title "Create mount-point for NFS on OSX"
