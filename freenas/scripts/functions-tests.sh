@@ -250,7 +250,11 @@ ssh_test()
 
   # Make SSH connection
   sshpass -p ${fpass} \
-    ssh -o StrictHostKeyChecking=no \
+    ssh -vvv \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
+        -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
@@ -332,6 +336,9 @@ _scp_test()
   # SCP connection
   sshpass -p ${fpass} \
     scp -o StrictHostKeyChecking=no \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
@@ -376,7 +383,11 @@ osx_test()
 
   # Make SSH connection
   sshpass -p ${OSX_PASSWORD} \
-    ssh -o StrictHostKeyChecking=no \
+    ssh -vvv \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
+        -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR

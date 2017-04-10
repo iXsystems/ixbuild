@@ -57,11 +57,16 @@ smb_osx_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
+
+  echo_test_title "Checking to see if SMB service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_service_status "RUNNING" || return 1
+
   echo_test_title "Checking permissions on ${SMB_PATH}"
   check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
-
-  echo_test_title "Poll VM to ensure SMB service is up and running"
-  check_service_status "RUNNING" || return 1
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
