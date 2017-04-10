@@ -91,7 +91,7 @@ ad_osx_tests()
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
     echo_test_title "Create mount-point for SMB on OSX system"
-    osx_test "mkdir -p '${MOUNTPOINT}'" || return 1
+    osx_test "mkdir -p '${MOUNTPOINT}' && sync" || return 1
 
     echo_test_title "Mount SMB share on OSX system"
     osx_test "mount -t smbfs 'smb://${ADUSERNAME}:${ADPASSWORD}@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'" || return 1

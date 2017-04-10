@@ -61,27 +61,22 @@ smb_osx_tests()
   check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   echo_test_title "Poll VM to ensure SMB service is up and running"
-  wait_for_avail_port "445"
-  check_exit_status || return 1
-
-  echo_test_title "Checking to see if SMB service is enabled"
-  rest_request "GET" "/services/services/cifs/"
   check_service_status "RUNNING" || return 1
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file
     echo_test_title "Create mount-point for SMB on OSX system"
-    osx_test "mkdir -p '${MOUNTPOINT}'" || return 1
+    osx_test "mkdir -p '${MOUNTPOINT}' && sync" || return 1
 
     echo_test_title "Mount SMB share on OSX system"
-    osx_test "mount -t smbfs 'smb://guest@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'" || return 1
+    osx_test "mount -t smbfs 'smb://guest@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}' && sync" || return 1
 
     echo_test_title "Verify SMB share has been mounted on OSX"
     wait_for_osx_mnt "${MOUNTPOINT}"
     check_exit_status || return 1
 
     echo_test_title "Checking for ability to list files on ${MOUNTPOINT}"
-    osx_test "time ls -la ${MOUNTPOINT}" || return 1
+    osx_test "time ls -la \"${MOUNTPOINT}\"" || return 1
 
     echo_test_title "Create file on SMB share via OSX to test permissions"
     osx_test "touch '${MOUNTPOINT}/testfile.txt'" || return 1

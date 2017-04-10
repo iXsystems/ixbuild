@@ -83,7 +83,7 @@ afp_osx_tests()
 
     # Mount share on OSX system and create a test file
     echo_test_title "Create mount-point for AFP on OSX system"
-    osx_test "mkdir -p '${MOUNTPOINT}'" || return 1
+    osx_test "mkdir -p '${MOUNTPOINT}' && sync" || return 1
     sync
 
     echo_test_title "Mount AFP share on OSX system"
