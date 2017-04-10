@@ -1081,7 +1081,6 @@ jenkins_freenas_run_tests()
 if [ -n "$FREENASLEGACY" ] ; then
   create_workdir
   cd ${TBUILDDIR}/scripts/
-  ./checkprogs.sh
   if [ $? -ne 0 ] ; then exit_clean ; fi
   echo ""
   sleep 10

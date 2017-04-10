@@ -23,7 +23,7 @@ fi
 pkg info -q sysutils/grub2-efi
 if [ "$?" != "0" ]; then
   echo "Installing sysutils/grub2-efi"
-  rc_halt "pkg-static install -y grub2-efi"
+  rc_halt "pkg-static install -y sysutils/grub2-efi"
 fi
 
 which mkisofs >/dev/null 2>/dev/null
@@ -41,7 +41,7 @@ fi
 pkg info "devel/gmake" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing devel/gmake.."
-  rc_halt "pkg-static install -y gmake"
+  rc_halt "pkg-static install -y devel/gmake"
 fi
 
 which curl >/dev/null 2>/dev/null
@@ -72,7 +72,7 @@ fi
 pkg info -q lang/python27 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing lang/python27.."
-  rc_halt "pkg-static install -y python27"
+  rc_halt "pkg-static install -y lang/python27"
 fi
 
 which python >/dev/null 2>/dev/null
@@ -90,43 +90,43 @@ fi
 pkg info -q textproc/py27-sphinx >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx.."
-  rc_halt "pkg-static install -y py27-sphinx"
+  rc_halt "pkg-static install -y textproc/py27-sphinx"
 fi
 
 pkg info -q textproc/py27-sphinx-intl >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx-intl.."
-  rc_halt "pkg-static install -y py27-sphinx-intl"
+  rc_halt "pkg-static install -y textproc/py27-sphinx-intl"
 fi
 
 pkg info -q textproc/py27-sphinx_numfig >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_numfig.."
-  rc_halt "pkg-static install -y py27-sphinx_numfig"
+  rc_halt "pkg-static install -y textproc/py27-sphinx_numfig"
 fi
 
 pkg info -q textproc/py27-sphinx_rtd_theme >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_rtd_theme.."
-  rc_halt "pkg-static install -y py27-sphinx_rtd_theme"
+  rc_halt "pkg-static install -y textproc/py27-sphinx_rtd_theme"
 fi
 
 pkg info -q textproc/py27-sphinx_wikipedia >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_wikipedia.."
-  rc_halt "pkg-static install -y py27-sphinx_wikipedia"
+  rc_halt "pkg-static install -y textproc/py27-sphinx_wikipedia"
 fi
 
 pkg info -q textproc/py27-sphinxcontrib-httpdomain >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinxcontrib-httpdomain.."
-  rc_halt "pkg-static install -y py27-sphinxcontrib-httpdomain"
+  rc_halt "pkg-static install -y textproc/py27-sphinxcontrib-httpdomain"
 fi
 
 pkg info -q misc/compat9x-amd64 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing misc/compat9x-amd64.."
-  rc_halt "pkg-static install -y compat9x-amd64"
+  rc_halt "pkg-static install -y misc/compat9x-amd64"
 fi
 
 which pxz >/dev/null 2>/dev/null
