@@ -68,11 +68,11 @@ EOF
 
   # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo -e "         <system-out>Command Run:\n$ESCAPE_TESTCMD\n\nResponse:\n" >> ${XMLRESULTS}
-    echo "`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
+    echo -e "         <system-out>Command Run:\n$(echo $TESTCMD | sed "s|&|&amp;|g")\n\nResponse:\n" >> ${XMLRESULTS}
+    echo "`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | sed "s|&|&amp;|g" | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
-    echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-err>" >> ${XMLRESULTS}
+    echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | sed "s|&|&amp;|g" | tr -d '\r'`</system-err>" >> ${XMLRESULTS}
   fi
 
   # Close the error tag
