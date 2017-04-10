@@ -87,40 +87,40 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y python3"
 fi
 
-pkg info -q textproc/py27-sphinx >/dev/null 2>/dev/null
+pkg info -q py27-sphinx >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx.."
-  rc_halt "pkg-static install -y textproc/py27-sphinx"
+  rc_halt "pkg-static install -y py27-sphinx"
 fi
 
-pkg info -q textproc/py27-sphinx-intl >/dev/null 2>/dev/null
+pkg info -q py27-sphinx-intl >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx-intl.."
-  rc_halt "pkg-static install -y textproc/py27-sphinx-intl"
+  rc_halt "pkg-static install -y py27-sphinx-intl"
 fi
 
-pkg info -q textproc/py27-sphinx_numfig >/dev/null 2>/dev/null
+pkg info -q py27-sphinx_numfig >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_numfig.."
-  rc_halt "pkg-static install -y textproc/py27-sphinx_numfig"
+  rc_halt "pkg-static install -y py27-sphinx_numfig"
 fi
 
-pkg info -q textproc/py27-sphinx_rtd_theme >/dev/null 2>/dev/null
+pkg info -q py27-sphinx_rtd_theme >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_rtd_theme.."
-  rc_halt "pkg-static install -y textproc/py27-sphinx_rtd_theme"
+  rc_halt "pkg-static install -y py27-sphinx_rtd_theme"
 fi
 
-pkg info -q textproc/py27-sphinx_wikipedia >/dev/null 2>/dev/null
+pkg info -q py27-sphinx_wikipedia >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_wikipedia.."
-  rc_halt "pkg-static install -y textproc/py27-sphinx_wikipedia"
+  rc_halt "pkg-static install -y py27-sphinx_wikipedia"
 fi
 
-pkg info -q textproc/py27-sphinxcontrib-httpdomain >/dev/null 2>/dev/null
+pkg info -q py27-sphinxcontrib-httpdomain >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing sphinxcontrib-httpdomain.."
-  rc_halt "pkg-static install -y textproc/py27-sphinxcontrib-httpdomain"
+  rc_halt "pkg-static install -y py27-sphinxcontrib-httpdomain"
 fi
 
 pkg info -q misc/compat9x-amd64 >/dev/null 2>/dev/null
