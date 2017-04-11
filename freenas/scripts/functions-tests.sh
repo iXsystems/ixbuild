@@ -156,6 +156,33 @@ rest_request()
   return 1;
 }
 
+# $1 = RESTY type to run 
+# $2 = RESTY URL
+# $3 = JSON to pass to RESTY
+replication_rest_request()
+{
+  if [ -z "$REPLICATIONTARGET" -o -z "$REPLICATIONUSERNAME" -o -z "$REPLICATIONPASSWORD" ]; then
+    echo -n "; missing required replication settings"
+    # null-out resty results to ensure "check_rest_request" test fails
+    echo -n "" > ${RESTYOUT}
+    echo -n "" > ${RESTYERR}
+    return 1
+  fi
+
+  if [ -n "$3" ]; then
+    curl -sLi -X "$1" -H "Accept: application/json" -H "Content-Type: application/json" \
+      -u ${REPLICATIONUSERNAME}:${REPLICATIONPASSWORD} "http://${REPLICATIONTARGET}:80/api/v1.0/${2}" -d "$3" \
+      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"header":"body")}'
+  else
+    curl -sLi -X "$1" -H "Accept: application/json" -H "Content-Type: application/json" \
+      -u ${REPLICATIONUSERNAME}:${REPLICATIONPASSWORD} "http://${REPLICATIONTARGET}:80/api/v1.0/${2}" \
+      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"header":"body")}'
+  fi
+  echo -n $(<header) > ${RESTYERR}
+  echo -n $(<body) > ${RESTYOUT}
+  return $?
+}
+
 # $1 = Command to run
 # $2 = Command to run if $1 fails
 # $3 = Optional timeout
@@ -273,15 +300,34 @@ ssh_test()
 }
 
 # (Optional) -q switch as first argument silences std_out
+# $1 = File to copy from the remote host
+# $2 = Location to copy file to
+scp_from_replication_target()
+{
+  if [ -z "$REPLICATIONTARGET" -o -z "$REPLICATIONUSERNAME" -o -z "$REPLICATIONPASSWORD" ]; then
+    echo -n "; missing required replication settings"
+    return 1
+  fi
+
+  if [ "$1" == "-q" ]; then
+    shift
+    __scp_test -q "${1}" "${REPLICATIONUSERNAME}@${REPLICATIONTARGET}:${2}" "${REPLICATIONPASSWORD}"
+  else
+    __scp_test "${1}" "${REPLICATIONUSERNAME}@${REPLICATIONTARGET}:${2}" "${REPLICATIONPASSWORD}"
+  fi
+  return $?
+}
+
+# (Optional) -q switch as first argument silences std_out
 # $1 = Local file to copy to the remote host
 # $2 = Location to store file on remote host
 scp_to_test()
 {
   if [ "$1" == "-q" ]; then
     shift
-    _scp_test -q "${1}" "${fuser}@${sshserver}:${2}"
+    __scp_test -q "${1}" "${fuser}@${sshserver}:${2}"
   else
-    _scp_test "${1}" "${fuser}@${sshserver}:${2}"
+    __scp_test "${1}" "${fuser}@${sshserver}:${2}"
   fi
   return $?
 }
@@ -293,9 +339,9 @@ scp_from_test()
 {
   if [ "$1" == "-q" ]; then
     shift
-    _scp_test -q "${fuser}@${sshserver}:${1}" "${2}"
+    __scp_test -q "${fuser}@${sshserver}:${1}" "${2}"
   else
-    _scp_test "${fuser}@${sshserver}:${1}" "${2}"
+    __scp_test "${fuser}@${sshserver}:${1}" "${2}"
   fi
   return $?
 }
@@ -304,7 +350,8 @@ scp_from_test()
 # (Optional) -q switch as first argument silences std_out
 # $1 = SCP from [[user@]host1:]file1
 # $2 = SCP to [[user@]host1:]file1
-_scp_test()
+# $3 = (Optional) SCP password (if different from $fpass)
+__scp_test()
 {
   export TESTSTDOUT="/tmp/.scpCmdTestStdOut"
   export TESTSTDERR="/tmp/.scpCmdTestStdErr"
@@ -317,24 +364,13 @@ _scp_test()
     shift
   fi
 
-  sshserver=${ip}
-  if [ -z "$sshserver" ]; then
-    sshserver=$FNASTESTIP
-  fi
-
-  if [ -z "$sshserver" ]; then
-    echo "SCP server IP address request for scp_test()."
-    return 1
-  fi
-
-  # Test fuser and fpass values
-  if [ -z "${fpass}" ] || [ -z "${fuser}" ]; then
-    echo "SCP server username and password required for scp_test()."
-    return 1
+  local password=${fpass}
+  if [ -n "$3" ]; then
+    password=$3
   fi
 
   # SCP connection
-  sshpass -p ${fpass} \
+  sshpass -p ${password} \
     scp -o StrictHostKeyChecking=no \
         -o ConnectionAttempts=15 \
         -o ConnectTimeout=30 \
