@@ -20,10 +20,10 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y grub2-pcbsd"
 fi
 
-pkg info -q sysutils/grub2-efi
+pkg info -q grub2-efi
 if [ "$?" != "0" ]; then
-  echo "Installing sysutils/grub2-efi"
-  rc_halt "pkg-static install -y sysutils/grub2-efi"
+  echo "Installing grub2-efi"
+  rc_halt "pkg-static install -y grub2-efi"
 fi
 
 which mkisofs >/dev/null 2>/dev/null
@@ -38,10 +38,10 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y xorriso"
 fi
 
-pkg info "devel/gmake" >/dev/null 2>/dev/null
+pkg info -q gmake >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing devel/gmake.."
-  rc_halt "pkg-static install -y devel/gmake"
+  echo "Installing gmake.."
+  rc_halt "pkg-static install -y gmake"
 fi
 
 which curl >/dev/null 2>/dev/null
@@ -52,32 +52,31 @@ fi
 
 which bash >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing shells/bash.."
+  echo "Installing bash.."
   rc_halt "pkg-static install -y bash"
-fi
-
-which js24 >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing lang/spidermonkey24.."
-  rc_halt "pkg-static install -y spidermonkey24"
-  rc_halt "pkg-static lock -y spidermonkey24"
 fi
 
 which snmpwalk >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing net-mgmt/net-snmp.."
-  rc_halt "pkg-static install -y net-mgmt/net-snmp"
+  echo "Installing net-snmp.."
+  rc_halt "pkg-static install -y net-snmp"
 fi
 
-pkg info -q lang/python27 >/dev/null 2>/dev/null
+which js24 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing lang/python27.."
-  rc_halt "pkg-static install -y lang/python27"
+  echo "Installing spidermonkey24.."
+  rc_halt "pkg-static install -y spidermonkey24"
+fi
+
+pkg info -q python27 >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing python27.."
+  rc_halt "pkg-static install -y python27"
 fi
 
 which python >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing lang/python.."
+  echo "Installing python.."
   rc_halt "pkg-static install -y python"
 fi
 
@@ -137,13 +136,13 @@ fi
 
 which poudriere >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing ports-mgmt/poudriere-devel"
+  echo "Installing poudriere-devel"
   rc_halt "pkg-static install -y poudriere-devel"
 fi
 
 which sshpass >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing security/sshpass"
+  echo "Installing sshpass"
   rc_halt "pkg-static install -y sshpass"
 fi
 
