@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+# Run a series of tests on the ssh settings
+# We also leave it enabled, so we have access to VM if something hangs / goes wrong
+replication_tests()
+{
+  set_test_group_text "1 - Create - Replication Tests" "3"
+  CLASSNAME=ixbuild.resty.functional.create.replication
+
+  local DATASET="repldata01"
+  local DATASET_PATH="/mnt/tank/${DATASET}/"
+  local DATASET_SNAPSHOT="${DATASET}_snapshot"
+  local REMOTE_TARGET_DATASET="repldatatarget"
+  local SSHKEY_REMOTE_PATH="/etc/local/ssh/ssh_host_rsa_key.pub"
+  local SSHKEY_LOCAL_PATH="/tmp/replication_rsa_key.pub"
+  local MP_GROUP="wheel"
+  local TEST_FILES=( "testfile.txt" "testdir/testfile2.txt" )
+
+  local REQUIRED_SETTINGS=( "REPLICATIONTARGET" "REPLICATIONUSERNAME" "REPLICATIONPASSWORD" "REPLICATIONVOLUME" )
+  for SETTING in "${REQUIRED_SETTINGS[@]}"
+  do
+    if [ -z "${!SETTING}" ]; then
+      echo -n "Required settings for replication: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+      echo_skipped
+      return 0
+    fi
+  done
+
+  echo_test_title "Creating \"${DATASET}\" dataset for replication"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Changing permissions on \"${DATASET_PATH}\""
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Creating \"${REMOTE_TARGET_DATASET}\" dataset on replication target host"
+  replication_rest_request "POST" "/storage/volume/${REPLICATIONVOLUME}/datasets/" '{ "name": "'"${REMOTE_TARGET_DATASET}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Changing permissions on \"${REMOTE_TARGET_DATASET}\" dataset on replication target host"
+  replication_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLICATIONVOLUME}/${REMOTE_TARGET_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  # Add files/directories to dataset
+  for uri in $TEST_FILES
+  do
+    local dir_name="$(dirname "$uri")"
+    local base_name="$(basename "$uri")"
+
+    echo_test_title "Creating file \"${uri}\" on the dataset \"${DATASET_PATH}\""
+    if [ "." == "${dir_name}" -o -n "${base_name}" ]; then
+      ssh_test "mkdir -p \"${dir_name}\" && touch \"${base_name}\""
+    else
+      ssh_test "touch \"${base_name}\""
+    fi
+  done
+
+  echo_test_title "SCP the public ssh key from the replication target"
+  scp_from_replication_target "${SSHKEY_REMOTE_PATH}" "${SSHKEY_LOCAL_PATH}"
+  check_exit_status || return 1
+
+  echo_test_title "Verify that ssh key has been retrieved to \"${SSHKEY_LOCAL_PATH}\""
+  test -f "${SSHKEY_LOCAL_PATH}" && test -s "${SSHKEY_LOCAL_PATH}"
+  check_exit_status || return 1
+
+  echo_test_title "Create snapshot of \"${DATASET}\" for replication"
+  rest_request "POST" "/storage/snapshot" '{ "dataset": "'"${DATASET}"'", "name": "'"${DATASET_SNAPSHOT}"'" }'
+  check_rest_response "201" || return 1
+
+  # Create replication job for our snapshot, using the ssh_key
+  local repl_remote_hostkey=$(cat "${SSHKEY_LOCAL_PATH}")
+  local repl_begin="$(date "+%H:%M:%S")"
+  local repl_end="$(date -v +5M "+%H:%M:%S")"
+  echo_test_title "Create replication job for the snapshot \"${DATASET_SNAPSHOT}\""
+  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${DATASET}"'", "repl_zfs": "'"${REPLICATIONVOLUME}/${REMOTE_TARGET_DATASET}"'", "repl_remote_hostname": "'"${REPLICATIONTARGET}"'", "repl_remote_hostkey": "'"${repl_remote_hostkey}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true }'
+  check_rest_response "201 Created" || return 1
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+replication_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) replication_tests ;;
+     COMPLETE) replication_tests ;;
+    BENCHMARK) ;;
+            *) replication_tests ;;
+  esac
+}
