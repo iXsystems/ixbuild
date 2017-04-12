@@ -298,22 +298,53 @@ ssh_test()
 }
 
 # (Optional) -q switch as first argument silences std_out
-# $1 = File to copy from the remote host
-# $2 = Location to copy file to
-scp_from_replication_target()
+# $1 = Command to run
+ssh_repl_test()
 {
-  if [ -z "$REPLTARGET" -o -z "$REPLUSERNAME" -o -z "$REPLPASSWORD" ]; then
-    echo -n "; missing required replication settings"
+  export TESTSTDOUT="/tmp/.sshReplCmdTestStdOut"
+  export TESTSTDERR="/tmp/.sshReplCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
+  if [ -z "$REPLTARGET" ] ; then
+    echo "SSH server IP address required for ssh_repl_test()."
     return 1
   fi
 
-  if [ "$1" == "-q" ]; then
-    shift
-    __scp_test -q "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
-  else
-    __scp_test "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
+  # Test fuser and fpass values
+  if [ -z "${REPLUSERNAME}" ] || [ -z "${REPLPASSWORD}" ] ; then
+    echo "SSH server username and password required for ssh_repl_test()."
+    return 1
   fi
-  return $?
+
+  # Make SSH connection
+  sshpass -p ${REPLPASSWORD} \
+    ssh -vvv \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
+        -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${REPLUSERNAME}@${REPLTARGET} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  local EXITSTATUS=$?
+
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed running: $1"
+    fi
+  fi
+
+  return $EXITSTATUS
 }
 
 # (Optional) -q switch as first argument silences std_out
