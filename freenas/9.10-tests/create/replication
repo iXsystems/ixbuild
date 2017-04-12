@@ -18,11 +18,17 @@ replication_tests()
 
   local DATASET="repldata01"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
-  local REMOTE_TARGET_DATASET="repldatatarget"
-  local SSHKEY_REMOTE_PATH="/etc/local/ssh/ssh_host_rsa_key.pub"
-  local SSHKEY_LOCAL_PATH="/tmp/replication_rsa_key.pub"
+  local REMOTE_TARGET_DATASET="testerrepldata"
+  local TARGET_SSHKEY_PATH="/etc/local/ssh/ssh_host_rsa_key.pub"
+  local REPL_SSHKEY_PATH="/data/ssh/replication.pub"
+  local SSH_
   local MP_GROUP="wheel"
   local TEST_FILES=( "testfile.txt" "testdir/testfile2.txt" )
+
+  # Set the replication dataset name to something unique for this test executor
+  if [ -n "${BRIDGEHOST}" ]; then
+    REMOTE_TARGET_DATASET="testrepl-${BRIDGEHOST}"
+  fi
 
   local REQUIRED_SETTINGS=( "REPLTARGET" "REPLUSERNAME" "REPLPASSWORD" "REPLVOLUME" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
@@ -44,6 +50,8 @@ replication_tests()
   echo_test_title "Changing permissions on \"${DATASET_PATH}\""
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
   check_rest_response "201 Created" || return 1
+
+  # TODO - create and test ZVOL dataset
 
   echo_test_title "Creating \"${REMOTE_TARGET_DATASET}\" dataset on replication target host"
   replication_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${REMOTE_TARGET_DATASET}"'" }'
@@ -67,17 +75,6 @@ replication_tests()
     fi
   done
 
-  echo_test_title "SCP the public ssh key from the replication target"
-  scp_from_replication_target "${SSHKEY_REMOTE_PATH}" "${SSHKEY_LOCAL_PATH}" || return 1
-
-  echo_test_title "Verify that ssh key has been retrieved to \"${SSHKEY_LOCAL_PATH}\""
-  test -f "${SSHKEY_LOCAL_PATH}" && test -s "${SSHKEY_LOCAL_PATH}"
-  check_exit_status || return 1
-
-  # echo_test_title "Create snapshot of \"${DATASET}\" for replication"
-  # rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "'"${DATASET}"'" }'
-  # check_rest_response "201" || return 1
-
   # Create a periodic snapshot to replicate
   local task_begin="$(date "+%H:%M:%S")"
   local task_end="$(date -v +5M "+%H:%M:%S")"
@@ -85,15 +82,35 @@ replication_tests()
   rest_request "POST" "/storage/task/" '{ "task_repeat_unit": "daily", "task_begin": "'"${task_begin}"'", "task_end": "'"${task_end}"'", "task_filesystem": "tank/'"${DATASET}"'", "task_ret_unit": "day", "task_interval": "15", "task_enabled": true, "task_recursive": true }'
   check_rest_response "201 Created" || return 1
 
-  # TODO - verify that snapshot has been created?
+  echo_test_title "Generate and fetch remote auth token from the replication target"
+  ssh_repl_test "midclt call auth.generate_token" || return 1
+  # TODO - hacky - figure out better way to get output from ssh_repl_test
+  local TESTSTDOUT="/tmp/.sshReplCmdTestStdOut"
+  local repl_auth_token="`cat "$TESTSTDOUT"`"
+
+  echo_test_title "Fetch the ida_rsa public key from the replication target"
+  ssh_repl_test "cat ${TARGET_SSHKEY_PATH}" || return 1
+  local TESTSTDOUT="/tmp/.sshReplCmdTestStdOut"
+  local repl_remote_hostkey="`cat "$TESTSTDOUT"`"
+
+  echo_test_title "Add ECDSA auth to known_hosts"
+  ssh_test "ssh-keyscan -t ecdsa ${REPLTARGET} >> /root/.ssh/known_hosts"
 
   # Create replication job for our snapshot, using the ssh_key
-  local repl_remote_hostkey=$(cat "${SSHKEY_LOCAL_PATH}")
+  #local repl_remote_hostkey="$(cat "${SSHKEY_LOCAL_PATH}")"
   local repl_begin="$(date "+%H:%M:%S")"
   local repl_end="$(date -v +5M "+%H:%M:%S")"
   echo_test_title "Create replication job for the snapshot \"${DATASET}\""
-  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${DATASET}"'", "repl_zfs": "'"${REPLVOLUME}/${REMOTE_TARGET_DATASET}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_remote_hostkey": "'"${repl_remote_hostkey}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard" }'
+  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${DATASET}"'", "repl_zfs": "'"${REPLVOLUME}/${REMOTE_TARGET_DATASET}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_remote_token": "'"${repl_auth_token}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard", "repl_remote_hostkey": "'"${repl_remote_hostkey}"'" }'
   check_rest_response "201 Created" || return 1
+
+  # TODO - check/poll repl_status for 'Succeeded' status
+
+  # TODO - verify that files and directory created on target FreeNAS host
+
+  #echo_test_title "Delete the replication target \"${REMOTE_TARGET_DATASET}\""
+  #replication_rest_request "DELETE" "/storage/volume/1/datasets/${REMOTE_TARGET_DATASET}/"
+  #check_rest_response "204" || return 1
 
   return 0
 }
