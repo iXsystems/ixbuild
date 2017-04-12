@@ -87,6 +87,13 @@ export SFTPWORKDIR
 # LDAPBINDPASSWORD=""
 # export LDAPHOSTNAME LDAPBASEDN LDAPBINDDN LDAPBINDPASSWORD
 
+# Set these to the target FreeNAS target you wish to replicate to for testing
+# REPLTARGET=""
+# REPLUSERNAME=""
+# REPLPASSWORD=""
+# REPLVOLUME=""
+# export REPLTARGET REPLUSERNAME REPLPASSWORD REPLVOLUME
+
 ###########################################################################
 # PC-BSD specific settings
 ###########################################################################

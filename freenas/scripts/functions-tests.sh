@@ -161,7 +161,7 @@ rest_request()
 # $3 = JSON to pass to RESTY
 replication_rest_request()
 {
-  if [ -z "$REPLICATIONTARGET" -o -z "$REPLICATIONUSERNAME" -o -z "$REPLICATIONPASSWORD" ]; then
+  if [ -z "$REPLTARGET" -o -z "$REPLUSERNAME" -o -z "$REPLPASSWORD" ]; then
     echo -n "; missing required replication settings"
     # null-out resty results to ensure "check_rest_request" test fails
     echo -n "" > ${RESTYOUT}
@@ -171,15 +171,13 @@ replication_rest_request()
 
   if [ -n "$3" ]; then
     curl -sLi -X "$1" -H "Accept: application/json" -H "Content-Type: application/json" \
-      -u ${REPLICATIONUSERNAME}:${REPLICATIONPASSWORD} "http://${REPLICATIONTARGET}:80/api/v1.0/${2}" -d "$3" \
-      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"header":"body")}'
+      -u ${REPLUSERNAME}:${REPLPASSWORD} "http://${REPLTARGET}:80/api/v1.0/${2}" -d "$3" \
+      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"'"$RESTYERR"'":"'"$RESTYOUT"'")}'
   else
     curl -sLi -X "$1" -H "Accept: application/json" -H "Content-Type: application/json" \
-      -u ${REPLICATIONUSERNAME}:${REPLICATIONPASSWORD} "http://${REPLICATIONTARGET}:80/api/v1.0/${2}" \
-      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"header":"body")}'
+      -u ${REPLUSERNAME}:${REPLPASSWORD} "http://${REPLTARGET}:80/api/v1.0/${2}" \
+      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"'"$RESTYERR"'":"'"$RESTYOUT"'")}'
   fi
-  echo -n $(<header) > ${RESTYERR}
-  echo -n $(<body) > ${RESTYOUT}
   return $?
 }
 
@@ -304,16 +302,16 @@ ssh_test()
 # $2 = Location to copy file to
 scp_from_replication_target()
 {
-  if [ -z "$REPLICATIONTARGET" -o -z "$REPLICATIONUSERNAME" -o -z "$REPLICATIONPASSWORD" ]; then
+  if [ -z "$REPLTARGET" -o -z "$REPLUSERNAME" -o -z "$REPLPASSWORD" ]; then
     echo -n "; missing required replication settings"
     return 1
   fi
 
   if [ "$1" == "-q" ]; then
     shift
-    __scp_test -q "${1}" "${REPLICATIONUSERNAME}@${REPLICATIONTARGET}:${2}" "${REPLICATIONPASSWORD}"
+    __scp_test -q "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
   else
-    __scp_test "${1}" "${REPLICATIONUSERNAME}@${REPLICATIONTARGET}:${2}" "${REPLICATIONPASSWORD}"
+    __scp_test "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
   fi
   return $?
 }

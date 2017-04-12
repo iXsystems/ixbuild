@@ -18,14 +18,13 @@ replication_tests()
 
   local DATASET="repldata01"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
-  local DATASET_SNAPSHOT="${DATASET}_snapshot"
   local REMOTE_TARGET_DATASET="repldatatarget"
   local SSHKEY_REMOTE_PATH="/etc/local/ssh/ssh_host_rsa_key.pub"
   local SSHKEY_LOCAL_PATH="/tmp/replication_rsa_key.pub"
   local MP_GROUP="wheel"
   local TEST_FILES=( "testfile.txt" "testdir/testfile2.txt" )
 
-  local REQUIRED_SETTINGS=( "REPLICATIONTARGET" "REPLICATIONUSERNAME" "REPLICATIONPASSWORD" "REPLICATIONVOLUME" )
+  local REQUIRED_SETTINGS=( "REPLTARGET" "REPLUSERNAME" "REPLPASSWORD" "REPLVOLUME" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
   do
     if [ -z "${!SETTING}" ]; then
@@ -34,6 +33,9 @@ replication_tests()
       return 0
     fi
   done
+
+  # Clean up any leftover items from previous failed replication tests
+  replication_rest_request "DELETE" "/storage/volume/1/datasets/${REMOTE_TARGET_DATASET}/"
 
   echo_test_title "Creating \"${DATASET}\" dataset for replication"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
@@ -44,15 +46,15 @@ replication_tests()
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Creating \"${REMOTE_TARGET_DATASET}\" dataset on replication target host"
-  replication_rest_request "POST" "/storage/volume/${REPLICATIONVOLUME}/datasets/" '{ "name": "'"${REMOTE_TARGET_DATASET}"'" }'
+  replication_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${REMOTE_TARGET_DATASET}"'" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Changing permissions on \"${REMOTE_TARGET_DATASET}\" dataset on replication target host"
-  replication_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLICATIONVOLUME}/${REMOTE_TARGET_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
+  replication_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${REMOTE_TARGET_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
   check_rest_response "201 Created" || return 1
 
   # Add files/directories to dataset
-  for uri in $TEST_FILES
+  for uri in ${TEST_FILES[@]}
   do
     local dir_name="$(dirname "$uri")"
     local base_name="$(basename "$uri")"
@@ -66,23 +68,31 @@ replication_tests()
   done
 
   echo_test_title "SCP the public ssh key from the replication target"
-  scp_from_replication_target "${SSHKEY_REMOTE_PATH}" "${SSHKEY_LOCAL_PATH}"
-  check_exit_status || return 1
+  scp_from_replication_target "${SSHKEY_REMOTE_PATH}" "${SSHKEY_LOCAL_PATH}" || return 1
 
   echo_test_title "Verify that ssh key has been retrieved to \"${SSHKEY_LOCAL_PATH}\""
   test -f "${SSHKEY_LOCAL_PATH}" && test -s "${SSHKEY_LOCAL_PATH}"
   check_exit_status || return 1
 
-  echo_test_title "Create snapshot of \"${DATASET}\" for replication"
-  rest_request "POST" "/storage/snapshot" '{ "dataset": "'"${DATASET}"'", "name": "'"${DATASET_SNAPSHOT}"'" }'
-  check_rest_response "201" || return 1
+  # echo_test_title "Create snapshot of \"${DATASET}\" for replication"
+  # rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "'"${DATASET}"'" }'
+  # check_rest_response "201" || return 1
+
+  # Create a periodic snapshot to replicate
+  local task_begin="$(date "+%H:%M:%S")"
+  local task_end="$(date -v +5M "+%H:%M:%S")"
+  echo_test_title "Create snapshot task for \"tank/${DATASET}\" for replication"
+  rest_request "POST" "/storage/task/" '{ "task_repeat_unit": "daily", "task_begin": "'"${task_begin}"'", "task_end": "'"${task_end}"'", "task_filesystem": "tank/'"${DATASET}"'", "task_ret_unit": "day", "task_interval": "15", "task_enabled": true, "task_recursive": true }'
+  check_rest_response "201 Created" || return 1
+
+  # TODO - verify that snapshot has been created?
 
   # Create replication job for our snapshot, using the ssh_key
   local repl_remote_hostkey=$(cat "${SSHKEY_LOCAL_PATH}")
   local repl_begin="$(date "+%H:%M:%S")"
   local repl_end="$(date -v +5M "+%H:%M:%S")"
-  echo_test_title "Create replication job for the snapshot \"${DATASET_SNAPSHOT}\""
-  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${DATASET}"'", "repl_zfs": "'"${REPLICATIONVOLUME}/${REMOTE_TARGET_DATASET}"'", "repl_remote_hostname": "'"${REPLICATIONTARGET}"'", "repl_remote_hostkey": "'"${repl_remote_hostkey}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true }'
+  echo_test_title "Create replication job for the snapshot \"${DATASET}\""
+  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${DATASET}"'", "repl_zfs": "'"${REPLVOLUME}/${REMOTE_TARGET_DATASET}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_remote_hostkey": "'"${repl_remote_hostkey}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard" }'
   check_rest_response "201 Created" || return 1
 
   return 0
