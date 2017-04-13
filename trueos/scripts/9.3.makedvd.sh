@@ -38,7 +38,7 @@ if [ "$SYSBUILD" = "trueos" ] ; then
   bTitle="TrueOS"
   brand="trueos"
 else
-  bFile="TrueOS-Desktop-${fDate}-${FARCH}"
+  bFile="TrueOS-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
 fi
