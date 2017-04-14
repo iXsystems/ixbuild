@@ -16,19 +16,53 @@ replication_tests()
   set_test_group_text "1 - Create - Replication Tests" "3"
   CLASSNAME=ixbuild.resty.functional.create.replication
 
-  local DATASET="repldata01"
-  local DATASET_PATH="/mnt/tank/${DATASET}/"
-  local REMOTE_TARGET_DATASET="testerrepldata"
-  local TARGET_SSHKEY_PATH="/etc/local/ssh/ssh_host_rsa_key.pub"
-  local REPL_SSHKEY_PATH="/data/ssh/replication.pub"
-  local SSH_
-  local MP_GROUP="wheel"
-  local TEST_FILES=( "testfile.txt" "testdir/testfile2.txt" )
+  # * PUSH = system generating the ZFS snapshots
+  # * PULL = system to receive a copy of the ZFS snapshot
+
+  # Datasets which will be created to host and store the snapshot via replication task
+  local PUSH_DATASET="repldata01"
+  local PULL_DATASET="repldata01"
 
   # Set the replication dataset name to something unique for this test executor
   if [ -n "${BRIDGEHOST}" ]; then
-    REMOTE_TARGET_DATASET="testrepl-${BRIDGEHOST}"
+    PULL_DATASET="${BRIDGEHOST}"
+    PUSH_DATASET="${BRIDGEHOST}"
   fi
+
+  local PUSH_DATASET_PATH="/mnt/tank/${PUSH_DATASET}/"
+  local PULL_DATASET_PATH="/mnt/tank/${PULL_DATASET}/"
+
+  # Respective locations for the ssh pub key which will be used for authentication
+  local PUSH_SSHKEY_PATH="/data/ssh/replication.pub"
+  local PULL_SSHKEY_PATH="/etc/local/ssh/ssh_host_rsa_key.pub"
+
+  # User accounts that we will create and add our SSH keys to, used for the replication task
+  local PUSH_UID=1142
+  local PUSH_USERNAME="repltest"
+  local PUSH_USERPASS="testing"
+  local PUSH_USERHOME="${PUSH_DATASET_PATH}${PUSH_USERNAME}"
+  local PULL_UID=1143
+  local PULL_USERNAME="repltest"
+  local PULL_USERPASS="testing"
+  local PULL_USERHOME="${PULL_DATASET_PATH}${PULL_USERNAME}"
+
+  # Add the BRIDGEHOST name to the PUSH and PULL usernames for predicable uniqueness
+  # across the various jenkins VMs using the same replication target host for testing.
+  if [ -n "${BRIDGEHOST}" ]; then
+    # Limit variable username to 16 chars
+    PULL_USERNAME="$(echo "${BRIDGEHOST}${PULL_USERNAME}" | cut -c1-16)"
+    PUSH_USERNAME="$(echo "${BRIDGEHOST}${PUSH_USERNAME}" | cut -c1-16)"
+  fi
+
+  # Common path and filename used for copying pub keys from both the PUSH and PULL servers
+  local PUSH_TMP_SSHKEY_PATH="/tmp/push_sshkeys${BRIDGEHOST}.pub"
+  local PULL_TMP_SSHKEY_PATH="/tmp/pull_sshkeys${BRIDGEHOST}.pub"
+  local REPL_TMP_SSHKEY_PATH="/tmp/repl_sshkeys${BRIDGEHOST}.pub"
+
+  local MP_GROUP="wheel"
+
+  # List of dummie filesystem objects to be created to test recursive replication
+  local TEST_FILES=( "testfile.txt" "testdir/testfile2.txt" )
 
   local REQUIRED_SETTINGS=( "REPLTARGET" "REPLUSERNAME" "REPLPASSWORD" "REPLVOLUME" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
@@ -41,76 +75,113 @@ replication_tests()
   done
 
   # Clean up any leftover items from previous failed replication tests
-  replication_rest_request "DELETE" "/storage/volume/1/datasets/${REMOTE_TARGET_DATASET}/"
 
-  echo_test_title "Creating \"${DATASET}\" dataset for replication"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  replication_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  rm "${PUSH_TMP_SSHKEY_PATH}" &>/dev/null
+  rm "${PULL_TMP_SSHKEY_PATH}" &>/dev/null
+  rm "${REPL_TMP_SSHKEY_PATH}" &>/dev/null
+
+  # Create datasets on PUSH and PULL replication hosts, set permissions on dataset
+
+  echo_test_title "Creating \"${PUSH_DATASET}\" dataset for replication"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${PUSH_DATASET}"'" }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Changing permissions on \"${DATASET_PATH}\""
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
+  echo_test_title "Changing permissions on \"${PUSH_DATASET_PATH}\""
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${PUSH_DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
   check_rest_response "201 Created" || return 1
 
   # TODO - create and test ZVOL dataset
 
-  echo_test_title "Creating \"${REMOTE_TARGET_DATASET}\" dataset on replication target host"
-  replication_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${REMOTE_TARGET_DATASET}"'" }'
+  echo_test_title "Creating \"${PULL_DATASET}\" dataset on replication target host"
+  replication_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${PULL_DATASET}"'" }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Changing permissions on \"${REMOTE_TARGET_DATASET}\" dataset on replication target host"
-  replication_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${REMOTE_TARGET_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
+  echo_test_title "Changing permissions on \"${PULL_DATASET}\" dataset on replication target host"
+  replication_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${PULL_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
   check_rest_response "201 Created" || return 1
 
   # Add files/directories to dataset
   for uri in ${TEST_FILES[@]}
   do
     local dir_name="$(dirname "$uri")"
-    local base_name="$(basename "$uri")"
-
-    echo_test_title "Creating file \"${uri}\" on the dataset \"${DATASET_PATH}\""
-    if [ "." == "${dir_name}" -o -n "${base_name}" ]; then
-      ssh_test "mkdir -p \"${dir_name}\" && touch \"${base_name}\""
+    echo_test_title "Creating file \"${uri}\" on the dataset \"${PUSH_DATASET_PATH}\""
+    if [ "." == "${dir_name}" -a -n "${base_name}" ]; then
+      ssh_test "touch \"${PUSH_DATASET_PATH}${uri}\""
     else
-      ssh_test "touch \"${base_name}\""
+      ssh_test "mkdir -p \"${PUSH_DATASET_PATH}${dir_name}\" && touch \"${PUSH_DATASET_PATH}${uri}\""
     fi
   done
 
   # Create a periodic snapshot to replicate
   local task_begin="$(date "+%H:%M:%S")"
-  local task_end="$(date -v +5M "+%H:%M:%S")"
-  echo_test_title "Create snapshot task for \"tank/${DATASET}\" for replication"
-  rest_request "POST" "/storage/task/" '{ "task_repeat_unit": "daily", "task_begin": "'"${task_begin}"'", "task_end": "'"${task_end}"'", "task_filesystem": "tank/'"${DATASET}"'", "task_ret_unit": "day", "task_interval": "15", "task_enabled": true, "task_recursive": true }'
+  local task_end="$(date -v +30M "+%H:%M:%S")"
+  echo_test_title "Create snapshot task for \"tank/${PUSH_DATASET}\" for replication"
+  rest_request "POST" "/storage/task/" '{ "task_repeat_unit": "daily", "task_begin": "'"${task_begin}"'", "task_end": "'"${task_end}"'", "task_filesystem": "tank/'"${PUSH_DATASET}"'", "task_ret_unit": "day", "task_interval": "15", "task_enabled": true, "task_recursive": true }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Generate and fetch remote auth token from the replication target"
-  ssh_repl_test "midclt call auth.generate_token" || return 1
-  # TODO - hacky - figure out better way to get output from ssh_repl_test
-  local TESTSTDOUT="/tmp/.sshReplCmdTestStdOut"
-  local repl_auth_token="`cat "$TESTSTDOUT"`"
+  # Fetch SSH public keys from the PUSH and PULL hosts to be added to our PUSH and PULL user accounts
 
-  echo_test_title "Fetch the ida_rsa public key from the replication target"
-  ssh_repl_test "cat ${TARGET_SSHKEY_PATH}" || return 1
-  local TESTSTDOUT="/tmp/.sshReplCmdTestStdOut"
-  local repl_remote_hostkey="`cat "$TESTSTDOUT"`"
+  echo_test_title "Fetch SSH public key from our PUSH host, to be added to our PULL user"
+  scp_from_test "${PUSH_SSHKEY_PATH}" "${PUSH_TMP_SSHKEY_PATH}"
+  local push_user_pubkey="`grep -v '^$' ${PUSH_TMP_SSHKEY_PATH} | tr -d '\n'`"
 
-  echo_test_title "Add ECDSA auth to known_hosts"
-  ssh_test "ssh-keyscan -t ecdsa ${REPLTARGET} >> /root/.ssh/known_hosts"
+  echo_test_title "Fetch SSH public key from our PULL host, to be added to our PUSH user"
+  scp_from_repl "${PULL_SSHKEY_PATH}" "${PULL_TMP_SSHKEY_PATH}"
+  local pull_user_pubkey="`grep -v '^$' ${PULL_TMP_SSHKEY_PATH} | tr -d '\n'`"
+
+  # Create user accounts to be used for replication and ssh key pairing
+
+  echo_test_title "Create user \"${PUSH_USERNAME}\" on replication PUSH host"
+  rest_request "POST" "/account/users/" '{ "bsdusr_username": "'"${PUSH_USERNAME}"'", "bsdusr_home": "'"${PUSH_USERHOME}"'", "bsdusr_uid": "'${PUSH_UID}'", "bsdusr_mode": 755, "bsdusr_creategroup": true, "bsdusr_full_name": "Replication '"${BRIDGEHOST}"'PUSH", "bsdusr_password": "'"${PUSH_USERPASS}"'", "bsdusr_sshpubkey": "'"${pull_user_pubkey}"'" }'
+  check_rest_response "201 Created" || return 1
+  local push_user_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+  local push_user_home="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.bsdusr_home)'`"
+
+  echo_test_title "Create user \"${PULL_USERNAME}\" on replication PULL host"
+  replication_rest_request "POST" "/account/users/" '{ "bsdusr_username": "'"${PULL_USERNAME}"'", "bsdusr_home": "'"${PULL_USERHOME}"'", "bsdusr_uid": "'${PULL_UID}'", "bsdusr_mode": 755, "bsdusr_creategroup": true, "bsdusr_full_name": "Replication '"${BRIDGEHOST}"'PULL", "bsdusr_password": "'"${PULL_USERPASS}"'", "bsdusr_sshpubkey": "'"${push_user_pubkey}"'" }'
+  check_rest_response "201 Created" || return 1
+  local pull_user_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+  local pull_user_home="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.bsdusr_home)'`"
+
+  # TODO - Is this the right ECDSA key?
+  echo_test_title "Add ECDSA auth to our PUSH user's ~/.ssh/known_hosts"
+  ssh_test "ssh-keyscan -t ecdsa-sha2-nistp256 ${REPLTARGET} >> \"${push_user_home}/.ssh/known_hosts\""
+
+  echo_test_title "Add ECDSA auth to our PULL user's ~/.ssh/known_hosts"
+  ssh_repl_test "ssh-keyscan -t ecdsa-sha2-nistp256 ${BRIDGEIP} >> \"${pull_user_home}/.ssh/known_hosts\""
+
+  echo_test_title "Collecting SSH keys by running midclt keyscan against replication target"
+  ssh_test "midclt call replication.ssh_keyscan ${REPLTARGET} 22 > ${REPL_TMP_SSHKEY_PATH}"
+
+  echo_test_title "Retrieve the replication target SSH keys from our replicator"
+  scp_from_test "${REPL_TMP_SSHKEY_PATH}" "${REPL_TMP_SSHKEY_PATH}"
 
   # Create replication job for our snapshot, using the ssh_key
-  #local repl_remote_hostkey="$(cat "${SSHKEY_LOCAL_PATH}")"
   local repl_begin="$(date "+%H:%M:%S")"
-  local repl_end="$(date -v +5M "+%H:%M:%S")"
-  echo_test_title "Create replication job for the snapshot \"${DATASET}\""
-  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${DATASET}"'", "repl_zfs": "'"${REPLVOLUME}/${REMOTE_TARGET_DATASET}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_remote_token": "'"${repl_auth_token}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard", "repl_remote_hostkey": "'"${repl_remote_hostkey}"'" }'
+  local repl_end="$(date -v +30M "+%H:%M:%S")"
+  echo_test_title "Create replication job for the snapshot \"${PUSH_DATASET}\""
+  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${PUSH_DATASET}"'", "repl_zfs": "'"${REPLVOLUME}/${PULL_DATASET}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard", "repl_remote_dedicateduser": "'"${PULL_USERNAME}"'", "repl_remote_dedicateduser_enabled": true, "repl_remote_hostkey": "'"${pull_user_pubkey}"'" }'
   check_rest_response "201 Created" || return 1
+
+  # TODO - Replication failed with error:
+  # Failed: No ECDSA host key is known for 10.20.20.110 and you have requested strict checking. Host key verification failed.
 
   # TODO - check/poll repl_status for 'Succeeded' status
 
   # TODO - verify that files and directory created on target FreeNAS host
 
-  #echo_test_title "Delete the replication target \"${REMOTE_TARGET_DATASET}\""
-  #replication_rest_request "DELETE" "/storage/volume/1/datasets/${REMOTE_TARGET_DATASET}/"
+  #echo_test_title "Delete the replication target \"${PULL_DATASET}\""
+  #replication_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
   #check_rest_response "204" || return 1
+
+  #echo_test_title "Delete PUSH user \"${PUSH_USERNAME}(${push_user_id})\" created for replication tests"
+  #rest_request "DELETE" "/account/users/${push_user_id}/"
+  #check_rest_response "204"
+
+  #echo_test_title "Delete PULL user \"${PULL_USERNAME}(${pull_user_id})\" created for replication tests"
+  #replication_rest_request "DELETE" "/account/users/${pull_user_id}/"
+  #check_rest_response "204"
 
   return 0
 }

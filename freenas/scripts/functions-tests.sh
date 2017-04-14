@@ -375,6 +375,17 @@ scp_from_test()
   return $?
 }
 
+scp_from_repl()
+{
+  if [ "$1" == "-q" ]; then
+    shift
+    __scp_test -q "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
+  else
+    __scp_test "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
+  fi
+  return $?
+}
+
 # Private method, see scp_from_test or scp_to_test
 # (Optional) -q switch as first argument silences std_out
 # $1 = SCP from [[user@]host1:]file1
