@@ -57,7 +57,7 @@ replication_tests()
   # Common path and filename used for copying pub keys from both the PUSH and PULL servers
   local PUSH_TMP_SSHKEY_PATH="/tmp/push_sshkeys${BRIDGEHOST}.pub"
   local PULL_TMP_SSHKEY_PATH="/tmp/pull_sshkeys${BRIDGEHOST}.pub"
-  local REPL_TMP_SSHKEY_PATH="/tmp/repl_sshkeys${BRIDGEHOST}.pub"
+  #local REPL_TMP_SSHKEY_PATH="/tmp/repl_sshkeys${BRIDGEHOST}.pub"
 
   local MP_GROUP="wheel"
 
@@ -79,7 +79,7 @@ replication_tests()
   replication_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
   rm "${PUSH_TMP_SSHKEY_PATH}" &>/dev/null
   rm "${PULL_TMP_SSHKEY_PATH}" &>/dev/null
-  rm "${REPL_TMP_SSHKEY_PATH}" &>/dev/null
+  #rm "${REPL_TMP_SSHKEY_PATH}" &>/dev/null
 
   # Create datasets on PUSH and PULL replication hosts, set permissions on dataset
 
@@ -151,11 +151,11 @@ replication_tests()
   echo_test_title "Add ECDSA auth to our PULL user's ~/.ssh/known_hosts"
   ssh_repl_test "ssh-keyscan -t ecdsa-sha2-nistp256 ${BRIDGEIP} >> \"${pull_user_home}/.ssh/known_hosts\""
 
-  echo_test_title "Collecting SSH keys by running midclt keyscan against replication target"
-  ssh_test "midclt call replication.ssh_keyscan ${REPLTARGET} 22 > ${REPL_TMP_SSHKEY_PATH}"
+  #echo_test_title "Collecting SSH keys by running midclt keyscan against replication target"
+  #ssh_test "midclt call replication.ssh_keyscan ${REPLTARGET} 22 > ${REPL_TMP_SSHKEY_PATH}"
 
-  echo_test_title "Retrieve the replication target SSH keys from our replicator"
-  scp_from_test "${REPL_TMP_SSHKEY_PATH}" "${REPL_TMP_SSHKEY_PATH}"
+  #echo_test_title "Retrieve the replication target SSH keys from our replicator"
+  #scp_from_test "${REPL_TMP_SSHKEY_PATH}" "${REPL_TMP_SSHKEY_PATH}"
 
   # Create replication job for our snapshot, using the ssh_key
   local repl_begin="$(date "+%H:%M:%S")"
@@ -163,6 +163,7 @@ replication_tests()
   echo_test_title "Create replication job for the snapshot \"${PUSH_DATASET}\""
   rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${PUSH_DATASET}"'", "repl_zfs": "'"${REPLVOLUME}/${PULL_DATASET}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard", "repl_remote_dedicateduser": "'"${PULL_USERNAME}"'", "repl_remote_dedicateduser_enabled": true, "repl_remote_hostkey": "'"${pull_user_pubkey}"'" }'
   check_rest_response "201 Created" || return 1
+  local repl_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
 
   # TODO - Replication failed with error:
   # Failed: No ECDSA host key is known for 10.20.20.110 and you have requested strict checking. Host key verification failed.
@@ -171,17 +172,21 @@ replication_tests()
 
   # TODO - verify that files and directory created on target FreeNAS host
 
-  #echo_test_title "Delete the replication target \"${PULL_DATASET}\""
-  #replication_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
-  #check_rest_response "204" || return 1
+  echo_test_title "Delete the replication job for snapshot \"${PUSH_DATASET}\""
+  rest_request "DELETE" "/storage/replication/${repl_id}/"
+  check_rest_response "204" || return 1
 
-  #echo_test_title "Delete PUSH user \"${PUSH_USERNAME}(${push_user_id})\" created for replication tests"
-  #rest_request "DELETE" "/account/users/${push_user_id}/"
-  #check_rest_response "204"
+  echo_test_title "Delete the replication target \"${PULL_DATASET}\""
+  replication_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  check_rest_response "204" || return 1
 
-  #echo_test_title "Delete PULL user \"${PULL_USERNAME}(${pull_user_id})\" created for replication tests"
-  #replication_rest_request "DELETE" "/account/users/${pull_user_id}/"
-  #check_rest_response "204"
+  echo_test_title "Delete PUSH user \"${PUSH_USERNAME}(${push_user_id})\" created for replication tests"
+  rest_request "DELETE" "/account/users/${push_user_id}/"
+  check_rest_response "204"
+
+  echo_test_title "Delete PULL user \"${PULL_USERNAME}(${pull_user_id})\" created for replication tests"
+  replication_rest_request "DELETE" "/account/users/${pull_user_id}/"
+  check_rest_response "204"
 
   return 0
 }
