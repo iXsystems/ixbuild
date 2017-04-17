@@ -375,6 +375,10 @@ scp_from_test()
   return $?
 }
 
+# SCP from the replication test target to the test executor
+# (Optional) -q switch as first argument silences std_out
+# $1 = File to copy from the remote host
+# $2 = Location to copy file to
 scp_from_repl()
 {
   if [ "$1" == "-q" ]; then
