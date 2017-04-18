@@ -21,7 +21,6 @@ as an automated job from Jenkins or manually. It includes support to build
 the following:
 
  * FreeNAS
- * Corral
  * TrueOS
  * iocage
 
@@ -83,10 +82,6 @@ FreeNAS
 ```
 sudo /ixbuild/jenkins.sh freenas freenas-9.10
 ```
-Corral
-```
-sudo /ixbuild/jenkins.sh freenas freenas-10
-```
 TrueOS
 ```
 sudo /ixbuild/jenkins.sh trueos-world trueos-current production
@@ -106,10 +101,6 @@ FreeNAS
 ```
 sudo /ixbuild/jenkins.sh freenas-tests freenas-9.10
 ```
-Corral
-```
-sudo /ixbuild/jenkins.sh freenas-tests freenas-10
-```
 TrueOS
 ```
 sudo /ixbuild/jenkins.sh ports-tests
@@ -121,10 +112,6 @@ Running test framework with pre-existing install from jenkins
 FreeNAS
 ```
 sudo /ixbuild/jenkins.sh freenas-run-tests freenas-9.10
-```
-Corral
-```
-sudo /ixbuild/jenkins.sh freenas-run-tests freenas-10
 ```
 
 Manually running test framework
@@ -147,11 +134,6 @@ FreeNAS
  # cd freenas/scripts && ./9.10-create-tests.sh
  # cd freenas/scripts && ./9.10-update-tests.sh
  # cd freenas/scripts && ./9.10-delete-tests.sh
-```
-
-Corral
-```
- # cd freenas/scripts && ./10-tests.sh
 ```
 
 ```
@@ -181,12 +163,6 @@ tests will be run.
  FreeNAS password for REST auth
 ```
 
-Corral CLI (from a Corral host only)
-```
-cli -D_batch=yes -Dexit_on_error=yes -e 'source ${cli_src_path + "/examples/freenas-test/run.cli"}'
-```
-
-
 FreeNAS Testing Framework
 ============
 
@@ -207,14 +183,6 @@ https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
 
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
-
-New tests can be written for Corral by adding a test "module" to the 10 testing directory:
-
-https://github.com/iXsystems/ixbuild/tree/master/freenas/10-tests/
-
-Corral CLI tests can be found here:
-
-https://github.com/freenas/cli/tree/master/freenas/cli/examples/freenas-test
 
 Where are tests run?
 ---
