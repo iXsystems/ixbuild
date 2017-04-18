@@ -940,8 +940,10 @@ jenkins_freenas()
   # If we have a saved build state, lets pull that before we begin
   #jenkins_pull_fn_statedir
 
-  # Make sure we always checkout shallow, save us some bandwidth
-  export CHECKOUT_SHALLOW="YES"
+  if [ -z "$DISABLE_SHALLOW_CHECKOUT" ] ; then
+    # Make sure we always checkout shallow, save us some bandwidth
+    export CHECKOUT_SHALLOW="YES"
+  fi
 
   get_bedir
 
