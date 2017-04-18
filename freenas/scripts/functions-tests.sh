@@ -156,10 +156,11 @@ rest_request()
   return 1;
 }
 
+# Make a rest request against the replication target API
 # $1 = RESTY type to run 
 # $2 = RESTY URL
 # $3 = JSON to pass to RESTY
-replication_rest_request()
+repl_rest_request()
 {
   if [ -z "$REPLTARGET" -o -z "$REPLUSERNAME" -o -z "$REPLPASSWORD" ]; then
     echo -n "; missing required replication settings"

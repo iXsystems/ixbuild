@@ -11,7 +11,7 @@ export REQUIRES
 
 replication_tests()
 {
-  set_test_group_text "1 - Create - Replication Tests" "3"
+  set_test_group_text "1 - Create - Replication Tests" "21"
   CLASSNAME=ixbuild.resty.functional.create.replication
 
   # * PUSH = system generating the ZFS snapshots
@@ -53,7 +53,20 @@ replication_tests()
 
   # Clean up any leftover items from previous failed replication tests
 
-  replication_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  # Remove replication tasks
+  repl_rest_request "GET" "/storage/replication/"
+  local repl_id_list=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.repl_remote_hostname == "'"${REPLTARGET}"'" && this.repl_filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  for repl_id in ${repl_id_list[@]}; do repl_rest_request "DELETE" "/storage/replication/${repl_id}/"; done
+
+  # Remove snapshot tasks
+  rest_request "GET" "/storage/task/"
+  local snapshot_id_list=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  for snapshot_id in ${snapshot_id_list[@]}; do rest_request "DELETE" "/storage/task/${snapshot_id}/"; done
+
+  # Remove datasets and leftover tmp files
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}%2F${PUSH_DATASET}/"
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  rest_request "DELETE" "/storage/volume/1/datasets/${PUSH_DATASET}/"
   rm "${PUSH_TMP_SSHKEY_PATH}" &>/dev/null
   rm "${PULL_TMP_SSHKEY_PATH}" &>/dev/null
 
@@ -68,11 +81,11 @@ replication_tests()
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Creating \"${PULL_DATASET}\" dataset on replication target host"
-  replication_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${PULL_DATASET}"'" }'
+  repl_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${PULL_DATASET}"'" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Changing permissions on \"${PULL_DATASET}\" dataset on replication target host"
-  replication_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${PULL_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  repl_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${PULL_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
   # Add files/directories to dataset
@@ -90,33 +103,33 @@ replication_tests()
   # Create a periodic snapshot to replicate
   local task_begin="$(date "+%H:%M:%S")"
   local task_end="$(date -v +30M "+%H:%M:%S")"
-  echo_test_title "Create snapshot task for \"tank/${PUSH_DATASET}\" for replication"
+  echo_test_title "Create snapshot task for \"tank/${PUSH_DATASET}\""
   rest_request "POST" "/storage/task/" '{ "task_repeat_unit": "daily", "task_begin": "'"${task_begin}"'", "task_end": "'"${task_end}"'", "task_filesystem": "tank/'"${PUSH_DATASET}"'", "task_ret_unit": "day", "task_interval": "15", "task_enabled": true, "task_recursive": true }'
   check_rest_response "201 Created" || return 1
 
   # Fetch SSH public keys from the PUSH and PULL hosts
 
   echo_test_title "Fetch SSH public key from our PUSH host"
-  scp_from_test "${PUSH_SSHKEY_PATH}" "${PUSH_TMP_SSHKEY_PATH}"
+  scp_from_test "${PUSH_SSHKEY_PATH}" "${PUSH_TMP_SSHKEY_PATH}" || return 1
   local push_user_pubkey="`grep -v '^$' ${PUSH_TMP_SSHKEY_PATH} | tr -d '\n'`"
 
   echo_test_title "Fetch SSH public key from our PULL host"
-  scp_from_repl "${PULL_SSHKEY_PATH}" "${PULL_TMP_SSHKEY_PATH}"
+  scp_from_repl "${PULL_SSHKEY_PATH}" "${PULL_TMP_SSHKEY_PATH}" || return 1
   local pull_user_pubkey="`grep -v '^$' ${PULL_TMP_SSHKEY_PATH} | tr -d '\n'`"
 
   # Get the root user's ID and add our PULL SSH public key to the account
 
   echo_test_title "Get the ID for the root user account on our PULL host"
-  replication_rest_request "GET" "/account/users/"
+  repl_rest_request "GET" "/account/users/"
   check_rest_response "200" || return 1
   local pull_root_user_id=$(cat "$RESTYOUT" | jsawk -n 'if (this.bsdusr_username == "root") { out(this.id) }')
 
   echo_test_title "Add our SSH public key to the root user account on our PULL host"
-  replication_rest_request "PUT" "/account/users/${pull_root_user_id}/" '{ "bsdusr_sshpubkey": "'"${push_user_pubkey}"'" }'
+  repl_rest_request "PUT" "/account/users/${pull_root_user_id}/" '{ "bsdusr_sshpubkey": "'"${push_user_pubkey}"'" }'
   check_rest_response "200"  || return 1
 
   echo_test_title "Add ECDSA auth to our the root user's \".ssh/known_hosts\""
-  ssh_test "ssh-keyscan ${REPLTARGET} >> \"/root/.ssh/known_hosts\""
+  ssh_test "ssh-keyscan ${REPLTARGET} >> \"/root/.ssh/known_hosts\"" || return 1
 
   # Create replication job for our snapshot, using the PULL SSH public key
   local repl_begin="$(date "+%H:%M:%S")"
@@ -133,8 +146,10 @@ replication_tests()
     let poll_cnt-=1
     rest_request "GET" "/storage/replication/${repl_id}/"
     if [ $poll_cnt -eq 0 ]; then
+      # Last attempt, print exit status
       check_property_value "return this.repl_status" "Succeeded"
     else
+      # Silent, only print success or re-try
       check_property_value -q "return this.repl_status" "Succeeded"
       if [ "$?" == "0" ]; then
         echo_ok
@@ -160,26 +175,51 @@ replication_tests()
   rest_request "DELETE" "/storage/replication/${repl_id}/"
   check_rest_response "204" || return 1
 
-  echo_test_title "Fetch a list of replicated snapshots for deletion"
-  replication_rest_request "GET" "/storage/snapshot/"
-  check_rest_response "200" || return 1
+  rest_request "GET" "/storage/task/"
+  local snapshot_tasks=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  for snapshot_id in ${snapshot_tasks[@]}
+  do
+    echo_test_title "Delete the snapshot task \"tank/${PUSH_DATASET}\"(${snapshot_id})"
+    rest_request "DELETE" "/storage/task/${snapshot_id}/"
+    check_rest_response "204"
+  done
+
+  # Snapshot ID example: tank/bridgehost/bridgehost@auto-20170417.1632-2d
+  repl_rest_request "GET" "/storage/snapshot/"
   local replicated_snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "'"${REPLVOLUME}/${PULL_DATASET}/${PUSH_DATASET}"'") { out(this.id) }')
-  echo $replicated_snapshots
-
-  return 0
-  if [ -z "${replicated_snapshots}" ]; then
-    exit 0
-  fi
-
-  for snapshot_id in $replicated_snapshots
+  for snapshot_id in ${replicated_snapshots[@]}
   do
     echo_test_title "Deleting replicated snapshot \"${snapshot_id}\" from replication target"
-    replication_rest_request "DELETE" "/storage/snapshot/${snapshot_id}/"
+    # repl_rest_request uses curl cmd instead of resty, requires some escaping of special chars
+    repl_rest_request "DELETE" "/storage/snapshot/$(echo ${snapshot_id} | sed 's|/|%2F|g' | sed 's|@|%40|g')/"
     check_rest_response "204"
   done 
 
-  echo_test_title "Delete the replication target \"${PULL_DATASET}\""
-  replication_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  echo_test_title "Delete the replication target child dataset \"${PULL_DATASET}/${PUSH_DATASET}\""
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}%2F${PUSH_DATASET}"
+  check_rest_response "204" || return 1
+
+
+  rest_request "GET" "/storage/snapshot/"
+  local snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  for snapshot_id in ${snapshots[@]}
+  do
+    echo_test_title "Deleting testing target snapshot \"${snapshot_id}\""
+    rest_request "DELETE" "/storage/snapshot/${snapshot_id}/"
+    check_rest_response "204"
+  done
+
+  echo_test_title "Delete the replication target dataset \"${PULL_DATASET}\""
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  check_rest_response "204" || return 1
+
+  if [ -n "${PUSH_DATASET_PATH}" ] && [ "$PUSH_DATASET_PATH" != "/" ]; then
+    echo_test_title "Delete all file objects create on the testing target"
+    ssh_test "test -d \"${PUSH_DATASET_PATH}\" && rm -rf \"${PUSH_DATASET_PATH}/*\""
+  fi
+
+  echo_test_title "Delete the testing target dataset \"${PUSH_DATASET}\""
+  rest_request "DELETE" "/storage/volume/1/datasets/${PUSH_DATASET}/"
   check_rest_response "204" || return 1
 
   return 0
