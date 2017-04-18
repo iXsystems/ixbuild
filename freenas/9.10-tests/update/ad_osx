@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# Author: Joe Maloney
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+ad_osx_tests() 
+{
+  local DATASET="ad-osx"
+  local SMB_NAME="TestShare"
+  local SMB_PATH="/mnt/tank/${DATASET}"
+  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local VOL_GROUP="qa"
+
+  TEST_CNT=11
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    TEST_CNT=22
+
+    # Clean up any leftover items from previous failed SMB runs
+    osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
+  fi
+
+  set_test_group_text "2 - Update - Active Directory OS X tests" "${TEST_CNT}"
+  CLASSNAME=ixbuild.resty.functional.update.ad_osx
+
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
+     echo -n "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing AD settings"
+     return 0
+  fi
+
+  # Clean up any leftover items from previous failed AD LDAP or SMB runs
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
+  rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'",  "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
+  rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
+  rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+
+  # Set auxilary parameters to allow mount_smbfs to work with Active Directory
+  echo_test_title "Setting auxilary parameters for mount_smbfs.."
+  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = no\nntlm auth = no \nraw NTLMv2 auth = no" }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Creating SMB dataset"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created"
+  
+  # Enable Active Directory Directory
+  echo_test_title "Enabling Active Directory.."
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":true }'
+  check_rest_response "200 OK"
+
+  # Check Active Directory
+  echo_test_title "Checking Active Directory.."
+  rest_request GET "/directoryservice/activedirectory/"
+  check_property_value "return this.ad_enable" "true" || return 1
+
+  echo_test_title "Checking to see if SMB service is enabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_service_status -q "RUNNING"
+  check_exit_status -q && echo_ok || (
+    echo_test_title "Enabling SMB service"
+    rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
+    check_rest_response "200 OK"
+
+    # Now start the service
+    echo_test_title "Starting SMB service"
+    rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
+    check_rest_response "200 OK"
+  )
+
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
+
+  echo_test_title "Changing permissions on ${SMB_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
+  check_rest_response "201 Created" 
+
+  local vol_name=$(dirname "${SMB_PATH}")
+  echo_test_title "Checking permissions on ${SMB_NAME}"
+  ssh_test "ls -la '${vol_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+  check_exit_status || return 1
+
+  echo_test_title "Creating a SMB share on ${SMB_PATH}"
+  rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
+  check_rest_response "201 Created"
+
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    # Mount share on OSX system and create a test file
+    echo_test_title "Create mount-point for SMB on OSX system"
+    osx_test "mkdir -p '${MOUNTPOINT}'"
+    check_exit_status || return 1
+
+    echo_test_title "Mount SMB share on OSX system"
+    osx_test "mount -t smbfs 'smb://aduser:12345678@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'"
+    check_exit_status || return 1
+
+    echo_test_title "Verify SMB share has been mounted on OSX"
+    # //{ADUSERNAME}@{FNASTESTIP}/{SMB_NAME} on {MOUNTPOINT} (smbfs, nodev, nosuid, mounted by jenkins)
+    wait_for_osx_mnt "${MOUNTPOINT}"
+    check_exit_status || return 1
+
+    local device_name=`dirname "${MOUNTPOINT}"`
+    echo_test_title "Checking permissions on ${MOUNTPOINT}"
+    osx_test "time ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+    check_exit_status || return 1
+
+    echo_test_title "Create file on SMB share via OSX to test permissions"
+    osx_test "touch '${MOUNTPOINT}/testfile.txt'"
+    check_exit_status || return 1
+
+    # Move test file to a new location on the SMB share
+    echo_test_title "Moving SMB test file into a new directory"
+    osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'"
+    check_exit_status || return 1
+
+    # Delete test file and test directory from SMB share
+    echo_test_title "Deleting test file and directory from SMB share"
+    osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'"
+    check_exit_status || return 1
+
+    echo_test_title "Verifying that test file and directory were successfully removed"
+    osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ."
+    check_exit_status || return 1
+
+    # Clean up mounted SMB share
+    echo_test_title "Unmount SMB share"
+    osx_test "umount -f '${MOUNTPOINT}'"
+    check_exit_status || return 1
+  fi
+
+  # Disable Active Directory Directory
+  echo_test_title "Disabling Active Directory.."
+  rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":"false" }'
+  check_rest_response "200 OK"
+
+  # Check Active Directory
+  echo_test_title "Verify Active Directory is disabled.."
+  rest_request GET "/directoryservice/activedirectory/"
+  check_property_value "return this.ad_enable" "false"
+
+  echo_test_title "Verify SMB service is disabled"
+  rest_request "GET" "/services/services/cifs/"
+  check_service_status "STOPPED"
+
+  # Check destroying a SMB dataset
+  echo_test_title "Destroying SMB dataset"
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  check_rest_response "204" || return 1
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+ad_osx_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) ad_osx_tests ; return $? ;;
+     COMPLETE) ad_osx_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) ad_osx_tests ; return $? ;;
+  esac
+}

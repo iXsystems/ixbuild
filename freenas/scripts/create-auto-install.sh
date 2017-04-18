@@ -74,7 +74,7 @@ if [ $? -ne 0 ] ; then exit 1; fi
 ###############################################
 
 # Setup install to be automated
-sed -i '' "s|/etc/install.sh|/etc/install.sh ${VMDISK};/sbin/halt -p|g" uzipdir/etc/rc
+sed -i '' "s|/etc/install.sh|/etc/install.sh ${VMDISK};/sbin/mount -t zfs freenas-boot/ROOT/default /mnt;/rescue/chroot /mnt /usr/local/bin/sqlite3 /data/freenas-v1.db 'update system_advanced set adv_serialconsole = 1';/sbin/umount /mnt;/sbin/halt -p|g" uzipdir/etc/rc
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Now setup ATF to run at first boot after install

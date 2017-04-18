@@ -65,6 +65,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y spidermonkey24"
 fi
 
+which wget >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing wget.."
+  rc_halt "pkg-static install -y wget"
+fi
+
 pkg info -q lang/python27 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing lang/python27.."
@@ -119,9 +125,9 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y py27-sphinxcontrib-httpdomain"
 fi
 
-pkg info -q misc/compat9x-amd64 >/dev/null 2>/dev/null
+pkg info -q compat9x-amd64 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
-  echo "Installing misc/compat9x-amd64.."
+  echo "Installing compat9x-amd64.."
   rc_halt "pkg-static install -y compat9x-amd64"
 fi
 

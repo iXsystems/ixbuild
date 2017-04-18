@@ -11,8 +11,13 @@ export REQUIRES
 
 network_tests()
 {
+  TEST_CNT=3
+  if [ -n "$BRIDGEIP" ]; then
+    TEST_CNT=4
+  fi
+
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Network tests" "5"
+  set_test_group_text "1 - Create - Network tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.network
 
   if [ -z "$FNASTESTIP" ] ; then
@@ -29,9 +34,10 @@ network_tests()
   # Add $FNASTESTIP to database
   rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "em0" }'
 
-  # Wait 30 seconds before trying more REST queries again
-  sleep 30
-
+  # Wait for port 80 response before trying more REST queries again
+  echo_test_title "Wait for FreeNAS UI by polling port 80"
+  wait_for_avail_port "80"
+  check_exit_status || return 1
 
   if [ -n "$BRIDGEIP" ] ; then
     # Using the bridged adapter settings
