@@ -32,6 +32,7 @@ webdav_osx_tests()
   done
 
   # Clean up any leftover items from previous failed test runs
+  osx_test -q "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
   rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
@@ -90,8 +91,11 @@ webdav_osx_tests()
   echo_test_title "Verifying that test file and directory were successfully removed"
   osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ." || return 1
 
+  # Clean up mounted WebDAV share
+  # OS X `umount` manpage reports that umount may fail often.
+  # "It is recommended that diskutil(1) (as in, ``diskutil unmount /mnt'') be used instead."
   echo_test_title "Unmount the WebDAV share from OSX system"
-  osx_test "umount -f \"${MOUNTPOINT}\"" || return 1
+  osx_test "diskutil unmount force '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
   rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'

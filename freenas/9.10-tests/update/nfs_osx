@@ -11,6 +11,10 @@ export REQUIRES
 
 nfs_osx_tests()
 {
+  # Set the group text and number of tests
+  set_test_group_text "1 - Update - NFS OSX tests" "33"
+  CLASSNAME=ixbuild.resty.functional.create.nfs_osx
+
   local DATASET="nfs-osx"
   local NFS_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
@@ -18,21 +22,21 @@ nfs_osx_tests()
   local NFS_PORT=618
   local MP_GROUP="wheel"
 
-  if [ -z "$OSX_HOST" -o -z "${BRIDGEIP}" -o -z "${BRIDGEHOST}" ]; then
-    echo "OSX_HOST, BRIDGEIP and BRIDGEHOST settings required for NFS OSX tests"
-    echo_skipped
-    return 0
-  fi
-
-  # Set the group text and number of tests
-  set_test_group_text "1 - Update - NFS OSX tests" "33"
-  CLASSNAME=ixbuild.resty.functional.create.nfs_osx
+  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" )
+  for SETTING in "${REQUIRED_SETTINGS[@]}"
+  do  
+    if [ -z "${!SETTING}" ]; then
+      echo -n "Required settings for nfs_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+      echo_skipped
+      return 0
+    fi  
+  done
 
   # Clean up any leftover items from previous failed NFS runs
+  osx_test -q "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
-  osx_test -q "umount -f \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
 
   # Create a dataset to use with NFS
   echo_test_title "Creating dataset ${DATASET}"
@@ -135,8 +139,11 @@ nfs_osx_tests()
   echo_test_title "Verify that test file and directory were successfully removed"
   osx_test "find -- \"${MOUNTPOINT}/\" -prune -type d -empty | grep -q ." || return 1
 
+  # Clean up mounted NFS share
+  # OS X `umount` manpage reports that umount may fail often.
+  # "It is recommended that diskutil(1) (as in, ``diskutil unmount /mnt'') be used instead."
   echo_test_title "Unmount NFS share"
-  osx_test "umount -f \"${MOUNTPOINT}\""
+  osx_test "diskutil unmount force '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Removing NFS share on ${NFS_PATH}"
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'

@@ -11,7 +11,7 @@ export REQUIRES
 
 replication_tests()
 {
-  set_test_group_text "1 - Create - Replication Tests" "21"
+  set_test_group_text "1 - Create - Replication Tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.replication
 
   # * PUSH = system generating the ZFS snapshots

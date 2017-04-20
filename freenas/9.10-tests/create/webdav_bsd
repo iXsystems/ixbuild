@@ -11,7 +11,7 @@ export REQUIRES
 
 webdav_bsd_tests()
 {
-  set_test_group_text "1 - Create - WebDAV BSD Tests" "20"
+  set_test_group_text "1 - Create - WebDAV BSD Tests" "16"
   CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
 
   local DATASET="webdavshare"

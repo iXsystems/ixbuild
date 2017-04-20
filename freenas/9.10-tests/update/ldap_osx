@@ -11,6 +11,9 @@ export REQUIRES
 
 ldap_osx_tests() 
 {
+  set_test_group_text "2 - Update - LDAP OS X tests" "25"
+  CLASSNAME=ixbuild.resty.functional.update.ldap_osx
+
   local DATASET="ldap-osx"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
@@ -20,25 +23,21 @@ ldap_osx_tests()
   local LDAP_PASS="12345678"
   local MP_GROUP="qa"
 
-  set_test_group_text "2 - Update - LDAP OS X tests" "25"
-  CLASSNAME=ixbuild.resty.functional.update.ldap_osx
-
-  if [ -z "$LDAPBINDDN" -o -z "$LDAPBINDPASSWORD" -o -z "$OSX_HOST" -o -z "$BRIDGEIP" -o -z "$ADUSERNAME" ] ; then
-    echo -n "Missing required settings for LDAP, Active Directory, test skipped.."
-    echo_skipped
-    add_xml_result "skipped" "Skipped due to missing LDAP settings"
-    return 0
-  fi  
-
-  if [ -z "$LDAPBINDDN2" -o -z "$LDAPBINDPASSWORD2" ] ; then
-     echo -n "Missing the LDAPBINDDN2 / LDAPBINDPASSWORD2 settings, test skipped.."
-     echo_skipped
-     add_xml_result "skipped" "Skipped due to missing LDAP settings"
-     return 0
-  fi
+  local REQUIRED_SETTINGS=( \
+    "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" \
+    "ADUSERNAME" "ADPASSWORD" "LDAPBINDDN" "LDAPBINDPASSWORD" "LDAPBINDDN2" "LDAPBINDPASSWORD2" \
+  )
+  for SETTING in "${REQUIRED_SETTINGS[@]}"
+  do  
+    if [ -z "${!SETTING}" ]; then
+      echo -n "Required settings for ldap_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+      echo_skipped
+      return 0
+    fi  
+  done
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
-  osx_test -q "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0"
+  osx_test -q "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_anonbind": false, "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
@@ -122,8 +121,10 @@ ldap_osx_tests()
     osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ." || return 1
 
     # Clean up mounted SMB share
+    # OS X `umount` manpage reports that umount may fail often.
+    # "It is recommended that diskutil(1) (as in, ``diskutil unmount /mnt'') be used instead."
     echo_test_title "Unmount SMB share"
-    osx_test "umount -f '${MOUNTPOINT}'" || return 1
+    osx_test "diskutil unmount force '${MOUNTPOINT}'" || return 1
   fi
 
   # Disable LDAP
