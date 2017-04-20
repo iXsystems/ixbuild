@@ -12,7 +12,7 @@ export REQUIRES
 webdav_osx_tests()
 {
   set_test_group_text "1 - Create - WebDAV OS X Tests" "20"
-  CLASSNAME=ixbuild.resty.functional.create.webdav
+  CLASSNAME=ixbuild.resty.functional.create.webdav_osx
 
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
