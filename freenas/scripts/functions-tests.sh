@@ -60,17 +60,17 @@ EOF
     # Failed!
     cat >>${XMLRESULTS} << EOF
     <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
-        <failure type="failure">$(echo $2 | sed 's|&|&amp;|g' | sed 's|<|&lt;|g' | sed 's|>|&gt;|g' | sed 's|"|&quot;|g' | sed "s|'|&apos;|g")</failure>
+        <failure type="failure">$(echo $2 | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g")</failure>
 EOF
   fi
 
   # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo -e "         <system-out>Command Run:\n$(echo $TESTCMD | sed 's|&|&amp;|g' | sed 's|<|&lt;|g' | sed 's|>|&gt;|g' | sed 's|"|&quot;|g' | sed "s|'|&apos;|g")\n\nResponse:\n" >> ${XMLRESULTS}
-    echo "`cat $TESTSTDOUT | sed 's|&|&amp;|g' | sed 's|<|&lt;|g' | sed 's|>|&gt;|g' | sed 's|"|&quot;|g' | sed "s|'|&apos;|g" | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
+    echo -e "         <system-out>Command Run:\n$(echo $TESTCMD | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g")\n\nResponse:\n" >> ${XMLRESULTS}
+    echo "`cat $TESTSTDOUT | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g" | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
-    echo "         <system-err>`cat $TESTSTDERR | sed 's|&|&amp;|g' | sed 's|<|&lt;|g' | sed 's|>|&gt;|g' | sed 's|"|&quot;|g' | sed "s|'|&apos;|g" | tr -d '\r'`</system-err>" >> ${XMLRESULTS}
+    echo "         <system-err>`cat $TESTSTDERR | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g" | tr -d '\r'`</system-err>" >> ${XMLRESULTS}
   fi
 
   # Close the error tag
