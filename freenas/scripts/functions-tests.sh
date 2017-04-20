@@ -64,11 +64,9 @@ EOF
 EOF
   fi
 
-  local ESCAPED_TESTCMD=$(echo $TESTCMD | sed "s|&|&amp;|g")
-
   # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo -e "         <system-out>Command Run:\n$(echo $TESTCMD | sed "s|&|&amp;|g")\n\nResponse:\n" >> ${XMLRESULTS}
+    echo -e "         <system-out>Command Run:\n$(echo $TESTCMD | sed 's|&|&amp;|g' | sed 's|<|&lt;|g' | sed 's|>|&gt;|g' | sed 's|"|&quot;|g' | sed "s|'|&apos;|g")\n\nResponse:\n" >> ${XMLRESULTS}
     echo "`cat $TESTSTDOUT | sed 's|&|&amp;|g' | sed 's|<|&lt;|g' | sed 's|>|&gt;|g' | sed 's|"|&quot;|g' | sed "s|'|&apos;|g" | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
