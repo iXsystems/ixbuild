@@ -32,6 +32,12 @@ start_xml_results() {
 EOF
 }
 
+# $1 = String that needs special characters escaped
+escape_special_chars()
+{
+  echo $1 | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g" | tr -d '\r'
+}
+
 #          $1 = true/false
 #          $2 = error message
 #  $CLASSNAME = Sub class of test results
@@ -50,27 +56,27 @@ add_xml_result() {
 
   if [ "$1" = "true" ] ; then
     cat >>${XMLRESULTS} << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
+    <testcase classname="$CLASSNAME" name="$(escape_special_chars "$TESTNAME")" time="$TIMEELAPSED">
 EOF
   elif [ "$1" = "skipped" ] ; then
     cat >>${XMLRESULTS} << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME"><skipped/>
+    <testcase classname="$CLASSNAME" name="$(escape_special_chars "$TESTNAME")"><skipped/>
 EOF
   else
     # Failed!
     cat >>${XMLRESULTS} << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
-        <failure type="failure">$(echo $2 | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g")</failure>
+    <testcase classname="$CLASSNAME" name="$(escape_special_chars "$TESTNAME")" time="$TIMEELAPSED">
+        <failure type="failure">$(escape_special_chars $2)</failure>
 EOF
   fi
 
   # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo -e "         <system-out>Command Run:\n$(echo $TESTCMD | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g")\n\nResponse:\n" >> ${XMLRESULTS}
-    echo "`cat $TESTSTDOUT | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g" | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
+    echo -e "         <system-out>Command Run:\n$(escape_special_chars "$TESTCMD")\n\nResponse:\n" >> ${XMLRESULTS}
+    echo "$(escape_special_chars "$(cat "$TESTSTDOUT")")</system-out>" >> ${XMLRESULTS}
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
-    echo "         <system-err>`cat $TESTSTDERR | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g" | tr -d '\r'`</system-err>" >> ${XMLRESULTS}
+    echo "         <system-err>$(escape_special_chars "$(cat "$TESTSTDERR")")</system-err>" >> ${XMLRESULTS}
   fi
 
   # Close the error tag
