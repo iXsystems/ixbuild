@@ -12,7 +12,7 @@ export REQUIRES
 webdav_bsd_tests()
 {
   set_test_group_text "1 - Create - WebDAV BSD Tests" "20"
-  CLASSNAME=ixbuild.resty.functional.create.webdav
+  CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
 
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
@@ -22,7 +22,7 @@ webdav_bsd_tests()
   local SHARE_PASS="davtest"
 
   # Clean up any leftover items from previous failed test runs
-  rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
+  rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by ixbuild tests", "webdav_path": "'"${DATASET_PATH}"'" }'
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   rm "${TMP_FILE}" &>/dev/null
