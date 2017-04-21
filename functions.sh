@@ -962,15 +962,9 @@ jenkins_freenas()
 
   # Now lets sync the ISOs
   if [ -n "$SFTPHOST" ] ; then
-    if [ "$FREENASLEGACY" = "YES" ] ; then
-      cd ${FNASBDIR}/objs
-      if [ $? -ne 0 ] ; then exit_clean ; fi
-      rm -rf os-base
-    else
-      cd ${BEDIR}/release
-      if [ $? -ne 0 ] ; then exit_clean ; fi
-    fi
-
+    cd ${FNASBDIR}/objs
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+    rm -rf os-base
     if [ -n "${RELENGBUILD}" ] ; then
       # Release Engineer Build
       # Don't cleanup all the old versions
@@ -1080,7 +1074,6 @@ jenkins_freenas_tests()
 
 jenkins_freenas_run_tests()
 {
-if [ -n "$FREENASLEGACY" ] ; then
   create_workdir
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -1120,25 +1113,6 @@ if [ -n "$FREENASLEGACY" ] ; then
   kill -9 $tpid 
   echo ""
   sleep 10
-else
-  create_workdir
-  cd ${TBUILDDIR}/scripts/
-  if [ $? -ne 0 ] ; then exit_clean ; fi
-  echo ""
-  sleep 10
-  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
-  echo ""
-  echo "Output from REST API calls:"
-  echo "-----------------------------------------"
-  echo "Running API v2.0 tests"
-  touch /tmp/$VM-tests-v2.0.log 2>/dev/null
-  tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
-  tpid=$!
-  ./10-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
-  kill -9 $tpid
-  echo ""
-  sleep 10
-fi
 
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
