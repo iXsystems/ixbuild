@@ -54,9 +54,9 @@ replication_tests()
   # Clean up any leftover items from previous failed replication tests
 
   # Remove replication tasks
-  repl_rest_request "GET" "/storage/replication/"
+  rest_request "GET" "/storage/replication/"
   local repl_id_list=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.repl_remote_hostname == "'"${REPLTARGET}"'" && this.repl_filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
-  for repl_id in ${repl_id_list[@]}; do repl_rest_request "DELETE" "/storage/replication/${repl_id}/"; done
+  for repl_id in ${repl_id_list[@]}; do rest_request "DELETE" "/storage/replication/${repl_id}/"; done
 
   # Remove snapshot tasks
   rest_request "GET" "/storage/task/"
