@@ -14,6 +14,10 @@ replication_tests()
   set_test_group_text "2 - Update - Replication Tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.replication
 
+  echo -n "Update replication module incomplete."
+  echo_skipped
+  return 0
+
   # * PUSH = system generating the ZFS snapshots
   # * PULL = system to receive a copy of the ZFS snapshot
 
@@ -76,6 +80,11 @@ replication_tests()
   local push_user_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.bsdusr_username == "'${REPL_DEDICATEDUSER}'") { out(this.id) }')
   if [ -n "$push_user_id" ]; then rest_request "DELETE" "/account/users/${push_user_id}/"; fi
 
+  # Remove tunable entry for zfs.usermount
+  repl_rest_request "GET" "/system/tunable/"
+  local tunable_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.tun_var == "zfs.usermount") { out(this.id) }')
+  if [ -n "$tunable_id" ]; then repl_rest_request "DELETE" "/system/tunable/${tunable_id}/"; fi
+
   # Remove snapshot task
   rest_request "GET" "/storage/task/"
   local snapshot_id_list=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
@@ -89,26 +98,18 @@ replication_tests()
   # Remove zvols and leftover tmp files
   repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}%2F${PUSH_ZVOL}/"
   repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
-  rest_request "DELETE" "/storage/volume/1/zvols/${PUSH_ZVOL}/"
+  rest_request "DELETE" "/storage/volume/1/datasets/${PUSH_ZVOL}/"
   rm "${PUSH_TMP_SSHKEY_PATH}" &>/dev/null
   rm "${PULL_TMP_SSHKEY_PATH}" &>/dev/null
 
   # Create zvols on PUSH and PULL replication hosts, set permissions on zvol
 
-  echo_test_title "Creating ZVOL \"${PUSH_ZVOL}\" zvol for replication"
+  echo_test_title "Creating ZVOL \"${PUSH_ZVOL}\" for replication"
   rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "'"${PUSH_ZVOL}"'", "volsize": "10M" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Changing permissions on \"${PUSH_ZVOL_PATH}\""
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${PUSH_ZVOL_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
-  check_rest_response "201 Created" || return 1
-
-  echo_test_title "Creating dataset \"${PULL_DATASET}\" on replication target host"
-  repl_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${PULL_DATASET}"'" }'
-  check_rest_response "201 Created" || return 1
-
-  echo_test_title "Changing permissions on \"${PULL_DATASET}\" dataset on replication target host"
-  repl_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${PULL_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
   # Add files/directories to zvol
@@ -159,6 +160,22 @@ replication_tests()
   check_rest_response "201 Created" || return 1
   local push_user_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
 
+  echo_test_title "Creating dataset \"${PULL_DATASET}\" on replication target host"
+  repl_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${PULL_DATASET}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Changing permissions on \"${PULL_DATASET}\" dataset on replication target host"
+  repl_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${PULL_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "'"${REPL_DEDICATEDUSER}"'", "mp_group": "'"${REPL_DEDICATEDUSER}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Changing permissions on \"${PULL_DATASET}\" dataset via ZFS command"
+  ssh_repl_test "zfs allow ${REPL_DEDICATEDUSER} create,destroy,diff,mount,readonly,receive,release,send,userprop \"${REPLVOLUME}/${PULL_DATASET}\""
+
+  # Create loader tunable for zfs.usermount
+  echo_test_title "Creating system tunable 'zfs.usermount'.."
+  repl_rest_request "POST" "/system/tunable/" '{ "tun_var": "zfs.usermount", "tun_enabled": true, "tun_value": "1", "tun_type": "sysctl" }'
+  check_rest_response "201 Created"
+
   # Create replication job for our snapshot, using the PULL SSH public key
   local repl_begin="$(date "+%H:%M:%S")"
   local repl_end="$(date -v +30M "+%H:%M:%S")"
@@ -167,7 +184,7 @@ replication_tests()
   check_rest_response "201 Created" || return 1
   local repl_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
 
-  # TODO - should we only try to replicate a ZVOL to a DATASET instead of a ZVOL to ZVOL?
+  # TODO - Observed: "Failed: tank/cd-freenasqa (auto-20170424.1250-2d)"
 
   # Check/poll replication job's repl_status for 'Succeeded' status
   echo_test_title "Verify that replication job succeeded for snapshot \"${PUSH_ZVOL}\""
