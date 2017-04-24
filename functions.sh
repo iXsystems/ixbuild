@@ -1149,7 +1149,7 @@ fi
 jenkins_freenas_tests_jailed()
 {
   iocage stop $BUILDTAG 2>/dev/null
-  iocage destroy $BUILDTAG 2>/dev/null
+  iocage destroy -f $BUILDTAG 2>/dev/null
   iocage create -b tag=$BUILDTAG -t executor && \
   iocage start $BUILDTAG
 }
