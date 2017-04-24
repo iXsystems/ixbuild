@@ -24,7 +24,7 @@ snmp_tests()
     ip_address=${BRIDGEIP}
   fi
 
-  set_test_group_text "1 - Update - SNMP tests" "9"
+  set_test_group_text "2 - Update - SNMP tests" "9"
   CLASSNAME=ixbuild.resty.functional.update.snmp
 
   echo_test_title "Disable SNMP service"
