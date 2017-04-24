@@ -1044,7 +1044,6 @@ jenkins_freenas_live_tests()
   return 0
 }
 
-
 jenkins_freenas_tests()
 {
   create_workdir
@@ -1145,6 +1144,14 @@ fi
   cleanup_workdir
 
   return 0
+}
+
+jenkins_freenas_tests_jailed()
+{
+  iocage stop $BUILDTAG 2>/dev/null
+  iocage destroy $BUILDTAG 2>/dev/null
+  iocage create -b $BUILDTAG -t executor && \
+  iocage start $BUILDTAG
 }
 
 jenkins_push_fn_statedir()
