@@ -53,6 +53,10 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
+if [ -z "$ip" ]; then
+  ip="${FNASTESTIP}"
+fi
+
 echo "Using REST API Address: ${ip}"
 
 # Source our resty / jsawk functions
