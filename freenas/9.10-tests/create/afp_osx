@@ -63,7 +63,6 @@ afp_osx_tests()
 
   echo_test_title "Checking permissions on ${AFP_PATH}"
   check_dataset_group "${AFP_PATH}" "${MP_GROUP}" || return 1
-  
 
   # Verify mountability and permissions of AFP share
   echo_test_title "Poll VM to ensure AFP service is up and running"

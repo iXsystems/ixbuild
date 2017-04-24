@@ -23,7 +23,7 @@ nfs_bsd_tests()
       NFS_HOST=${BRIDGEIP}
     elif [ -n "${FNASTESTIP}" ]; then
       NFS_HOST=${FNASTESTIP}
-    fi  
+    fi
   fi
 
   # Set the group text and number of tests
@@ -49,7 +49,7 @@ nfs_bsd_tests()
 
   echo_test_title "Checking permissions on ${NFS_PATH}"
   check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
-  
+
   # Enable NFS server
   echo_test_title "Creating the NFS server"
   rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${NFS_HOST}"'", "nfs_srv_mountd_port": '${NFS_PORT}', "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": true, "nfs_srv_v4_krb": false, "id": 1 }'

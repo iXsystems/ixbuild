@@ -9,7 +9,7 @@
 REQUIRES=""
 export REQUIRES
 
-ldap_osx_tests() 
+ldap_osx_tests()
 {
   set_test_group_text "2 - Update - LDAP OS X tests" "25"
   CLASSNAME=ixbuild.resty.functional.update.ldap_osx
@@ -28,12 +28,12 @@ ldap_osx_tests()
     "ADUSERNAME" "ADPASSWORD" "LDAPBINDDN" "LDAPBINDPASSWORD" "LDAPBINDDN2" "LDAPBINDPASSWORD2" \
   )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do  
+  do
     if [ -z "${!SETTING}" ]; then
       echo -n "Required settings for ldap_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
-    fi  
+    fi
   done
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs

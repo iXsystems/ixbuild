@@ -81,7 +81,7 @@ webdav_bsd_tests()
 
   echo_test_title "Stopping WebDAV service"
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
-  check_rest_response "200 OK" 
+  check_rest_response "200 OK"
 
   echo_test_title "Verifying that the WebDAV service has stopped"
   rest_request "GET" "/services/services/webdav"

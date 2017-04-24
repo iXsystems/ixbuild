@@ -24,12 +24,12 @@ nfs_osx_tests()
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do  
+  do
     if [ -z "${!SETTING}" ]; then
       echo -n "Required settings for afp_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
-    fi  
+    fi
   done
 
   # Clean up any leftover items from previous failed NFS runs

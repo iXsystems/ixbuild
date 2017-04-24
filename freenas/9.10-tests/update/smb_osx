@@ -23,12 +23,12 @@ smb_osx_tests()
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" "BRIDGEDOMAIN" "ADUSERNAME" "ADPASSWORD" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do  
+  do
     if [ -z "${!SETTING}" ]; then
       echo -n "Required settings for afp_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
-    fi  
+    fi
   done
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
@@ -110,7 +110,7 @@ smb_osx_tests()
     # "It is recommended that diskutil(1) (as in, ``diskutil unmount /mnt'') be used instead."
     echo_test_title "Unmount SMB share"
     osx_test "diskutil unmount force '${MOUNTPOINT}'" || return 1
-  fi  
+  fi
 
   echo_test_title "Removing SMB share on ${SMB_PATH}"
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'

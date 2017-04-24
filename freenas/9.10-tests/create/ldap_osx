@@ -9,7 +9,7 @@
 REQUIRES="storage"
 export REQUIRES
 
-ldap_osx_tests() 
+ldap_osx_tests()
 {
   set_test_group_text "1 - Create - LDAP OS X tests" "25"
   CLASSNAME=ixbuild.resty.functional.create.ldap_osx

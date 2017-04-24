@@ -9,7 +9,7 @@
 REQUIRES=""
 export REQUIRES
 
-ad_osx_tests() 
+ad_osx_tests()
 {
   set_test_group_text "2 - Update - Active Directory OS X tests" "22"
   CLASSNAME=ixbuild.resty.functional.update.ad_osx
@@ -22,12 +22,12 @@ ad_osx_tests()
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" "ADUSERNAME" "ADPASSWORD" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do  
+  do
     if [ -z "${!SETTING}" ]; then
       echo -n "Required settings for ad_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
-    fi  
+    fi
   done
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
@@ -46,7 +46,7 @@ ad_osx_tests()
   echo_test_title "Creating SMB dataset"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created"
-  
+
   # Enable Active Directory Directory
   echo_test_title "Enabling Active Directory.."
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "ad", "ad_enable":true }'
@@ -77,7 +77,7 @@ ad_osx_tests()
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'$(printf "%q" ${MP_GROUP})'", "mp_recursive": true }'
-  check_rest_response "201 Created" 
+  check_rest_response "201 Created"
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'

@@ -23,12 +23,12 @@ webdav_osx_tests()
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEHOST" "BRIDGEIP" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do  
+  do
     if [ -z "${!SETTING}" ]; then
       echo -n "Required settings for webdav_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
-    fi  
+    fi
   done
 
   # Clean up any leftover items from previous failed test runs
@@ -103,7 +103,7 @@ webdav_osx_tests()
 
   echo_test_title "Stopping WebDAV service"
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
-  check_rest_response "200 OK" 
+  check_rest_response "200 OK"
 
   echo_test_title "Verifying that the WebDAV service has stopped"
   rest_request "GET" "/services/services/webdav"

@@ -9,7 +9,7 @@
 REQUIRES="storage ntp"
 export REQUIRES
 
-ad_osx_tests() 
+ad_osx_tests()
 {
   set_test_group_text "1 - Create - Active Directory OS X tests" "22"
   CLASSNAME=ixbuild.resty.functional.create.ad_osx
@@ -22,12 +22,12 @@ ad_osx_tests()
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEDOMAIN" "BRIDGEHOST" "ADUSERNAME" "ADPASSWORD" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do  
+  do
     if [ -z "${!SETTING}" ]; then
       echo -n "Required settings for ad_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
-    fi  
+    fi
   done
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
@@ -95,7 +95,7 @@ ad_osx_tests()
   # //{ADUSERNAME}@{FNASTESTIP}/{SMB_NAME} on {MOUNTPOINT} (smbfs, nodev, nosuid, mounted by jenkins)
   wait_for_osx_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
-  
+
   echo_test_title "Checking for ability to list files on volume"
   osx_test "time ls -la ${MOUNTPOINT}" || return 1
 

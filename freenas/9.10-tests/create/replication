@@ -193,12 +193,11 @@ replication_tests()
     # repl_rest_request uses curl cmd instead of resty, requires some escaping of special chars
     repl_rest_request "DELETE" "/storage/snapshot/$(echo ${snapshot_id} | sed 's|/|%2F|g' | sed 's|@|%40|g')/"
     check_rest_response "204"
-  done 
+  done
 
   echo_test_title "Delete the replication target child dataset \"${PULL_DATASET}/${PUSH_DATASET}\""
   repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}%2F${PUSH_DATASET}"
   check_rest_response "204" || return 1
-
 
   rest_request "GET" "/storage/snapshot/"
   local snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')

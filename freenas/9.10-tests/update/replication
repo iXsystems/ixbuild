@@ -50,7 +50,7 @@ replication_tests()
   if [ -n "${BRIDGEHOST}" ]; then
     # Limit variable username to 16 chars
     REPL_DEDICATEDUSER="$(echo "${BRIDGEHOST}${REPL_DEDICATEDUSER}" | cut -c1-16)"
-  fi  
+  fi
 
   # List of dummie filesystem objects to be created to test recursive replication
   local TEST_FILES=( "testfile.txt" "testdir/testfile2.txt" )
@@ -240,12 +240,11 @@ replication_tests()
     # repl_rest_request uses curl cmd instead of resty, requires some escaping of special chars
     repl_rest_request "DELETE" "/storage/snapshot/$(echo ${snapshot_id} | sed 's|/|%2F|g' | sed 's|@|%40|g')/"
     check_rest_response "204"
-  done 
+  done
 
   echo_test_title "Delete the replication target child zvol \"${PULL_DATASET}/${PUSH_ZVOL}\""
   repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}%2F${PUSH_ZVOL}"
   check_rest_response "204" || return 1
-
 
   rest_request "GET" "/storage/snapshot/"
   local snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
