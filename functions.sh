@@ -1112,14 +1112,14 @@ if [ -n "$FREENASLEGACY" ] ; then
   kill -9 $tpid
   echo ""
   sleep 10
-  echo "Running API v2.0 tests"
-  touch /tmp/$VM-tests-v2.0.log 2>/dev/null
-  tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
-  tpid=$!
-  ./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
-  kill -9 $tpid 
-  echo ""
-  sleep 10
+  #echo "Running API v2.0 tests"
+  #touch /tmp/$VM-tests-v2.0.log 2>/dev/null
+  #tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
+  #tpid=$!
+  #./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
+  #kill -9 $tpid 
+  #echo ""
+  #sleep 10
 else
   create_workdir
   cd ${TBUILDDIR}/scripts/
