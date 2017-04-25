@@ -597,7 +597,7 @@ check_property_value()
     shift
   fi
 
-  grep -q "200 OK" ${RESTYERR}
+  grep -q "200 OK" "${RESTYERR}" || grep -q "201 Created" "${RESTYERR}"
   if [ $? -ne 0 ] ; then
     if [ "$SILENT" == "false" ]; then
       cat ${RESTYERR}
