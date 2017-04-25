@@ -11,12 +11,13 @@ export REQUIRES
 
 ldap_nfs_tests()
 {
-  local DATASET="ldap-nfs"
-  local NFS_PATH="/mnt/tank/${DATASET}"
+  local DATASET=( "ldap-nfs-share" "ldap-nfs-share2" )
+  local NFS_PATH=( "/mnt/tank/${DATASET[0]}" "/mnt/tank/${DATASET[1]}" )
   local MOUNTPOINT="/tmp/nfs-mnt.$$"
   local NFS_HOST=${ip}
   local NFS_PORT=618
-  local MP_GROUP="some thing"
+  local MP_USER="Ldap User"
+  local MP_GROUP="human resources"
 
   if [ -z "${NFS_HOST}" ]; then
     if [ -n "${BRIDGEIP}" ]; then
@@ -30,7 +31,7 @@ ldap_nfs_tests()
   set_test_group_text "1 - Create - LDAP NFS tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.ldap_nfs
 
-  local REQUIRED_SETTINGS=( "LDAPHOSTNAME" "LDAPBINDDN" "LDAPBINDPASSWORD" )
+  local REQUIRED_SETTINGS=( "LDAPHOSTNAME" "LDAPBINDDN" "LDAPBINDPASSWORD" "BRIDGEHOST" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
   do
     if [ -z "${!SETTING}" ]; then
@@ -38,6 +39,97 @@ ldap_nfs_tests()
       echo_skipped
       return 0
     fi
+  done
+
+  # Clean up any leftover items from previous failed LDAP NFS runs
+  rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_anonbind": true, "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": false }'
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
+  for idx in ${!DATASET[@]}; do
+    rest_request "DELETE" "/sharing/nfs/" '{ "nfs_paths": ["'"${NFS_PATH[$idx]}"'"], "nfs_maproot_user": "'"${MP_USER}"'", "nfs_maproot_group": "'"${MP_GROUP}"'" }'
+    rest_request "DELETE" "/storage/volume/1/datasets/${DATASET[$idx]}/"
+  done
+  umount -A &>/dev/null
+  rmdir /tmp/nfs-mnt.* &>/dev/null
+
+  # Configure LDAP and verify service
+
+  echo_test_title "Configuring and enabling LDAP"
+  rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN}'", "ldap_binddn": "'${LDAPBINDDN}'", "ldap_bindpw": "'${LDAPBINDPASSWORD}'", "ldap_anonbind": false, "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME}'", "ldap_has_samba_schema": true, "ldap_enable": true, "ldap_ssl": "off" }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verify that the LDAP service is reported as enabled"
+  rest_request GET "/directoryservice/ldap/"
+  check_property_value "return this.ldap_enable" "true" || return 1
+
+  # Create dataset for our NFS share
+  for idx in ${!DATASET[@]}; do
+    echo_test_title "Creating dataset \"${DATASET[$idx]}\" for the NFS share"
+    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET[$idx]}"'" }'
+    check_rest_response "201 Created" || return 1
+  done
+
+  # Configure NFS service, start and verify running service
+
+  echo_test_title "Configuring the NFS service"
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${NFS_HOST}"'", "nfs_srv_mountd_port": '${NFS_PORT}', "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "nfs_security": ["sys"], "id": 1 }'
+  check_rest_response "200 OK" || return 1
+
+  echo_test_title "Creating NFS share with maproot user \"${MP_USER}\" and maproot group \"${MP_GROUP}\" for \"${DATASET[0]}\""
+  rest_request "POST" "/sharing/nfs/" '{ "nfs_paths": ["'"${NFS_PATH[0]}"'"], "nfs_maproot_user": "'"${MP_USER}"'", "nfs_maproot_group": "'"${MP_GROUP}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Verify that NFS share configuration was saved correctly for \"${DATASET[0]}\""
+  check_property_value -q "this.nfs_maproot_user" "${MP_USER}" \
+    && check_property_value -q "this.nfs_maproot_group" "${MP_GROUP}" \
+    && echo_ok || echo_fail
+
+  echo_test_title "Creating NFS share with mapall user \"${MP_USER}\" and mapall group \"${MP_GROUP}\" for \"${DATASET[1]}\""
+  rest_request "POST" "/sharing/nfs/" '{ "nfs_paths": ["'"${NFS_PATH[1]}"'"], "nfs_mapall_user": "'"${MP_USER}"'", "nfs_mapall_group": "'"${MP_GROUP}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Verify that NFS share configuration was saved correctly for \"${DATASET[1]}\""
+  check_property_value -q "this.nfs_mapall_user" "${MP_USER}" \
+    && check_property_value -q "this.nfs_mapall_group" "${MP_GROUP}" \
+    && echo_ok || echo_fail
+
+  echo_test_title "Starting NFS service"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verify that the NFS port is open on the host"
+  wait_for_avail_port "${NFS_PORT}"
+  check_exit_status || return 1
+
+  echo_test_title "Verify that nfsd shows up in netstat results"
+  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd" || return 1
+
+  for idx in ${!DATASET[@]}; do
+    echo_test_title "Verify NFS share \"${NFS_PATH[$idx]}\" on host is found in mount results"
+    ssh_test "mount | awk '\$3 == \"${NFS_PATH[$idx]}\"' | grep -q \"${NFS_PATH[$idx]}\""
+  done
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_service_status "RUNNING" || return 1
+
+	# Begin teardown process
+
+  echo_test_title "Stopping NFS service"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verifying NFS service is disabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_service_status "STOPPED"
+
+  for idx in ${!DATASET[@]}; do
+    echo_test_title "Removing NFS share on ${NFS_PATH[$idx]}"
+    rest_request "DELETE" "/sharing/nfs/" '{ "nfs_paths": ["'"${NFS_PATH[$idx]}"'"], "nfs_maproot_user": "'"${MP_USER}"'", "nfs_maproot_group": "'"${MP_GROUP}"'" }'
+    check_rest_response "204"
+
+    echo_test_title "Destroying NFS dataset ${DATASET[$idx]}"
+    rest_request "DELETE" "/storage/volume/1/datasets/${DATASET[$idx]}/"
+    check_rest_response "204" || return 1
   done
 
   return 0
