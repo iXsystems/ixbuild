@@ -82,8 +82,7 @@ ldap_bsd_tests()
   check_rest_response "201 Created"
 
   echo_test_title "Creating SMB mountpoint"
-  rc_test "mkdir -p '${MOUNTPOINT}'" || return 1
-  sync
+  rc_test "mkdir -p \"${MOUNTPOINT}\" && sync" || return 1
 
   sleep 10
 

@@ -28,7 +28,7 @@ ldap_nfs_tests()
   fi
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - LDAP NFS tests" "24"
+  set_test_group_text "1 - Create - LDAP NFS tests" "21"
   CLASSNAME=ixbuild.resty.functional.create.ldap_nfs
 
   local REQUIRED_SETTINGS=( "LDAPHOSTNAME" "LDAPBINDDN" "LDAPBINDPASSWORD" "BRIDGEHOST" )
