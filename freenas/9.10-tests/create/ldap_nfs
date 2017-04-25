@@ -35,7 +35,7 @@ ldap_nfs_tests()
   for SETTING in "${REQUIRED_SETTINGS[@]}"
   do
     if [ -z "${!SETTING}" ]; then
-      echo -n "Required settings for webdav_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+      echo -n "Required settings for ldap_nfs: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
     fi
