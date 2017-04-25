@@ -77,16 +77,16 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y python27"
 fi
 
-which python >/dev/null 2>/dev/null
+pkg info python >/dev/null 2>&1
 if [ "$?" != "0" ]; then
   echo "Installing lang/python.."
   rc_halt "pkg-static install -y python"
 fi
 
-which python3 >/dev/null 2>/dev/null
+pkg info python36 >/dev/null 2>&1
 if [ "$?" != "0" ]; then
-  echo "Installing python3.."
-  rc_halt "pkg-static install -y python3"
+  echo "Installing python36.."
+  rc_halt "pkg-static install -y python36"
 fi
 
 pkg info -q textproc/py27-sphinx >/dev/null 2>/dev/null
@@ -149,62 +149,62 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y sshpass"
 fi
 
-which pip3 > /dev/null 2>&1
+which pip3.6 > /dev/null 2>&1
 if [ "$?" != "0" ]; then
   echo "Installing pip"
-  rc_halt "python3 -m ensurepip"
+  rc_halt "python3.6 -m ensurepip"
 fi
 
-python3 -c "import requests" >/dev/null 2>/dev/null
+python3.6 -c "import requests" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing requests"
-  rc_halt "pip3 install requests"
+  rc_halt "pip3.6 install requests"
 fi
 
-python3 -c "import pytest" >/dev/null 2>/dev/null
+python3.6 -c "import pytest" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest"
-  rc_halt "pip3 install pytest"
+  rc_halt "pip3.6 install pytest"
 fi
 
-python3 -c "import pytest_cache" >/dev/null 2>/dev/null
+python3.6 -c "import pytest_cache" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest-cache"
-  rc_halt "pip3 install pytest-cache"
+  rc_halt "pip3.6 install pytest-cache"
 fi
 
-python3 -c "import pytest_capturelog" >/dev/null 2>/dev/null
+python3.6 -c "import pytest_capturelog" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest-capturelog"
-  rc_halt "pip3 install pytest-capturelog"
+  rc_halt "pip3.6 install pytest-capturelog"
 fi
 
-python3 -c "import pytest_localserver" >/dev/null 2>/dev/null
+python3.6 -c "import pytest_localserver" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest-localserver"
-  rc_halt "pip3 install pytest-localserver"
+  rc_halt "pip3.6 install pytest-localserver"
 fi
 
-python3 -c "import pytest_runner" >/dev/null 2>/dev/null
+python3.6 -c "import pytest_runner" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest-runner"
-  rc_halt "pip3 install pytest-runner"
+  rc_halt "pip3.6 install pytest-runner"
 fi
 
-python3 -c "import pytest_cache" >/dev/null 2>/dev/null
+python3.6 -c "import pytest_cache" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest-cache"
-  rc_halt "pip3 install pytest-cache"
+  rc_halt "pip3.6 install pytest-cache"
 fi
 
-python3 -c "import pytest_tornado" >/dev/null 2>/dev/null
+python3.6 -c "import pytest_tornado" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest-tornado"
-  rc_halt "pip3 install pytest-tornado"
+  rc_halt "pip3.6 install pytest-tornado"
 fi
 
-python3 -c "import pytest_xdist" >/dev/null 2>/dev/null
+python3.6 -c "import pytest_xdist" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest-xdist"
-  rc_halt "pip3 install pytest-xdist"
+  rc_halt "pip3.6 install pytest-xdist"
 fi
