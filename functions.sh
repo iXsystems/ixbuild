@@ -1151,18 +1151,12 @@ jenkins_freenas_tests_jailed()
   iocage stop $BUILDTAG 2>/dev/null
   iocage destroy -f $BUILDTAG 2>/dev/null
   iocage create -b tag=$BUILDTAG -t executor && \
-  if [ ! -d /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls ] ; then
-    mkdir /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls
-  fi
-  if [ ! -d /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins ] ; then
-    mkdir -p /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins
-  fi
-  if [ ! -d mkdir /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild ] ; then
-    mkdir /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild
-  fi
-  echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> /mnt/tank/iocage/tags/$BUILDTAG/fstab && \
-  echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> /mnt/tank/iocage/tags/$BUILDTAG/fstab && \
-  echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/ixbuild nullfw rw 0 0" >> /mnt/tank/iocage/tags/$BUILDTAG/fstab && \
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
+  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
+  echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/ixbuild nullfw rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   iocage start $BUILDTAG
 }
 
