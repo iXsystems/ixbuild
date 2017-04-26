@@ -1,0 +1,4 @@
+1.) Install the node package manager (npm), good luck and godspeed.
+2.) Run `npm install -g protractor`
+3.) Configure a running selenium server.
+
