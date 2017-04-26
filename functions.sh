@@ -1152,7 +1152,7 @@ jenkins_freenas_tests_jailed()
   local ip4input=$3
   if [ -z $ip4input ] ; then
     echo "You must specify interfaces ip addresses, and netmasks for jails!"
-    echo "example: igb0|192.168.58.7/24,igb1|10.20.20.7/23"
+    echo '"example: igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
     exit 1
   fi
   iocage stop $BUILDTAG 2>/dev/null
