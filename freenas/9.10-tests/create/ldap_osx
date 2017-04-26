@@ -58,7 +58,7 @@ ldap_osx_tests()
 
   # Check LDAP
   echo_test_title "Checking LDAP.."
-  rest_request GET "/directoryservice/ldap/"
+  rest_request "GET" "/directoryservice/ldap/"
   check_property_value "return this.ldap_enable" "true"
 
   echo_test_title "Enabling SMB service"
@@ -135,7 +135,7 @@ ldap_osx_tests()
 
   # Check LDAP
   echo_test_title "Verify LDAP is disabled.."
-  rest_request GET "/directoryservice/ldap/"
+  rest_request "GET" "/directoryservice/ldap/"
   check_property_value "return this.ldap_enable" "false"
 
   echo_test_title "Verify SMB service is disabled"

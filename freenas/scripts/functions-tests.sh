@@ -694,7 +694,7 @@ wait_for_avail()
   local count=0
   while :
   do
-    GET "${ENDPOINT}" -v 2>${RESTYERR} >${RESTYOUT}
+    rest_request "GET" "${ENDPOINT}"
     check_rest_response_continue "200 OK"
     check_exit_status -q && break
     echo -n "."

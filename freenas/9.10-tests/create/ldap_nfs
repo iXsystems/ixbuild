@@ -58,7 +58,7 @@ ldap_nfs_tests()
   check_rest_response "200 OK"
 
   echo_test_title "Verify that the LDAP service is reported as enabled"
-  rest_request GET "/directoryservice/ldap/"
+  rest_request "GET" "/directoryservice/ldap/"
   check_property_value "return this.ldap_enable" "true" || return 1
 
   # Create dataset for our NFS share
