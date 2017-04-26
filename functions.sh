@@ -1148,9 +1148,16 @@ fi
 
 jenkins_freenas_tests_jailed()
 {
+  # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
+  local ip4input=$4
+  if [ -z $ip4input ] ; then
+    echo "You must specify interfaces ip addresses, and netmasks for jails!"
+    echo "example: igb0|192.168.58.7/24,igb1|10.20.20.7/23"
+    exit 1
+  fi
   iocage stop $BUILDTAG 2>/dev/null
   iocage destroy -f $BUILDTAG 2>/dev/null
-  iocage create -b tag=$BUILDTAG -t executor
+  iocage create -b tag=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4input}" -t executor
   mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
   mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
   mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
