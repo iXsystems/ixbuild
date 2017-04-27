@@ -13,11 +13,14 @@ cleanup_workdir()
   if [ ! -d "$MASTERWRKDIR" ] ; then return 0 ; fi
   if [ "$MASTERWRKDIR" = "/" ] ; then return 0 ; fi
 
-  # Cleanup any leftover mounts
-  for i in `mount | grep -q "on ${MASTERWRKDIR}/" | awk '{print $1}' | tail -r`
-  do
-    umount -f $i
-  done
+  # If running on host, lets cleanup
+  if [ -z "$JAILED_TESTS" ] ; then
+    # Cleanup any leftover mounts
+    for i in `mount | grep -q "on ${MASTERWRKDIR}/" | awk '{print $1}' | tail -r`
+    do
+      umount -f $i
+    done
+  fi
 
   # Should be done with unmounts
   mount | grep -q "on ${MASTERWRKDIR}/"
