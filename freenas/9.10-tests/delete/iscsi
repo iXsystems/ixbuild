@@ -11,6 +11,8 @@ export REQUIRES
 
 iscsi_tests()
 {
+  return 0
+
   # Set the group text and number of tests
   set_test_group_text "3 - Delete - iSCSI tests" "2"
   CLASSNAME=ixbuild.resty.functional.delete.iscsi
