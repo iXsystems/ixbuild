@@ -1141,7 +1141,9 @@ fi
 
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  cleanup_workdir
+  # We do not want to cleanup_workdir from a host running jails which will unmount everything
+  # This function should be improved to be more specific
+  # cleanup_workdir
 
   return 0
 }
