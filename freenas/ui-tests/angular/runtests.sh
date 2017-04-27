@@ -51,7 +51,7 @@ BASEURL="http://${BRIDGEIP}${ANGULAR_BASEURI}"
 #  --debuggerServerPort                   Start a debugger server at specified port instead of repl
 #  --disableChecks                        disable cli checks      
 
-protractor conf.js \
+protractor "${CURRDIR}/conf.js" \
   --browser=chrome \
   --rootElement="app" \
   --seleniumAddress="http://${SELENIUMSERVER}:${SELENIUMPORT}/wd/hub" \
