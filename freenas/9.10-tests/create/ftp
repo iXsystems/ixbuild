@@ -10,6 +10,8 @@ REQUIRES="storage user"
 export REQUIRES
 
 ftp_tests() {
+  return 0
+
   set_test_group_text "1 - Create - FTP tests" "4"
   CLASSNAME=ixbuild.resty.functional.create.ftp
 
