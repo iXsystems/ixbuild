@@ -1,4 +1,27 @@
-#!/bin/sh
+#!/usr/bin/env bash
+CURRDIR="$(realpath "$(dirname "$0")")"
+
+source "${CURRDIR}/../../../build.conf"
+if [ -f "${CURRDIR}/../config.local" ]; then
+  source "${CURRDIR}/../config.local"
+else
+  source "${CURRDIR}/../config.prod"
+fi
+
+# BRIDGEIP = Bridged IP address for the FreeNAS/TrueNAS host (see ${CURRDIR}/../../../build.conf)
+
+REQUIRED_SETTINGS=( "SELENIUMSERVER" "SELENIUMPORT" "BRIDGEIP" "ANGULAR_BASEURI" )
+for SETTING in "${REQUIRED_SETTINGS[@]}"
+do  
+  if [ -z "${!SETTING}" ]; then
+    echo "Required environment variable settings for angular test automation:"
+    echo "'${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+    exit 1
+  fi  
+done
+
+BASEURL="http://${BRIDGEIP}${ANGULAR_BASEURI}"
+
 #**you must either specify a configuration file or at least 3 options. See below for the options:
 #
 #Usage: protractor [configFile] [options]
@@ -30,5 +53,6 @@
 
 protractor conf.js \
   --browser=chrome \
-  --seleniumAddress=? \
-  --baseUrl="http://${FNASTESTIP}:80/ui/"
+  --seleniumAddress="http://${SELENIUMSERVER}:${SELENIUMPORT}/wd/hub" \
+  --seleniumPort="${SELENIUMPORT}" \
+  --baseUrl="${BASEURL}"
