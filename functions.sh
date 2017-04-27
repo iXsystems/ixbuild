@@ -1139,7 +1139,8 @@ else
   sleep 10
 fi
 
-  if [ $? -ne 0 ] ; then exit_clean ; fi
+  # This runs cleanup_workdir and is bad for jail host
+  # if [ $? -ne 0 ] ; then exit_clean ; fi
 
   # We do not want to cleanup_workdir from a host running jails which will unmount everything
   # This function should be improved to be more specific
