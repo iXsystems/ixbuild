@@ -13,8 +13,11 @@
 3.) Install protractor (AngularJS's wrapper for selenium):
     npm install -g protractor
 
-4.) Run:
+4.) Run webdriver update:
     webdriver-manager update
+
+5.) Start webdriver:
+    webdriver-manager start
     
 --
 -- Setup Selenium server --

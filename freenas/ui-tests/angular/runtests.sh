@@ -53,6 +53,7 @@ BASEURL="http://${BRIDGEIP}${ANGULAR_BASEURI}"
 
 protractor conf.js \
   --browser=chrome \
+  --rootElement="app" \
   --seleniumAddress="http://${SELENIUMSERVER}:${SELENIUMPORT}/wd/hub" \
   --seleniumPort="${SELENIUMPORT}" \
   --baseUrl="${BASEURL}"
