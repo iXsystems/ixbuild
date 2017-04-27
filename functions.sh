@@ -1164,8 +1164,9 @@ jenkins_freenas_tests_jailed()
   echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  iocage set login_flags="-f jenkins" $BUILDTAG
   iocage start $BUILDTAG
-  iocage console -f jenkins $BUILDTAG
+  iocage console $BUILDTAG
   sudo /ixbuild/jenkins.sh freenas-tests $BUILDTAG
   exit
 }
