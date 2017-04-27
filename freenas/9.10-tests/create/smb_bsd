@@ -11,6 +11,8 @@ export REQUIRES
 
 smb_bsd_tests()
 {
+  return 0
+
   local DATASET="smb-bsd"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
