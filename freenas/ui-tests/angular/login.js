@@ -1,17 +1,12 @@
-describe('angularjs homepage todo list', function() {
-  it('should add a todo', function() {
-    browser.get('http://192.168.56.101');
+describe('angularjs login', function() {
+  it('should authenticate default user', function() {
+    browser.get('#/login');
 
-    element(by.model('todoList.todoText')).sendKeys('write first protractor test');
-    element(by.css('[value="add"]')).click();
+    element(by.model('username')).sendKeys('root')
+    element(by.model('password')).sendKeys('testing')
 
-    var todoList = element.all(by.repeater('todo in todoList.todos'));
-    expect(todoList.count()).toEqual(3);
-    expect(todoList.get(2).getText()).toEqual('write first protractor test');
+    element(by.css('[type="submit"]')).click();
 
-    // You wrote your first test, cross it off the list
-    todoList.get(2).element(by.css('input')).click();
-    var completedAmount = element.all(by.css('.done-true'));
-    expect(completedAmount.count()).toEqual(2);
+    expect(browser.getCurrentUrl()).toContain('#/pages/dashboard');
   });
 });

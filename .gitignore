@@ -1,2 +1,3 @@
 /build.conf
 /freenas/freenas.cfg
+/freenas/ui-tests/config.local

@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+#
+# General settings for UI tests
+#
+
+# A running selenium server address to use
+SELENIUMSERVER="{TODO}"
+SELENIUMPORT="4444"
+
+#
+# Configuration settings for the angular interface testsuite
+#
+
+# Used for protractor baseUrl, eg: "http://${FNASTESTIP}${ANGULAR_BASEURI}"
+ANGULAR_BASEURI="/ui/"
+
+#
+# Configuration settings for the dogo interface testsuite
+#
