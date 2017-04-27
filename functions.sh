@@ -1168,7 +1168,7 @@ jenkins_freenas_tests_jailed()
   iocage start $BUILDTAG
   echo "$BUILDTAG" > /mnt/tank/iocage/tags/$BUILDTAG/root/BUILDTAG
   iocage console $BUILDTAG
-  sudo /ixbuild/jenkins.sh freenas-run-tests $BUILDTAG
+  sudo /ixbuild/jenkins.sh freenas-run-tests `cat /BUILDTAG`
   exit
 }
 
