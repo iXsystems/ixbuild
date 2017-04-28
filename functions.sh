@@ -1083,8 +1083,8 @@ jenkins_freenas_tests()
 jenkins_freenas_run_tests()
 {
 if [ -z "$WORKSPACE" ] ; then
-  if [ -f "/$BUILDTAG" ] ; then
-    export WORKSPACE=`cat /$BUILDTAG`
+  if [ -f "/tmp/$BUILDTAG" ] ; then
+    export WORKSPACE=`cat /tmp/$BUILDTAG`
   fi
   else
     echo "No WORKSPACE found are we really running through jenkins?"
@@ -1177,7 +1177,7 @@ jenkins_freenas_tests_jailed()
   echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-  echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/$BUILDTAG
+  echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
   iocage set login_flags="-f jenkins" $BUILDTAG
   iocage start $BUILDTAG
   iocage console $BUILDTAG
