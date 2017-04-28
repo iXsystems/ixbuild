@@ -1,3 +1,3 @@
 exports.config = {
-  specs: ['login.js']
+  specs: ['accounts.js']
 };
