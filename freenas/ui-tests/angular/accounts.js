@@ -9,7 +9,7 @@ accounts.user_list = [
 
 accounts.default_user = function(){
   return this.user_list[0];
-}
+};
 
 accounts.login = function(){
 
