@@ -99,6 +99,9 @@ EOF
   sed -i '' "s|TOTALTESTS|$1|g" ${XMLRESULTS}
 
   # Move results to pre-defined location
+  if [ -n "JAILED" ] ; then
+    export WORKSPACE=/mnt/tank/home/jenkins/workspace/$BUILDTAG/
+  fi
   if [ -n "$WORKSPACE" ] ; then
     if [ ! -d "${WORKSPACE}/results" ] ; then
       mkdir "${WORKSPACE}/results"
