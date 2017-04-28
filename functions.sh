@@ -1083,8 +1083,8 @@ jenkins_freenas_tests()
 jenkins_freenas_run_tests()
 {
 if [ -z "$WORKSPACE" ] ; then
-  if [ -f "/mnt/tank/iocage/tags/$BUILDTAG/root/$BUILDTAG" ] ; then
-    export WORKSPACE=`cat /mnt/tank/iocage/tags/$BUILDTAG/root/$BUILDTAG`
+  if [ -f "/$BUILDTAG" ] ; then
+    export WORKSPACE=`cat /$BUILDTAG`
   fi
   else
     echo "No WORKSPACE found are we really running through jenkins?"
