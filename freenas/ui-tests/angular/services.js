@@ -6,7 +6,7 @@ services = new Object();
 services.list_services = function(){
   var self = this;
   return {
-    'webdav': self.webdav,
+    'webdav': self.webdav
   };
 ];
 
