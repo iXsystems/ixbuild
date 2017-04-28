@@ -4,7 +4,7 @@ Setup Selenium locally
 For Debian 8:
 ---
 
-* Install nvm (node version manager) [https://github.com/creationix/nvm]:
+* Install nvm [node version manager](https://github.com/creationix/nvm):
 ```
     curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
 ```
@@ -28,7 +28,7 @@ For Debian 8:
 ```
     webdriver-manager start
 ```
-    
+
 Setup Selenium server
 ===========
 
@@ -75,5 +75,5 @@ Running angular tests with protractor on the test executor
 Helpful resources
 ===========
 
-[Selenium Wiki Documentation](https://github.com/SeleniumHQ/selenium/wiki)
-[Protractor for AngularJS](https://ramonvictor.github.io/protractor/slides/)
+* [Selenium Wiki Documentation](https://github.com/SeleniumHQ/selenium/wiki)
+* [Protractor for AngularJS](https://ramonvictor.github.io/protractor/slides/)
