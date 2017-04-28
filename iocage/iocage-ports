@@ -8,4 +8,5 @@ net-p2p/couchpotato
 irc/quassel-core
 www/nextcloud
 www/nginx
+www/redmine
 www/subsonic-standalone
