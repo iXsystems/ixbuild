@@ -205,6 +205,12 @@ fi
 kill -9 $TPID 2>/dev/null
 echo_ok
 
+# If this build is on the nightlies train, make the changelog
+echo ${BUILDOPTS} | grep -q "Nightlies"
+if [ $? -eq 0 ] ; then
+  make changelog-nightlies
+fi
+
 # Ugly hack to get freenas 9.x to build on CURRENT
 if [ "$FREENASLEGACY" = "YES" ] ; then
 
