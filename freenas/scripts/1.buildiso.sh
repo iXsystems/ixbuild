@@ -209,7 +209,7 @@ echo_ok
 echo ${PROFILEARGS} | grep -q "Nightlies"
 if [ $? -eq 0 ] ; then
   echo "Building nightlies ChangeLog"
-  make changelog-nightlies
+  make changelog-nightly
 
   # Set CHANGELOG
   CHANGELOG="${FNASBDIR}/ChangeLog"
