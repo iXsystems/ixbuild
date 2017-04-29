@@ -607,6 +607,7 @@ jenkins_freenas_push_nightly()
 
   # Set CHANGELOG
   if [ -e "${FNASBDIR}/ChangeLog" ] ; then
+    echo "Setting CHANGELOG: ${FNASBDIR}/ChangeLog"
     CHANGELOG="${FNASBDIR}/ChangeLog"
     export CHANGELOG
   fi
