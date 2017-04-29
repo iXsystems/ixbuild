@@ -210,6 +210,10 @@ echo ${PROFILEARGS} | grep -q "Nightlies"
 if [ $? -eq 0 ] ; then
   echo "Building nightlies ChangeLog"
   make changelog-nightlies
+
+  # Set CHANGELOG
+  CHANGELOG="${FNASBDIR}/ChangeLog"
+  export CHANGELOG
 fi
 
 # Ugly hack to get freenas 9.x to build on CURRENT

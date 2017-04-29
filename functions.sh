@@ -605,6 +605,12 @@ jenkins_freenas_push_nightly()
   cd ${FNASBDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
+  # Set CHANGELOG
+  if [ -e "${FNASBDIR}/ChangeLog" ] ; then
+    CHANGELOG="${FNASBDIR}/ChangeLog"
+    export CHANGELOG
+  fi
+
   # Skip deltas
   DELTAS="0"
   export DELTAS
