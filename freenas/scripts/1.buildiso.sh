@@ -206,8 +206,9 @@ kill -9 $TPID 2>/dev/null
 echo_ok
 
 # If this build is on the nightlies train, make the changelog
-echo ${BUILDOPTS} | grep -q "Nightlies"
+echo ${PROFILEARGS} | grep -q "Nightlies"
 if [ $? -eq 0 ] ; then
+  echo "Building nightlies ChangeLog"
   make changelog-nightlies
 fi
 
