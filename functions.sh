@@ -1115,10 +1115,9 @@ jenkins_freenas_tests()
 
 jenkins_freenas_run_tests()
 {
-  if [ -d "/ixbuild" ] ; then
-    unset JAILED_TESTS
-  fi
-  if [ -n "JAILED_TESTS" ] ; then
+  if [ -f "/tmp/${BUILDTAG}" ] ; then
+    return 0
+  else
     iocage stop $BUILDTAG 2>/dev/null
     iocage destroy -f $BUILDTAG 2>/dev/null
     iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
