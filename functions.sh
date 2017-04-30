@@ -1128,7 +1128,12 @@ jenkins_freenas_run_tests()
     echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
     iocage set login_flags="-f jenkins" $BUILDTAG
     iocage start $BUILDTAG
-    iocage console $BUILDTAG
+    jailcheck=`iocage list | grep $BUILDTAG | grep up`
+    if [ "$jailcheck" = "" ]  ; then
+      exit 1
+    else 
+      iocage console $BUILDTAG
+    fi  
   fi
   create_workdir
   cd ${TBUILDDIR}/scripts/
