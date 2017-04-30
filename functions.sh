@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Set the build tag
+BUILDTAG="$BUILD"
+export BUILDTAG
+
 # Set the repo we pull for build / tests
 GITREPO="https://github.com/iXsystems/ixbuild.git"
 # Set the branch to use for above repo
@@ -1331,10 +1335,6 @@ do_build_env_setup()
   # Set location of local PC-BSD build data
   PCBSDBDIR="/pcbsd"
   export PCBSDBDIR
-
-  # Set the build tag
-  BUILDTAG="$BUILD"
-  export BUILDTAG
 
   # Set location of local FreeNAS build data
   FNASBDIR="/$BUILDTAG"
