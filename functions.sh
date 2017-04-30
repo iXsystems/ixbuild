@@ -1104,11 +1104,16 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
-  cd ${TBUILDDIR}
-  make tests
-  if [ $? -ne 0 ] ; then exit_clean ; fi
-
-  cleanup_workdir
+  if [ -n JAILED_TESTS ] ; then
+    echo "Running jailed tests"
+    ISOFILE=`find / | grep '\.iso$' | head -n 1`
+    ${PROGDIR}/freenas/scripts/create-auto-install.sh ${ISOFILE}
+  else
+    cd ${TBUILDDIR}
+    make tests
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+    cleanup_workdir
+  fi        
 
   return 0
 }
