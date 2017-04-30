@@ -1082,14 +1082,13 @@ jenkins_freenas_tests()
 
 jenkins_freenas_run_tests()
 {
-if [ -z "$WORKSPACE" ] ; then
-  if [ -f "/tmp/$BUILDTAG" ] ; then
-    export WORKSPACE=`cat /tmp/$BUILDTAG`
-  fi
-  else
-    echo "No WORKSPACE found are we really running through jenkins?"
-fi 
-if [ -n "$FREENASLEGACY" ] ; then
+  if [ -z "$WORKSPACE" ] ; then
+    if [ -f "/tmp/$BUILDTAG" ] ; then
+      export WORKSPACE=`cat /tmp/$BUILDTAG`
+    fi
+    else
+      echo "No WORKSPACE found are we really running through jenkins?"
+  fi 
   create_workdir
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -1129,25 +1128,6 @@ if [ -n "$FREENASLEGACY" ] ; then
   #kill -9 $tpid 
   #echo ""
   #sleep 10
-else
-  create_workdir
-  cd ${TBUILDDIR}/scripts/
-  if [ $? -ne 0 ] ; then exit_clean ; fi
-  echo ""
-  sleep 10
-  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
-  echo ""
-  echo "Output from REST API calls:"
-  echo "-----------------------------------------"
-  echo "Running API v2.0 tests"
-  touch /tmp/$VM-tests-v2.0.log 2>/dev/null
-  tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
-  tpid=$!
-  ./10-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
-  kill -9 $tpid
-  echo ""
-  sleep 10
-fi
 
   # This runs cleanup_workdir and is bad for jail host
   # if [ $? -ne 0 ] ; then exit_clean ; fi
