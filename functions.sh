@@ -1161,22 +1161,24 @@ fi
 
 jenkins_freenas_tests_jailed()
 {
-  echo "Using VMBACKEND="${VMBACKEND}
-  if [ -n "VMBACKEND=esxi" ] ; then
-    local vicfginput=$4
-    export VI_CFG="${vicfginput}"
-    echo "Using configration ${VI_CFG}"
-  fi
-  # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
-  local ip4input=$3
-  if [ -z $ip4input ] ; then
-    echo "You must specify interfaces ip addresses, and netmasks for jails!"
-    echo '"example: igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
+  if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
+    echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
     exit 1
+  fi
+  . ${PROGDIR}/config/${BUILDTAG}.conf
+  # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
+  if [ -z "$ip4_addr" ] ; then
+    echo "You must specify interfaces ip addresses, and netmasks for jails in executors/${BUILDTAG.conf}!"
+    echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
+    exit 1
+  fi
+  echo "Using VMBACKEND="${VMBACKEND}
+  if [ -n "$VI_CFG" ] ; then
+    echo "Using VM configuration ${VI_CFG}"
   fi
   iocage stop $BUILDTAG 2>/dev/null
   iocage destroy -f $BUILDTAG 2>/dev/null
-  iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4input}" -t executor
+  iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4addr}" -t executor
   mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
   mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
   mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
