@@ -1115,7 +1115,7 @@ jenkins_freenas_tests()
 
 jenkins_freenas_run_tests()
 {
-  if [ -d "/ixbuild ] ; then
+  if [ -d "/ixbuild" ] ; then
     unset JAILED_TESTS
   fi
   if [ -n "JAILED_TESTS" ] ; then
