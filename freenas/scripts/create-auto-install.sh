@@ -21,6 +21,7 @@ ISO="$1"
 # Extract the ISO file
 MD=`mdconfig -a -t vnode $ISO`
 if [ $? -ne 0 ] ; then exit 1; fi
+cd /
 mkdir isomnt 2>/dev/null
 mkdir isodir 2>/dev/null
 
