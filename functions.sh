@@ -1166,6 +1166,7 @@ jenkins_freenas_tests_jailed()
     local vicfginput=$4
     export VI_CFG="${vicfginput}"
     echo "Using configration ${VI_CFG}"
+  fi
   # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
   local ip4input=$3
   if [ -z $ip4input ] ; then
