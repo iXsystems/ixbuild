@@ -1100,7 +1100,7 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
+    rsync -va --delete --include="*/" --include="*.iso" --exclude="*"  -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
