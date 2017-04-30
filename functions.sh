@@ -7,6 +7,35 @@ if [ -z "$IXBUILDBRANCH" ] ; then
   IXBUILDBRANCH="master"
 fi
 
+# Check to see if we are running in jail
+if [ -d "/mnt/tank/ixbuild/" ] ; then
+  echo "Running tests jailed"
+  export JAILED_TESTS=yes
+fi
+
+# Do some global setup if we are running in jail
+if [ -n "JAILED_TESTS" ] ; then
+  if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
+    echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
+    exit 1
+  else
+    . ${PROGDIR}/config/${BUILDTAG}.conf
+      # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
+      if [ -z "$ip4_addr" ] ; then
+        echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
+        echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
+      exit 1
+        if [ -z "$WORKSPACE" ] ; then
+          if [ -f "/tmp/$BUILDTAG" ] ; then
+            export WORKSPACE=`cat /tmp/$BUILDTAG`
+        else
+          echo "No WORKSPACE found are we really running through jenkins?"
+        fi
+      fi
+    fi
+  fi
+fi
+
 cleanup_workdir()
 {
   if [ -z "$MASTERWRKDIR" ] ; then return 0; fi
@@ -1082,33 +1111,7 @@ jenkins_freenas_tests()
 
 jenkins_freenas_run_tests()
 {
-  if [ -z "$WORKSPACE" ] ; then
-    if [ -f "/tmp/$BUILDTAG" ] ; then
-      export WORKSPACE=`cat /tmp/$BUILDTAG`
-    fi
-    else
-      echo "No WORKSPACE found are we really running through jenkins?"
-  fi 
-  if [ -d "/mnt/tank/ixbuild/" ] ; then
-    echo "Running tests jailed"
-    export JAILED_TESTS=yes
-  fi
-    if [ -n "JAILED_TESTS" ] ; then
-      if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
-      echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
-      exit 1
-    fi
-    . ${PROGDIR}/config/${BUILDTAG}.conf
-    # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
-    if [ -z "$ip4_addr" ] ; then
-      echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
-      echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
-      exit 1
-    fi
-  echo "Using VMBACKEND="${VMBACKEND}
-  if [ -n "$VI_CFG" ] ; then
-    echo "Using VM configuration ${VI_CFG}"
-  fi
+  if [ -n "JAILED_TESTS" ] ; then
     iocage stop $BUILDTAG 2>/dev/null
     iocage destroy -f $BUILDTAG 2>/dev/null
     iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
@@ -1122,7 +1125,7 @@ jenkins_freenas_run_tests()
     iocage set login_flags="-f jenkins" $BUILDTAG
     iocage start $BUILDTAG
     iocage console $BUILDTAG
-  else
+  fi
   create_workdir
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -1162,7 +1165,6 @@ jenkins_freenas_run_tests()
   #kill -9 $tpid 
   #echo ""
   #sleep 10
-fi
 
   # This runs cleanup_workdir and is bad for jail host
   # if [ $? -ne 0 ] ; then exit_clean ; fi
