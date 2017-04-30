@@ -1089,6 +1089,40 @@ jenkins_freenas_run_tests()
     else
       echo "No WORKSPACE found are we really running through jenkins?"
   fi 
+  if [ -d "/mnt/tank/ixbuild/ ] ; then
+    echo "Running tests jailed"
+    export JAILED_TESTS=yes
+  fi
+    if [ -n "JAILED_TESTS" ] ; then
+      if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
+      echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
+      exit 1
+    fi
+    . ${PROGDIR}/config/${BUILDTAG}.conf
+    # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
+    if [ -z "$ip4_addr" ] ; then
+      echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
+      echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
+      exit 1
+    fi
+  echo "Using VMBACKEND="${VMBACKEND}
+  if [ -n "$VI_CFG" ] ; then
+    echo "Using VM configuration ${VI_CFG}"
+  fi
+    iocage stop $BUILDTAG 2>/dev/null
+    iocage destroy -f $BUILDTAG 2>/dev/null
+    iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
+    mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
+    mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
+    mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
+    echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+    echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+    echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+    echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
+    iocage set login_flags="-f jenkins" $BUILDTAG
+    iocage start $BUILDTAG
+    iocage console $BUILDTAG
+  else
   create_workdir
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -1137,38 +1171,6 @@ jenkins_freenas_run_tests()
   # cleanup_workdir
 
   return 0
-}
-
-jenkins_freenas_tests_jailed()
-{
-  if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
-    echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
-    exit 1
-  fi
-  . ${PROGDIR}/config/${BUILDTAG}.conf
-  # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
-  if [ -z "$ip4_addr" ] ; then
-    echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
-    echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
-    exit 1
-  fi
-  echo "Using VMBACKEND="${VMBACKEND}
-  if [ -n "$VI_CFG" ] ; then
-    echo "Using VM configuration ${VI_CFG}"
-  fi
-  iocage stop $BUILDTAG 2>/dev/null
-  iocage destroy -f $BUILDTAG 2>/dev/null
-  iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
-  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
-  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
-  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
-  echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-  echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-  echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-  echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
-  iocage set login_flags="-f jenkins" $BUILDTAG
-  iocage start $BUILDTAG
-  iocage console $BUILDTAG
 }
 
 jenkins_push_fn_statedir()
