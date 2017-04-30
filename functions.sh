@@ -1089,7 +1089,7 @@ jenkins_freenas_run_tests()
     else
       echo "No WORKSPACE found are we really running through jenkins?"
   fi 
-  if [ -d "/mnt/tank/ixbuild/ ] ; then
+  if [ -d "/mnt/tank/ixbuild/" ] ; then
     echo "Running tests jailed"
     export JAILED_TESTS=yes
   fi
@@ -1162,6 +1162,7 @@ jenkins_freenas_run_tests()
   #kill -9 $tpid 
   #echo ""
   #sleep 10
+fi
 
   # This runs cleanup_workdir and is bad for jail host
   # if [ $? -ne 0 ] ; then exit_clean ; fi
