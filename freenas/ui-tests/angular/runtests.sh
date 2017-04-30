@@ -21,6 +21,7 @@ do
 done
 
 BASEURL="http://${BRIDGEIP}${ANGULAR_BASEURI}"
+echo "Using --baseUrl=${BASEURL}"
 
 #**you must either specify a configuration file or at least 3 options. See below for the options:
 #
@@ -53,7 +54,6 @@ BASEURL="http://${BRIDGEIP}${ANGULAR_BASEURI}"
 
 protractor "${CURRDIR}/conf.js" \
   --browser=chrome \
-  --rootElement="app" \
   --seleniumAddress="http://${SELENIUMSERVER}:${SELENIUMPORT}/wd/hub" \
   --seleniumPort="${SELENIUMPORT}" \
   --baseUrl="${BASEURL}"

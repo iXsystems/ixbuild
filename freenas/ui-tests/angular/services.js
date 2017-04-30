@@ -1,19 +1,18 @@
 // System services: SMB, SSH, etc
 // Requires: accounts, storage, shares
+'use strict';
+
+// http://stackoverflow.com/questions/36201691/protractor-angular-2-failed-unknown-error-angular-is-not-defined
+browser.ignoreSynchronization = true;
+
 require('./accounts');
 
 var services = new Object();
 
 // List of services
-services.services_list = function() {
-  var self = this;
-
-  let services_list = {
-    'webdav': self.webdav
-  };
-
-  return services_list;
-};
+services.services_list = Array(
+  { 'webdav': function() { return services.webdav } }
+);
 
 // Each services.${servicename} should have an interface of:
 //    start(), stop(), restart()
@@ -21,7 +20,18 @@ services.services_list = function() {
 services.webdav = new Object();
 
 services.webdav.start = function() {
-  return null;
+  describe('webdav service', function() {
+    it('should start', function() {
+      browser.get('#/pages/services');
+
+      let l = element.all(by.css('.btn-primary'));
+      l[15].click();
+
+      expect(l[15].getText()).equalTo('Stop');
+    });
+  });
+
+  return true;
 };
 
 services.webdav.stop = function() {
@@ -41,9 +51,8 @@ services.webdav.setUp = function() {
 };
 
 services.webdav.tearDown = function() {
-  // teardown webdav share
-  // destroy dataset for share
   // stop service
+  // destroy dataset for share
   return null;
 };
 
@@ -60,3 +69,6 @@ services.webdav.tests = function() {
     });
   });
 };
+
+// restore
+browser.ignoreSynchronization = false;
