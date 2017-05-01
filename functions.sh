@@ -56,7 +56,6 @@ else
   echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
   iocage set login_flags="-f jenkins" $BUILDTAG
   iocage start $BUILDTAG
-  iocage chroot $BUILDTAG /ixbuild/jenkins.sh freenas-tests $BUILDTAG
 fi
 
 cleanup_workdir()
@@ -1135,6 +1134,11 @@ jenkins_freenas_tests()
   fi        
 
   return 0
+}
+
+jenkins_freenas_tests_jailed()
+{
+  iocage chroot $BUILDTAG /ixbuild/jenkins.sh freenas-tests $BUILDTAG
 }
 
 jenkins_freenas_run_tests()
