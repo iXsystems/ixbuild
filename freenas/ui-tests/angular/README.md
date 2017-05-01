@@ -3,7 +3,10 @@ Running AngularJS UI tests
 
 ### Locally ###
 
-* Setup Selenium locally
+* [Setup Selenium locally](#setup-selenium-locally)
+
+
+And run:
 
 ```
 ./runtests.sh
@@ -11,8 +14,8 @@ Running AngularJS UI tests
 
 ### Jenkins ###
 
-* Setup Selenium server.
-* Setup test executor.
+* [Setup Selenium server](#setup-selenium-server)
+* [Setup test executor](#setup-test-executor)
 
 
 Setup Selenium locally

@@ -2,10 +2,7 @@
 // Requires: accounts, storage, shares
 'use strict';
 
-// http://stackoverflow.com/questions/36201691/protractor-angular-2-failed-unknown-error-angular-is-not-defined
-browser.ignoreSynchronization = true;
-
-require('./accounts');
+const accounts = require('./accounts.js');
 
 var services = new Object();
 
@@ -22,12 +19,15 @@ services.webdav = new Object();
 services.webdav.start = function() {
   describe('webdav service', function() {
     it('should start', function() {
+      browser.ignoreSynchronization = true;
       browser.get('#/pages/services');
 
-      let l = element.all(by.css('.btn-primary'));
-      l[15].click();
+      let services_list = $$('.btn-primary');
+      services_list.isPresent();
+      services_list[15].click();
 
       expect(l[15].getText()).equalTo('Stop');
+      browser.ignoreSynchronization = false;
     });
   });
 
@@ -47,28 +47,31 @@ services.webdav.setUp = function() {
   // create dataset for share
   // create webdav share
   // verify webdav share access, read/write (?)
-  return null;
+  accounts.login();
+  // TODO: storage.create(dataset_name, dataset_type);
+  services.webdav.start();
 };
 
 services.webdav.tearDown = function() {
   // stop service
   // destroy dataset for share
-  return null;
+  service.webdav.stop();
+  accounts.logout();
 };
 
 services.webdav.tests = function() {
   var self = this;
-
-  expect('Configuring a webdav share', function() {
-    it('should have a logged in user account', function() {
-      expect(account.login()).toEqual(true);
-    });
-    it('should have a dataset available for sharing', function() {
-      // TODO: storage.create(dataset_name, dataset_type);
-      expect(true).toEqual(true);
-    });
-  });
+  self.setUp();
+  self.tearDown();
+  return true;
 };
+
+services.tests = function() {
+  services.webdav.tests();
+};
+
+services.tests();
 
 // restore
 browser.ignoreSynchronization = false;
+module.exports = browser;

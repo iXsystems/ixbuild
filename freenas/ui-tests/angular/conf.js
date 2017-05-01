@@ -1,3 +1,3 @@
 exports.config = {
-  specs: ['accounts.js']
+  specs: ['accounts.js', 'services.js']
 };

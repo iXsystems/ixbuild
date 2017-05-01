@@ -134,3 +134,4 @@ accounts.tests = function() {
 };
 
 accounts.tests();
+module.exports = accounts;
