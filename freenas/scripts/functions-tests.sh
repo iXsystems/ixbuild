@@ -237,18 +237,17 @@ ssh_test()
     return 1
   fi
 
-  # Test fuser and fpass values
-  if [ -z "${fpass}" ] || [ -z "${fuser}" ] ; then
-    echo "SSH server username and password required for ssh_test()."
+  # Test fuser value
+  if [ -z "${fuser}" ] ; then
+    echo "SSH server username required for ssh_test()."
     return 1
   fi
 
   # Make SSH connection
-  sshpass -p ${fpass} \
-    ssh -o StrictHostKeyChecking=no \
-        -o UserKnownHostsFile=/dev/null \
-        -o VerifyHostKeyDNS=no \
-        ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  ssh -o StrictHostKeyChecking=no \
+      -o UserKnownHostsFile=/dev/null \
+      -o VerifyHostKeyDNS=no \
+      ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
   return $?
 }
 
@@ -287,18 +286,17 @@ _scp_test()
     return 1
   fi
 
-  # Test fuser and fpass values
-  if [ -z "${fpass}" ] || [ -z "${fuser}" ]; then
-    echo "SCP server username and password required for scp_test()."
+  # Test fuser value
+  if [ -z "${fuser}" ] ; then
+    echo "SCP server username required for scp_test()."
     return 1
   fi
 
   # SCP connection
-  sshpass -p ${fpass} \
-    scp -o StrictHostKeyChecking=no \
-        -o UserKnownHostsFile=/dev/null \
-        -o VerifyHostKeyDNS=no \
-        "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  scp -o StrictHostKeyChecking=no \
+      -o UserKnownHostsFile=/dev/null \
+      -o VerifyHostKeyDNS=no \
+      "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
   SCP_CMD_RESULTS=$?
 
   if [ $SCP_CMD_RESULTS -ne 0 ]; then
@@ -325,17 +323,16 @@ osx_test()
     return 1
   fi
 
-  if [ -z "${OSX_USERNAME}" ] || [ -z "${OSX_PASSWORD}" ] ; then
-    echo "SSH server username and password required for osx_test()."
+  if [ -z "${OSX_USERNAME}" ] ; then
+    echo "SSH server username required for osx_test()."
     return 1
   fi
 
   # Make SSH connection
-  sshpass -p ${OSX_PASSWORD} \
-    ssh -o StrictHostKeyChecking=no \
-        -o UserKnownHostsFile=/dev/null \
-        -o VerifyHostKeyDNS=no \
-        ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  ssh -o StrictHostKeyChecking=no \
+      -o UserKnownHostsFile=/dev/null \
+      -o VerifyHostKeyDNS=no \
+      ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
 
   return $?
 }
