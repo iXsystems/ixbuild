@@ -40,6 +40,24 @@ if [ -n "JAILED_TESTS" ] ; then
   fi
 fi
 
+# Setup jails for jailed tests
+if [ -f "/tmp/${BUILDTAG}" ] ; then
+  return 0
+else
+  iocage stop $BUILDTAG 2>/dev/null
+  iocage destroy -f $BUILDTAG 2>/dev/null
+  iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
+  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
+  echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
+  iocage set login_flags="-f jenkins" $BUILDTAG
+  iocage chroot $BUILDTAG /ixbuild/jenkins.sh freenas-tests $BUILDTAG
+fi
+
 cleanup_workdir()
 {
   if [ -z "$MASTERWRKDIR" ] ; then return 0; fi
@@ -1123,18 +1141,6 @@ jenkins_freenas_run_tests()
   if [ -f "/tmp/${BUILDTAG}" ] ; then
     return 0
   else
-    iocage stop $BUILDTAG 2>/dev/null
-    iocage destroy -f $BUILDTAG 2>/dev/null
-    iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
-    mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
-    mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
-    mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
-    echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-    echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-    echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-    echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
-    iocage set login_flags="-f jenkins" $BUILDTAG
-    iocage start $BUILDTAG
     jailcheck=`iocage list | grep $BUILDTAG | grep up`
     if [ "$jailcheck" = "" ]  ; then
       exit 1
