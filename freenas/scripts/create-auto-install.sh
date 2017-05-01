@@ -162,7 +162,7 @@ else
   VOLID="FreeNAS"
 fi
 
-at << EOF >/tmp/xorriso
+cat << EOF >/tmp/xorriso
 ARGS=\`echo \$@ | sed 's|-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label -hfs-bless-by i /System/Library/CoreServices/boot.efi||g'\`
 xorriso \$ARGS
 EOF
