@@ -55,6 +55,7 @@ else
   echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
   iocage set login_flags="-f jenkins" $BUILDTAG
+  iocage start $BUILDTAG
   iocage chroot $BUILDTAG /ixbuild/jenkins.sh freenas-tests $BUILDTAG
 fi
 
