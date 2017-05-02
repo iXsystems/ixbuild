@@ -26,7 +26,6 @@ services.webdav.start = function() {
       }, 30000);
 
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
-      browser.waitForAngular();
 
       var btn_el = $$('button.btn.btn-primary').get(15);
       btn_el.isPresent();
@@ -53,7 +52,6 @@ services.webdav.stop = function() {
       }, 30000);
 
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
-      browser.waitForAngular();
 
       var btn_el = $$('button.btn.btn-primary').get(15);
       btn_el.isPresent();
