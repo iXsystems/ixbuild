@@ -105,7 +105,7 @@ esac
 clean_xml_results
 
 # Run tests now
-if [ -f "/tmp/${BUILDTAG}" ] ; then
+if [ -d "/mnt/tank/ixbuild" ] ; then
   iocage console $BUILDTAG
 else
   run_tests
