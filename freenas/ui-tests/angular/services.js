@@ -12,7 +12,7 @@ services.services_list = Array(
 );
 
 // Each services.${servicename} should have an interface of:
-//    start(), stop(), setUp(), test(), tearDown()
+//    start(), stop(), setUp(), tearDown(), tests()
 services.webdav = new Object();
 
 services.webdav.start = function() {
@@ -25,14 +25,17 @@ services.webdav.start = function() {
         }); 
       }, 30000);
 
-      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 60000);
+      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
       browser.waitForAngular();
 
-      var btn_el = element.all(by.css('button.btn.btn-primary')).get(15);
+      var btn_el = $$('button.btn.btn-primary').get(15);
       btn_el.isPresent();
-      btn_el.click().then(function() {
-        expect(btn_el.getText()).toEqual('Stop');
-      });
+      btn_el.click();
+
+      // @TODO - figure out a way to wait for the 'loading' dialog to complete
+      // while waiting for the service to start instead of an arbitrary sleep()
+      browser.driver.sleep('5000');
+      expect(btn_el.getText()).toEqual('Stop');
     });
   });
 
@@ -49,15 +52,21 @@ services.webdav.stop = function() {
         });
       }, 30000);
 
-      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 60000);
+      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
       browser.waitForAngular();
 
-      var btn_el = element.all(by.css('button.btn.btn-primary')).get(15);
-      btn_el.click().then(function() {
-        expect(btn_el.getText()).toEqual('Start');
-      });
+      var btn_el = $$('button.btn.btn-primary').get(15);
+      btn_el.isPresent();
+      btn_el.click();
+
+      // @TODO - figure out a way to wait for the 'loading' dialog to complete
+      // while waiting for the service to stop instead of an arbitrary sleep()
+      browser.driver.sleep('5000');
+      expect(btn_el.getText()).toEqual('Start');
     });
   });
+
+  return true;
 };
 
 services.webdav.setUp = function() {
@@ -65,8 +74,9 @@ services.webdav.setUp = function() {
   // create dataset for share
   // create webdav share
   // verify webdav share access, read/write (?)
-  accounts.login();
   // TODO: storage.create(dataset_name, dataset_type);
+  //accounts.require_login();
+  accounts.login();
   services.webdav.start();
 };
 
@@ -74,13 +84,16 @@ services.webdav.tearDown = function() {
   // stop service
   // destroy dataset for share
   services.webdav.stop();
+  // TODO: storage.destroy(dataset_name, dataset_type);
   accounts.logout();
 };
 
 services.webdav.tests = function() {
   var self = this;
+
   self.setUp();
   self.tearDown();
+
   return true;
 };
 

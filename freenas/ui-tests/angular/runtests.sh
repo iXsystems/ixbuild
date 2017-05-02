@@ -56,5 +56,4 @@ protractor "${CURRDIR}/conf.js" \
   --browser=chrome \
   --seleniumAddress="http://${SELENIUMSERVER}:${SELENIUMPORT}/wd/hub" \
   --seleniumPort="${SELENIUMPORT}" \
-  --rootElement=app \
   --baseUrl="${BASEURL}"
