@@ -43,7 +43,7 @@ if [ $? -ne 0 ] ; then exit 1; fi
 # Load geom_uzip if necessary
 kldstat | grep -q 'geom_uzip'
 if [ $? -ne 0 ] ; then
-  kldload geom_uzip
+  kldload geom_uzip 2>/dev/null &
 fi
 
 # Set kernel to boot in serial mode

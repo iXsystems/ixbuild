@@ -13,7 +13,6 @@ fi
 
 # Check to see if we are running in jail
 if [ -d "/mnt/tank/ixbuild/" ] ; then
-  echo "Running tests jailed"
   export JAILED_TESTS=yes
 fi
 
@@ -42,15 +41,14 @@ fi
 
 # Setup jails for jailed tests
 if [ -f "/tmp/${BUILDTAG}" ] ; then
-  echo "Entered jail ${BUILDTAG}"
+  echo "Entered ${BUILDTAG}"
 else
-  echo "Getting ready to setup ${BUILDTAG} jail on host"
   iocage stop $BUILDTAG 2>/dev/null
   iocage destroy -f $BUILDTAG 2>/dev/null
   iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
-  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" &>/dev/null
-  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" &>/dev/null
-  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" &>/dev/null
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" 2>/dev/null & 
+  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" 2>/dev/null &
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" 2>/dev/null &
   echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
   echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
