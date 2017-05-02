@@ -139,5 +139,4 @@ accounts.tests = function() {
   return true;
 };
 
-accounts.tests();
 module.exports = accounts;
