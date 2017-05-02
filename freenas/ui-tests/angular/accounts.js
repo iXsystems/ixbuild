@@ -122,6 +122,14 @@ accounts.tearDown = function() {
   accounts.logout();
 };
 
+accounts.require_login = function() {
+  browser.manage().getCookie('ng2-webstorage|username').then(function(cookie) {
+    if (cookie == null || cookie.value == '') {
+      accounts.login();
+    }
+  });
+};
+
 accounts.tests = function() {
   var self = this;
 
