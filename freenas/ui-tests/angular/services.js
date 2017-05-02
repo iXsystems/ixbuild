@@ -19,15 +19,21 @@ services.webdav = new Object();
 services.webdav.start = function() {
   describe('webdav service', function() {
     it('should start', function() {
-      browser.ignoreSynchronization = true;
       browser.get('#/pages/services');
+      browser.wait(function() {
+        return browser.driver.getCurrentUrl().then(function(actualUrl) {
+          return actualUrl.indexOf('#/pages/services') >= 0;
+        }); 
+      }, 30000);
 
-      let services_list = $$('.btn-primary');
-      services_list.isPresent();
-      services_list[15].click();
+      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 60000);
+      browser.waitForAngular();
 
-      expect(l[15].getText()).equalTo('Stop');
-      browser.ignoreSynchronization = false;
+      var btn_el = element.all(by.css('button.btn.btn-primary')).get(15);
+      btn_el.isPresent();
+      btn_el.click().then(function() {
+        expect(btn_el.getText()).toEqual('Stop');
+      });
     });
   });
 
@@ -55,7 +61,7 @@ services.webdav.setUp = function() {
 services.webdav.tearDown = function() {
   // stop service
   // destroy dataset for share
-  service.webdav.stop();
+  services.webdav.stop();
   accounts.logout();
 };
 
@@ -71,7 +77,4 @@ services.tests = function() {
 };
 
 services.tests();
-
-// restore
-browser.ignoreSynchronization = false;
-module.exports = browser;
+module.exports = services;
