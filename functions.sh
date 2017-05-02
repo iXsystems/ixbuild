@@ -42,8 +42,9 @@ fi
 
 # Setup jails for jailed tests
 if [ -f "/tmp/${BUILDTAG}" ] ; then
-  return 0
+  echo "Entered jail ${BUILDTAG}"
 else
+  echo "Getting ready to setup ${BUILDTAG} jail on host"
   iocage stop $BUILDTAG 2>/dev/null
   iocage destroy -f $BUILDTAG 2>/dev/null
   iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
