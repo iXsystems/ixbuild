@@ -99,5 +99,4 @@ services.tests = function() {
   services.webdav.tests();
 };
 
-services.tests();
 module.exports = services;
