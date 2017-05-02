@@ -13,7 +13,7 @@ export REQUIRES
 # We also leave it enabled, so we have access to VM if something hangs / goes wrong
 ssh_tests()
 {
-  set_test_group_text "1 - Create - SSH Tests" "3"
+  set_test_group_text "1 - Create - SSH Tests" "4"
   CLASSNAME=ixbuild.resty.functional.create.ssh
 
   echo_test_title "Configuring SSH settings"
@@ -28,19 +28,16 @@ ssh_tests()
   rest_request "GET" "/services/services/ssh/"
   check_service_status "RUNNING"
 
-  # Use Jenkins SSH Keys, or generate new ones to be added to the test target.
+  # Use Jenkins SSH Keys if found, otherwise generate new ones
   local ssh_pubkey=""
   if [ -f "/root/.ssh/id_dsa.jenkins.pub" ]; then
     ssh_pubkey="$(cat "/root/.ssh/id_dsa.jenkins.pub")"
-    ssh-add -l &>/dev/null
-    if [ "$?" = "1" ]; then
-      ssh-add "/root/.ssh/id_dsa.jenkins" &>/dev/null
-    fi
+    ssh-add "/root/.ssh/id_dsa.jenkins" &>/dev/null
   else
     if [ ! -f "$HOME/.ssh/id_rsa.tests.pub" ]; then
       ssh-keygen -b 4096 -t rsa -f "$HOME/.ssh/id_rsa.tests" -q -N ""
-      ssh-add "$HOME/.ssh/id_rsa.tests" &>/dev/null
     fi
+    ssh-add "$HOME/.ssh/id_rsa.tests" &>/dev/null
     ssh_pubkey="$(cat "$HOME/.ssh/id_rsa.tests.pub")"
   fi
 
