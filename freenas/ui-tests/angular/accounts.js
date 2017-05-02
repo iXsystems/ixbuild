@@ -17,13 +17,19 @@ accounts.default_user = function() {
 };
 
 accounts.login = function() {
-  var _user = accounts.default_user();
+  var self = this;
+  var _user = self.default_user();
 
   describe('logging in as our root account ', function() {
     it('should authenticate the user and re-direct to the dashboard', function() {
-      // http://stackoverflow.com/questions/36201691/protractor-angular-2-failed-unknown-error-angular-is-not-defined
-      browser.ignoreSynchronization = true;
       browser.get('#/login');
+      browser.wait(function() {
+        return browser.driver.getCurrentUrl().then(function(actualUrl) {
+          return actualUrl.indexOf('#/login') >= 0;
+        }); 
+      }, 6000);
+
+      browser.wait(protractor.ExpectedConditions.presenceOf($('#inputUsername')), 60000);
 
       var username = $('#inputUsername');
       var password = $('#inputPassword3');
@@ -37,7 +43,7 @@ accounts.login = function() {
       password.clear();
       password.sendKeys(_user['password']);
 
-      element(by.css('[type="submit"]')).click();
+      $('[type="submit"]').click();
 
       browser.wait(function() {
         return browser.driver.getCurrentUrl().then(function(actualUrl) {
@@ -46,9 +52,6 @@ accounts.login = function() {
       }, 3000);
 
       expect(browser.driver.getCurrentUrl()).toContain('#/pages/dashboard');
-
-      // restore previous value
-      browser.ignoreSynchronization = false;
     });
   });
 
@@ -58,9 +61,12 @@ accounts.login = function() {
 accounts.logout = function() {
   describe('logging out', function() {
     it('should re-direct to the login page with empty username/password input fields', function() {
-      // http://stackoverflow.com/questions/36201691/protractor-angular-2-failed-unknown-error-angular-is-not-defined
-      browser.ignoreSynchronization = true;
       browser.get('#/pages/dashboard');
+      browser.wait(function() {
+        return browser.driver.getCurrentUrl().then(function(actualUrl) {
+          return actualUrl.indexOf('#/pages/dashboard') >= 0;
+        }); 
+      }, 6000);
 
       var profile_menu = $('#user-profile-dd');
       profile_menu.isPresent();
@@ -70,9 +76,6 @@ accounts.logout = function() {
       signout_link.isPresent();
       signout_link.click();
 
-      //element(by.id('user-profile-dd')).click();
-      //element(by.css('.signout')).click();
-
       expect(browser.driver.getCurrentUrl()).toContain('#/login');
 
       var username = $('#inputUsername');
@@ -80,9 +83,6 @@ accounts.logout = function() {
       expect(username.isPresent()).toBe(true);
       expect(browser.driver.getCurrentUrl()).toContain('#/login');
       //expect(element(by.id('inputUsername')).getAttribute('value')).toEqual("");
-
-      // restore previous value
-      browser.ignoreSynchronization = false;
     });
   });
 
@@ -92,8 +92,6 @@ accounts.logout = function() {
 accounts.test_invalid_login = function() {
   describe('before logging in', function() {
     it('an invalid login attempt should be rejected', function() {
-      // http://stackoverflow.com/questions/36201691/protractor-angular-2-failed-unknown-error-angular-is-not-defined
-      browser.ignoreSynchronization = true;
       browser.get('#/login');
 
       var username = $('#inputUsername');
