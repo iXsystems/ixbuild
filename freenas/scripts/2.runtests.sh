@@ -100,4 +100,8 @@ esac
 clean_xml_results
 
 # Run tests now
-run_tests
+if [ -f "/tmp/${BUILDTAG}" ] ; then
+  iocage console $BUILDTAG
+else
+  run_tests
+fi
