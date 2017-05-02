@@ -1124,9 +1124,8 @@ jenkins_freenas_tests()
   fi
 
   if [ -n JAILED_TESTS ] ; then
-    echo "Running jailed tests"
-    ISOFILE=`find / | grep '\.iso$' | head -n 1`
-    ${PROGDIR}/freenas/scripts/create-auto-install.sh ${ISOFILE}
+    cd ${TBUILDDIR}
+    make tests  
   else
     cd ${TBUILDDIR}
     make tests
@@ -1140,21 +1139,10 @@ jenkins_freenas_tests()
 jenkins_freenas_run_tests_jailed()
 {
   iocage chroot $BUILDTAG /ixbuild/jenkins.sh freenas-tests $BUILDTAG
-  iocage console $BUILDTAG
 }
 
 jenkins_freenas_run_tests()
 {
-  if [ -f "/tmp/${BUILDTAG}" ] ; then
-    return 0
-  else
-    jailcheck=`iocage list | grep $BUILDTAG | grep up`
-    if [ "$jailcheck" = "" ]  ; then
-      exit 1
-    else 
-      iocage console $BUILDTAG
-    fi  
-  fi
   create_workdir
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
