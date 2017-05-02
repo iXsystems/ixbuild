@@ -12,8 +12,7 @@ services.services_list = Array(
 );
 
 // Each services.${servicename} should have an interface of:
-//    start(), stop(), restart()
-//    setUp(), test(), tearDown()
+//    start(), stop(), setUp(), test(), tearDown()
 services.webdav = new Object();
 
 services.webdav.start = function() {
@@ -41,11 +40,24 @@ services.webdav.start = function() {
 };
 
 services.webdav.stop = function() {
-  return null;
-};
+  describe('webdav service', function() {
+    it('should stop', function() {
+      browser.get('#/pages/services');
+      browser.wait(function() {
+        return browser.driver.getCurrentUrl().then(function(actualUrl) {
+          return actualUrl.indexOf('#/pages/services') >= 0;
+        });
+      }, 30000);
 
-services.webdav.restart = function() {
-  return null;
+      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 60000);
+      browser.waitForAngular();
+
+      var btn_el = element.all(by.css('button.btn.btn-primary')).get(15);
+      btn_el.click().then(function() {
+        expect(btn_el.getText()).toEqual('Start');
+      });
+    });
+  });
 };
 
 services.webdav.setUp = function() {
