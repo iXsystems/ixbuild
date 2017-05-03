@@ -4,5 +4,6 @@ exports.config = {
   onPrepare: function() {
     browser.ignoreSynchronization = true;
   },
-  useAllAngular2AppRoots: true
+  useAllAngular2AppRoots: true,
+  debug: true
 };
