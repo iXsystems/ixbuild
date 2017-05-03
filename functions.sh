@@ -1121,7 +1121,7 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
-  if [ -n JAILED_TESTS ] ; then
+  if [ -n "$JAILED_TESTS" ] ; then
     cd ${TBUILDDIR}
     make tests  
   else
