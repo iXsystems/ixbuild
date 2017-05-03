@@ -405,7 +405,7 @@ install_vmware()
 
   #Get console output for install
   tpid=$!
-  tail -f /tmp/console.log 2>/dev/null &
+  tail -f /autoinstalls/$BUILDTAG.out 2>/dev/null &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
@@ -449,7 +449,7 @@ boot_vmware()
 
   #Get console output for bootup
   tpid=$!
-  tail -f /tmp/console.log 2>/dev/null &
+  tail -f /autoinstalls/$BUILDTAG.out 2>/dev/null &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
