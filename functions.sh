@@ -1134,7 +1134,7 @@ jenkins_freenas_tests()
   return 0
 }
 
-jenkins_freenas_run_tests_jailed()
+jenkins_freenas_tests_jailed()
 {
   iocage chroot $BUILDTAG /ixbuild/jenkins.sh freenas-tests $BUILDTAG
 }
@@ -1190,6 +1190,12 @@ jenkins_freenas_run_tests()
 
   return 0
 }
+
+jenkins_freenas_run_tests_jailed()
+{
+  iocage console $BUILDTAG
+}
+
 
 jenkins_push_fn_statedir()
 {
