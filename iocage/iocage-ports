@@ -1,5 +1,5 @@
 devel/jenkins
-games/minecraft-server
+editors/libreoffice
 multimedia/emby-server
 multimedia/plexmediaserver
 net/syncthing
@@ -9,4 +9,5 @@ irc/quassel-core
 www/nextcloud
 www/nginx
 www/redmine
+www/gitlab
 www/subsonic-standalone

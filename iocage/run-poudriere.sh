@@ -5,7 +5,7 @@ PPORTS="iocports"
 ZROOT="/poud"
 POUDCONFDIR="${PROGDIR}/poudriere"
 PORTS_GIT_URL="https://github.com/freebsd/freebsd-ports.git"
-PORTS_GIT_BRANCH="branches/2017Q1"
+PORTS_GIT_BRANCH="branches/2017Q2"
 JAILVER="11.0-RELEASE"
 PPKGDIR="${ZROOT}/data/packages/${PJAILNAME}-${PPORTS}"
 
