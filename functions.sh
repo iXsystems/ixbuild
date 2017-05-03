@@ -11,12 +11,30 @@ if [ -z "$IXBUILDBRANCH" ] ; then
   IXBUILDBRANCH="master"
 fi
 
-# Check to see if we should setup jails 
+# Check to see if we should run jails on host
 if [ -d "/mnt/tank/ixbuild/" ] ; then
   export JAILED_TESTS=yes
 fi
 
-# Do some prep work if we are setting up jails 
+# Setup jails for jailed tests
+if [ -f "/tmp/${BUILDTAG}" ] ; then
+  echo "Entered ${BUILDTAG}"
+elif [ -n "$JAILED_TESTS" ] ; then   
+  iocage stop $BUILDTAG 2>/dev/null
+  iocage destroy -f $BUILDTAG 2>/dev/null
+  iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" 2>/dev/null & 
+  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" 2>/dev/null &
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" 2>/dev/null &
+  echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
+  iocage set login_flags="-f jenkins" $BUILDTAG
+  iocage start $BUILDTAG
+fi
+
+# Perform some checks if we are starting jails 
 if [ -n "$JAILED_TESTS" ] ; then
   if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
     echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
@@ -37,24 +55,6 @@ if [ -n "$JAILED_TESTS" ] ; then
       fi
     fi
   fi
-fi
-
-# Setup jails for jailed tests
-if [ -f "/tmp/${BUILDTAG}" ] ; then
-  echo "Entered ${BUILDTAG}"
-else
-  iocage stop $BUILDTAG 2>/dev/null
-  iocage destroy -f $BUILDTAG 2>/dev/null
-  iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
-  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" 2>/dev/null & 
-  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" 2>/dev/null &
-  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" 2>/dev/null &
-  echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-  echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-  echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
-  echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
-  iocage set login_flags="-f jenkins" $BUILDTAG
-  iocage start $BUILDTAG
 fi
 
 cleanup_workdir()
