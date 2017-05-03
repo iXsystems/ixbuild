@@ -5,6 +5,11 @@ mypath=`realpath $0`
 cd `dirname $mypath`
 export PROGDIR="`realpath`"
 
+# Skip updating git repo if we are using iocage basejails
+if [ -d "/mnt/tank/ixbuild/" ] ; then
+  export JENKINS_DO_UPDATE="YES"
+fi
+
 if [ -z "$JENKINS_DO_UPDATE" ] ; then
   # Before we begin any build, make sure we are updated from git
   git pull
