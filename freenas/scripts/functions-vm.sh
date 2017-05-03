@@ -411,7 +411,7 @@ install_vmware()
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   # Wait for installation to finish
-  while ! grep -q "Installation finished. No error reported." /tmp/console.log
+  while ! grep -q "Installation finished. No error reported." /autoinstalls/$BUILDTAG.log
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before installation finished. Exiting."
@@ -456,7 +456,7 @@ boot_vmware()
 
   # Wait for bootup to finish
   # Wait for bootup to finish
-  while ! ((grep -q "Starting nginx." /tmp/console.log) || (grep -q "Plugin loaded: SSHPlugin" /tmp/console.log))
+  while ! ((grep -q "Starting nginx." /autoinstalls/$BUILDTAG.log) || (grep -q "Plugin loaded: SSHPlugin" /autoinstalls/$BUILDTAG.log))
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before bootup finished."
