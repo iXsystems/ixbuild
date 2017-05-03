@@ -11,26 +11,26 @@ if [ -z "$IXBUILDBRANCH" ] ; then
   IXBUILDBRANCH="master"
 fi
 
-# Check to see if we are running in jail
+# Check to see if we should setup jails 
 if [ -d "/mnt/tank/ixbuild/" ] ; then
   export JAILED_TESTS=yes
 fi
 
-# Do some global setup if we are running in jail
+# Do some prep work if we are setting up jails 
 if [ -n "$JAILED_TESTS" ] ; then
   if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
     echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
     exit 1
   else
     . ${PROGDIR}/config/${BUILDTAG}.conf
-      # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
-      if [ -z "$ip4_addr" ] ; then
-        echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
-        echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
+    # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
+    if [ -z "$ip4_addr" ] ; then
+      echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
+      echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
       exit 1
-        if [ -z "$WORKSPACE" ] ; then
-          if [ -f "/tmp/$BUILDTAG" ] ; then
-            export WORKSPACE=`cat /tmp/$BUILDTAG`
+      if [ -z "$WORKSPACE" ] ; then
+        if [ -f "/tmp/$BUILDTAG" ] ; then
+          export WORKSPACE=`cat /tmp/$BUILDTAG`
         else
           echo "No WORKSPACE found are we really running through jenkins?"
         fi
