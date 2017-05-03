@@ -17,7 +17,7 @@ if [ -d "/mnt/tank/ixbuild/" ] ; then
 fi
 
 # Do some global setup if we are running in jail
-if [ -n "JAILED_TESTS" ] ; then
+if [ -n "$JAILED_TESTS" ] ; then
   if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
     echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
     exit 1
