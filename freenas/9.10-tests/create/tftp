@@ -36,7 +36,6 @@ tftp_tests()
   rest_request "GET" "/services/services/tftp/"
   check_service_status "RUNNING" || return 1
 
-  #Before re-enable convert rc_test to bsd_test
   #echo_test_title "Fetching status of TFTP status"
   #rc_test "touch '${TESTFILE_PATH}${TESTFILE_NAME}' && atftp -p -l '${TESTFILE_PATH}${TESTFILE_NAME}' ${FNASTESTIP}"
   #check_exit_status
