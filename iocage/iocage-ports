@@ -1,4 +1,5 @@
 databases/mysql56-server
+databases/postgresql93-server
 devel/jenkins
 editors/libreoffice
 games/minecraft-server
