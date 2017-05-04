@@ -4,6 +4,7 @@ editors/libreoffice
 games/minecraft-server
 multimedia/emby-server
 multimedia/plexmediaserver
+multimedia/plexmediaserver-plexpass
 net/syncthing
 net-p2p/btsync
 net-p2p/couchpotato
