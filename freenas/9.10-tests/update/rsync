@@ -10,8 +10,6 @@ REQUIRES=""
 export REQUIRES
 
 rsync_tests() {
-  return 0
-
   set_test_group_text "2 - Update - RSYNC tests" "2"
   CLASSNAME=ixbuild.resty.functional.update.rsync
 
