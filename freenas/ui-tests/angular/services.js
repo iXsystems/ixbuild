@@ -22,17 +22,17 @@ services.webdav.start = function() {
 
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
 
-      var btn_el = $$('button.btn.btn-primary').get(15);
+      let btn_el = $$('service').get(15).$$('div > button').first();
       btn_el.isDisplayed().then(function(isVisable) {
         if (isVisable) {
           btn_el.click();
+
+          // @TODO - figure out a way to wait for the 'loading' dialog to complete
+          // while waiting for the service to start instead of an arbitrary sleep()
+          browser.driver.sleep('5000');
+          expect(btn_el.getText()).toEqual('Stop');
         }
       });
-
-      // @TODO - figure out a way to wait for the 'loading' dialog to complete
-      // while waiting for the service to start instead of an arbitrary sleep()
-      browser.driver.sleep('5000');
-      expect(btn_el.getText()).toEqual('Stop');
     });
   });
 
@@ -51,17 +51,17 @@ services.webdav.stop = function() {
 
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
 
-      var btn_el = $$('button.btn.btn-primary').get(15);
+      var btn_el = $$('service').get(15).$$('div > button').first();
       btn_el.isDisplayed().then(function(isVisable) {
         if (isVisable) {
           btn_el.click();
+
+          // @TODO - figure out a way to wait for the 'loading' dialog to complete
+          // while waiting for the service to stop instead of an arbitrary sleep()
+          browser.driver.sleep('5000');
+          expect(btn_el.getText()).toEqual('Start');
         }
       });
-
-      // @TODO - figure out a way to wait for the 'loading' dialog to complete
-      // while waiting for the service to stop instead of an arbitrary sleep()
-      browser.driver.sleep('5000');
-      expect(btn_el.getText()).toEqual('Start');
     });
   });
 
