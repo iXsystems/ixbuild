@@ -11,8 +11,6 @@ export REQUIRES
 
 ldap_bsd_tests()
 {
-  return 0
-
   local DATASET="ldap-bsd"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
