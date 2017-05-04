@@ -513,9 +513,7 @@ jenkins_freenas_push_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    ssh -i /root/.ssh/id_rsa.jenkins jenkins@api.freenas.org mkdir -p /tank/doc/userguide/html/11 >/dev/null 2>/dev/null
-
-    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html/11
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html11
     if [ $? -ne 0 ] ; then exit_clean; fi
     rm -rf /tmp/handbookpush 2>/dev/null
   fi
