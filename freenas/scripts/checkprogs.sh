@@ -155,8 +155,6 @@ if [ "$?" != "0" ]; then
   rc_halt "python3.6 -m ensurepip"
 fi
 
-#FIXME: waiting for fixed python3.6 in executor
-: '
 python3.6 -c "import requests" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing requests"
@@ -210,4 +208,3 @@ if [ "$?" != "0" ]; then
   echo "Installing pytest-xdist"
   rc_halt "pip3.6 install pytest-xdist"
 fi
-'
