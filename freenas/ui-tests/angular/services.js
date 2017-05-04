@@ -6,11 +6,6 @@ const accounts = require('./accounts.js');
 
 var services = new Object();
 
-// List of services
-services.services_list = Array(
-  { 'webdav': function() { return services.webdav } }
-);
-
 // Each services.${servicename} should have an interface of:
 //    start(), stop(), setUp(), tearDown(), tests()
 services.webdav = new Object();
@@ -28,8 +23,11 @@ services.webdav.start = function() {
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
 
       var btn_el = $$('button.btn.btn-primary').get(15);
-      btn_el.isPresent();
-      btn_el.click();
+      btn_el.isDisplayed().then(function(isVisable) {
+        if (isVisable) {
+          btn_el.click();
+        }
+      });
 
       // @TODO - figure out a way to wait for the 'loading' dialog to complete
       // while waiting for the service to start instead of an arbitrary sleep()
@@ -54,8 +52,11 @@ services.webdav.stop = function() {
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
 
       var btn_el = $$('button.btn.btn-primary').get(15);
-      btn_el.isPresent();
-      btn_el.click();
+      btn_el.isDisplayed().then(function(isVisable) {
+        if (isVisable) {
+          btn_el.click();
+        }
+      });
 
       // @TODO - figure out a way to wait for the 'loading' dialog to complete
       // while waiting for the service to stop instead of an arbitrary sleep()
@@ -73,7 +74,6 @@ services.webdav.setUp = function() {
   // create webdav share
   // verify webdav share access, read/write (?)
   // TODO: storage.create(dataset_name, dataset_type);
-  //accounts.require_login();
   accounts.login();
   services.webdav.start();
 };
@@ -81,8 +81,9 @@ services.webdav.setUp = function() {
 services.webdav.tearDown = function() {
   // stop service
   // destroy dataset for share
-  services.webdav.stop();
+  //services.webdav.stop();
   // TODO: storage.destroy(dataset_name, dataset_type);
+  services.webdav.stop();
   accounts.logout();
 };
 
