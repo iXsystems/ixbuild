@@ -12,6 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 # Installl modules
 pip3.6 install requests
+pip3.6 install ws4py
 
 #################################################################
 # Run the tests now!
