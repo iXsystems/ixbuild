@@ -11,6 +11,10 @@ if [ -z "$IXBUILDBRANCH" ] ; then
   IXBUILDBRANCH="master"
 fi
 
+if [ -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
+  . ${PROGDIR}/config/${BUILDTAG}.conf
+fi
+
 # Check to see if we should run jails on host
 if [ -d "/mnt/tank/ixbuild/" ] ; then
   export JAILED_TESTS=yes
@@ -20,7 +24,6 @@ if [ -d "/mnt/tank/ixbuild/" ] ; then
     echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
     exit 1
   else
-    . ${PROGDIR}/config/${BUILDTAG}.conf
     # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
     if [ -z "$ip4_addr" ] ; then
       echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
