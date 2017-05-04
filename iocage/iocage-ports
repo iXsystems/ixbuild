@@ -1,8 +1,16 @@
+databases/mysql56-server
 devel/jenkins
+editors/libreoffice
+games/minecraft-server
+multimedia/emby-server
 multimedia/plexmediaserver
+multimedia/plexmediaserver-plexpass
 net/syncthing
 net-p2p/btsync
+net-p2p/couchpotato
 irc/quassel-core
 www/nextcloud
 www/nginx
+www/redmine
+www/gitlab
 www/subsonic-standalone

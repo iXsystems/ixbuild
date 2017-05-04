@@ -662,6 +662,13 @@ jenkins_freenas_push_nightly()
   cd ${FNASBDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
+  # Set CHANGELOG
+  if [ -e "${FNASBDIR}/ChangeLog" ] ; then
+    echo "Setting CHANGELOG: ${FNASBDIR}/ChangeLog"
+    CHANGELOG="${FNASBDIR}/ChangeLog"
+    export CHANGELOG
+  fi
+
   # Skip deltas
   DELTAS="0"
   export DELTAS
@@ -975,19 +982,13 @@ get_bedir()
     eval $BUILDOPTS
   fi
 
-  if [ "${GITFNASBRANCH}" != "master" ] ; then
-    export BEDIR="${FNASBDIR}/_BE"
-    return 0
-  fi
-
-  if [ "$GITFNASURL" = "https://github.com/freenas/build.git" ] ; then
+  if [ -z "$LEGACYBEDIR" -a -n "${PROFILE}" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
     return 0
   else
     export BEDIR="${FNASBDIR}/_BE"
     return 0
   fi
-
 }
 
 jenkins_freenas()
@@ -1002,9 +1003,6 @@ jenkins_freenas()
     export CHECKOUT_SHALLOW="YES"
   fi
 
-  get_bedir
-
-  # Check if this is a Release Engineer build
   echo ${BUILDTAG} | grep -q "releng"
   if [ $? -eq 0 ] ; then RELENGBUILD="YES" ; fi
 
@@ -1014,6 +1012,9 @@ jenkins_freenas()
   make iso
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+  get_bedir
+
+  # Check if this is a Release Engineer build
   # Push the entire build statedir
   #jenkins_push_fn_statedir
 
