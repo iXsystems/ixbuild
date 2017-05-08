@@ -14,12 +14,7 @@ services.webdav.start = function() {
   describe('webdav service', function() {
     it('should start', function() {
       browser.get('#/pages/services');
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/services') >= 0;
-        }); 
-      }, 30000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/services'), 6000);
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
 
       let btn_el = $$('service').get(15).$$('div > button').first();
@@ -43,12 +38,7 @@ services.webdav.stop = function() {
   describe('webdav service', function() {
     it('should stop', function() {
       browser.get('#/pages/services');
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/services') >= 0;
-        });
-      }, 30000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/services'), 6000);
       browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
 
       var btn_el = $$('service').get(15).$$('div > button').first();
