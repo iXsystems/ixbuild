@@ -1,7 +1,6 @@
 // System storage: volumes, snapshots
 'use strict';
 
-//const html_dnd = require('html-dnd').code;
 const accounts = require('./accounts.js');
 
 var storage = new Object();
@@ -13,30 +12,41 @@ storage.volumes.create = function() {
   describe('storage volume', function() {
     it('should be added', function() {
       browser.get('#/pages/storage/volumes/manager');
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/storage/volumes/manager') >= 0;
-        }); 
-      }, 6000);
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/storage/volumes/manager'));
 
       var vol_name_el = $('input.form-control');
       vol_name_el.sendKeys('testvol');
 
-      var disk_el = $$('app-disk').first();
-      var groups_el = $$('app-vdev > ba-card > div > div > div').first();
-      disk_el.isPresent();
-      groups_el.isPresent();
+      var disk_el = $('app-disk:nth-child(1)')
+      var groups_el = $('app-vdev > ba-card > div > div > div:nth-child(1)')
+      browser.wait(protractor.ExpectedConditions.presenceOf(disk_el), 6000);
+      browser.wait(protractor.ExpectedConditions.presenceOf(groups_el), 6000);
 
       expect(disk_el.getText()).toContain('ada1');
 
-      //browser.executeScript(html_dnd, disk_el.getWebElement(), groups_el.getWebElement());
-      //browser.actions().dragAndDrop(dest_disk_el.getWebElement(), {x:1000, y:1000}).perform();
-      //browser.actions().mouseDown(disk_el.getWebElement()).mouseMove(groups_el.getWebElement()).mouseUp().perform();
-      browser.actions().dragAndDrop(disk_el.getWebElement(), groups_el.getWebElement()).perform();
+      // https://github.com/bevacqua/dragula/issues/65
+      browser.executeScript(function() {
+        var el = document.querySelector('app-disk:nth-child(1)');
+        var target = document.querySelector('app-vdev > ba-card > div > div > div:nth-child(1)');
+        var el_loc = el.getBoundingClientRect();
+        var target_loc = target.getBoundingClientRect();
+        el.style.transition = "all 0.3s ease-in-out";
+        el.style.left = (el_loc.left - 40) + 'px';
+        el.style.top = (el_loc.top - 40) + 'px';
+        el.style.position = 'absolute';
+        el.style.left = (target_loc.left - 90) + 'px';
+        el.style.top = (target_loc.top - 190) + 'px';
+        el.style.position = 'relative';
+        el.style.top = 0;
+        el.style.left = 0;
+        target.append(el);
+      });
 
-      browser.debugger();
-      browser.driver.sleep(20000);
-      browser.pause();
+      //browser.actions().mouseDown(disk_el.getWebElement()).mouseMove(groups_el.getWebElement()).mouseUp().perform();
+      //browser.actions().dragAndDrop(disk_el.getWebElement(), groups_el.getWebElement()).perform();
+
+      //$('app-manager > div > div.row:nth-child(3) > div > button.btn-primary').click();
+      //browser.pause();
     });
     //it('should populate the storage list with the new volume', function() {
     //  

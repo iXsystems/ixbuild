@@ -22,12 +22,7 @@ accounts.login = function() {
   describe('logging in as our root account ', function() {
     it('should authenticate the user and re-direct to the dashboard', function() {
       browser.get('#/login');
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/login') >= 0;
-        }); 
-      }, 6000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/login'), 6000);
       browser.wait(protractor.ExpectedConditions.presenceOf($('#inputUsername')), 6000);
 
       var username = $('#inputUsername');
@@ -47,12 +42,7 @@ accounts.login = function() {
 
       $('[type="submit"]').click();
 
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/dashboard') >= 0;
-        });
-      }, 3000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/dashboard'), 6000);
       expect(browser.driver.getCurrentUrl()).toContain('#/pages/dashboard');
     });
   });
@@ -64,11 +54,7 @@ accounts.logout = function() {
   describe('logging out', function() {
     it('should re-direct to the login page with empty username/password input fields', function() {
       browser.get('#/pages/dashboard');
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/dashboard') >= 0;
-        }); 
-      }, 6000);
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/dashboard'), 6000);
 
       var profile_menu = $('#user-profile-dd');
       profile_menu.isDisplayed().then(function(isVisable) {
@@ -84,12 +70,7 @@ accounts.logout = function() {
         }
       });
 
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/login') >= 0;
-        });
-      }, 3000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/login'), 6000);
       expect(browser.driver.getCurrentUrl()).toContain('#/login');
       var username = $('#inputUsername');
       expect(username.isPresent()).toBe(true);
@@ -134,12 +115,7 @@ accounts.test_add_user = function() {
   describe('adding a new user', function() {
     it('should be able to navigate to the add users view from user listing', function() {
       browser.get('#/pages/users');
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/users') >= 0;
-        }); 
-      }, 6000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/users'), 6000);
       browser.wait(protractor.ExpectedConditions.invisibilityOf($('.ng-busy-default-wrapper')), 5000);
 
       let add_btn = $('button.btn.btn-primary.btn-add');
@@ -150,12 +126,7 @@ accounts.test_add_user = function() {
         }
       });
 
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/users/add') >= 0;
-        }); 
-      }, 6000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/users/add'), 6000);
       expect(browser.driver.getCurrentUrl()).toContain('#/pages/users/add');
     });
     it('should allow a valid new user to be added', function() {
@@ -204,12 +175,7 @@ accounts.test_add_user = function() {
       add_btn.click();
     });
     it('should list the newly created user in the users list', function() {
-      browser.wait(function() {
-        return browser.driver.getCurrentUrl().then(function(actualUrl) {
-          return actualUrl.indexOf('#/pages/users') >= 0;
-        }); 
-      }, 6000);
-
+      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/users'), 6000);
       expect(browser.driver.getCurrentUrl()).toContain('#/pages/users');
 
       // Make sure the user list has finished loading
