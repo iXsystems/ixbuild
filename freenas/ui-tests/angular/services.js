@@ -3,6 +3,7 @@
 'use strict';
 
 const accounts = require('./accounts.js');
+const EC = protractor.ExpectedConditions;
 
 var services = new Object();
 
@@ -34,8 +35,8 @@ services.start_service_by_name = function(servicename) {
           browser.get('#/pages/services');
         }
       });
-      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/services'), 6000);
-      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000);
+      browser.wait(EC.urlContains('#/pages/services'), 6000);
+      browser.wait(EC.presenceOf($('button.btn.btn-primary')), 30000);
       // protractor doesn't take into account the scrolling div.page-top element when scrolling
       // from the bottom of the view to focus on the first service element. This results on the
       // div.page-top element covering the top-most service's row, thus we scroll to the top of the
@@ -49,7 +50,7 @@ services.start_service_by_name = function(servicename) {
           expect(status_el.getText()).toEqual('STOPPED');
           expect(btn.getText()).toEqual('Start');
           btn.click();
-          browser.wait(protractor.ExpectedConditions.invisibilityOf($('service:nth-child(' + idx +') div.ng-busy')), 15000);
+          browser.wait(EC.invisibilityOf($('service:nth-child(' + idx +') div.ng-busy')), 15000);
           expect(btn.getText()).toEqual('Stop');
           expect(status_el.getText()).toEqual('RUNNING');
         }
@@ -70,8 +71,8 @@ services.stop_service_by_name = function(servicename) {
           browser.get('#/pages/services');
         }
       });
-      browser.wait(protractor.ExpectedConditions.urlContains('#/pages/services'), 6000);
-      browser.wait(protractor.ExpectedConditions.presenceOf($('button.btn.btn-primary')), 30000); 
+      browser.wait(EC.urlContains('#/pages/services'), 6000);
+      browser.wait(EC.presenceOf($('button.btn.btn-primary')), 30000); 
       // protractor doesn't take into account the scrolling div.page-top element when scrolling
       // from the bottom of the view to focus on the first service element. This results on the
       // div.page-top element covering the top-most service's row, thus we scroll to the top of the
@@ -85,7 +86,7 @@ services.stop_service_by_name = function(servicename) {
           expect(status_el.getText()).toEqual('RUNNING');
           expect(btn.getText()).toEqual('Stop');
           btn.click();
-          browser.wait(protractor.ExpectedConditions.invisibilityOf($('service:nth-child(' + idx +') div.ng-busy')), 15000);
+          browser.wait(EC.invisibilityOf($('service:nth-child(' + idx +') div.ng-busy')), 15000);
           expect(btn.getText()).toEqual('Start');
           expect(status_el.getText()).toEqual('STOPPED');
         }
