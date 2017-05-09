@@ -11,6 +11,7 @@ net/syncthing
 net-p2p/btsync
 net-p2p/couchpotato
 irc/quassel-core
+sysutils/linux-crashplan
 www/nextcloud
 www/nginx
 www/redmine
