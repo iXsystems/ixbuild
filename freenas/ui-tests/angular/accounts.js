@@ -112,6 +112,14 @@ accounts.test_invalid_login = function() {
 };
 
 accounts.test_add_user = function() {
+
+  var user_data = {
+    username: 'new_test_user',
+    full_name: 'New TestUser',
+    home: '/nonexistent',
+    password: 'testing'
+  };
+
   describe('adding a new user', function() {
     it('should be able to navigate to the add users view from user listing', function() {
       browser.get('#/pages/users');
@@ -136,7 +144,7 @@ accounts.test_add_user = function() {
       username.isDisplayed().then(function(isVisable) {
         if (isVisable) {
           username.clear();
-          username.sendKeys('new_test_user');
+          username.sendKeys(user_data['username']);
         }
       });
 
@@ -144,7 +152,7 @@ accounts.test_add_user = function() {
       fullname.isDisplayed().then(function(isVisable) {
         if (isVisable) {
           fullname.clear();
-          fullname.sendKeys('New TestUser');
+          fullname.sendKeys(user_data['full_name']);
         }
       });
 
@@ -152,7 +160,7 @@ accounts.test_add_user = function() {
       home_dir.isDisplayed().then(function(isVisable) {
         if (isVisable) {
           home_dir.clear();
-          home_dir.sendKeys('/nonexistent');
+          home_dir.sendKeys(user_data['home']);
         }
       });
 
@@ -160,7 +168,7 @@ accounts.test_add_user = function() {
       password.isDisplayed().then(function(isVisable) {
           if (isVisable) {
             password.clear();
-            password.sendKeys('testing');
+            password.sendKeys(user_data['password']);
           }
       });
 
@@ -181,12 +189,22 @@ accounts.test_add_user = function() {
       // Make sure the user list has finished loading
       browser.wait(protractor.ExpectedConditions.presenceOf($('app-entity-list-actions')), 6000);
 
-      // TODO - new user is visible in the user list, yet not found with the following.
-      let tbl_rows = $$('table > tbody > tr');
-      tbl_rows.each(function(row, idx) {
-        if (row.$('td:nth-child(1)').getText() == 'new_test_user') {
-          console.log('FOUND');
-        }
+      $$('table > tbody > tr').each(function(row, idx) {
+        // Find the row where the username column contains our new user
+        row.$('td:nth-child(1)').getText().then(function(username) {
+          if (username == user_data['username']) {
+            expect(row.$('td:nth-child(1)').getText()).toEqual(user_data['username']);
+            expect(row.$('td:nth-child(4)').getText()).toEqual(user_data['home']);
+            expect(row.$('td:nth-child(6)').getText()).toEqual('false');
+            row.$$('app-entity-list-actions > span > button').each(function(btn, btn_idx) {
+              btn.getText().then(function(btn_text) {
+                if (btn_text == 'Delete') {
+                  btn.click();
+                }
+              });
+            });
+          }
+        });
       });
     });
   });
