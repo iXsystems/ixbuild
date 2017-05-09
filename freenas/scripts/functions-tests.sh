@@ -218,8 +218,6 @@ rc_test()
 }
 
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 ssh_test()
 {
   export TESTSTDOUT="/tmp/.sshCmdTestStdOut"
@@ -243,11 +241,20 @@ ssh_test()
     return 1
   fi
 
-  # Make SSH connection
-  ssh -o StrictHostKeyChecking=no \
-      -o UserKnownHostsFile=/dev/null \
-      -o VerifyHostKeyDNS=no \
-      ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  # Use password auth if password set and no local ssh key found
+  if [ -n "${fpass}" ] && ssh-add -l | grep -q 'The agent has no identities.'; then
+    sshpass -p ${fpass} \
+      ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  fi
+
   return $?
 }
 
@@ -292,11 +299,19 @@ _scp_test()
     return 1
   fi
 
-  # SCP connection
-  scp -o StrictHostKeyChecking=no \
-      -o UserKnownHostsFile=/dev/null \
-      -o VerifyHostKeyDNS=no \
-      "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  # Use password auth if password set and no local ssh key found
+  if [ -n "${fpass}" ] && ssh-add -l | grep -q 'The agent has no identities.'; then
+    sshpass -p ${fpass} \
+      scp -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  else
+    scp -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  fi
   SCP_CMD_RESULTS=$?
 
   if [ $SCP_CMD_RESULTS -ne 0 ]; then
@@ -309,8 +324,6 @@ _scp_test()
 }
 
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 osx_test()
 {
   export TESTSTDOUT="/tmp/.osxCmdTestStdOut"
@@ -328,12 +341,55 @@ osx_test()
     return 1
   fi
 
-  # Make SSH connection
-  ssh -o StrictHostKeyChecking=no \
-      -o UserKnownHostsFile=/dev/null \
-      -o VerifyHostKeyDNS=no \
-      -o PubkeyAcceptedKeyTypes=+ssh-dss \
-      ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  # Use SSH keys if the $OSX_PASSWORD is not set
+  if [ -n "${OSX_PASSWORD}" ]; then
+    sshpass -p ${OSX_PASSWORD} \
+      ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        -o PubkeyAcceptedKeyTypes=+ssh-dss \
+        ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  fi
+
+  return $?
+}
+
+# $1 = Command to run
+bsd_test()
+{
+  export TESTSTDOUT="/tmp/.bsdCmdTestStdOut"
+  export TESTSTDERR="/tmp/.bsdCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  if [ -z "${BSD_HOST}" ] ; then
+    echo "SSH server IP address required for bsd_test()."
+    return 1
+  fi
+
+  if [ -z "${BSD_USERNAME}" ] ; then
+    echo "SSH server username required for bsd_test()."
+    return 1
+  fi
+
+  # Use SSH keys if the $BSD_PASSWORD is not set
+  if [ -n "${BSD_PASSWORD}" ]; then
+    sshpass -p ${BSD_PASSWORD} \
+      ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${BSD_USERNAME}@${BSD_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${BSD_USERNAME}@${BSD_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  fi
 
   return $?
 }
