@@ -94,7 +94,7 @@ ad_bsd_tests()
   echo password=12345678 >> ~/.nsmbrc
 
   echo_test_title "Mounting SMB"
-  rc_test "mount_smbfs -N -I ${ip} -W AD01 '//aduser@testnas/${SMB_NAME}' '${MOUNTPOINT}'" || return 1
+  bsd_test "mount_smbfs -N -I ${ip} -W AD01 '//aduser@testnas/${SMB_NAME}' '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Verify that SMB share has finished mounting"
   wait_for_bsd_mnt "${MOUNTPOINT}"
@@ -102,28 +102,28 @@ ad_bsd_tests()
 
   local device_name=`dirname "${MOUNTPOINT}"`
   echo_test_title "Checking permissions on ${MOUNTPOINT}"
-  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+  bsd_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
 
   echo_test_title "Creating SMB file"
-  rc_test "touch '${MOUNTPOINT}/testfile'" || return 1
+  bsd_test "touch '${MOUNTPOINT}/testfile'" || return 1
 
   echo_test_title "Moving SMB file"
-  rc_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
+  bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Copying SMB file"
-  rc_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
+  bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
 
   echo_test_title "Deleting SMB file 1/2"
-  rc_test "rm '${MOUNTPOINT}/testfile'" || return 1
+  bsd_test "rm '${MOUNTPOINT}/testfile'" || return 1
 
   echo_test_title "Deleting SMB file 2/2"
-  rc_test "rm '${MOUNTPOINT}/testfile2'" || return 1
+  bsd_test "rm '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Unmounting SMB"
-  rc_test "umount '${MOUNTPOINT}'" || return 1
+  bsd_test "umount '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Removing SMB mountpoint"
-  rc_test "rmdir '${MOUNTPOINT}'" || return 1
+  bsd_test "rmdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Removing SMB share on ${SMB_PATH}"
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
