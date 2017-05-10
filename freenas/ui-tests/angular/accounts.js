@@ -86,6 +86,7 @@ accounts.test_invalid_login = function() {
   describe('before logging in', function() {
     it('an invalid login attempt should be rejected', function() {
       browser.get('#/login');
+      expect(browser.driver.getCurrentUrl()).toContain('#/login');
 
       var username = $('#inputUsername');
       browser.wait(EC.presenceOf(username), 5000);
@@ -200,23 +201,50 @@ accounts.test_add_user = function() {
       expect(row.$('td:nth-child(1)').getText()).toEqual(user_data['username']);
       expect(row.$('td:nth-child(4)').getText()).toEqual(user_data['home']);
       expect(row.$('td:nth-child(6)').getText()).toEqual('false');
-
+    });
+    it('should allow the user to be deleted from the user list', function() {
+      expect(browser.driver.getCurrentUrl()).toContain('#/pages/users');
+      var row = $$('table > tbody > tr').filter(function(elem) {
+        return elem.$('td:nth-child(1)').getText().then(function(username) {
+          return username === user_data['username'];
+        });
+      }).first();
       var del_btn = row.$$('app-entity-list-actions > span > button').filter(function(elem) {
         return elem.getText().then(function(btn_txt) {
           return btn_txt === 'Delete';
         });
       });
+
+      expect(del_btn.getText()).toContain('Delete');
       del_btn.click();
+
       browser.wait(EC.urlContains('#/pages/users/delete/'), 15000);
     });
     it('should allow deletion of newly created user', function() {
       expect(browser.driver.getCurrentUrl()).toContain('#/pages/users/delete/');
 
-      browser.wait(EC.presenceOf($('button.btn-danger')), 15000);
-      $('button.btn-danger').click();
+      var confirm_btn = $('button.btn-danger');
+      browser.wait(EC.presenceOf(confirm_btn), 15000);
+
+      expect(confirm_btn.getText()).toEqual('Yes');
+      confirm_btn.click();
 
       browser.wait(EC.urlContains('#/pages/users'), 15000);
       expect(browser.driver.getCurrentUrl()).toContain('#/pages/users');
+    });
+    it('should no longer list deleted user in the user list', function() {
+      browser.driver.getCurrentUrl().then(function(actualUrl) {
+        if (actualUrl.indexOf('#/pages/users') < 0) {
+          browser.get('#/pages/users');
+        }
+      });
+      expect(browser.driver.getCurrentUrl()).toContain('#/pages/users');
+      var row = $$('table > tbody > tr').filter(function(elem) {
+        return elem.$('td:nth-child(1)').getText().then(function(username) {
+          return username === user_data['username'];
+        });
+      }).first();
+      expect(row.isPresent()).toBeFalsy();
     });
   });
 }
