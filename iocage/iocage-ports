@@ -2,6 +2,7 @@ databases/mysql56-server
 databases/postgresql93-server
 databases/postgresql93-contrib
 devel/jenkins
+devel/jenkins-lts
 editors/libreoffice
 games/minecraft-server
 multimedia/emby-server
