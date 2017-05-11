@@ -168,7 +168,7 @@ repl_rest_request()
 {
   if [ -z "$REPLTARGET" -o -z "$REPLUSERNAME" -o -z "$REPLPASSWORD" ]; then
     echo -n "; missing required replication settings"
-    # null-out resty results to ensure "check_rest_request" test fails
+    # clear out resty results to ensure "check_rest_response" test fails
     echo -n "" > ${RESTYOUT}
     echo -n "" > ${RESTYERR}
     return 1
@@ -637,7 +637,7 @@ check_rest_response()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
-  grep -qi "$1" ${RESTYERR}
+  grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
   if [ $? -ne 0 ] ; then
     cat ${RESTYERR}
     cat ${RESTYOUT}
@@ -651,7 +651,7 @@ check_rest_response()
 
 check_rest_response_continue()
 {
-  grep -q "$1" ${RESTYERR}
+  grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
   return $?
 }
 
