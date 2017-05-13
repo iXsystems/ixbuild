@@ -47,10 +47,19 @@ merge_trueos_src_ports()
    # If on 10.x we can stop now
    if [ -n "$TRUEOSLEGACY" ] ; then return 0 ; fi
 
-   while read repo
+   while read line
    do
+     unset repo
+     unset _branch
+     repo=`echo $line | cut -d ' ' -f 1`
+     _branch=`echo $line | cut -d ' ' -f 2`
      dname=$(basename $repo)
-     rc_halt "git clone --depth=1 https://github.com/${repo}.git"
+
+     if [ -n "$branch" ] ; then
+       rc_halt "git clone -b ${_branch} --depth=1 https://github.com/${repo}.git"
+     else
+       rc_halt "git clone --depth=1 https://github.com/${repo}.git"
+     fi
      rc_halt "cd $dname"
      rc_halt "./mkport.sh ${portsdir} ${distCache}"
      rc_halt "cd $mcwd" >/dev/null 2>/dev/null
