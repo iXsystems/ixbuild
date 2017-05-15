@@ -686,22 +686,26 @@ check_rest_response()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
   grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
   if [ $? -ne 0 ] ; then
-    cat ${RESTYERR}
-    cat ${RESTYOUT}
-    echo_fail
+    if [ "$SILENT" == "false" ]; then
+      cat ${RESTYERR}
+      cat ${RESTYOUT}
+      echo_fail
+    fi
     return 1
   fi
 
-  echo_ok
+  if [ "$SILENT" == "false" ]; then
+    echo_ok
+  fi
   return 0
-}
-
-check_rest_response_continue()
-{
-  grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
-  return $?
 }
 
 set_test_group_text()
@@ -744,7 +748,7 @@ wait_for_avail()
   while :
   do
     rest_request "GET" "${ENDPOINT}"
-    check_rest_response_continue "200 OK"
+    check_rest_response -q "200 OK"
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
