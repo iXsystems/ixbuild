@@ -5,6 +5,11 @@ mypath=`realpath $0`
 cd `dirname $mypath`
 export PROGDIR="`realpath`"
 
+# Skip updating git repo if we are using iocage basejails
+if [ -d "/mnt/tank/ixbuild/" ] ; then
+  export JENKINS_DO_UPDATE="YES"
+fi
+
 if [ -z "$JENKINS_DO_UPDATE" ] ; then
   # Before we begin any build, make sure we are updated from git
   git pull
@@ -87,11 +92,6 @@ fi
 . build.conf
 . functions.sh
 
-# Look for centralized config and source if found
-if [ -f "/autoinstalls/globalconfig/build.conf" ] ; then
-. /autoinstalls/globalconfig/build.conf
-fi
-
 ######################################################
 
 case $TYPE in
@@ -119,7 +119,9 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
       iocage_pkgs_push) jenkins_iocage_pkgs_push ;;
                freenas) jenkins_freenas ;;
          freenas-tests) jenkins_freenas_tests ;;
+  freenas-tests-jailed) jenkins_freenas_tests_jailed ;;
      freenas-run-tests) jenkins_freenas_run_tests ;;
+freenas-run-tests-jailed) jenkins_freenas_run_tests_jailed ;;
          freenas-ltest) jenkins_freenas_live_tests ;;
       freenas-lupgrade) jenkins_freenas_live_upgrade ;;
        freenas-tn-docs) jenkins_truenas_docs ;;

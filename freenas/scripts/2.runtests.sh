@@ -76,10 +76,15 @@ if [ -z "$VMBACKEND" ] ; then
   VMBACKEND="vbox"
 fi
 
+# Copy ISO to autoinstalls if using jails
+if [ -f /tmp/$BUILDTAG ] ; then
+  cp /$BUILDTAG.iso /autoinstalls
+fi
+
 # Determine which VM backend to start
 case ${VMBACKEND} in
      bhyve) start_bhyve ;;
-     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso
+     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null & 
      daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
      sleep 30
            clean_xml_results
@@ -100,4 +105,8 @@ esac
 clean_xml_results
 
 # Run tests now
-run_tests
+if [ -f "/tmp/${BUILDTAG}" ] ; then
+  exit 0
+else
+  run_tests
+fi

@@ -12,6 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
 # Installl modules
 pip3.6 install requests
+pip3.6 install ws4py
 
 #################################################################
 # Run the tests now!
@@ -22,7 +23,7 @@ echo "Using API Address: http://${FNASTESTIP}/api/v2.0"
 git clone https://www.github.com/freenas/freenas --depth=1 /freenas
 cd /freenas/src/middlewared
 pip3.6 uninstall -y middlewared.client
-python3.6 setup_client.py install
+python3.6 setup_client.py install --single-version-externally-managed --record $(mktemp)
 cd /freenas/src/middlewared/middlewared/pytest
 echo [Target] > target.conf
 echo hostname = ${FNASTESTIP} >> target.conf

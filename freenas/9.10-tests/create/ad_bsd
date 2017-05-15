@@ -84,6 +84,8 @@ ad_bsd_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
+  return 0
+
   sleep 10
 
   # Store credentials file for mount_smb
