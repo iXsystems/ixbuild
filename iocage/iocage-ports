@@ -1,5 +1,8 @@
 databases/mysql56-server
+databases/postgresql93-server
+databases/postgresql93-contrib
 devel/jenkins
+devel/jenkins-lts
 editors/libreoffice
 games/minecraft-server
 multimedia/emby-server
@@ -9,6 +12,7 @@ net/syncthing
 net-p2p/btsync
 net-p2p/couchpotato
 irc/quassel-core
+sysutils/linux-crashplan
 www/nextcloud
 www/nginx
 www/redmine
