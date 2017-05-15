@@ -83,21 +83,21 @@ fi
 
 # Determine which VM backend to start
 case ${VMBACKEND} in
-     bhyve) start_bhyve ;;
-     esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null & 
-     daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
-     sleep 30
-           clean_xml_results
-           echo "Shutting down any previous instances of ${VM}.."
-     stop_vmware
-           sleep 60
-           echo "Reverting to snapshot..."
-           revert_vmware
-           sleep 30
-     install_vmware
-           sleep 60
-     boot_vmware
-     ;;
+  bhyve) start_bhyve ;;
+  esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null &
+    daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
+    sleep 30
+    clean_xml_results
+    echo "Shutting down any previous instances of ${VM}.."
+    stop_vmware
+    sleep 60
+    echo "Reverting to snapshot..."
+    revert_vmware
+    sleep 30
+    install_vmware
+    sleep 60
+    boot_vmware
+    ;;
   *) start_vbox ;;
 esac
 
