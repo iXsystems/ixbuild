@@ -15,86 +15,116 @@ storage_tests()
   set_test_group_text "1 - Create - Storage tests" "46"
   CLASSNAME=ixbuild.resty.functional.create.storage
 
-# Set the default VMBACKEND
-if [ -z "$VMBACKEND" ] ; then
-  VMBACKEND="vbox"
-  echo "No virtual machine backend specified, defaulting to '${VMBACKEND}'."
-fi
+  VOL_NAME="tank"
 
-# Determine which VM backend to use for storage
-case ${VMBACKEND} in
-  esxi)
-    export disk1="da0"
-    export disk2="da1"
-    ;;
-  vbox)
-    export disk1="ada1"
-    export disk2="ada2"
-    ;;
-esac
+  # Determine which VM backend to use for storage
+  case "${VMBACKEND}" in
+    esxi)
+      export disk1="da0"
+      export disk2="da1"
+      ;;
+    *)
+      export disk1="ada1"
+      export disk2="ada2"
+      ;;
+  esac
 
   # Check getting disks
   echo_test_title "Disks / API functionality"
   rest_request "GET" "/storage/disk/"
   check_rest_response "200 OK" || return 1
 
+  rest_request "GET" "/storage/volume/${VOL_NAME}/"
+  local existing_datasets=$(cat $RESTYOUT | jq '.children[].children[] | .name')
+
   # Check creating a zpool
   echo_test_title "Creating volume"
-  rest_request "POST" "/storage/volume/" '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "'${disk1}'", "'${disk2}'" ] } ] }'
-  check_rest_response "201 Created" || return 1
+  rest_request "GET" "/storage/volume/"
+  if ! check_property_value -q "return this.name" "${VOL_NAME}" ; then
+    rest_request "POST" "/storage/volume/" '{ "volume_name" : "'"${VOL_NAME}"'", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "'${disk1}'", "'${disk2}'" ] } ] }'
+    check_rest_response "201 Created" || return 1
+  else
+    echo_skipped
+  fi
 
   # Check creating a dataset 01/20 /share
-  echo_test_title "Creating dataset 01/20 tank/share"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "share" }'
-  check_rest_response "201 Created" || return 1
+  echo_test_title "Creating dataset 01/20 ${VOL_NAME}/share"
+  if ! echo $existing_datasets | grep -q '"share"' ; then
+    rest_request "POST" "/storage/volume/${VOL_NAME}/datasets/" '{ "name": "share", "pool": "'"${VOL_NAME}"'" }'
+    check_rest_response "201 Created" || return 1
+  else
+    echo_skipped
+  fi
 
   # Check creating a dataset 02/20 /jails
-  echo_test_title "Creating dataset 02/20 tank/jails"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
-  check_rest_response "201 Created" || return 1
+  echo_test_title "Creating dataset 02/20 ${VOL_NAME}/jails"
+  if ! echo $existing_datasets | grep -q '"jails"' ; then
+    rest_request "POST" "/storage/volume/${VOL_NAME}/datasets/" '{ "name": "jails", "pool": "'"${VOL_NAME}"'"}'
+    check_rest_response "201 Created" || return 1
+  else
+    echo_skipped
+  fi
 
   # Set the permissions of the dataset 01/20
-  echo_test_title "Changing permissions on /mnt/tank/share"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  echo_test_title "Changing permissions on /mnt/${VOL_NAME}/share"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${VOL_NAME}"'/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
   # Set the permissions of the dataset 02/20
-  echo_test_title "Changing permissions on /mnt/tank/jails"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/jails", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  echo_test_title "Changing permissions on /mnt/${VOL_NAME}/jails"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${VOL_NAME}"'/jails", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
 
   local DATASET_CNT=20
   for count in $(seq -f "%02g" 3 $DATASET_CNT)
   do
-    echo_test_title "Creating dataset ${count}/${DATASET_CNT} tank/dataset${count}"
-    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset'"${count}"'" }'
-    check_rest_response "201 Created" || return 1
+    echo_test_title "Creating dataset ${count}/${DATASET_CNT} ${VOL_NAME}/dataset${count}"
+    if ! echo $existing_datasets | grep -q '"dataset'${count}'"' ; then
+      rest_request "POST" "/storage/volume/${VOL_NAME}/datasets/" '{ "name": "dataset'"${count}"'", "pool": "'"${VOL_NAME}"'" }'
+      check_rest_response "201 Created" || return 1
+    else
+      echo_skipped
+    fi
 
-    echo_test_title "Changing permissions on /mnt/tank/dataset${count}"
-    rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset'"${count}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+    echo_test_title "Changing permissions on /mnt/${VOL_NAME}/dataset${count}"
+    rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${VOL_NAME}"'/dataset'"${count}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
     check_rest_response "201 Created" || return 1
   done
 
   # Check creating a ZFS snapshot
-  echo_test_title "Creating a ZFS snapshot tank@test"
-  rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
+  echo_test_title "Creating a ZFS snapshot ${VOL_NAME}@test"
+  rest_request "POST" "/storage/snapshot/" '{ "dataset": "'"${VOL_NAME}"'", "name": "test" }'
   check_rest_response "201 Created" || return 1
 
   # Create a dataset for testing snapshot
-  echo_test_title "Creating dataset for testing snapshot rollback tank/snapcheck"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "snapcheck" }'
-  check_rest_response "201 Created" || return 1
+  echo_test_title "Creating dataset for testing snapshot rollback ${VOL_NAME}/snapcheck"
+  if ! echo $existing_datasets | grep -q '"snapcheck"' ; then
+    rest_request "POST" "/storage/volume/${VOL_NAME}/datasets/" '{ "name": "snapcheck" }'
+    check_rest_response "201 Created" || return 1
+  else
+    echo_skipped
+  fi
 
   # Check creating a ZVOL 1/2
   echo_test_title "Creating a ZVOL 1/2"
-  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol1", "volsize": "10M" }'
-  check_rest_response "\(201\)\|\(202\)" || return 1
+  rest_request "GET" "/storage/volume/${VOL_NAME}/zvols/"
+  if ! check_property_value -q "return this.name" "testzvol1" ; then
+    rest_request "POST" "/storage/volume/${VOL_NAME}/zvols/" '{ "name": "testzvol1", "volsize": "10M" }'
+    check_rest_response "\(201\)\|\(202\)" || return 1
+  else
+    echo_skipped
+  fi
 
   # Check creating a ZVOL 2/2
   echo_test_title "Creating a ZVOL 2/2"
-  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol2", "volsize": "10M" }'
-  check_rest_response "\(201\)\|\(202\)" || return 1
+  rest_request "GET" "/storage/volume/${VOL_NAME}/zvols/"
+  if ! check_property_value -q "return this.name" "testzvol2" ; then
+    rest_request "POST" "/storage/volume/${VOL_NAME}/zvols/" '{ "name": "testzvol2", "volsize": "10M" }'
+    check_rest_response "\(201\)\|\(202\)" || return 1
+  else
+    echo_skipped
+  fi
 
   return 0
 }

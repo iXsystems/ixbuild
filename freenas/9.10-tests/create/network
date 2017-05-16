@@ -39,21 +39,28 @@ network_tests()
   wait_for_avail_port "80"
   check_exit_status || return 1
 
-  if [ -n "$BRIDGEIP" ] ; then
-    # Using the bridged adapter settings
-    echo_test_title "Setting bridged IP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
-    check_rest_response "201 Created"
+  echo_test_title "Checking for configured network interface(s)"
+  rest_request "GET" "/network/interface"
+  check_rest_response "200 OK" || return 1
 
-    # Set the global config stuff
-    echo_test_title "Setting default route and DNS"
-    rest_request "PUT" "/network/globalconfiguration/" '{ "gc_domain": "'"${BRIDGEDOMAIN}"'", "gc_ipv4gateway": "'"${BRIDGEGW}"'", "gc_hostname": "'"${BRIDGEHOST}"'", "gc_nameserver1": "'"${BRIDGEDNS}"'" }'
-    check_rest_response "200 OK"
-  else
-    # Using the NAT mode
-    echo_test_title "Setting DHCP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
-    check_rest_response "201 Created"
+  if ! check_property_value -q "return this.int_interface" "em1" ; then
+    # Configure network interface(s) since none found.
+    if [ -n "$BRIDGEIP" ] ; then
+      # Using the bridged adapter settings
+      echo_test_title "Setting bridged IP on em1"
+      rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
+      check_rest_response "201 Created"
+
+      # Set the global config stuff
+      echo_test_title "Setting default route and DNS"
+      rest_request "PUT" "/network/globalconfiguration/" '{ "gc_domain": "'"${BRIDGEDOMAIN}"'", "gc_ipv4gateway": "'"${BRIDGEGW}"'", "gc_hostname": "'"${BRIDGEHOST}"'", "gc_nameserver1": "'"${BRIDGEDNS}"'" }'
+      check_rest_response "200 OK"
+    else
+      # Using the NAT mode
+      echo_test_title "Setting DHCP on em1"
+      rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
+      check_rest_response "201 Created"
+    fi
   fi
 }
 
