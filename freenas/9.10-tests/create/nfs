@@ -54,28 +54,28 @@ nfs_tests()
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating NFS mountpoint"
-  rc_test "mkdir '${MOUNTPOINT}'" || return 1
+  bsd_test "mkdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Mounting NFS"
-  rc_test "mount_nfs ${ip}:${NFS_PATH} ${MOUNTPOINT}" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60" || return 1
+  bsd_test "mount_nfs ${ip}:${NFS_PATH} ${MOUNTPOINT}" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60" || return 1
 
   echo_test_title "Creating NFS file"
-  rc_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'" || return 1
+  bsd_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Moving NFS file"
-  rc_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
+  bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Copying NFS file"
-  rc_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
+  bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
 
   echo_test_title "Deleting NFS file"
-  rc_test "rm '${MOUNTPOINT}/testfile2'" || return 1
+  bsd_test "rm '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Unmounting NFS"
-  rc_test "umount '${MOUNTPOINT}'" || return 1
+  bsd_test "umount '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Removing NFS mountpoint"
-  rc_test "rmdir '${MOUNTPOINT}'" || return 1
+  bsd_test "rmdir '${MOUNTPOINT}'" || return 1
 }
 
 # Init function, this is called after module is sourced
