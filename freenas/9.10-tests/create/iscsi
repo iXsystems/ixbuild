@@ -78,12 +78,12 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
+  bsd_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
 
   echo_test_title "Waiting for iscsi connection before grabbing device name"
   # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
   # have been established before -L[isting] results
-  rc_test "iscsictl -L -w 30" || return 1
+  bsd_test "iscsictl -L -w 30" || return 1
 
   # Get the device for the connect target
   local iscsi_devname=`iscsictl -L | awk '$2 == "'${ip}':3620" && $3 == "Connected:" {print $4}'`
@@ -93,34 +93,34 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Format the target volume"
-  rc_test "newfs /dev/${iscsi_devname}" || return 1
+  bsd_test "newfs /dev/${iscsi_devname}" || return 1
 
   echo_test_title "Creating iSCSI mountpoint"
-  rc_test "mkdir '${MOUNTPOINT}'" || return 1
+  bsd_test "mkdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Mount the target volume"
-  rc_test "mount '/dev/${iscsi_devname}' '${MOUNTPOINT}'" || return 1
+  bsd_test "mount '/dev/${iscsi_devname}' '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Creating file"
-  rc_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'" || return 1
+  bsd_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Moving file"
-  rc_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
+  bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Copying file"
-  rc_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
+  bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
 
   echo_test_title "Deleting file"
-  rc_test "rm '${MOUNTPOINT}/testfile2'" || return 1
+  bsd_test "rm '${MOUNTPOINT}/testfile2'" || return 1
 
   echo_test_title "Unmounting iSCSI volume"
-  rc_test "umount '${MOUNTPOINT}'" || return 1
+  bsd_test "umount '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Removing iSCSI volume mountpoint"
-  rc_test "rmdir '${MOUNTPOINT}'" || return 1
+  bsd_test "rmdir '${MOUNTPOINT}'" || return 1
 
   echo_test_title "Disconnect all targets"
-  rc_test "iscsictl -R -a" || return 1
+  bsd_test "iscsictl -R -a" || return 1
 
   # Disable the iSCSI service
   echo_test_title "Disable iSCSI service"
