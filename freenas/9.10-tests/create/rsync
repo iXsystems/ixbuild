@@ -31,7 +31,7 @@ rsync_tests() {
 
   # Test rsync
   echo_test_title "Testing rsync access"
-  rc_test "rsync -avn ${ip}::testmod" || return 1
+  bsd_test "rsync -avn ${ip}::testmod" || return 1
 }
 
 # Init function, this is called after module is sourced
