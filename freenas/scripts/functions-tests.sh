@@ -32,6 +32,12 @@ start_xml_results() {
 EOF
 }
 
+# $1 = String that needs special characters escaped
+escape_special_chars()
+{
+  echo $1 | sed 's|&|\&amp;|g' | sed 's|<|\&lt;|g' | sed 's|>|\&gt;|g' | sed 's|"|\&quot;|g' | sed "s|'|\&apos;|g" | tr -d '\r'
+}
+
 #          $1 = true/false
 #          $2 = error message
 #  $CLASSNAME = Sub class of test results
@@ -50,29 +56,27 @@ add_xml_result() {
 
   if [ "$1" = "true" ] ; then
     cat >>${XMLRESULTS} << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
+    <testcase classname="$CLASSNAME" name="$(escape_special_chars "$TESTNAME")" time="$TIMEELAPSED">
 EOF
   elif [ "$1" = "skipped" ] ; then
     cat >>${XMLRESULTS} << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME"><skipped/>
+    <testcase classname="$CLASSNAME" name="$(escape_special_chars "$TESTNAME")"><skipped/>
 EOF
   else
     # Failed!
     cat >>${XMLRESULTS} << EOF
-    <testcase classname="$CLASSNAME" name="$TESTNAME" time="$TIMEELAPSED">
-        <failure type="failure">$2</failure>
+    <testcase classname="$CLASSNAME" name="$(escape_special_chars "$TESTNAME")" time="$TIMEELAPSED">
+        <failure type="failure">$(escape_special_chars $2)</failure>
 EOF
   fi
 
-  local ESCAPED_TESTCMD=$(echo $TESTCMD | sed "s|&|&amp;|g")
-
   # Optional stdout / stderr logs
   if [ -n "$TESTSTDOUT" -a -e "$TESTSTDOUT" ] ; then
-    echo -e "         <system-out>Command Run:\n$ESCAPE_TESTCMD\n\nResponse:\n" >> ${XMLRESULTS}
-    echo "`cat $TESTSTDOUT | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-out>" >> ${XMLRESULTS}
+    echo -e "         <system-out>Command Run:\n$(escape_special_chars "$TESTCMD")\n\nResponse:\n" >> ${XMLRESULTS}
+    echo "$(escape_special_chars "$(cat "$TESTSTDOUT")")</system-out>" >> ${XMLRESULTS}
   fi
   if [ -n "$TESTSTDERR" -a -e "$TESTSTDERR" ] ; then
-    echo "         <system-err>`cat $TESTSTDERR | sed 's|<||g' | sed 's|>||g' | tr -d '\r'`</system-err>" >> ${XMLRESULTS}
+    echo "         <system-err>$(escape_special_chars "$(cat "$TESTSTDERR")")</system-err>" >> ${XMLRESULTS}
   fi
 
   # Close the error tag
@@ -156,6 +160,32 @@ rest_request()
   return 1;
 }
 
+# Make a rest request against the replication target API
+# $1 = RESTY type to run 
+# $2 = RESTY URL
+# $3 = JSON to pass to RESTY
+repl_rest_request()
+{
+  if [ -z "$REPLTARGET" -o -z "$REPLUSERNAME" -o -z "$REPLPASSWORD" ]; then
+    echo -n "; missing required replication settings"
+    # clear out resty results to ensure "check_rest_response" test fails
+    echo -n "" > ${RESTYOUT}
+    echo -n "" > ${RESTYERR}
+    return 1
+  fi
+
+  if [ -n "$3" ]; then
+    curl -sLi -X "$1" -H "Accept: application/json" -H "Content-Type: application/json" \
+      -u ${REPLUSERNAME}:${REPLPASSWORD} "http://${REPLTARGET}:80/api/v1.0/${2}" -d "$3" \
+      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"'"$RESTYERR"'":"'"$RESTYOUT"'")}'
+  else
+    curl -sLi -X "$1" -H "Accept: application/json" -H "Content-Type: application/json" \
+      -u ${REPLUSERNAME}:${REPLPASSWORD} "http://${REPLTARGET}:80/api/v1.0/${2}" \
+      | awk -v bl=1 'bl{bl=0; h=($0 ~ /HTTP\/1/)} /^\r?$/{bl=1} {print $0>(h?"'"$RESTYERR"'":"'"$RESTYOUT"'")}'
+  fi
+  return $?
+}
+
 # $1 = Command to run
 # $2 = Command to run if $1 fails
 # $3 = Optional timeout
@@ -217,15 +247,20 @@ rc_test()
   return 1
 }
 
+# (Optional) -q switch as first argument silences std_out
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 ssh_test()
 {
   export TESTSTDOUT="/tmp/.sshCmdTestStdOut"
   export TESTSTDERR="/tmp/.sshCmdTestStdErr"
   touch $TESTSTDOUT
   touch $TESTSTDERR
+
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
 
   sshserver=${ip}
   if [ -z "$sshserver" ] ; then
@@ -245,80 +280,181 @@ ssh_test()
 
   # Make SSH connection
   sshpass -p ${fpass} \
-    ssh -o StrictHostKeyChecking=no \
+    ssh -vvv \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
+        -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  return $?
+  local EXITSTATUS=$?
+
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed running: $1"
+    fi
+  fi
+
+  return $EXITSTATUS
 }
 
+# (Optional) -q switch as first argument silences std_out
+# $1 = Command to run
+ssh_repl_test()
+{
+  export TESTSTDOUT="/tmp/.sshReplCmdTestStdOut"
+  export TESTSTDERR="/tmp/.sshReplCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
+  if [ -z "$REPLTARGET" ] ; then
+    echo "SSH server IP address required for ssh_repl_test()."
+    return 1
+  fi
+
+  # Test fuser and fpass values
+  if [ -z "${REPLUSERNAME}" ] || [ -z "${REPLPASSWORD}" ] ; then
+    echo "SSH server username and password required for ssh_repl_test()."
+    return 1
+  fi
+
+  # Make SSH connection
+  sshpass -p ${REPLPASSWORD} \
+    ssh -vvv \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
+        -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${REPLUSERNAME}@${REPLTARGET} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  local EXITSTATUS=$?
+
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed running: $1"
+    fi
+  fi
+
+  return $EXITSTATUS
+}
+
+# (Optional) -q switch as first argument silences std_out
 # $1 = Local file to copy to the remote host
 # $2 = Location to store file on remote host
 scp_to_test()
 {
-  _scp_test "${1}" "${fuser}@${sshserver}:${2}"
+  if [ "$1" == "-q" ]; then
+    shift
+    __scp_test -q "${1}" "${fuser}@${sshserver}:${2}"
+  else
+    __scp_test "${1}" "${fuser}@${sshserver}:${2}"
+  fi
+  return $?
 }
 
+# (Optional) -q switch as first argument silences std_out
 # $1 = File to copy from the remote host
 # $2 = Location to copy file to
 scp_from_test()
 {
-  _scp_test "${fuser}@${sshserver}:${1}" "${2}"
+  if [ "$1" == "-q" ]; then
+    shift
+    __scp_test -q "${fuser}@${sshserver}:${1}" "${2}"
+  else
+    __scp_test "${fuser}@${sshserver}:${1}" "${2}"
+  fi
+  return $?
+}
+
+# SCP from the replication test target to the test executor
+# (Optional) -q switch as first argument silences std_out
+# $1 = File to copy from the remote host
+# $2 = Location to copy file to
+scp_from_repl()
+{
+  if [ "$1" == "-q" ]; then
+    shift
+    __scp_test -q "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
+  else
+    __scp_test "${REPLUSERNAME}@${REPLTARGET}:${1}" "${2}" "${REPLPASSWORD}"
+  fi
+  return $?
 }
 
 # Private method, see scp_from_test or scp_to_test
+# (Optional) -q switch as first argument silences std_out
 # $1 = SCP from [[user@]host1:]file1
 # $2 = SCP to [[user@]host1:]file1
-_scp_test()
+# $3 = (Optional) SCP password (if different from $fpass)
+__scp_test()
 {
   export TESTSTDOUT="/tmp/.scpCmdTestStdOut"
   export TESTSTDERR="/tmp/.scpCmdTestStdErr"
   touch $TESTSTDOUT
   touch $TESTSTDERR
 
-  sshserver=${ip}
-
-  if [ -z "$sshserver" ]; then
-    sshserver=$FNASTESTIP
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
   fi
 
-  if [ -z "$sshserver" ]; then
-    echo "SCP server IP address request for scp_test()."
-    return 1
-  fi
-
-  # Test fuser and fpass values
-  if [ -z "${fpass}" ] || [ -z "${fuser}" ]; then
-    echo "SCP server username and password required for scp_test()."
-    return 1
+  local password=${fpass}
+  if [ -n "$3" ]; then
+    password=$3
   fi
 
   # SCP connection
-  sshpass -p ${fpass} \
+  sshpass -p ${password} \
     scp -o StrictHostKeyChecking=no \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
-  SCP_CMD_RESULTS=$?
+  local EXITSTATUS=$?
 
-  if [ $SCP_CMD_RESULTS -ne 0 ]; then
-    echo "Failed on test module: $1"
-    FAILEDMODULES="${FAILEDMODULES}:::${1}:::"
-    return 1
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed while SCPing from $1 to $2"
+    fi
   fi
 
-  return $SCP_CMD_RESULTS
+  return $EXITSTATUS
 }
 
+# (Optional) -q switch as first argument silences std_out
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 osx_test()
 {
   export TESTSTDOUT="/tmp/.osxCmdTestStdOut"
   export TESTSTDERR="/tmp/.osxCmdTestStdErr"
   touch $TESTSTDOUT
   touch $TESTSTDERR
+
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
 
   if [ -z "${OSX_HOST}" ] ; then
     echo "SSH server IP address required for osx_test()."
@@ -332,12 +468,26 @@ osx_test()
 
   # Make SSH connection
   sshpass -p ${OSX_PASSWORD} \
-    ssh -o StrictHostKeyChecking=no \
+    ssh -vvv \
+        -o ConnectionAttempts=15 \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=5 \
+        -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  local EXITSTATUS=$?
 
-  return $?
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+      echo "Failed running: $1"
+    fi
+  fi
+
+  return $EXITSTATUS
 }
 
 echo_ok()
@@ -364,12 +514,44 @@ echo_skipped()
   add_xml_result "skipped" "Skipped test!"
 }
 
+# (Optional) -q switch as first argument silences std_out
+# $1 = Full path to dataset
+# $2 = Expected group name of dataset
+check_dataset_group()
+{
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
+  local dir_name=`dirname "${1}"`
+  local base_name=`basename "${1}"` 
+  local group_name=$(printf "%q" $2)
+
+  # (ls) List directory with dataset in it (eg /mnt/tank/)
+  # (awk) Only return line from list which matches the group ($2) and dataset name ($base_name)
+  # (grep) Make sure awk returned the dataset ($base_name)
+  ssh_test -q "ls -la '${dir_name}' | awk '\$4 == \"${group_name}\" && \$9 == \"${base_name}\/\"' | grep -q \"${base_name}\"";
+  local EXITSTATUS=$?
+
+  if [ "$SILENT" == "false" ]; then
+    if [ $EXITSTATUS -eq 0 ]; then
+      echo_ok
+    else
+      echo_fail
+    fi
+  fi
+
+  return $EXITSTATUS
+}
+
 # Checks the exit status_code from previous command
 # (Optional) -q switch as first argument silences std_out
 check_exit_status()
 {
-  STATUSCODE=$?
-  SILENT="false"
+  local STATUSCODE=$?
+  local SILENT="false"
   if [ "$1" == "-q" ]; then
     SILENT="true"
     shift
@@ -415,7 +597,7 @@ check_property_value()
     shift
   fi
 
-  grep -q "200 OK" ${RESTYERR}
+  grep -q "200 OK" "${RESTYERR}" || grep -q "201 Created" "${RESTYERR}"
   if [ $? -ne 0 ] ; then
     if [ "$SILENT" == "false" ]; then
       cat ${RESTYERR}
@@ -455,7 +637,7 @@ check_rest_response()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
-  grep -qi "$1" ${RESTYERR}
+  grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
   if [ $? -ne 0 ] ; then
     cat ${RESTYERR}
     cat ${RESTYOUT}
@@ -469,7 +651,7 @@ check_rest_response()
 
 check_rest_response_continue()
 {
-  grep -q "$1" ${RESTYERR}
+  grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
   return $?
 }
 
@@ -512,7 +694,7 @@ wait_for_avail()
   local count=0
   while :
   do
-    GET "${ENDPOINT}" -v 2>${RESTYERR} >${RESTYOUT}
+    rest_request "GET" "${ENDPOINT}"
     check_rest_response_continue "200 OK"
     check_exit_status -q && break
     echo -n "."
@@ -598,7 +780,7 @@ wait_for_osx_mnt()
 
   while :
   do
-    osx_test "mount | grep -q \"${pattern}\""
+    osx_test -q "mount | grep -q \"${pattern}\""
     check_exit_status -q && break
     (( loop_cnt++ ))
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
@@ -621,7 +803,7 @@ wait_for_afp_from_osx()
   local loop_cnt=0
   while :
   do
-    osx_test "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} ${AFP_PORT} ${AFP_PORT} | grep ${AFP_PORT}"
+    osx_test -q "/System/Library/CoreServices/Applications/Network\ Utility.app/Contents/Resources/stroke ${BRIDGEIP} ${AFP_PORT} ${AFP_PORT} | grep ${AFP_PORT}"
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
@@ -643,6 +825,7 @@ wait_for_fnas_mnt()
 
   local mntpoint=$1
   local permissions=""
+  local loop_cnt=0
 
   if [ -n "${2}" ]; then
     permissions=" && \$2 == \"${2}\""
@@ -650,11 +833,11 @@ wait_for_fnas_mnt()
 
   while :
   do
-    ssh_test "showmount -e | awk '\$1 == \"${mntpoint}\"${permissions}' "
+    ssh_test -q "showmount -e | awk 'NR>1 && \$1 == \"${mntpoint}\"${permissions} {print \$1}' | grep -q '${mntpoint}'"
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
-    if [ $loop_cnt -gt $LOOP_LIMIT ]; then
+    if [ $loop_cnt -ge $LOOP_LIMIT ]; then
       return 1
     fi
     (( loop_cnt++ ))

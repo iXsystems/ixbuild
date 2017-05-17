@@ -23,11 +23,11 @@ iscsi_tests()
   #  echo -n "iSCSI service does not appear to be running."
   #  echo_skipped
   #  return 0
-  #fi  
+  #fi
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  iscsictl -R -a
+  iscsictl -R -a &>/dev/null
   umount -A &>/dev/null
   rmdir /tmp/iscsi-mnt.* &>/dev/null
 
@@ -47,7 +47,7 @@ iscsi_tests()
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
   rc_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0" || return 1
- 
+
   echo_test_title "Waiting for iscsi connection before grabbing device name"
   # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
   # have been established before -L[isting] results
@@ -88,7 +88,7 @@ iscsi_tests()
 
   # Disable the iSCSI service
   echo_test_title "Disable iSCSI service"
-  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }' 
+  rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   check_rest_response "200 OK"
 
   echo_test_title "Verify the iSCSI service is disabled"

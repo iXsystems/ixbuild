@@ -1,0 +1,294 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+replication_tests()
+{
+  set_test_group_text "2 - Update - Replication Tests" "24"
+  CLASSNAME=ixbuild.resty.functional.create.replication
+
+  echo -n "Update replication module incomplete."
+  echo_skipped
+  return 0
+
+  # * PUSH = system generating the ZFS snapshots
+  # * PULL = system to receive a copy of the ZFS snapshot
+
+  # Datasets which will be created to host and store the snapshot via replication task
+  local PUSH_ZVOL="repldata01"
+  local PULL_DATASET="repldata01"
+
+  # Set the replication zvol name to something unique for this test executor
+  if [ -n "${BRIDGEHOST}" ]; then
+    PULL_DATASET="${BRIDGEHOST}"
+    PUSH_ZVOL="${BRIDGEHOST}"
+  fi
+
+  local PUSH_ZVOL_PATH="/mnt/tank/${PUSH_ZVOL}/"
+  local PULL_DATASET_PATH="/mnt/tank/${PULL_DATASET}/"
+
+  # Respective locations for the ssh pub key which will be used for authentication
+  local PUSH_SSHKEY_PATH="/data/ssh/replication.pub"
+  local PULL_SSHKEY_PATH="/etc/local/ssh/ssh_host_rsa_key.pub"
+
+  # Common path and filename used for copying pub keys from both the PUSH and PULL servers
+  local PUSH_TMP_SSHKEY_PATH="/tmp/push_sshkeys${BRIDGEHOST}.pub"
+  local PULL_TMP_SSHKEY_PATH="/tmp/pull_sshkeys${BRIDGEHOST}.pub"
+
+  # User accounts that we will create and add our SSH keys to, used for the replication task
+  local REPL_DEDICATEDUSER="repltest"
+  local REPL_DEDICATEDUSERPASS="testing"
+
+  # Add the BRIDGEHOST name to the PULL username for predicable uniqueness
+  if [ -n "${BRIDGEHOST}" ]; then
+    # Limit variable username to 16 chars
+    REPL_DEDICATEDUSER="$(echo "${BRIDGEHOST}${REPL_DEDICATEDUSER}" | cut -c1-16)"
+  fi
+
+  # List of dummie filesystem objects to be created to test recursive replication
+  local TEST_FILES=( "testfile.txt" "testdir/testfile2.txt" )
+
+  local REQUIRED_SETTINGS=( "REPLTARGET" "REPLUSERNAME" "REPLPASSWORD" "REPLVOLUME" )
+  for SETTING in "${REQUIRED_SETTINGS[@]}"
+  do
+    if [ -z "${!SETTING}" ]; then
+      echo -n "Required settings for replication: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+      echo_skipped
+      return 0
+    fi
+  done
+
+  # Clean up any leftover items from previous failed replication tests
+
+  # Remove replication tasks
+  rest_request "GET" "/storage/replication/"
+  local repl_id_list=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.repl_remote_hostname == "'"${REPLTARGET}"'" && this.repl_filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  for repl_id in ${repl_id_list[@]}; do rest_request "DELETE" "/storage/replication/${repl_id}/"; done
+
+  # Remove dedicated user accounts
+  repl_rest_request "GET" "/account/users/"
+  local pull_user_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.bsdusr_username == "'${REPL_DEDICATEDUSER}'") { out(this.id) }')
+  if [ -n "$pull_user_id" ]; then repl_rest_request "DELETE" "/account/users/${pull_user_id}/"; fi
+  rest_request "GET" "/account/users/"
+  local push_user_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.bsdusr_username == "'${REPL_DEDICATEDUSER}'") { out(this.id) }')
+  if [ -n "$push_user_id" ]; then rest_request "DELETE" "/account/users/${push_user_id}/"; fi
+
+  # Remove tunable entry for zfs.usermount
+  repl_rest_request "GET" "/system/tunable/"
+  local tunable_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.tun_var == "zfs.usermount") { out(this.id) }')
+  if [ -n "$tunable_id" ]; then repl_rest_request "DELETE" "/system/tunable/${tunable_id}/"; fi
+
+  # Remove snapshot task
+  rest_request "GET" "/storage/task/"
+  local snapshot_id_list=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  for snapshot_id in ${snapshot_id_list[@]}; do rest_request "DELETE" "/storage/task/${snapshot_id}/"; done
+
+  # Remove snapshot(s)
+  rest_request "GET" "/storage/snapshot/"
+  local snapshot_id_list=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  for snapshot_id in ${snapshot_id_list[@]}; do rest_request "DELETE" "/storage/snapshot/${snapshot_id}/"; done
+
+  # Remove zvols and leftover tmp files
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}%2F${PUSH_ZVOL}/"
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  rest_request "DELETE" "/storage/volume/1/datasets/${PUSH_ZVOL}/"
+  rm "${PUSH_TMP_SSHKEY_PATH}" &>/dev/null
+  rm "${PULL_TMP_SSHKEY_PATH}" &>/dev/null
+
+  # Create zvols on PUSH and PULL replication hosts, set permissions on zvol
+
+  echo_test_title "Creating ZVOL \"${PUSH_ZVOL}\" for replication"
+  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "'"${PUSH_ZVOL}"'", "volsize": "10M" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Changing permissions on \"${PUSH_ZVOL_PATH}\""
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${PUSH_ZVOL_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created" || return 1
+
+  # Add files/directories to zvol
+  for uri in ${TEST_FILES[@]}
+  do
+    local dir_name="$(dirname "$uri")"
+    echo_test_title "Creating file \"${uri}\" on the zvol \"${PUSH_ZVOL_PATH}\""
+    if [ "." == "${dir_name}" -a -n "${uri}" ]; then
+      ssh_test "sync && touch \"${PUSH_ZVOL_PATH}${uri}\""
+    else
+      ssh_test "sync && mkdir -p \"${PUSH_ZVOL_PATH}${dir_name}\" && touch \"${PUSH_ZVOL_PATH}${uri}\""
+    fi
+  done
+
+  # Create a periodic snapshot to replicate
+  local task_begin="$(date "+%H:%M:%S")"
+  local task_end="$(date -v +30M "+%H:%M:%S")"
+  echo_test_title "Create snapshot task for \"tank/${PUSH_ZVOL}\""
+  rest_request "POST" "/storage/task/" '{ "task_repeat_unit": "daily", "task_begin": "'"${task_begin}"'", "task_end": "'"${task_end}"'", "task_filesystem": "tank/'"${PUSH_ZVOL}"'", "task_ret_unit": "day", "task_interval": "15", "task_enabled": true, "task_recursive": true }'
+  check_rest_response "201 Created" || return 1
+
+  # Fetch SSH public keys from the PUSH and PULL hosts
+
+  echo_test_title "Fetch SSH public key from our PUSH host"
+  scp_from_test "${PUSH_SSHKEY_PATH}" "${PUSH_TMP_SSHKEY_PATH}" || return 1
+  local push_user_pubkey="`grep -v '^$' ${PUSH_TMP_SSHKEY_PATH} | tr -d '\n'`"
+
+  echo_test_title "Fetch SSH public key from our PULL host"
+  scp_from_repl "${PULL_SSHKEY_PATH}" "${PULL_TMP_SSHKEY_PATH}" || return 1
+  local pull_user_pubkey="`grep -v '^$' ${PULL_TMP_SSHKEY_PATH} | tr -d '\n'`"
+
+  echo_test_title "Add ECDSA auth to our the root user's \".ssh/known_hosts\""
+  ssh_test "ssh-keyscan ${REPLTARGET} >> \"/root/.ssh/known_hosts\"" || return 1
+
+  # Ensure we get unique user id for our dedicated replication users
+  repl_rest_request "GET" "/account/users/"
+  local repl_uid=$(( $(cat "$RESTYOUT" | ${JSAWK} -n 'out(this.bsdusr_uid)' | sort -u -g | tail -n 1)+1 ))
+
+  # Create user on PULL host for our replication's dedicated user
+  echo_test_title "Create user \"${REPL_DEDICATEDUSER}\" on replication PULL host"
+  repl_rest_request "POST" "/account/users/" '{ "bsdusr_username": "'"${REPL_DEDICATEDUSER}"'", "bsdusr_home": "/mnt/tank/", "bsdusr_uid": "'${repl_uid}'", "bsdusr_mode": 755, "bsdusr_creategroup": true, "bsdusr_full_name": "Replication '"${BRIDGEHOST}"'PULL", "bsdusr_password": "'"${REPL_DEDICATEDUSERPASS}"'", "bsdusr_sshpubkey": "'"${push_user_pubkey}"'" }'
+  check_rest_response "201 Created" || return 1
+  local pull_user_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+
+  # Create user on PUSH host for our replication's dedicated user
+  echo_test_title "Create user \"${REPL_DEDICATEDUSER}\" on replication PUSH host"
+  rest_request "POST" "/account/users/" '{ "bsdusr_username": "'"${REPL_DEDICATEDUSER}"'", "bsdusr_home": "/mnt/tank/", "bsdusr_uid": "'${repl_uid}'", "bsdusr_mode": 755, "bsdusr_creategroup": true, "bsdusr_full_name": "Replication '"${BRIDGEHOST}"'PULL", "bsdusr_password": "'"${REPL_DEDICATEDUSERPASS}"'" }' #, "bsdusr_sshpubkey": "'"${pull_user_pubkey}"'" }'
+  check_rest_response "201 Created" || return 1
+  local push_user_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+
+  echo_test_title "Creating dataset \"${PULL_DATASET}\" on replication target host"
+  repl_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${PULL_DATASET}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Changing permissions on \"${PULL_DATASET}\" dataset on replication target host"
+  repl_rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'"${REPLVOLUME}/${PULL_DATASET}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "'"${REPL_DEDICATEDUSER}"'", "mp_group": "'"${REPL_DEDICATEDUSER}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  echo_test_title "Changing permissions on \"${PULL_DATASET}\" dataset via ZFS command"
+  ssh_repl_test "zfs allow ${REPL_DEDICATEDUSER} create,destroy,diff,mount,readonly,receive,release,send,userprop \"${REPLVOLUME}/${PULL_DATASET}\""
+
+  # Create loader tunable for zfs.usermount
+  echo_test_title "Creating system tunable 'zfs.usermount'.."
+  repl_rest_request "POST" "/system/tunable/" '{ "tun_var": "zfs.usermount", "tun_enabled": true, "tun_value": "1", "tun_type": "sysctl" }'
+  check_rest_response "201 Created"
+
+  # Create replication job for our snapshot, using the PULL SSH public key
+  local repl_begin="$(date "+%H:%M:%S")"
+  local repl_end="$(date -v +30M "+%H:%M:%S")"
+  echo_test_title "Create replication job for the snapshot \"${PUSH_ZVOL}\""
+  rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${PUSH_ZVOL}"'", "repl_zfs": "'"${REPLVOLUME}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard", "repl_remote_hostkey": "'"${pull_user_pubkey}"'", "repl_remote_dedicateduser_enabled": true, "repl_remote_dedicateduser": "'"${REPL_DEDICATEDUSER}"'" }'
+  check_rest_response "201 Created" || return 1
+  local repl_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+
+  # TODO - Observed: "Failed: tank/cd-freenasqa (auto-20170424.1250-2d)"
+
+  # Check/poll replication job's repl_status for 'Succeeded' status
+  echo_test_title "Verify that replication job succeeded for snapshot \"${PUSH_ZVOL}\""
+  local poll_cnt=30
+  until [ $poll_cnt -lt 1 ]; do
+    let poll_cnt-=1
+    rest_request "GET" "/storage/replication/${repl_id}/"
+    if [ $poll_cnt -eq 0 ]; then
+      # Last attempt, print exit status
+      check_property_value "return this.repl_status" "Succeeded" || return 1
+    else
+      # Silent, only print success or re-try
+      check_property_value -q "return this.repl_status" "Succeeded"
+      if [ "$?" == "0" ]; then
+        echo_ok
+        break
+      fi
+    fi
+    sleep 3
+  done
+
+  # Verify that files and directories were created on target PULL host
+  for uri in ${TEST_FILES[@]}
+  do
+    local dir_name="$(dirname "$uri")"
+    echo_test_title "Verify that \"${uri}\" was created on the replication target"
+    if [ "." == "${dir_name}" -a -n "${uri}" ]; then
+      ssh_repl_test "test -f \"${PULL_DATASET_PATH}/${PUSH_ZVOL}/${uri}\""
+    else
+      ssh_repl_test "test -d \"${PULL_DATASET_PATH}/${PUSH_ZVOL}/${dir_name}\" && test -f \"${PULL_DATASET_PATH}/${PUSH_ZVOL}/${uri}\""
+    fi
+  done
+
+  echo_test_title "Delete the replication job for snapshot \"${PUSH_ZVOL}\""
+  rest_request "DELETE" "/storage/replication/${repl_id}/"
+  check_rest_response "204" || return 1
+
+  rest_request "GET" "/storage/task/"
+  local snapshot_tasks=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  for snapshot_id in ${snapshot_tasks[@]}
+  do
+    echo_test_title "Delete the snapshot task \"tank/${PUSH_ZVOL}\"(${snapshot_id})"
+    rest_request "DELETE" "/storage/task/${snapshot_id}/"
+    check_rest_response "204"
+  done
+
+  # Snapshot ID example: tank/bridgehost/bridgehost@auto-20170417.1632-2d
+  repl_rest_request "GET" "/storage/snapshot/"
+  local replicated_snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "'"${REPLVOLUME}/${PULL_DATASET}/${PUSH_ZVOL}"'") { out(this.id) }')
+  for snapshot_id in ${replicated_snapshots[@]}
+  do
+    echo_test_title "Deleting replicated snapshot \"${snapshot_id}\" from replication target"
+    # repl_rest_request uses curl cmd instead of resty, requires some escaping of special chars
+    repl_rest_request "DELETE" "/storage/snapshot/$(echo ${snapshot_id} | sed 's|/|%2F|g' | sed 's|@|%40|g')/"
+    check_rest_response "204"
+  done
+
+  echo_test_title "Delete the replication target child zvol \"${PULL_DATASET}/${PUSH_ZVOL}\""
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}%2F${PUSH_ZVOL}"
+  check_rest_response "204" || return 1
+
+  rest_request "GET" "/storage/snapshot/"
+  local snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  for snapshot_id in ${snapshots[@]}
+  do
+    echo_test_title "Deleting testing target snapshot \"${snapshot_id}\""
+    rest_request "DELETE" "/storage/snapshot/${snapshot_id}/"
+    check_rest_response "204"
+  done
+
+  echo_test_title "Delete the replication target dataset \"${PULL_DATASET}\""
+  repl_rest_request "DELETE" "/storage/volume/1/datasets/${PULL_DATASET}/"
+  check_rest_response "204" || return 1
+
+  if [ -n "${PUSH_ZVOL_PATH}" ] && [ "$PUSH_ZVOL_PATH" != "/" ]; then
+    echo_test_title "Delete all file objects create on the testing target"
+    ssh_test "test -d \"${PUSH_ZVOL_PATH}\" && rm -rf \"${PUSH_ZVOL_PATH}/*\""
+  fi
+
+  echo_test_title "Delete the testing target zvol \"${PUSH_ZVOL}\""
+  rest_request "DELETE" "/storage/volume/1/zvols/${PUSH_ZVOL}/"
+  check_rest_response "204" || return 1
+
+  echo_test_title "Delete replication host user \"${PUSH_USERNAME}(${push_user_id})\" created for replication tests"
+  rest_request "DELETE" "/account/users/${push_user_id}/"
+  check_rest_response "204"
+
+  echo_test_title "Delete replication target user \"${PULL_USERNAME}(${pull_user_id})\" created for replication tests"
+  replication_rest_request "DELETE" "/account/users/${pull_user_id}/"
+  check_rest_response "204"
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+replication_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) replication_tests ;;
+     COMPLETE) replication_tests ;;
+    BENCHMARK) ;;
+            *) replication_tests ;;
+  esac
+}

@@ -31,12 +31,12 @@ system_tests()
 
   # Check loader tunable
   echo_test_title "Checking system tunable 'dummynet'.."
-  rest_request GET "/system/tunable/"
+  rest_request "GET" "/system/tunable/"
   check_property_value "return this.tun_var" "dummynet_load"
 
   # Reboot system to enable tunable
   echo_test_title "Reboot system to enable tunable.."
-  rest_request "POST" "/system/reboot"
+  rest_request "POST" "/system/reboot/"
   check_rest_response "202" || return 1
 
   # Ensure shutdown is complete before polling for initialization
@@ -50,11 +50,11 @@ system_tests()
       echo_ok && break;
     fi
     (( loop_cnt++ ))
-    if [ $loop_cnt -gt 30 ]; then
+    if [ $loop_cnt -gt 15 ]; then
       echo_fail
       return 1
     fi
-    sleep 1 && echo -n ".";
+    sleep 4 && echo -n ".";
   done
 
   echo_test_title "Waiting for HTTP server and API initialization after reboot"
@@ -65,8 +65,9 @@ system_tests()
 
   # Verify loader tunable
   echo_test_title "Verify system tunable 'dummynet_load'.."
-  ssh_test "kldstat -m dummynet"
-  check_exit_status || return 1
+  ssh_test "kldstat -m dummynet" || return 1
+
+  return 0
 }
 
 # Init function, this is called after module is sourced

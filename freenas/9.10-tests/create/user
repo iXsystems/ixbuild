@@ -21,7 +21,7 @@ user_tests() {
   # Create the testuser
   echo_test_title "Creating user: testuser"
   rest_request "POST" "/account/users/" '{ "bsdusr_username": "testuser", "bsdusr_creategroup": true, "bsdusr_full_name": "Test User", "bsdusr_password": "test", "bsdusr_uid": 1111, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }'
-  check_rest_response "201 Created"
+  check_rest_response "201 Created" || return 1
 
   # Get the ID of this user
   userid=`cat ${RESTYOUT} | ${JSAWK} 'return this.id'`
@@ -31,14 +31,18 @@ user_tests() {
   rest_request "POST" "/account/users/${userid}/groups/" '["wheel","ftp"]'
   check_rest_response "202"
 
-  # Create temporary directory for output if needed
-  if [ ! -d "${FNASBDIR}" ] ; then
-    mkdir "${FNASBDIR}"
+  # If the FreeNAS build directory is set
+  if [ -n "$FNASBDIR"] ; then
+    # Create temporary directory for output if needed
+    if [ ! -d "${FNASBDIR}" ] ; then
+      mkdir "${FNASBDIR}"
+    fi
+
+    # Save the ID of this user for other jobs
+    echo $userid > ${FNASBDIR}/testuser
   fi
 
-  # Save the ID of this user for other jobs
-  echo $userid > ${FNASBDIR}/testuser
-
+  return 0
 }
 
 # Init function, this is called after module is sourced

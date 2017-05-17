@@ -15,8 +15,9 @@ smb_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/smb-mnt.$$"
-  TEST_CNT=22
-    
+  local MP_GROUP="wheel"
+  TEST_CNT=23
+
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Samba BSD tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.smb_bsd
@@ -52,16 +53,19 @@ smb_bsd_tests()
   check_service_status "RUNNING" || return 1
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
   check_rest_response "201 Created"
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
+  echo_test_title "Checking permissions on ${SMB_PATH}"
+  check_dataset_group "${SMB_PATH}" "${MP_GROUP}"
+
   # Now check if we can mount SMB / create / rename / copy / delete / umount
   echo_test_title "Creating SMB mountpoint"
-  rc_test "mkdir ${MOUNTPOINT}" || return 1
+  rc_test "mkdir -p ${MOUNTPOINT}" || return 1
   sync
 
   echo_test_title "Mounting SMB"
@@ -71,9 +75,8 @@ smb_bsd_tests()
   wait_for_bsd_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
 
-  local device_name=`dirname "${MOUNTPOINT}"`
-  echo_test_title "Checking permissions on ${MOUNTPOINT}"
-  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+  echo_test_title "Checking for ability to list files on volume"
+  rc_test "time ls -la ${MOUNTPOINT}"
 
   echo_test_title "Creating SMB file"
   rc_test "touch ${MOUNTPOINT}/testfile" || return 1

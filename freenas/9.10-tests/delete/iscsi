@@ -21,11 +21,11 @@ iscsi_tests()
   #  echo -n "iSCSI service does not appear to be running."
   #  echo_skipped
   #  return 0
-  #fi  
+  #fi
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  iscsictl -R -a
+  iscsictl -R -a &>/dev/null
   umount -A &>/dev/null
   rmdir /tmp/iscsi-mnt.* &>/dev/null
 

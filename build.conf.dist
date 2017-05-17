@@ -52,6 +52,13 @@ export SFTPWORKDIR
 # BRIDGEDOMAIN=""
 # export BRIDGEIP BRIDGENETMASK BRIDGEGW BRIDGEDNS BRIDGEHOST BRIDGEHOST_B BRIDGEDOMAIN
 
+# Set these to the FreeNAS target you wish to test replication against
+# REPLTARGET=""
+# REPLUSERNAME=""
+# REPLPASSWORD=""
+# REPLVOLUME=""
+# export REPLTARGET REPLUSERNAME REPLPASSWORD REPLVOLUME
+
 # Set the account information for dns testing we do with noip.com
 # If this is NOT set, the test will be skipped
 # NOIPUSERNAME=""
@@ -86,6 +93,13 @@ export SFTPWORKDIR
 # LDAPBINDDN=""
 # LDAPBINDPASSWORD=""
 # export LDAPHOSTNAME LDAPBASEDN LDAPBINDDN LDAPBINDPASSWORD
+
+# Set these to the target FreeNAS target you wish to replicate to for testing
+# REPLTARGET=""
+# REPLUSERNAME=""
+# REPLPASSWORD=""
+# REPLVOLUME=""
+# export REPLTARGET REPLUSERNAME REPLPASSWORD REPLVOLUME
 
 ###########################################################################
 # PC-BSD specific settings

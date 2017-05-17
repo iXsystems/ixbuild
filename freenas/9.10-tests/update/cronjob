@@ -10,7 +10,7 @@ export REQUIRES
 
 cronjob_tests()
 {
-  set_test_group_text "1 - Update - Cron tests" "4"
+  set_test_group_text "2 - Update - Cron tests" "4"
   CLASSNAME=ixbuild.resty.functional.delete.cronjob
 
   local TESTFILE="/tmp/.testFileCreatedViaCronjob"
@@ -18,8 +18,7 @@ cronjob_tests()
 
   # Ensure test file does exist
   echo_test_title "Verify cronjob has created the test file.."
-  ssh_test "test -f ${TESTFILE}"
-  check_exit_status || return 1
+  ssh_test "test -f ${TESTFILE}" || return 1
 
   # Update cronjob to disabled with new cron_command
   echo_test_title "Updating cron job status to disabled, updating command.."
@@ -33,8 +32,7 @@ cronjob_tests()
 
   # Delete test file so we can verify it is no longer being created later in the delete/cronjob test
   echo_test_title "Deleting test file created by cronjob"
-  ssh_test "rm -f ${TESTFILE}"
-  check_exit_status || return 1
+  ssh_test "rm -f ${TESTFILE}" || return 1
 
   return 0
 }

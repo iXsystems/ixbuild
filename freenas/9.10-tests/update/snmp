@@ -5,16 +5,16 @@
 # jsawk: https://github.com/micha/jsawk
 
 # List the other modules which must be run before this module can execute
-REQUIRES="storage"
+REQUIRES=""
 export REQUIRES
 
 snmp_tests()
 {
-  local COMMUNITY="public"
-  local TRAPS=false
-  local CONTACT="root@localhost"
-  local LOCATION="Maryville,TN"
-  local PASSWORD="testing1234"
+  local COMMUNITY="private"
+  local TRAPS=true
+  local CONTACT="user@localhost"
+  local LOCATION="NY"
+  local PASSWORD="testing5678"
   # SNMP agent command timeout in seconds
   local SNMP_TIMEOUT=30
 
@@ -24,10 +24,14 @@ snmp_tests()
     ip_address=${BRIDGEIP}
   fi
 
-  set_test_group_text "1 - Create - SNMP tests" "8"
-  CLASSNAME=ixbuild.resty.functional.create.snmp
+  set_test_group_text "2 - Update - SNMP tests" "9"
+  CLASSNAME=ixbuild.resty.functional.update.snmp
 
-  echo_test_title "Configure SNMP"
+  echo_test_title "Disable SNMP service"
+  rest_request "PUT" "/services/services/snmp/" '{ "srv_enable": false }'
+  check_rest_response "200"
+
+  echo_test_title "Update configuration of SNMP service"
   rest_request "PUT" "/services/snmp/" '{ "snmp_community": "'"${COMMUNITY}"'", "snmp_traps": '${TRAPS}', "snmp_contact": "'"${CONTACT}"'", "snmp_location": "'"${LOCATION}"'", "snmp_v3_password": "'"${PASSWORD}"'", "snmp_v3_password2": "'"${PASSWORD}"'" }'
   check_rest_response "200"
 
@@ -43,7 +47,7 @@ snmp_tests()
   rest_request "GET" "/services/services/snmp/"
   check_service_status "RUNNING" || return 1
 
-  echo_test_title "Validate that SNMP settings were preserved by the API"
+  echo_test_title "Validate that SNMP settings were updated by the API"
   rest_request "GET" "/services/snmp/"
   check_property_value -q "this.snmp_community" "${COMMUNITY}" \
     && check_property_value -q "this.snmp_traps" "${TRAPS}" \
@@ -56,10 +60,10 @@ snmp_tests()
   rc_test "snmpwalk -t ${SNMP_TIMEOUT} -c ${COMMUNITY} -v 2c ${ip_address} SNMPv2-MIB::sysDescr.0 | grep -q 'FreeBSD'" || return 1
 
   echo_test_title "Verify that the sysContact was set correctly on the SNMP server"
-  rc_test "snmpget -c ${COMMUNITY} -v 2c -m ALL ${ip_address} SNMPv2-MIB::sysContact.0 | awk '\$4 == \"${CONTACT}\" {print \$4}' | grep -q '${CONTACT}'"
+  rc_test "snmpget -c ${COMMUNITY} -v 2c -m ALL ${ip_address} SNMPv2-MIB::sysContact.0 | awk '\$4 == \"${CONTACT}\" {print \$4}' | grep -q '${CONTACT}' "
 
   echo_test_title "Verify that the sysLocation was set correctly on the SNMP server"
-  rc_test "snmpget -c ${COMMUNITY} -v 2c -m ALL ${ip_address} SNMPv2-MIB::sysLocation.0 | awk '\$4 == \"${LOCATION}\" {print \$4}' | grep -q '${LOCATION}'"
+  rc_test "snmpget -c ${COMMUNITY} -v 2c -m ALL ${ip_address} SNMPv2-MIB::sysLocation.0 | awk '\$4 == \"${LOCATION}\" {print \$4}' | grep -q '${LOCATION}' "
 
   #
   # TODO - test password authentication?

@@ -15,9 +15,9 @@ ad_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/ad-mnt.$$"
-  local VOL_GROUP="ga"
+  local MP_GROUP="AD01\\qa"
 
-  set_test_group_text "2 - Update - Active Directory BSD tests" "24"
+  set_test_group_text "2 - Update - Active Directory BSD tests" "25"
   CLASSNAME=ixbuild.resty.functional.update.ad_bsd
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
@@ -52,7 +52,7 @@ ad_bsd_tests()
 
   # Check Active Directory
   echo_test_title "Checking Active Directory.."
-  rest_request GET "/directoryservice/activedirectory/"
+  rest_request "GET" "/directoryservice/activedirectory/"
   check_property_value "return this.ad_enable" "true" || return 1
 
   echo_test_title "Checking to see if SMB service is enabled"
@@ -69,25 +69,25 @@ ad_bsd_tests()
     check_rest_response "200 OK"
   )
 
-  # Wait a moment for samba to spin up
-  sleep 4
+  echo_test_title "Poll VM to ensure SMB service is up and running"
+  wait_for_avail_port "445"
+  check_exit_status || return 1
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "AD01\\QA", "mp_recursive": true }'
-  check_rest_response "201 Created" 
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'$(printf "%q" ${MP_GROUP})'", "mp_recursive": true }'
+  check_rest_response "201 Created"
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
   # Now check if we can mount SMB / create / rename / copy / delete / umount
-  echo_test_title "Poll VM to ensure SMB service is up and running"
-  wait_for_avail_port "445"
-  check_exit_status || return 1
-
   echo_test_title "Creating SMB mountpoint"
   rc_test "mkdir -p '${MOUNTPOINT}'" || return 1
   sync
+
+  echo_test_title "Checking permissions on ${SMB_PATH}"
+  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   # Store credentials file for mount_smb
   # The ADUSER user must exist in AD with this password
@@ -101,9 +101,8 @@ ad_bsd_tests()
   wait_for_bsd_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
 
-  local device_name=`dirname "${MOUNTPOINT}"`
-  echo_test_title "Checking permissions on ${MOUNTPOINT}"
-  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+  echo_test_title "Checking for ability to list files on volume"
+  rc_test "time ls -la ${MOUNTPOINT}"
 
   echo_test_title "Creating SMB file"
   rc_test "touch ${MOUNTPOINT}/testfile" || return 1
@@ -137,7 +136,7 @@ ad_bsd_tests()
 
   # Check Active Directory
   echo_test_title "Verify Active Directory is disabled.."
-  rest_request GET "/directoryservice/activedirectory/"
+  rest_request "GET" "/directoryservice/activedirectory/"
   check_property_value "return this.ad_enable" "false"
 
   echo_test_title "Verify SMB service is disabled"

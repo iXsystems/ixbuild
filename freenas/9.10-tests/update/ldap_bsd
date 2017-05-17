@@ -16,9 +16,9 @@ ldap_bsd_tests()
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/ldap-mnt.$$"
   local LDAP_USER='ldapuser'
-  local VOL_GROUP="qa"
+  local MP_GROUP="qa"
 
-  set_test_group_text "2 - Update - LDAP BSD tests" "27"
+  set_test_group_text "2 - Update - LDAP BSD tests" "28"
   CLASSNAME=ixbuild.resty.functional.update.ldap_bsd
 
   if [ -z "$LDAPBINDDN2" -o -z "$LDAPBINDPASSWORD2" ] ; then
@@ -44,26 +44,26 @@ ldap_bsd_tests()
 
   echo_test_title "Creating SMB dataset"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
-  check_rest_response "201 Created"  
+  check_rest_response "201 Created"
 
   # Enable LDAP
   echo_test_title "Enabling LDAP.."
   rest_request "PUT" "/directoryservice/ldap/1/" '{ "ldap_basedn": "'${LDAPBASEDN2}'", "ldap_binddn": "'${LDAPBINDDN2}'", "ldap_bindpw": "'${LDAPBINDPASSWORD2}'", "ldap_netbiosname_a": "'${BRIDGEHOST}'", "ldap_hostname": "'${LDAPHOSTNAME2}'", "ldap_has_samba_schema": true, "ldap_enable": true }'
-  check_rest_response "200 OK"
+  check_rest_response "200 OK" || return 1
 
   # Check LDAP
   echo_test_title "Checking LDAP.."
-  rest_request GET "/directoryservice/ldap/"
+  rest_request "GET" "/directoryservice/ldap/"
   check_property_value "return this.ldap_enable" "true" || return 1
 
   echo_test_title "Enabling SMB service"
   rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
-  check_rest_response "200 OK"
+  check_rest_response "200 OK" || return 1
 
   # Now start the service
   echo_test_title "Starting SMB service"
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": true }'
-  check_rest_response "200 OK"
+  check_rest_response "200 OK" || return 1
 
   # Wait a moment for samba to spin up
   echo_test_title "Poll VM to ensure SMB service is up and running"
@@ -75,19 +75,20 @@ ldap_bsd_tests()
   check_service_status "RUNNING"
 
   echo_test_title "Changing permissions on ${SMB_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "qa", "mp_recursive": true }'
-  check_rest_response "201 Created"   
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${SMB_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'${MP_GROUP}'", "mp_recursive": true }'
+  check_rest_response "201 Created"
 
   echo_test_title "Creating a SMB share on ${SMB_PATH}"
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
+  echo_test_title "Checking permissions on ${SMB_PATH}"
+  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
+
   # Now check if we can mount SMB / create / rename / copy / delete / umount
   echo_test_title "Creating SMB mountpoint"
   rc_test "mkdir '${MOUNTPOINT}'" || return 1
   sync
-
-  sleep 10
 
   # Store credentials file for mount_smb
   # The LDAPUSER user must exist in LDAP with this password
@@ -101,9 +102,8 @@ ldap_bsd_tests()
   wait_for_bsd_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
 
-  local device_name=`dirname "${MOUNTPOINT}"`
-  echo_test_title "Checking permissions on ${MOUNTPOINT}"
-  rc_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+  echo_test_title "Checking for ability to list files on volume"
+  rc_test "time ls -la ${MOUNTPOINT}"
 
   echo_test_title "Creating SMB file"
   rc_test "touch '${MOUNTPOINT}/testfile'" || return 1
@@ -142,7 +142,7 @@ ldap_bsd_tests()
 
   # Check LDAP
   echo_test_title "Verify LDAP is disabled.."
-  rest_request GET "/directoryservice/ldap/"
+  rest_request "GET" "/directoryservice/ldap/"
   check_property_value "return this.ldap_enable" "false" || return 1
 
   echo_test_title "Verify SMB service has shut down"

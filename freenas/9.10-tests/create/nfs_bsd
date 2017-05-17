@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+nfs_bsd_tests()
+{
+  local DATASET="nfs-bsd"
+  local NFS_PATH="/mnt/tank/${DATASET}"
+  local MOUNTPOINT="/tmp/nfs-mnt.$$"
+  local NFS_HOST=${ip}
+  local NFS_PORT=618
+  local MP_GROUP="wheel"
+
+  if [ -z "${NFS_HOST}" ]; then
+    if [ -n "${BRIDGEIP}" ]; then
+      NFS_HOST=${BRIDGEIP}
+    elif [ -n "${FNASTESTIP}" ]; then
+      NFS_HOST=${FNASTESTIP}
+    fi
+  fi
+
+  # Set the group text and number of tests
+  set_test_group_text "1 - Create - NFS BSD tests" "24"
+  CLASSNAME=ixbuild.resty.functional.create.nfs_bsd
+
+  # Clean up any leftover items from previous failed NFS runs
+  rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
+  umount -A &>/dev/null
+  rmdir /tmp/nfs-mnt.* &>/dev/null
+
+  # Create a dataset to use with NFS
+  echo_test_title "Creating dataset ${DATASET}"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  # Set the permissions of the dataset
+  echo_test_title "Changing permissions on ${NFS_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${NFS_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
+  check_rest_response "201 Created" || return 1
+
+  # Enable NFS server
+  echo_test_title "Creating the NFS server"
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${NFS_HOST}"'", "nfs_srv_mountd_port": '${NFS_PORT}', "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
+  check_rest_response "200 OK"
+
+  # Check creating a NFS share
+  echo_test_title "Creating a NFS share on ${NFS_PATH}"
+  rest_request "POST" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  check_rest_response "201 Created"
+
+  # Now start the service
+  echo_test_title "Starting NFS service"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
+
+  # Give NFS time to start
+  echo_test_title "Verify that the NFS port is open on the host"
+  wait_for_avail_port "${NFS_PORT}"
+  check_exit_status || return 1
+
+  echo_test_title "Verify that nfsd shows up in netstat results"
+  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd" || return 1
+
+  echo_test_title "Verify NFS on host in showmount results"
+  wait_for_fnas_mnt "${NFS_PATH}" "Everyone"
+  check_exit_status || return 1
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_service_status "RUNNING" || return 1
+
+  echo_test_title "Checking permissions on ${NFS_PATH}"
+  check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
+
+  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  echo_test_title "Creating NFS mountpoint"
+  rc_test "mkdir -p '${MOUNTPOINT}'" || return 1
+
+  echo_test_title "Mounting NFS share ${NFS_PATH} to ${MOUNTPOUNT}"
+  rc_test "mount_nfs ${NFS_HOST}:${NFS_PATH} ${MOUNTPOINT}" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60" || return 1
+
+  echo_test_title "Verify that the NFS share has been mounted"
+  wait_for_bsd_mnt "${MOUNTPOINT}"
+  check_exit_status || return 1
+
+  echo_test_title "Checking for ability to list files on volume"
+  rc_test "time ls -la '${MOUNTPOINT}'" || return 1
+
+  echo_test_title "Creating NFS file"
+  rc_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'" || return 1
+
+  echo_test_title "Moving NFS file"
+  rc_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'" || return 1
+
+  echo_test_title "Copying NFS file"
+  rc_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'" || return 1
+
+  echo_test_title "Deleting NFS file"
+  rc_test "rm '${MOUNTPOINT}/testfile2'" || return 1
+
+  echo_test_title "Unmounting NFS"
+  rc_test "umount '${MOUNTPOINT}'" || return 1
+
+  echo_test_title "Removing NFS mountpoint"
+  rc_test "rmdir '${MOUNTPOINT}'" || return 1
+
+  echo_test_title "Removing NFS share on ${NFS_PATH}"
+  rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  check_rest_response "204"
+
+  echo_test_title "Stopping NFS service"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verifying NFS service is disabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_service_status "STOPPED"
+
+  echo_test_title "Destroying NFS dataset ${DATASET}"
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  check_rest_response "204" || return 1
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+nfs_bsd_init()
+{
+  # Run all the nfs tests
+  case $TESTSET in
+        SMOKE) nfs_bsd_tests ;;
+     COMPLETE) nfs_bsd_tests ;;
+    BENCHMARK) ;;
+            *) nfs_bsd_tests ;;
+  esac
+}
+
