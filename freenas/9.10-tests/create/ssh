@@ -37,6 +37,18 @@ ssh_tests()
     if [ ! -f "$HOME/.ssh/id_rsa.tests.pub" ]; then
       ssh-keygen -b 4096 -t rsa -f "$HOME/.ssh/id_rsa.tests" -q -N ""
     fi
+
+    local PS_USER=$USER
+    # Root user through su reports as other user
+    if [ $HOME="/root" ]; then
+      PS_USER="root"
+    fi
+
+    # Start ssh-agent for executing user if not found.
+    if ! ps aux -U ${PS_USER} | grep -q "[s]sh-agent" ; then
+      eval `ssh-agent -s`
+    fi
+
     ssh-add "$HOME/.ssh/id_rsa.tests" &>/dev/null
     ssh_pubkey="$(cat "$HOME/.ssh/id_rsa.tests.pub")"
   fi
