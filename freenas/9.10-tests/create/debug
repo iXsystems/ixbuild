@@ -20,7 +20,7 @@ debug_tests()
   check_rest_response "200 OK" || return 1
 
   echo_test_title "Verify that API returns WWW download path"
-  check_property_value "this.url" "/system/debug/download/" || return 1
+  check_property_value ".url" "/system/debug/download/" || return 1
 
   # Currently there is no way to create an authenticated session with FreeNAS
   # WWW via the API, so fetch file with SCP and the expected path. CD - 03/24/17

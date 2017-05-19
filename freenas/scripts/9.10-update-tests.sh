@@ -6,7 +6,7 @@
 # jsawk: https://github.com/micha/jsawk
 
 # Where is the pcbsd-build program installed
-PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"; export PROGDIR
 
 # Set variable to call jsawk utility
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"

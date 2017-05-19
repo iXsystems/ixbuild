@@ -43,7 +43,7 @@ network_tests()
   rest_request "GET" "/network/interface"
   check_rest_response "200 OK" || return 1
 
-  if ! check_property_value -q "return this.int_interface" "em1" ; then
+  if ! check_property_value -q ".[].int_interface" "em1" ; then
     # Configure network interface(s) since none found.
     if [ -n "$BRIDGEIP" ] ; then
       # Using the bridged adapter settings

@@ -24,7 +24,7 @@ user_tests() {
   check_rest_response "201 Created" || return 1
 
   # Get the ID of this user
-  userid=`cat ${RESTYOUT} | ${JSAWK} 'return this.id'`
+  userid=`cat ${RESTYOUT} | jq '.id'`
 
   # Set the user to part of the 'wheel' / 'ftp' groups
   echo_test_title "Setting user groups: wheel,ftp"

@@ -18,7 +18,7 @@ smarttest_tests()
 
   # Get list of disk_identifiers from /storage/disks
   rest_request "GET" "/storage/disk"
-  local disk_identifiers=`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.disk_identifier)'`
+  local disk_identifiers=`cat ${RESTYOUT} | jq '.disk_identifier'`
   local disk_ident_1=`echo ${disk_identifiers} | cut -d " " -f1`
 
   echo_test_title "Create a new SMARTTest"
@@ -27,7 +27,7 @@ smarttest_tests()
 
   echo_test_title "Check that API reports new SMARTTest"
   rest_request "GET" "/tasks/smarttest/"
-  check_property_value "this.smarttest_disks" "${disk_ident_1}"
+  check_property_value ".[].smarttest_disks" "${disk_ident_1}"
 
   return 0
 }

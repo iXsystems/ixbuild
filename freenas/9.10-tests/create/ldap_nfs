@@ -55,7 +55,7 @@ ldap_nfs_tests()
 
   echo_test_title "Verify that the LDAP service is reported as enabled"
   rest_request "GET" "/directoryservice/ldap/"
-  check_property_value "return this.ldap_enable" "true" || return 1
+  check_property_value ".ldap_enable" "true" || return 1
 
   # Create dataset for our NFS share
   for idx in ${!DATASET[@]}; do
@@ -75,8 +75,8 @@ ldap_nfs_tests()
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Verify that NFS share configuration was saved correctly for \"${DATASET[0]}\""
-  check_property_value -q "this.nfs_maproot_user" "${MP_USER}" \
-    && check_property_value -q "this.nfs_maproot_group" "${MP_GROUP}" \
+  check_property_value -q ".nfs_maproot_user" "${MP_USER}" \
+    && check_property_value -q ".nfs_maproot_group" "${MP_GROUP}" \
     && echo_ok || echo_fail
 
   echo_test_title "Creating NFS share with mapall user \"${MP_USER}\" and mapall group \"${MP_GROUP}\" for \"${DATASET[1]}\""
@@ -84,8 +84,8 @@ ldap_nfs_tests()
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Verify that NFS share configuration was saved correctly for \"${DATASET[1]}\""
-  check_property_value -q "this.nfs_mapall_user" "${MP_USER}" \
-    && check_property_value -q "this.nfs_mapall_group" "${MP_GROUP}" \
+  check_property_value -q ".nfs_mapall_user" "${MP_USER}" \
+    && check_property_value -q ".nfs_mapall_group" "${MP_GROUP}" \
     && echo_ok || echo_fail
 
   echo_test_title "Starting NFS service"

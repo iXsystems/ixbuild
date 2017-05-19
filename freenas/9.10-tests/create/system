@@ -27,7 +27,7 @@ system_tests()
   # Check loader tunable
   echo_test_title "Checking system tunable 'dummynet'.."
   rest_request "GET" "/system/tunable/"
-  if ! check_property_value -q "return this.tun_var" "dummynet_load"; then
+  if ! check_property_value -q ".[].tun_var" "dummynet_load"; then
     echo -n " not loaded. " && echo_ok
     
     # Create loader tunable
