@@ -82,8 +82,6 @@ ldap_bsd_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
-  return 0
-
   # Now check if we can mount SMB / create / rename / copy / delete / umount
   echo_test_title "Creating SMB mountpoint"
   bsd_test "mkdir '${MOUNTPOINT}'" || return 1
