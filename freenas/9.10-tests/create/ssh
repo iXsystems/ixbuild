@@ -28,6 +28,17 @@ ssh_tests()
   rest_request "GET" "/services/services/ssh/"
   check_service_status "RUNNING"
 
+  local PS_USER=$USER
+  # Root user through su reports as other user
+  if [ $HOME="/root" ]; then
+    PS_USER="root"
+  fi
+
+  # Start ssh-agent for executing user if not found.
+  if ! ps aux -U ${PS_USER} | grep -q "[s]sh-agent" ; then
+    eval `ssh-agent -s`
+  fi
+
   # Use Jenkins SSH Keys if found, otherwise generate new ones
   local ssh_pubkey=""
   if [ -f "/root/.ssh/id_dsa.jenkins.pub" ]; then
@@ -36,17 +47,6 @@ ssh_tests()
   else
     if [ ! -f "$HOME/.ssh/id_rsa.tests.pub" ]; then
       ssh-keygen -b 4096 -t rsa -f "$HOME/.ssh/id_rsa.tests" -q -N ""
-    fi
-
-    local PS_USER=$USER
-    # Root user through su reports as other user
-    if [ $HOME="/root" ]; then
-      PS_USER="root"
-    fi
-
-    # Start ssh-agent for executing user if not found.
-    if ! ps aux -U ${PS_USER} | grep -q "[s]sh-agent" ; then
-      eval `ssh-agent -s`
     fi
 
     ssh-add "$HOME/.ssh/id_rsa.tests" &>/dev/null
