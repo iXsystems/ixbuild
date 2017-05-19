@@ -4,10 +4,11 @@ PJAILNAME="iocage"
 PPORTS="iocports"
 ZROOT="/poud"
 POUDCONFDIR="${PROGDIR}/poudriere"
-PORTS_GIT_URL="https://github.com/freebsd/freebsd-ports.git"
-PORTS_GIT_BRANCH="branches/2017Q1"
+PORTS_GIT_URL="https://github.com/freenas/iocage-ports.git"
+PORTS_GIT_BRANCH="branches/2017Q2"
 JAILVER="11.0-RELEASE"
 PPKGDIR="${ZROOT}/data/packages/${PJAILNAME}-${PPORTS}"
+PPORTSDIR="${ZROOT}/ports/${PPORTS}"
 
 if [ ! -d "$POUDCONFDIR" ] ; then
   mkdir -p ${POUDCONFDIR}
@@ -119,6 +120,12 @@ do_portsnap()
   if [ $? -ne 0 ] ; then
     exit_err "Failed pulling ports tree"
   fi
+
+  # Adjust the minecraft-server Makefile
+  cat ${PPORTSDIR}/games/minecraft-server/Makefile \
+	  | grep -v "^LICENSE" > ${PPORTSDIR}/games/minecraft-server/Makefile.new
+  mv ${PPORTSDIR}/games/minecraft-server/Makefile.new \
+	  ${PPORTSDIR}/games/minecraft-server/Makefile
 }
 
 update_poud_world()

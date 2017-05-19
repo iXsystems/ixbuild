@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+nis_bsd_tests()
+{
+  #define variables 
+  local SERVER="${NISSERVER}"
+  local DOMAIN="${NISDOMAIN}"
+  # Set the group text and number of tests
+  set_test_group_text "1 - Create - nis_bsd test class" "2"
+  CLASSNAME=ixbuild.resty.functional.create.nis_bsd
+
+  echo_test_title "nis_bsd test"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created" || return 1
+  
+  #skip if variable are not present
+  if [-z "$NISSERVER" -o -z "$NISDOMAIN" ] ; then
+	echo -n "MISSING the ADUSERNAME / ADPASSWORD settings, test skipped.."
+	echo_skipped
+	add_xml_result "skipped" "skipped due to missing AD settings"
+	return 0
+  fi
+  
+  #Tests all passed!
+  return 0
+ 
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+nis_bsd_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) nis_bsd_tests ; return $? ;;
+     COMPLETE) nis_bsd_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) nis_bsd_tests ; return $? ;;
+  esac
+}
+
