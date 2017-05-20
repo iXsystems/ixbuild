@@ -36,7 +36,11 @@ ssh_tests()
 
   # Start ssh-agent for executing user if not found.
   if ! ps aux -U ${PS_USER} | grep -q "[s]sh-agent" ; then
-    eval `ssh-agent -s`
+    if uname | grep -qi "linux" ; then
+      eval `ssh-agent -s`
+    else
+      ssh-agent csh
+    fi
   fi
 
   # Use Jenkins SSH Keys if found, otherwise generate new ones
