@@ -352,7 +352,6 @@ osx_test()
     ssh -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
-        -o PubkeyAcceptedKeyTypes=+ssh-dss \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
   fi
 

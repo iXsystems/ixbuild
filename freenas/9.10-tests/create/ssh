@@ -28,29 +28,15 @@ ssh_tests()
   rest_request "GET" "/services/services/ssh/"
   check_service_status "RUNNING"
 
-  local PS_USER=$USER
-  # Root user through su reports as other user
-  if [ $HOME="/root" ]; then
-    PS_USER="root"
-  fi
-
-  # Use Jenkins SSH Keys if found, otherwise generate new ones
-  local ssh_pubkey=""
-  if [ -f "/root/.ssh/id_dsa.jenkins.pub" ]; then
-    ssh_pubkey="$(cat "/root/.ssh/id_dsa.jenkins.pub")"
-    ssh-add "/root/.ssh/id_dsa.jenkins" &>/dev/null
-  else
-    if [ ! -f "$HOME/.ssh/id_rsa.tests.pub" ]; then
-      ssh-keygen -b 4096 -t rsa -f "$HOME/.ssh/id_rsa.tests" -q -N ""
-    fi
-
-    ssh-add "$HOME/.ssh/id_rsa.tests" &>/dev/null
-    ssh_pubkey="$(cat "$HOME/.ssh/id_rsa.tests.pub")"
+  # Generate ssh rsa key if one doesn't exist
+  if ssh-add -L | grep -q "^ssh-rsa" ; then
+    ssh-keygen -b 4096 -t rsa -q -N ""
   fi
 
   # Get the root user id so we can add ssh keys to the test target
   rest_request "GET" "/account/users/"
-  local root_user_id=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.bsdusr_username == "root") { out(this.id) }')
+  local root_user_id=$(cat $RESTYOUT | jq '.[] | select(.bsdusr_username == "root") | .id')
+  local ssh_pubkey="$(cat ~/.ssh/id_rsa.pub)"
 
   echo_test_title "Adding SSH public key from the executor to the root user account"
   if [ -n "$root_user_id" -a -n "$ssh_pubkey" ]; then
