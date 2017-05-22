@@ -11,9 +11,10 @@ export REQUIRES
 
 nis_bsd_tests()
 {
-  #define variables 
+  # define variables 
   local SERVER="${NISSERVER}"
   local DOMAIN="${NISDOMAIN}"
+
   # Set the group text and number of tests
   set_test_group_text "1 - Create - nis_bsd test class" "2"
   CLASSNAME=ixbuild.resty.functional.create.nis_bsd
@@ -21,18 +22,18 @@ nis_bsd_tests()
   echo_test_title "nis_bsd test"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
-  
-  #skip if variable are not present
-  if [-z "$NISSERVER" -o -z "$NISDOMAIN" ] ; then
-	echo -n "MISSING the ADUSERNAME / ADPASSWORD settings, test skipped.."
-	echo_skipped
-	add_xml_result "skipped" "skipped due to missing AD settings"
-	return 0
+
+  # skip if variable are not present
+  if [ -z "$NISSERVER" -o -z "$NISDOMAIN" ] ; then
+    echo -n "MISSING the NISSERVER / NISDOMAIN settings, test skipped.."
+    echo_skipped
+    add_xml_result "skipped" "skipped due to missing NIS settings"
+    return 0
   fi
-  
-  #Tests all passed!
+
+  # Tests all passed!
   return 0
- 
+
 }
 
 # Init function, this is called after module is sourced
