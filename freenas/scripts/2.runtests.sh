@@ -106,6 +106,7 @@ clean_xml_results
 
 # Run tests now
 if [ -f "/tmp/${BUILDTAG}" ] ; then
+  rm -rf /tmp/build
   exit 0
 else
   run_tests
