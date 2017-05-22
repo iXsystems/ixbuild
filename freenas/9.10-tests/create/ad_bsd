@@ -86,10 +86,10 @@ ad_bsd_tests()
 
   sleep 10
 
-  # Store credentials file for mount_smb
   # The ADUSER user must exist in AD with this password
-  echo "[TESTNAS:ADUSER]" > ~/.nsmbrc
-  echo password=12345678 >> ~/.nsmbrc
+  echo_test_title "Store AD credentials in a file for mount_smbfs"
+  bsd_test "echo \"[TESTNAS:ADUSER]\" > ~/.nsmbrc && echo password=12345678 >> ~/.nsmbrc"
+  check_exit_status || return 1
 
   echo_test_title "Mounting SMB"
   bsd_test "mount_smbfs -N -I ${BRIDGEIP} -W AD01 '//aduser@testnas/${SMB_NAME}' '${MOUNTPOINT}'"
