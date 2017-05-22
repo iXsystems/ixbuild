@@ -34,11 +34,6 @@ ssh_tests()
     PS_USER="root"
   fi
 
-  # Start ssh-agent for executing user if not found.
-  if ! ps aux -U ${PS_USER} | grep -q "[s]sh-agent" ; then
-    eval `ssh-agent -s`
-  fi
-
   # Use Jenkins SSH Keys if found, otherwise generate new ones
   local ssh_pubkey=""
   if [ -f "/root/.ssh/id_dsa.jenkins.pub" ]; then
