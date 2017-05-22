@@ -20,7 +20,7 @@ nfs_tests()
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
-  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${ip}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${BRIDGIP}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
   check_rest_response "200 OK"
 
   # Check creating a NFS share
@@ -58,7 +58,7 @@ nfs_tests()
   check_exit_status || return 1
 
   echo_test_title "Mounting NFS"
-  bsd_test "mount_nfs ${ip}:${NFS_PATH} ${MOUNTPOINT}" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60"
+  bsd_test "mount_nfs ${BRIDGEIP}:${NFS_PATH} ${MOUNTPOINT}" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60"
   check_exit_status || return 1
 
   echo_test_title "Creating NFS file"

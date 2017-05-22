@@ -70,7 +70,7 @@ smb_bsd_tests()
   check_exit_status || return 1
 
   echo_test_title "Mounting SMB"
-  bsd_test "mount_smbfs -N -I ${ip} //guest@testnas/${SMB_NAME} ${MOUNTPOINT}"
+  bsd_test "mount_smbfs -N -I ${BRIDGEIP} //guest@testnas/${SMB_NAME} ${MOUNTPOINT}"
   check_exit_status || return 1
 
   echo_test_title "Verify that SMB share has been mounted"

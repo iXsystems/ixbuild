@@ -76,7 +76,7 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${ip}:3620 -t iqn.2005-10.org.freenas.ctl:target0"
+  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t iqn.2005-10.org.freenas.ctl:target0"
   check_exit_status || return 1
 
   echo_test_title "Waiting for iscsi connection before grabbing device name"

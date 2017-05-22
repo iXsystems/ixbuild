@@ -96,7 +96,7 @@ ldap_bsd_tests()
   echo password=12345678 >> ~/.nsmbrc
 
   echo_test_title "Mounting SMB"
-  bsd_test "mount_smbfs -N -I ${ip} -W LDAP02 '//${LDAP_USER}@testnas/${SMB_NAME}' '${MOUNTPOINT}'"
+  bsd_test "mount_smbfs -N -I ${BRIDGEIP} -W LDAP02 '//${LDAP_USER}@testnas/${SMB_NAME}' '${MOUNTPOINT}'"
   check_exit_status || return 1
 
   echo_test_title "Verify SMB share has finished mounting"
