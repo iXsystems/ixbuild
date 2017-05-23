@@ -14,7 +14,7 @@ ad_bsd_tests()
   local DATASET="ad-bsd"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/tmp/ad-mnt.$$"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}ad-bsd"
   local VOL_GROUP="ga"
 
   set_test_group_text "2 - Update - Active Directory BSD tests" "24"
@@ -33,8 +33,7 @@ ad_bsd_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  umount -A &>/dev/null
-  rmdir /tmp/ad-mnt.* &>/dev/null
+  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Set auxilary parameters to allow mount_smbfs to work with Active Directory
   echo_test_title "Setting auxilary parameters for mount_smbfs.."
@@ -89,10 +88,10 @@ ad_bsd_tests()
   bsd_test "mkdir -p '${MOUNTPOINT}' && sync"
   check_exit_status || return 1
 
-  # Store credentials file for mount_smb
   # The ADUSER user must exist in AD with this password
-  echo "[TESTNAS:ADUSER]" > ~/.nsmbrc
-  echo password=12345678 >> ~/.nsmbrc
+  echo_test_title "Store Active Directory credentials in file for mount_smbfs"
+  bsd_test "echo \"[TESTNAS:ADUSER]\" > ~/.nsmbrc && echo password=12345678 >> ~/.nsmbrc"
+  check_exit_status || return 1
 
   echo_test_title "Mounting SMB"
   bsd_test "mount_smbfs -N -I ${BRIDGEIP} -W AD01 //aduser@testnas/${SMB_NAME} '${MOUNTPOINT}'"

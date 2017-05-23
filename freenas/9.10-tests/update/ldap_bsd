@@ -14,7 +14,7 @@ ldap_bsd_tests()
   local DATASET="ldap-bsd"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/tmp/ldap-mnt.$$"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}ldap-bsd"
   local LDAP_USER='ldapuser'
   local VOL_GROUP="qa"
 
@@ -34,8 +34,7 @@ ldap_bsd_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  umount -A &>/dev/null
-  rmdir /tmp/ldap-mnt.* &>/dev/null
+  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Set auxilary parameters to allow mount_smbfs to work with ldap
   echo_test_title "Set auxilary parameters for mount_smbfs.."
@@ -90,10 +89,10 @@ ldap_bsd_tests()
 
   sleep 10
 
-  # Store credentials file for mount_smb
   # The LDAPUSER user must exist in LDAP with this password
-  echo "[TESTNAS:LDAPUSER]" > ~/.nsmbrc
-  echo password=12345678 >> ~/.nsmbrc
+  echo_test_title "Store LDAP credentials in file for mount_smbfs"
+  bsd_test "echo \"[TESTNAS:LDAPUSER]\" > ~/.nsmbrc echo password=12345678 >> ~/.nsmbrc"
+  check_exit_status || return 1
 
   echo_test_title "Mounting SMB"
   bsd_test "mount_smbfs -N -I ${BRIDGEIP} -W LDAP02 '//${LDAP_USER}@testnas/${SMB_NAME}' '${MOUNTPOINT}'"

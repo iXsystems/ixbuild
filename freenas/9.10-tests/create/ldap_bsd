@@ -14,7 +14,7 @@ ldap_bsd_tests()
   local DATASET="ldap-bsd"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/tmp/ldap-mnt.$$"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}ldap-bsd"
   local VOL_GROUP="ga"
 
   set_test_group_text "1 - Create - LDAP BSD tests" "27"
@@ -33,8 +33,7 @@ ldap_bsd_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  umount -A &>/dev/null
-  rmdir /tmp/ldap-mnt.* &>/dev/null
+  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Set auxilary parameters to allow mount_smbfs to work with ldap
   echo_test_title "Setting auxilary parameters for mount_smbfs.."

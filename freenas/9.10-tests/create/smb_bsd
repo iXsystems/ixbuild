@@ -14,7 +14,7 @@ smb_bsd_tests()
   local DATASET="smb-bsd"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/tmp/smb-mnt.$$"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}smb-bsd"
   TEST_CNT=22
     
   # Set the group text and number of tests
@@ -27,8 +27,7 @@ smb_bsd_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  umount -A &>/dev/null
-  rmdir /tmp/smb-mnt.* &>/dev/null
+  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Set auxilary parameters to allow mount_smbfs to work
   echo_test_title "Setting auxilary parameters for mount_smbfs.."
@@ -65,7 +64,7 @@ smb_bsd_tests()
   check_exit_status || return 1
 
   echo_test_title "Mounting SMB"
-  bsd_test "mount_smbfs -N -I ${BRIDGEIP} //guest@testnas/${SMB_NAME} ${MOUNTPOINT}"
+  bsd_test "mount_smbfs -N -I ${BRIDGEIP} \"//guest@testnas/${SMB_NAME}\" \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Verify that SMB share has been mounted"
