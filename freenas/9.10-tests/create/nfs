@@ -12,7 +12,7 @@ export REQUIRES
 nfs_tests()
 {
   local NFS_PATH="/mnt/tank/share"
-  local MOUNTPOINT="/tmp/nfs-mnt.$$"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}nfs"
 
   # Set the group text and number of tests
   set_test_group_text "1 - Create - NFS tests" "14"
@@ -20,7 +20,7 @@ nfs_tests()
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
-  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${BRIDGIP}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${BRIDGEIP}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
   check_rest_response "200 OK"
 
   # Check creating a NFS share
@@ -50,11 +50,9 @@ nfs_tests()
   rest_request "GET" "/services/services/nfs/"
   check_service_status "RUNNING" || return 1
 
-  return 0
-
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating NFS mountpoint"
-  bsd_test "mkdir '${MOUNTPOINT}'"
+  bsd_test "mkdir \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Mounting NFS"
@@ -82,7 +80,7 @@ nfs_tests()
   check_exit_status || return 1
 
   echo_test_title "Removing NFS mountpoint"
-  bsd_test "rmdir '${MOUNTPOINT}'"
+  bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
   check_exit_status || return 1
 
   return 0

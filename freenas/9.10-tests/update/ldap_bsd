@@ -83,15 +83,12 @@ ldap_bsd_tests()
 
   # Now check if we can mount SMB / create / rename / copy / delete / umount
   echo_test_title "Creating SMB mountpoint"
-  bsd_test "mkdir '${MOUNTPOINT}'"
+  bsd_test "mkdir '${MOUNTPOINT}' && sync"
   check_exit_status || return 1
-  sync
-
-  sleep 10
 
   # The LDAPUSER user must exist in LDAP with this password
   echo_test_title "Store LDAP credentials in file for mount_smbfs"
-  bsd_test "echo \"[TESTNAS:LDAPUSER]\" > ~/.nsmbrc echo password=12345678 >> ~/.nsmbrc"
+  bsd_test "echo \"[TESTNAS:LDAPUSER]\" > ~/.nsmbrc && echo password=12345678 >> ~/.nsmbrc"
   check_exit_status || return 1
 
   echo_test_title "Mounting SMB"
