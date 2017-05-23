@@ -628,7 +628,8 @@ wait_for_bsd_mnt()
 
   while :
   do
-    mount -l | grep -q "${1}" && break
+    bsd_test "mount -l | grep -q \"${1}\""
+    check_exit_status -q && break
     (( loop_cnt++ ))
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
       return 1
