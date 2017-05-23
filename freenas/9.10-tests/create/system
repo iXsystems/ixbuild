@@ -50,11 +50,11 @@ system_tests()
       echo_ok && break;
     fi
     (( loop_cnt++ ))
-    if [ $loop_cnt -gt 30 ]; then
+    if [ $loop_cnt -gt 60 ]; then
       echo_fail
       return 1
     fi
-    sleep 3 && echo -n ".";
+    sleep 4 && echo -n ".";
   done
 
   echo_test_title "Waiting for HTTP server and API initialization after reboot"
