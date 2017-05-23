@@ -101,7 +101,7 @@ smb_bsd_tests()
   check_exit_status || return 1
 
   echo_test_title "Removing SMB mountpoint"
-  bsd_test "rmdir ${MOUNTPOINT}"
+  bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
   check_exit_status || return 1
 
   echo_test_title "Removing SMB share on ${SMB_PATH}"
