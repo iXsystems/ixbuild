@@ -54,7 +54,7 @@ system_tests()
       echo_fail
       return 1
     fi
-    sleep 3 && echo -n ".";
+    sleep 1 && echo -n ".";
   done
 
   echo_test_title "Waiting for HTTP server and API initialization after reboot"
