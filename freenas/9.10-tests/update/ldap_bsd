@@ -128,9 +128,17 @@ ldap_bsd_tests()
   bsd_test "umount '${MOUNTPOINT}'"
   check_exit_status || return 1
 
+  echo_test_title "Verifying SMB share was unmounted"
+  bsd_test "mount | grep -qv \"${MOUNTPOINT}\""
+  check_exit_status
+
   echo_test_title "Removing SMB mountpoint"
   bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
   check_exit_status || return 1
+
+  echo_test_title "Verifying SMB mountpoint was removed"
+  bsd_test "! test -d \"${MOUNTPOINT}\""
+  check_exit_status
 
   echo_test_title "Removing SMB share on ${SMB_PATH}"
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
