@@ -11,25 +11,25 @@ export REQUIRES
 
 iscsi_tests()
 {
-  local MOUNTPOINT="/tmp/iscsi-mnt.$$"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
+  local DEVICE_NAME_PATH="/tmp/iscsi_dev_name"
 
   # Set the group text and number of tests
   set_test_group_text "1 - Create - iSCSI tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.iscsi
 
-  # TODO - Find correct process name on test executor
-  #ps -aux | grep -q "[i]scsid"
-  #if [ $? -ne 0 ]; then
-  #  echo -n "iSCSI service does not appear to be running."
-  #  echo_skipped
-  #  return 0
-  #fi
+  # bsd_test "ps -aux | grep -q \"[i]scsid\""
+  # if [ $? -ne 0 ]; then
+  #   echo -n "iSCSI service does not appear to be running."
+  #   echo_skipped
+  #   return 0
+  # fi
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  iscsictl -R -a
-  umount -A &>/dev/null
-  rmdir /tmp/iscsi-mnt.* &>/dev/null
+  bsd_test "iscsictl -R -t \"\$(cat \"${DEVICE_NAME_PATH}\")\""
+  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
+  bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Add iSCSI initator
   echo_test_title "Add iSCSI initiator"
@@ -86,14 +86,16 @@ iscsi_tests()
   check_exit_status || return 1
 
   # Get the device for the connect target
-  local iscsi_devname=`iscsictl -L | awk '$2 == "'${ip}':3620" && $3 == "Connected:" {print $4}'`
+  echo_test_title "Get the iSCSI target device name for the connection target"
+  bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
+  check_exit_status || return 1
 
   echo_test_title "Ensure we have the iSCSI device name"
-  test -n "${iscsi_devname}" && ls "/dev/${iscsi_devname}" >/dev/null
+  bsd_test "test -n \"\$(cat \"${DEVICE_NAME_PATH}\")\" && ls \"/dev/\$(cat \"${DEVICE_NAME_PATH}\")\" >/dev/null"
   check_exit_status || return 1
 
   echo_test_title "Format the target volume"
-  bsd_test "newfs /dev/${iscsi_devname}"
+  bsd_test "newfs /dev/\$(cat \"${DEVICE_NAME_PATH}\")"
   check_exit_status || return 1
 
   echo_test_title "Creating iSCSI mountpoint"
@@ -101,7 +103,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Mount the target volume"
-  bsd_test "mount '/dev/${iscsi_devname}' '${MOUNTPOINT}'"
+  bsd_test "mount \"\$(cat \"${DEVICE_NAME_PATH}\")\" \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Creating file"
@@ -129,7 +131,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Disconnect all targets"
-  bsd_test "iscsictl -R -a"
+  bsd_test "iscsictl -R -t \"\$(cat \"${DEVICE_NAME_PATH}\")\""
   check_exit_status || return 1
 
   # Disable the iSCSI service
