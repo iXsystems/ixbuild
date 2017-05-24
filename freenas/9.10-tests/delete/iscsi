@@ -28,7 +28,7 @@ iscsi_tests()
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  bsd_test "iscsictl -R -t \"\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
   bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null ; rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Remove iSCSI target

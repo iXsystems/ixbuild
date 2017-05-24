@@ -27,7 +27,7 @@ iscsi_tests()
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  bsd_test "iscsictl -R -t \"\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
   bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
   bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
@@ -91,7 +91,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Ensure we have the iSCSI device name"
-  bsd_test "test -n \"\`cat \"${DEVICE_NAME_PATH}\"\`\"" # && ls \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" >/dev/null"
+  bsd_test "test -n \"\`cat \"${DEVICE_NAME_PATH}\"\`\""
   check_exit_status || return 1
 
   echo_test_title "Format the target volume"
@@ -103,7 +103,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Mount the target volume"
-  bsd_test "mount \"\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
+  bsd_test "mount \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Creating file"
@@ -131,7 +131,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Disconnect all targets"
-  bsd_test "iscsictl -R -t \"\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
   check_exit_status || return 1
 
   # Disable the iSCSI service
