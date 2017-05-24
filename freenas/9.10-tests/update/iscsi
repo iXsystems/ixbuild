@@ -28,7 +28,7 @@ iscsi_tests()
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  bsd_test "iscsictl -R -t \"\$(cat \"${DEVICE_NAME_PATH}\")\""
+  bsd_test "iscsictl -R -t \"\`cat \"${DEVICE_NAME_PATH}\"\`\""
   bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
   bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
@@ -61,7 +61,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Ensure we have the iSCSI device name"
-  bsd_test "test -n \"\$(cat \"${DEVICE_NAME_PATH}\")\" && ls \"\$(cat \"${DEVICE_NAME_PATH}\")\" >/dev/null"
+  bsd_test "test -n \"\`cat \"${DEVICE_NAME_PATH}\"\`\" && ls \"\`cat \"${DEVICE_NAME_PATH}\"\`\" &>/dev/null"
   check_exit_status || return 1
 
   # Now check if we can mount target / create / rename / copy / delete / umount
@@ -71,7 +71,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Mount the target volume"
-  bsd_test "mount \"\$(cat \"${DEVICE_NAME_PATH}\")\" \"${MOUNTPOINT}\""
+  bsd_test "mount \"\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Creating 45MB file to verify vzol size increase"
@@ -95,7 +95,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Disconnect iSCSI target"
-  bsd_test "iscsictl -R -t \"\$(cat \"${DEVICE_NAME_PATH}\")\""
+  bsd_test "iscsictl -R -t \"\`cat \"${DEVICE_NAME_PATH}\"\`\""
   check_exit_status || return 1
 
   # Disable the iSCSI service
