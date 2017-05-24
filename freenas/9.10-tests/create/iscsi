@@ -91,7 +91,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Ensure we have the iSCSI device name"
-  bsd_test "test -n \"\`cat \"${DEVICE_NAME_PATH}\"\`\" && ls \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" &>/dev/null"
+  bsd_test "test -n \"\`cat \"${DEVICE_NAME_PATH}\"\`\"" # && ls \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" >/dev/null"
   check_exit_status || return 1
 
   echo_test_title "Format the target volume"
