@@ -13,7 +13,7 @@ iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
   local DEVICE_NAME_PATH="/tmp/iscsi_dev_name"
-  local TARGET_NAME="iqn.${BUILDTAG}tests:target0"
+  local TARGET_NAME="iqn.${BUILDTAG}:target0"
 
   # Set the group text and number of tests
   set_test_group_text "2 - Update - iSCSI tests" "16"
@@ -48,7 +48,7 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${FNASTESTIP}:3620 -t ${TARGET_NAME}"
+  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
   check_exit_status || return 1
  
   echo_test_title "Waiting for iscsi connection before grabbing device name"
@@ -58,7 +58,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Get the iSCSI target device name for the connection target"
-  bsd_test "iscsictl -L | awk '\$2 == \"${FNASTESTIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
+  bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
   check_exit_status || return 1
 
   echo_test_title "Ensure we have the iSCSI device name"
