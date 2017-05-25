@@ -48,17 +48,17 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
+  bsd_test "iscsictl -A -p ${FNASTESTIP}:3620 -t ${TARGET_NAME}"
   check_exit_status || return 1
  
   echo_test_title "Waiting for iscsi connection before grabbing device name"
   # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
   # have been established before -L[isting] results
   bsd_test "iscsictl -L -w 90"
-  check_exit_status
+  check_exit_status || return 1
 
   echo_test_title "Get the iSCSI target device name for the connection target"
-  bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
+  bsd_test "iscsictl -L | awk '\$2 == \"${FNASTESTIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
   check_exit_status || return 1
 
   echo_test_title "Ensure we have the iSCSI device name"
