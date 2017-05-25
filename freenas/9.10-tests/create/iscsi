@@ -13,6 +13,7 @@ iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
   local DEVICE_NAME_PATH="/tmp/iscsi_dev_name"
+  local TARGET_NAME "${BUILDTAG}tests:target0"
 
   # Set the group text and number of tests
   set_test_group_text "1 - Create - iSCSI tests" "24"
@@ -43,7 +44,7 @@ iscsi_tests()
 
   # Add iSCSI target
   echo_test_title "Add iSCSI target"
-  rest_request "POST" "/services/iscsi/target/" '{ "iscsi_target_name": "iqn.2005-10.org.freenas.ctl:target0"}'
+  rest_request "POST" "/services/iscsi/target/" '{ "iscsi_target_name": "'"${TARGET_NAME}"'"}'
   check_rest_response "201 Created"
 
   # Add Target to groups
@@ -76,7 +77,7 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t iqn.2005-10.org.freenas.ctl:target0"
+  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
   check_exit_status || return 1
 
   echo_test_title "Waiting for iscsi connection before grabbing device name"
@@ -131,7 +132,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Disconnect all targets"
-  bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t ${TARGET_NAME}"
   check_exit_status || return 1
 
   # Disable the iSCSI service

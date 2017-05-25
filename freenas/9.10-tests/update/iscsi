@@ -13,6 +13,7 @@ iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
   local DEVICE_NAME_PATH="/tmp/iscsi_dev_name"
+  local TARGET_NAME="${BUILDTAG}tests:target0"
 
   # Set the group text and number of tests
   set_test_group_text "2 - Update - iSCSI tests" "16"
@@ -47,7 +48,7 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t iqn.2005-10.org.freenas.ctl:target0"
+  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
   check_exit_status || return 1
  
   echo_test_title "Waiting for iscsi connection before grabbing device name"
@@ -95,7 +96,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Disconnect iSCSI target"
-  bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t ${TARGET_NAME}"
   check_exit_status || return 1
 
   # Disable the iSCSI service

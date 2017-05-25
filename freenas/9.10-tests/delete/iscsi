@@ -13,6 +13,7 @@ iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
   local DEVICE_NAME_PATH="/tmp/iscsi_dev_name"
+  local TARGET_NAME="${BUILDTAG}tests:target0"
 
   # Set the group text and number of tests
   set_test_group_text "3 - Delete - iSCSI tests" "2"
@@ -28,7 +29,7 @@ iscsi_tests()
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t ${TARGET_NAME}"
   bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null ; rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Remove iSCSI target
