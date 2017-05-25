@@ -83,8 +83,8 @@ iscsi_tests()
   echo_test_title "Waiting for iscsi connection before grabbing device name"
   # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
   # have been established before -L[isting] results
-  bsd_test "iscsictl -L -w 30"
-  check_exit_status || return 1
+  bsd_test "iscsictl -L -w 90"
+  check_exit_status
 
   # Get the device for the connect target
   echo_test_title "Get the iSCSI target device name for the connection target"
