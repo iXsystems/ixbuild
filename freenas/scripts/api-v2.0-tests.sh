@@ -4,15 +4,23 @@
 # Location for tests into REST API of FreeNAS 9.10
 
 # Where is the ixbuild program installed
-PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
+PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"; export PROGDIR
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
 
+# Set which python, pip versions to use
+PYTHON="/usr/bin/env python3.6"
+PIP="/usr/bin/env pip3.6"
+
+# Use venv to avoid needing superuser
+$PYTHON -m venv /tmp/py3-venv
+. /tmp/py3-venv/bin/activate
+ 
 # Installl modules
-pip3.6 install requests
-pip3.6 install ws4py
+$PIP install requests
+$PIP install ws4py
 
 #################################################################
 # Run the tests now!
@@ -20,18 +28,18 @@ pip3.6 install ws4py
 
 echo "Using API Address: http://${FNASTESTIP}/api/v2.0"
 
-git clone https://www.github.com/freenas/freenas --depth=1 /freenas
-cd /freenas/src/middlewared
-pip3.6 uninstall -y middlewared.client
-python3.6 setup_client.py install --single-version-externally-managed --record $(mktemp)
-cd /freenas/src/middlewared/middlewared/pytest
+git clone https://www.github.com/freenas/freenas --depth=1 /tmp/freenas
+cd /tmp/freenas/src/middlewared
+$PIP uninstall -y middlewared.client
+$PYTHON setup_client.py install --single-version-externally-managed --record $(mktemp)
+cd /tmp/freenas/src/middlewared/middlewared/pytest
 echo [Target] > target.conf
 echo hostname = ${FNASTESTIP} >> target.conf
 echo api = /api/v2.0/ >> target.conf
 echo username = "root" >> target.conf
 echo password = "testing" >> target.conf
 sed -i '' "s|'freenas'|'testing'|g" functional/test_0001_authentication.py
-python3.6 -m pytest -sv functional --junitxml=$RESULTSDIR/results.xml.v2.0
+$PYTHON -m pytest -sv functional --junitxml=$RESULTSDIR/results.xml.v2.0
 TOTALTESTS="14"
 publish_pytest_results "$TOTALCOUNT"
 
