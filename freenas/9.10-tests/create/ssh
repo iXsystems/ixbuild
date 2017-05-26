@@ -30,7 +30,10 @@ ssh_tests()
 
   # Generate ssh rsa key if one doesn't exist
   if ssh-add -L | grep -q "^ssh-rsa" ; then
-    ssh-keygen -b 4096 -t rsa -q -N ""
+    if [ ! -f ${HOME}/.ssh/id_rsa ] ; then
+      ssh-keygen -b 4096 -t rsa -q -N ""
+    fi
+    ssh-add ${HOME}/.ssh/id_rsa &>/dev/null
   fi
 
   # Get the root user id so we can add ssh keys to the test target

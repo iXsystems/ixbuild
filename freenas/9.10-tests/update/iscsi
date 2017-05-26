@@ -61,9 +61,9 @@ iscsi_tests()
   bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
   check_exit_status || return 1
 
-  #echo_test_title "Ensure we have the iSCSI device name"
-  #bsd_test "test -n \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" && ls \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" &>/dev/null"
-  #check_exit_status || return 1
+  echo_test_title "Ensure we have the iSCSI device name"
+  bsd_test "test -n /dev/\`cat ${DEVICE_NAME_PATH}\` && ls /dev/\`cat ${DEVICE_NAME_PATH}\` &>/dev/null"
+  check_exit_status || return 1
 
   # Now check if we can mount target / create / rename / copy / delete / umount
 
