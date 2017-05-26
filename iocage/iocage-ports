@@ -11,6 +11,9 @@ multimedia/plexmediaserver-plexpass
 net/syncthing
 net-p2p/btsync
 net-p2p/couchpotato
+net-p2p/sonarr
+net-p2p/deluge-cli
+net-p2p/transmission-daemon
 irc/quassel-core
 sysutils/linux-crashplan
 www/nextcloud
@@ -18,3 +21,5 @@ www/nginx
 www/redmine
 www/gitlab
 www/subsonic-standalone
+www/madsonic-standalone
+www/transmission-web
