@@ -23,7 +23,7 @@ echo "Using API Address: http://${FNASTESTIP}/api/v2.0"
 git clone https://www.github.com/freenas/freenas --depth=1 /tmp/freenas
 cd /tmp/freenas/src/middlewared
 $PIP uninstall -y middlewared.client
-$PYTHON setup_client.py install --single-version-externally-managed --record $(mktemp)
+$PYTHON setup_client.py install --user --single-version-externally-managed --record $(mktemp)
 cd /tmp/freenas/src/middlewared/middlewared/pytest
 echo [Target] > target.conf
 echo hostname = ${FNASTESTIP} >> target.conf
