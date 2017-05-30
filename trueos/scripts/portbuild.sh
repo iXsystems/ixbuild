@@ -55,7 +55,7 @@ merge_trueos_src_ports()
      _branch=`echo $line | cut -d ' ' -f 2`
      dname=$(basename $repo)
 
-     if [ -n "$branch" ] ; then
+     if [ -n "$_branch" ] ; then
        rc_halt "git clone -b ${_branch} --depth=1 https://github.com/${repo}.git"
      else
        rc_halt "git clone --depth=1 https://github.com/${repo}.git"
