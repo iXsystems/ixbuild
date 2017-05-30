@@ -14,7 +14,7 @@ ldap_osx_tests()
   local DATASET="ldap-osx"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/ldap-osx${BRIDGEHOST}"
   local VOL_GROUP="qa"
 
   set_test_group_text "1 - Create - LDAP OS X tests" "25"

@@ -14,7 +14,7 @@ smb_osx_tests()
   local DATASET="smb-osx"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/smb-osx${BRIDGEHOST}"
   local VOL_GROUP="qa"
 
   TEST_CNT=13
