@@ -31,14 +31,10 @@ user_tests() {
   rest_request "POST" "/account/users/${userid}/groups/" '["wheel","ftp"]'
   check_rest_response "202"
 
-  # Create temporary directory for output if needed
-  if [ ! -d "${FNASBDIR}" ] ; then
-    mkdir "${FNASBDIR}"
-  fi
-
   # Save the ID of this user for other jobs
-  echo $userid > ${FNASBDIR}/testuser
+  echo $userid > /tmp/.ixbuild_test_userid
 
+  return 0
 }
 
 # Init function, this is called after module is sourced

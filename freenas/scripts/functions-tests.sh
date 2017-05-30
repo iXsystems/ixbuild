@@ -218,8 +218,6 @@ rc_test()
 }
 
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 ssh_test()
 {
   export TESTSTDOUT="/tmp/.sshCmdTestStdOut"
@@ -237,18 +235,26 @@ ssh_test()
     return 1
   fi
 
-  # Test fuser and fpass values
-  if [ -z "${fpass}" ] || [ -z "${fuser}" ] ; then
-    echo "SSH server username and password required for ssh_test()."
+  # Test fuser value
+  if [ -z "${fuser}" ] ; then
+    echo "SSH server username required for ssh_test()."
     return 1
   fi
 
-  # Make SSH connection
-  sshpass -p ${fpass} \
+  # Use password auth if password set and no local ssh key found
+  if [ -n "${fpass}" ] && ssh-add -l | grep -q 'The agent has no identities.'; then
+    sshpass -p ${fpass} \
+      ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
     ssh -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  fi
+
   return $?
 }
 
@@ -287,18 +293,25 @@ _scp_test()
     return 1
   fi
 
-  # Test fuser and fpass values
-  if [ -z "${fpass}" ] || [ -z "${fuser}" ]; then
-    echo "SCP server username and password required for scp_test()."
+  # Test fuser value
+  if [ -z "${fuser}" ] ; then
+    echo "SCP server username required for scp_test()."
     return 1
   fi
 
-  # SCP connection
-  sshpass -p ${fpass} \
+  # Use password auth if password set and no local ssh key found
+  if [ -n "${fpass}" ] && ssh-add -l | grep -q 'The agent has no identities.'; then
+    sshpass -p ${fpass} \
+      scp -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  else
     scp -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  fi
   SCP_CMD_RESULTS=$?
 
   if [ $SCP_CMD_RESULTS -ne 0 ]; then
@@ -311,8 +324,6 @@ _scp_test()
 }
 
 # $1 = Command to run
-# $2 = Command to run if $1 fails
-# $3 = Optional timeout
 osx_test()
 {
   export TESTSTDOUT="/tmp/.osxCmdTestStdOut"
@@ -325,17 +336,59 @@ osx_test()
     return 1
   fi
 
-  if [ -z "${OSX_USERNAME}" ] || [ -z "${OSX_PASSWORD}" ] ; then
-    echo "SSH server username and password required for osx_test()."
+  if [ -z "${OSX_USERNAME}" ] ; then
+    echo "SSH server username required for osx_test()."
     return 1
   fi
 
-  # Make SSH connection
-  sshpass -p ${OSX_PASSWORD} \
+  # Use SSH keys if the $OSX_PASSWORD is not set
+  if [ -n "${OSX_PASSWORD}" ]; then
+    sshpass -p ${OSX_PASSWORD} \
+      ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
     ssh -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  fi
+
+  return $?
+}
+
+# $1 = Command to run
+bsd_test()
+{
+  export TESTSTDOUT="/tmp/.bsdCmdTestStdOut"
+  export TESTSTDERR="/tmp/.bsdCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  if [ -z "${BSD_HOST}" ] ; then
+    echo "SSH server IP address required for bsd_test()."
+    return 1
+  fi
+
+  if [ -z "${BSD_USERNAME}" ] ; then
+    echo "SSH server username required for bsd_test()."
+    return 1
+  fi
+
+  # Use SSH keys if the $BSD_PASSWORD is not set
+  if [ -n "${BSD_PASSWORD}" ]; then
+    sshpass -p ${BSD_PASSWORD} \
+      ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${BSD_USERNAME}@${BSD_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${BSD_USERNAME}@${BSD_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  fi
 
   return $?
 }
@@ -575,7 +628,8 @@ wait_for_bsd_mnt()
 
   while :
   do
-    mount -l | grep -q "${1}" && break
+    bsd_test "mount -l | grep -q \"${1}\""
+    check_exit_status -q && break
     (( loop_cnt++ ))
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
       return 1

@@ -38,7 +38,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 # Start grub-bhyve
-bhyvectl --destroy --vm=$VM >/dev/null 2>/dev/null
+bhyvectl --destroy --vm=$BUILDTAG >/dev/null 2>/dev/null
 echo "(hd0) ${MFSFILE}
 (cd0) ${PROGDIR}/tmp/$BUILDTAG.iso" > ${PROGDIR}/tmp/device.map
 
@@ -47,16 +47,16 @@ echo "(hd0) ${MFSFILE}
 echo "#!/bin/sh
 count=0
 
-grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $VM
+grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $BUILDTAG
 
-daemon -p /tmp/$VM.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/$BUILDTAG.iso -l com1,stdio -c 4 -m 2048M $VM
+daemon -p /tmp/$BUILDTAG.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/$BUILDTAG.iso -l com1,stdio -c 4 -m 2048M $BUILDTAG
 
 # Wait for initial bhyve startup
 while :
 do
-  if [ ! -e "/tmp/$VM.pid" ] ; then break; fi
+  if [ ! -e "/tmp/$BUILDTAG.pid" ] ; then break; fi
 
-  pgrep -qF /tmp/$VM.pid
+  pgrep -qF /tmp/$BUILDTAG.pid
   if [ \$? -ne 0 ] ; then
         break;
   fi
@@ -69,12 +69,12 @@ do
 done
 
 # Cleanup the old VM
-bhyvectl --destroy --vm=$VM
-"> ${PROGDIR}/tmp/screen-$VM.sh
-chmod 755 ${PROGDIR}/tmp/screen-$VM.sh
+bhyvectl --destroy --vm=$BUILDTAG
+"> ${PROGDIR}/tmp/screen-$BUILDTAG.sh
+chmod 755 ${PROGDIR}/tmp/screen-$BUILDTAG.sh
 
 echo "Running bhyve in screen session, will display when finished..."
-screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$VM.sh
+screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$BUILDTAG.sh
 
 # Display output of screen command
 cat flush
@@ -104,16 +104,16 @@ echo "(hd0) ${MFSFILE}" > ${PROGDIR}/tmp/device.map
 echo "#!/bin/sh
 count=0
 
-grub-bhyve -m ${PROGDIR}/tmp/device.map -M 2048M $VM
+grub-bhyve -m ${PROGDIR}/tmp/device.map -M 2048M $BUILDTAG
 
-daemon -p /tmp/$VM.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -l com1,stdio -c 4 -m 2048M $VM
+daemon -p /tmp/$BUILDTAG.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -l com1,stdio -c 4 -m 2048M $BUILDTAG
 
 # Wait for initial bhyve startup
 while :
 do
-  if [ ! -e "/tmp/$VM.pid" ] ; then break; fi
+  if [ ! -e "/tmp/$BUILDTAG.pid" ] ; then break; fi
 
-  pgrep -qF /tmp/$VM.pid
+  pgrep -qF /tmp/$BUILDTAG.pid
   if [ \$? -ne 0 ] ; then
         break;
   fi
@@ -129,12 +129,12 @@ done
 stop_bhyve()
 {
 # Cleanup the old VM
-bhyvectl --destroy --vm=$VM
-"> ${PROGDIR}/tmp/screen-$VM.sh
-chmod 755 ${PROGDIR}/tmp/screen-$VM.sh
+bhyvectl --destroy --vm=$BUILDTAG
+"> ${PROGDIR}/tmp/screen-$BUILDTAG.sh
+chmod 755 ${PROGDIR}/tmp/screen-$BUILDTAG.sh
 
 echo "Running bhyve tests in screen session, will display when finished..."
-screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$VM.sh
+screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$BUILDTAG.sh
 
 # Display output of screen command
 cat flush
@@ -173,7 +173,7 @@ OS=`echo $runningvm | cut -d \" -f 2`
 if [ "${VM}" == "${OS}" ]; then
   echo "A previous instance of ${VM} is still running!"
   echo "Shutting down ${VM}"
-  VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
+  VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
   sleep 10
 else
   echo "Checking for previous running instances of ${VM}... none found"
@@ -191,8 +191,8 @@ echo "Creating $MFSFILE"
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.vdi --size 20000"
 
 # Remove any crashed / old VM
-VBoxManage unregistervm $VM >/dev/null 2>/dev/null
-rm -rf "/root/VirtualBox VMs/$VM" >/dev/null 2>/dev/null
+VBoxManage unregistervm $BUILDTAG >/dev/null 2>/dev/null
+rm -rf "/root/VirtualBox VMs/$BUILDTAG" >/dev/null 2>/dev/null
 
 # Copy ISO over to /root in case we need to grab it from jenkins node later
   cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
@@ -201,47 +201,47 @@ rm -rf "/root/VirtualBox VMs/$VM" >/dev/null 2>/dev/null
 VBoxManage closemedium dvd ${PROGDIR}/tmp/$BUILDTAG.iso >/dev/null 2>/dev/null
 
 # Create the VM in virtualbox
-rc_halt "VBoxManage createvm --name $VM --ostype FreeBSD_64 --register"
-rc_halt "VBoxManage storagectl $VM --name SATA --add sata --controller IntelAhci"
-rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
-rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/tmp/$BUILDTAG.iso"
-rc_halt "VBoxManage modifyvm $VM --cpus 1 --ioapic on --boot1 disk --memory 4096 --vram 12"
+rc_halt "VBoxManage createvm --name $BUILDTAG --ostype FreeBSD_64 --register"
+rc_halt "VBoxManage storagectl $BUILDTAG --name SATA --add sata --controller IntelAhci"
+rc_halt "VBoxManage storageattach $BUILDTAG --storagectl SATA --port 0 --device 0 --type hdd --medium ${MFSFILE}.vdi"
+rc_halt "VBoxManage storageattach $BUILDTAG --storagectl SATA --port 1 --device 0 --type dvddrive --medium ${PROGDIR}/tmp/$BUILDTAG.iso"
+rc_halt "VBoxManage modifyvm $BUILDTAG --cpus 1 --ioapic on --boot1 disk --memory 4096 --vram 12"
 rc_nohalt "VBoxManage hostonlyif remove vboxnet0"
 rc_halt "VBoxManage hostonlyif create"
-rc_halt "VBoxManage modifyvm $VM --nic1 hostonly"
-rc_halt "VBoxManage modifyvm $VM --hostonlyadapter1 vboxnet0"
-rc_halt "VBoxManage modifyvm $VM --macaddress1 auto"
-rc_halt "VBoxManage modifyvm $VM --nicpromisc1 allow-all"
+rc_halt "VBoxManage modifyvm $BUILDTAG --nic1 hostonly"
+rc_halt "VBoxManage modifyvm $BUILDTAG --hostonlyadapter1 vboxnet0"
+rc_halt "VBoxManage modifyvm $BUILDTAG --macaddress1 auto"
+rc_halt "VBoxManage modifyvm $BUILDTAG --nicpromisc1 allow-all"
 if [ -n "$BRIDGEIP" ] ; then
   # Switch to bridged mode
   DEFAULTNIC=`netstat -nr | grep "^default" | awk '{print $4}'`
-  rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
-  rc_halt "VBoxManage modifyvm $VM --nic2 bridged"
-  rc_halt "VBoxManage modifyvm $VM --bridgeadapter2 ${DEFAULTNIC}"
-  rc_halt "VBoxManage modifyvm $VM --nicpromisc2 allow-all"
+  rc_halt "VBoxManage modifyvm $BUILDTAG --nictype1 82540EM"
+  rc_halt "VBoxManage modifyvm $BUILDTAG --nic2 bridged"
+  rc_halt "VBoxManage modifyvm $BUILDTAG --bridgeadapter2 ${DEFAULTNIC}"
+  rc_halt "VBoxManage modifyvm $BUILDTAG --nicpromisc2 allow-all"
 else
   # Fallback to NAT
-  rc_halt "VBoxManage modifyvm $VM --nictype1 82540EM"
-  rc_halt "VBoxManage modifyvm $VM --nic2 nat"
+  rc_halt "VBoxManage modifyvm $BUILDTAG --nictype1 82540EM"
+  rc_halt "VBoxManage modifyvm $BUILDTAG --nic2 nat"
 fi
-rc_halt "VBoxManage modifyvm $VM --macaddress2 auto"
-rc_halt "VBoxManage modifyvm $VM --nictype2 82540EM"
-rc_halt "VBoxManage modifyvm $VM --pae off"
-rc_halt "VBoxManage modifyvm $VM --usb on"
+rc_halt "VBoxManage modifyvm $BUILDTAG --macaddress2 auto"
+rc_halt "VBoxManage modifyvm $BUILDTAG --nictype2 82540EM"
+rc_halt "VBoxManage modifyvm $BUILDTAG --pae off"
+rc_halt "VBoxManage modifyvm $BUILDTAG --usb on"
 
 # Setup serial output
-rc_halt "VBoxManage modifyvm $VM --uart1 0x3F8 4"
-rc_halt "VBoxManage modifyvm $VM --uartmode1 file /tmp/$VM.vboxpipe"
+rc_halt "VBoxManage modifyvm $BUILDTAG --uart1 0x3F8 4"
+rc_halt "VBoxManage modifyvm $BUILDTAG --uartmode1 file /tmp/$BUILDTAG.vboxpipe"
 
 # Just in case the install hung, we don't need to be waiting for over an hour
-echo "Performing $VM installation..."
+echo "Performing $BUILDTAG installation..."
 count=0
 
 # Unload VB
-VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
 
 # Start the VM
-daemon -p "/tmp/${VM}.pid" vboxheadless -startvm "$VM" --vrde off
+daemon -p "/tmp/${VM}.pid" vboxheadless -startvm "$BUILDTAG" --vrde off
 
 sleep 5
 if [ ! -e "/tmp/${VM}.pid" ] ; then
@@ -256,7 +256,7 @@ do
   # Check if the install failed
   grep -q "installation on ada0 has failed" "/tmp/${VM}.vboxpipe"
   if [ $? -eq 0 ] ; then
-    cat /tmp/$VM.vboxpipe
+    cat /tmp/$BUILDTAG.vboxpipe
     echo_fail
     break
   fi
@@ -277,7 +277,7 @@ do
 done
 
 # Make sure VM is shutdown
-VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
 
 # Remove from the vbox registry
 # Give extra time to ensure VM is shutdown to avoid CAM errors
@@ -285,12 +285,12 @@ sleep 30
 VBoxManage closemedium dvd ${PROGDIR}/tmp/$BUILDTAG.iso >/dev/null 2>/dev/null
 
 # Set the DVD drive to empty
-rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium emptydrive"
+rc_halt "VBoxManage storageattach $BUILDTAG --storagectl SATA --port 1 --device 0 --type dvddrive --medium emptydrive"
 
 # Display output of VM serial mode
 echo "OUTPUT FROM INSTALLATION CONSOLE..."
 echo "---------------------------------------------"
-cat /tmp/$VM.vboxpipe
+cat /tmp/$BUILDTAG.vboxpipe
 echo ""
 
 # Check that this device seemed to install properly
@@ -304,7 +304,7 @@ fi
 sync
 sleep 2
 
-echo "$VM installation successful!"
+echo "$BUILDTAG installation successful!"
 sleep 30
 
 runningvm=$(VBoxManage list runningvms | grep ${VM})
@@ -312,53 +312,53 @@ OS=`echo $runningvm | cut -d \" -f 2`
 if [ "${VM}" == "${OS}" ]; then
   echo "Warning ${VM} has failed to shut down!"
 else
-  echo "$VM has been successfully shut down"
+  echo "$BUILDTAG has been successfully shut down"
 fi
 
 echo "Attaching extra disks for testing"
 
 # Attach extra disks to the VM for testing
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk1 --size 20000"
-rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 1 --device 0 --type hdd --medium ${MFSFILE}.disk1"
+rc_halt "VBoxManage storageattach $BUILDTAG --storagectl SATA --port 1 --device 0 --type hdd --medium ${MFSFILE}.disk1"
 rc_halt "VBoxManage createhd --filename ${MFSFILE}.disk2 --size 20000"
-rc_halt "VBoxManage storageattach $VM --storagectl SATA --port 2 --device 0 --type hdd --medium ${MFSFILE}.disk2"
+rc_halt "VBoxManage storageattach $BUILDTAG --storagectl SATA --port 2 --device 0 --type hdd --medium ${MFSFILE}.disk2"
 
 sleep 30
 
 # Get rid of old output file
-if [ -e "/tmp/$VM.vboxpipe" ] ; then
-  rm /tmp/$VM.vboxpipe
+if [ -e "/tmp/$BUILDTAG.vboxpipe" ] ; then
+  rm /tmp/$BUILDTAG.vboxpipe
 fi
 
 sleep 30
 
 echo "Running Installed System..."
-daemon -p /tmp/$VM.pid vboxheadless -startvm "$VM" --vrde off
+daemon -p /tmp/$BUILDTAG.pid vboxheadless -startvm "$BUILDTAG" --vrde off
 
 # Give a minute to boot, should be ready for REST calls now
-echo "Waiting up to 8 minutes for $VM to boot with hostpipe output"
+echo "Waiting up to 8 minutes for $BUILDTAG to boot with hostpipe output"
 sleep 480
 }
 
 stop_vbox()
 {
 # Shutdown that VM
-VBoxManage controlvm $VM poweroff >/dev/null 2>/dev/null
+VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
 sync
 
 # Delete the VM
-VBoxManage unregistervm $VM --delete
+VBoxManage unregistervm $BUILDTAG --delete
 
 echo ""
 echo "Output from console during runtime tests:"
 echo "-----------------------------------------"
-cat /tmp/$VM.vboxpipe
+cat /tmp/$BUILDTAG.vboxpipe
 echo ""
 echo "Output from REST API calls:"
 echo "-----------------------------------------"
-cat /tmp/$VM-tests-create.log
-cat /tmp/$VM-tests-update.log
-cat /tmp/$VM-tests-delete.log
+cat /tmp/$BUILDTAG-tests-create.log
+cat /tmp/$BUILDTAG-tests-update.log
+cat /tmp/$BUILDTAG-tests-delete.log
 
 exit $res
 }
@@ -405,13 +405,13 @@ install_vmware()
 
   #Get console output for install
   tpid=$!
-  tail -f /tmp/console.log 2>/dev/null &
+  tail -f /autoinstalls/$BUILDTAG.out 2>/dev/null &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   # Wait for installation to finish
-  while ! grep -q "Installation finished. No error reported." /tmp/console.log
+  while ! grep -q "Installation finished. No error reported." /autoinstalls/$BUILDTAG.out
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before installation finished. Exiting."
@@ -449,14 +449,14 @@ boot_vmware()
 
   #Get console output for bootup
   tpid=$!
-  tail -f /tmp/console.log 2>/dev/null &
+  tail -f /autoinstalls/$BUILDTAG.out 2>/dev/null &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   # Wait for bootup to finish
   # Wait for bootup to finish
-  while ! ((grep -q "Starting nginx." /tmp/console.log) || (grep -q "Plugin loaded: SSHPlugin" /tmp/console.log))
+  while ! ((grep -q "Starting nginx." /autoinstalls/$BUILDTAG.out) || (grep -q "Plugin loaded: SSHPlugin" /autoinstalls/$BUILDTAG.out))
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before bootup finished."

@@ -11,8 +11,9 @@ export REQUIRES
 
 # Run a series of tests on the ssh settings
 # We also leave it enabled, so we have access to VM if something hangs / goes wrong
-ssh_tests() {
-  set_test_group_text "1 - Create - SSH Tests" "3"
+ssh_tests()
+{
+  set_test_group_text "1 - Create - SSH Tests" "4"
   CLASSNAME=ixbuild.resty.functional.create.ssh
 
   echo_test_title "Configuring SSH settings"
@@ -27,6 +28,29 @@ ssh_tests() {
   rest_request "GET" "/services/services/ssh/"
   check_service_status "RUNNING"
 
+  # Generate ssh rsa key if one doesn't exist
+  if ssh-add -L | grep -q "^ssh-rsa" ; then
+    if [ ! -f ${HOME}/.ssh/id_rsa ] ; then
+      ssh-keygen -b 4096 -t rsa -q -N ""
+    fi
+    ssh-add ${HOME}/.ssh/id_rsa &>/dev/null
+  fi
+
+  # Get the root user id so we can add ssh keys to the test target
+  rest_request "GET" "/account/users/"
+  local root_user_id=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.bsdusr_username == "root") { out(this.id) }')
+  local ssh_pubkey="$(cat ~/.ssh/id_rsa.pub)"
+
+  echo_test_title "Adding SSH public key from the executor to the root user account"
+  if [ -n "$root_user_id" -a -n "$ssh_pubkey" ]; then
+    rest_request "PUT" "/account/users/${root_user_id}/" '{ "bsdusr_sshpubkey": "'"${ssh_pubkey}"'" }'
+    check_rest_response "201"
+  else
+    echo_fail
+    return 1
+  fi
+
+  return 0
 }
 
 # Init function, this is called after module is sourced

@@ -77,8 +77,14 @@ export SFTPWORKDIR
 # Set this information to use for testing AFP/OSX filesharing
 # OSX_HOST=""
 # OSX_USERNAME=""
-# OSX_PASSWORD=""
+# OSX_PASSWORD="" # Leave this unset to default to SSH keys
 # export OSX_HOST OSX_USERNAME OSX_PASSWORD
+
+# Set this information to test filesharing and others on BSD
+# BSD_HOST=""
+# BSD_USERNAME=""
+# BSD_PASSWORD="" # Leave this unset to default to SSH keys
+# export BSD_HOST BSD_USERNAME BSD_PASSWORD
 
 # Set this to be the information required for testing LDAP
 # LDAPHOSTNAME=""

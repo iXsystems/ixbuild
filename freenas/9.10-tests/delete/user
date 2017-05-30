@@ -14,7 +14,13 @@ user_tests() {
   CLASSNAME=ixbuild.resty.functional.delete.user
 
   # Get the ID of testuser
-  userid=$(cat ${FNASBDIR}/testuser)
+  echo_test_title "Fetching user id of previously added test user"
+  if [ -f /tmp/.ixbuild_test_userid -a -s /tmp/.ixbuild_test_userid ] ; then
+    userid=`cat /tmp/.ixbuild_test_userid`
+    echo_ok
+  else
+    echo_fail && return 1
+  fi
 
   # Delete the testuser
   echo_test_title "Deleting user: testuser"

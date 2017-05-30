@@ -14,7 +14,7 @@ afp_osx_tests()
   local DATASET="afp-osx"
   local AFP_NAME="My AFP Share"
   local AFP_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/afp-osx${BRIDGEHOST}"
   local VOL_GROUP="qa"
 
   # Set the test count based on config settings

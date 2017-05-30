@@ -1,10 +1,64 @@
 #!/bin/sh
 
+# Set the build tag
+BUILDTAG="$BUILD"
+export BUILDTAG
+
 # Set the repo we pull for build / tests
 GITREPO="https://github.com/iXsystems/ixbuild.git"
 # Set the branch to use for above repo
 if [ -z "$IXBUILDBRANCH" ] ; then
   IXBUILDBRANCH="master"
+fi
+
+if [ -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
+  . ${PROGDIR}/config/${BUILDTAG}.conf
+fi
+
+# Check to see if we should run jails on host
+if [ -d "/mnt/tank/ixbuild/" ] ; then
+  export JAILED_TESTS=yes
+
+  # Validate jail configuration
+  if [ ! -f "${PROGDIR}/config/${BUILDTAG}.conf" ] ; then
+    echo "Missing executor configuration in ${PROGDIR}/config/${BUILDTAG}.conf"
+    exit 1
+  else
+    # Until py-iocage supports ip4start/ip4end properties again, or dhcp we must require an interface,IP address, and netmask
+    if [ -z "$ip4_addr" ] ; then
+      echo "You must specify interfaces ip addresses, and netmasks for jails in ${PROGDIR}/config/${BUILDTAG}.conf"
+      echo '"example: ip4_addr="igb0|192.168.58.7/24,igb1|10.20.20.7/23"'
+      exit 1
+    fi
+  fi
+fi
+
+# Setup jails for jailed tests
+if [ -f "/tmp/${BUILDTAG}" ] ; then
+  echo "Entered ${BUILDTAG}"
+elif [ -n "$JAILED_TESTS" ] ; then   
+  iocage stop $BUILDTAG 2>/dev/null
+  iocage destroy -f $BUILDTAG 2>/dev/null
+  iocage create -b tag=$BUILDTAG host_hostname=$BUILDTAG allow_raw_sockets=1 ip4_addr="${ip4_addr}" -t executor
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls" 2>/dev/null & 
+  mkdir -p "/mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins" 2>/dev/null &
+  mkdir "/mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild" 2>/dev/null &
+  echo "/mnt/tank/autoinstalls /mnt/tank/iocage/tags/$BUILDTAG/root/autoinstalls nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/home/jenkins /mnt/tank/iocage/tags/$BUILDTAG/root/mnt/tank/home/jenkins nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo "/mnt/tank/ixbuild /mnt/tank/iocage/tags/$BUILDTAG/root/ixbuild nullfs rw 0 0" >> "/mnt/tank/iocage/tags/$BUILDTAG/fstab" && \
+  echo $WORKSPACE > /mnt/tank/iocage/tags/$BUILDTAG/root/tmp/$BUILDTAG
+  iocage set login_flags="-f jenkins" $BUILDTAG
+  iocage start $BUILDTAG
+fi
+
+
+# Export WORKSPACE path to jails
+if [ -z "$WORKSPACE" ] ; then
+  if [ -f "/tmp/$BUILDTAG" ] ; then
+    export WORKSPACE=`cat /tmp/$BUILDTAG`
+  else
+    echo "No WORKSPACE found are we really running through jenkins?"
+  fi
 fi
 
 cleanup_workdir()
@@ -13,11 +67,14 @@ cleanup_workdir()
   if [ ! -d "$MASTERWRKDIR" ] ; then return 0 ; fi
   if [ "$MASTERWRKDIR" = "/" ] ; then return 0 ; fi
 
-  # Cleanup any leftover mounts
-  for i in `mount | grep -q "on ${MASTERWRKDIR}/" | awk '{print $1}' | tail -r`
-  do
-    umount -f $i
-  done
+  # If running on host, lets cleanup
+  if [ -z "$JAILED_TESTS" ] ; then
+    # Cleanup any leftover mounts
+    for i in `mount | grep -q "on ${MASTERWRKDIR}/" | awk '{print $1}' | tail -r`
+    do
+      umount -f $i
+    done
+  fi
 
   # Should be done with unmounts
   mount | grep -q "on ${MASTERWRKDIR}/"
@@ -1051,7 +1108,6 @@ jenkins_freenas_live_tests()
   return 0
 }
 
-
 jenkins_freenas_tests()
 {
   create_workdir
@@ -1072,22 +1128,32 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
+    rsync -va --delete --include="*/" --include="*.iso" --exclude="*"  -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
-  cd ${TBUILDDIR}
-  make tests
-  if [ $? -ne 0 ] ; then exit_clean ; fi
-
-  cleanup_workdir
+  if [ -n "$JAILED_TESTS" ] ; then
+    cd ${TBUILDDIR}
+    make tests  
+  else
+    cd ${TBUILDDIR}
+    make tests
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+    cleanup_workdir
+  fi        
 
   return 0
 }
 
+jenkins_freenas_tests_jailed()
+{
+  iocage chroot $BUILDTAG /ixbuild/jenkins.sh freenas-tests $BUILDTAG
+  echo "Exited ${BUILDTAG}"
+  jenkins_freenas_run_tests_jailed
+}
+
 jenkins_freenas_run_tests()
 {
-if [ -n "$FREENASLEGACY" ] ; then
   create_workdir
   cd ${TBUILDDIR}/scripts/
   if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -1119,40 +1185,30 @@ if [ -n "$FREENASLEGACY" ] ; then
   kill -9 $tpid
   echo ""
   sleep 10
-  #echo "Running API v2.0 tests"
-  #touch /tmp/$VM-tests-v2.0.log 2>/dev/null
-  #tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
-  #tpid=$!
-  #./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
-  #kill -9 $tpid 
-  #echo ""
-  #sleep 10
-else
-  create_workdir
-  cd ${TBUILDDIR}/scripts/
-  if [ $? -ne 0 ] ; then exit_clean ; fi
-  echo ""
-  sleep 10
-  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
-  echo ""
-  echo "Output from REST API calls:"
-  echo "-----------------------------------------"
   echo "Running API v2.0 tests"
   touch /tmp/$VM-tests-v2.0.log 2>/dev/null
   tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
   tpid=$!
-  ./10-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
-  kill -9 $tpid
+  ./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
+  kill -9 $tpid 
   echo ""
   sleep 10
-fi
 
-  if [ $? -ne 0 ] ; then exit_clean ; fi
+  # This runs cleanup_workdir and is bad for jail host
+  # if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  cleanup_workdir
+  # We do not want to cleanup_workdir from a host running jails which will unmount everything
+  # This function should be improved to be more specific
+  # cleanup_workdir
 
   return 0
 }
+
+jenkins_freenas_run_tests_jailed()
+{
+  iocage console $BUILDTAG
+}
+
 
 jenkins_push_fn_statedir()
 {
@@ -1309,10 +1365,6 @@ do_build_env_setup()
   # Set location of local PC-BSD build data
   PCBSDBDIR="/pcbsd"
   export PCBSDBDIR
-
-  # Set the build tag
-  BUILDTAG="$BUILD"
-  export BUILDTAG
 
   # Set location of local FreeNAS build data
   FNASBDIR="/$BUILDTAG"

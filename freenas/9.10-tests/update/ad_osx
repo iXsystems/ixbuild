@@ -14,7 +14,7 @@ ad_osx_tests()
   local DATASET="ad-osx"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/ad-osx${BRIDGEHOST}"
   local VOL_GROUP="qa"
 
   TEST_CNT=11

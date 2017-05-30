@@ -21,6 +21,7 @@ ISO="$1"
 # Extract the ISO file
 MD=`mdconfig -a -t vnode $ISO`
 if [ $? -ne 0 ] ; then exit 1; fi
+cd /
 mkdir isomnt 2>/dev/null
 mkdir isodir 2>/dev/null
 
@@ -42,7 +43,7 @@ if [ $? -ne 0 ] ; then exit 1; fi
 # Load geom_uzip if necessary
 kldstat | grep -q 'geom_uzip'
 if [ $? -ne 0 ] ; then
-  kldload geom_uzip
+  kldload geom_uzip 2>/dev/null &
 fi
 
 # Set kernel to boot in serial mode
@@ -78,18 +79,10 @@ sed -i '' "s|/etc/install.sh|/etc/install.sh ${VMDISK};/sbin/mount -t zfs freena
 if [ $? -ne 0 ] ; then exit 1; fi
 
 # Now setup ATF to run at first boot after install
-
-if [ -n "$FREENASLEGACY" ] ; then
-  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
-  if [ $? -ne 0 ] ; then exit 1; fi
-  sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
-  if [ $? -ne 0 ] ; then exit 1; fi
-else
-  sed -i '' "s|# zpool scrub freenas-boot|mkdir -p /tmp/data/conf/base/etc/local/serviced.d;cp -R /atf/etc/ /tmp/data/conf/base/etc/;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
-  if [ $? -ne 0 ] ; then exit 1; fi
-  sed -i '' "s|# zpool scrub freenas-boot|mkdir -p /tmp/data/conf/base/etc/local/serviced.d;cp -R /atf/etc/ /tmp/data/conf/base/etc/;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
-  if [ $? -ne 0 ] ; then exit 1; fi
-fi
+sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/conf/default/etc/install.sh
+if [ $? -ne 0 ] ; then exit 1; fi
+sed -i '' "s|# zpool scrub freenas-boot|cp -r /atf /tmp/data/atf;mkdir -p /tmp/data/conf/default/etc;cp /atf/rc.local /tmp/data/conf/default/etc/rc.local;chmod 755 /tmp/data/conf/default/etc/rc.local;zpool scrub freenas-boot|g" uzipdir/etc/install.sh
+if [ $? -ne 0 ] ; then exit 1; fi
 
 # Set serial mode
 sed -i '' 's|# And now move the backup files back in place|chroot \${_mnt} sed -i "" "s;kernel/kernel;kernel/kernel -D -h;g" /boot/grub/grub.cfg|g' uzipdir/conf/default/etc/install.sh
@@ -169,18 +162,14 @@ else
   VOLID="FreeNAS"
 fi
 
-if [ "$FREENASLEGACY" = "YES" ] ; then
-  grub-mkrescue -o $BUILDTAG.iso isodir -- -volid ${VOLID}_INSTALL
-  if [ $? -ne 0 ] ; then exit 1; fi
-else
-  cat << EOF >/tmp/xorriso
+cat << EOF >/tmp/xorriso
 ARGS=\`echo \$@ | sed 's|-hfsplus -apm-block-size 2048 -hfsplus-file-creator-type chrp tbxj /System/Library/CoreServices/.disk_label -hfs-bless-by i /System/Library/CoreServices/boot.efi||g'\`
 xorriso \$ARGS
 EOF
-  chmod 755 /tmp/xorriso
-  grub-mkrescue --xorriso=/tmp/xorriso -o $BUILDTAG.iso isodir -- -volid ${VOLID}
-  if [ $? -ne 0 ] ; then exit 1; fi
-fi
+chmod 755 /tmp/xorriso
+grub-mkrescue --xorriso=/tmp/xorriso -o $BUILDTAG.iso isodir -- -volid ${VOLID}
+if [ $? -ne 0 ] ; then exit 1; fi
+
 
 # Cleanup old iso dir
 rm -rf isodir
