@@ -14,14 +14,6 @@ PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"; export PROGDIR
 PYTHON="/usr/bin/env python3.6"
 PIP="/usr/bin/env pip3.6"
 
-# Use venv to avoid needing superuser
-$PYTHON -m venv /tmp/py3-venv
-. /tmp/py3-venv/bin/activate
- 
-# Installl modules
-$PIP install requests
-$PIP install ws4py
-
 #################################################################
 # Run the tests now!
 #################################################################

@@ -161,6 +161,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pip3.6 install requests"
 fi
 
+python3.6 -c "import ws4py" >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing ws4py"
+  rc_halt "pip3.6 install ws4py"
+fi
+
 python3.6 -c "import pytest" >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing pytest"
