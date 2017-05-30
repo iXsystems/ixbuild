@@ -51,11 +51,11 @@ merge_trueos_src_ports()
    do
      unset repo
      unset _branch
-     repo=`echo $line | cut -d ' ' -f 1`
-     _branch=`echo $line | cut -d ' ' -f 2`
+     repo=`echo $line | awk '{print $1}'`
+     _branch=`echo $line | awk '{print $2}'`
      dname=$(basename $repo)
 
-     if [ -n "$branch" ] ; then
+     if [ -n "$_branch" ] ; then
        rc_halt "git clone -b ${_branch} --depth=1 https://github.com/${repo}.git"
      else
        rc_halt "git clone --depth=1 https://github.com/${repo}.git"

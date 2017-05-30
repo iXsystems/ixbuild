@@ -455,7 +455,11 @@ jenkins_promote_pkg()
 {
   # Set target locations
   scale="pcbsd@pcbsd-master.scaleengine.net"
-  target="/usr/home/pcbsd/mirror/pkg/master"
+  mdate=$(date "+%y%m%d%H")
+  target="/usr/home/pcbsd/mirror/pkg/master-${mdate}"
+
+  # Make new master-<DATE> directory
+  ssh ${scale} "mkdir -p ${target}"
 
   # Copy over the amd64-base packages from UNSTABLE -> STABLE
   rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64-base/ ${target}/amd64-base/"
@@ -469,6 +473,8 @@ jenkins_promote_pkg()
   ssh ${scale} "$rcmd"
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+  echo "Packages promoted to: ${target}"
+  echo "Don't forget to sym-link master -> ${target}"
 }
 
 jenkins_publish_iso()
