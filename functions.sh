@@ -456,6 +456,9 @@ jenkins_promote_pkg()
   # Set target locations
   scale="pcbsd@pcbsd-master.scaleengine.net"
   mdate=$(date "+%y%m%d%H")
+  if [ -n "TARGETDATE" ] ; then
+    mdate="$TARGETDATE"
+  fi
   otarget="/usr/home/pcbsd/mirror/pkg/master/edge"
   ntarget="/usr/home/pcbsd/mirror/pkg/master-${mdate}"
 
