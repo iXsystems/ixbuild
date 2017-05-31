@@ -456,19 +456,20 @@ jenkins_promote_pkg()
   # Set target locations
   scale="pcbsd@pcbsd-master.scaleengine.net"
   mdate=$(date "+%y%m%d%H")
-  target="/usr/home/pcbsd/mirror/pkg/master-${mdate}"
+  otarget="/usr/home/pcbsd/mirror/pkg/master/edge"
+  ntarget="/usr/home/pcbsd/mirror/pkg/master-${mdate}"
 
   # Make new master-<DATE> directory
   ssh ${scale} "mkdir -p ${target}"
 
   # Copy over the amd64-base packages from UNSTABLE -> STABLE
-  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64-base/ ${target}/amd64-base/"
+  rcmd="rsync -va --delete-delay --delay-updates ${otarget}/amd64-base/ ${ntarget}/amd64-base/"
   echo "Running on remote: $rcmd"
   ssh ${scale} "$rcmd"
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   # Copy over the amd64 packages from UNSTABLE -> STABLE
-  rcmd="rsync -va --delete-delay --delay-updates ${target}/edge/amd64/ ${target}/amd64/"
+  rcmd="rsync -va --delete-delay --delay-updates ${otarget}/amd64/ ${ntarget}/amd64/"
   echo "Running on remote: $rcmd"
   ssh ${scale} "$rcmd"
   if [ $? -ne 0 ] ; then exit_clean; fi
