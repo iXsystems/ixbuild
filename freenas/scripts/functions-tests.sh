@@ -256,12 +256,6 @@ ssh_test()
   touch $TESTSTDOUT
   touch $TESTSTDERR
 
-  local SILENT="false"
-  if [ "$1" == "-q" ]; then
-    SILENT="true"
-    shift
-  fi
-
   sshserver=${ip}
   if [ -z "$sshserver" ] ; then
     sshserver=$FNASTESTIP
@@ -587,7 +581,7 @@ check_dataset_group()
   # (ls) List directory with dataset in it (eg /mnt/tank/)
   # (awk) Only return line from list which matches the group ($2) and dataset name ($base_name)
   # (grep) Make sure awk returned the dataset ($base_name)
-  ssh_test -q "ls -la '${dir_name}' | awk '\$4 == \"${group_name}\" && \$9 == \"${base_name}\/\"' | grep -q \"${base_name}\"";
+  ssh_test "ls -la '${dir_name}' | awk '\$4 == \"${group_name}\" && \$9 == \"${base_name}\/\"' | grep -q \"${base_name}\"";
   local EXITSTATUS=$?
 
   if [ "$SILENT" == "false" ]; then
@@ -889,7 +883,7 @@ wait_for_fnas_mnt()
 
   while :
   do
-    ssh_test -q "showmount -e | awk 'NR>1 && \$1 == \"${mntpoint}\"${permissions} {print \$1}' | grep -q '${mntpoint}'"
+    ssh_test "showmount -e | awk 'NR>1 && \$1 == \"${mntpoint}\"${permissions} {print \$1}' | grep -q '${mntpoint}'"
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
