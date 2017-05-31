@@ -14,13 +14,20 @@ group_tests() {
   CLASSNAME=ixbuild.resty.functional.update.group
 
   # Get the ID of testgroup
-  groupid=$(cat ${FNASBDIR}/testgroup)
+  echo_test_title "Fetching group id of previously created test group"
+  if [ -f /tmp/.ixbuild_test_groupid -a -s /tmp/.ixbuild_test_groupid ] ; then
+    groupid=`cat /tmp/.ixbuild_test_groupid`
+    echo_ok
+  else
+    echo_fail && return 1
+  fi
 
   # Update the testgroup
   echo_test_title "Updating group: testgroup"
   rest_request "PUT" "/account/groups/${groupid}/" '{ "bsdgrp_gid": "1201","bsdgrp_group": "newgroup" }'
   check_rest_response "200"
 
+  return 0
 }
 
 # Init function, this is called after module is sourced

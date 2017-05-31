@@ -17,18 +17,26 @@ ad_osx_tests()
   local DATASET="ad-osx"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/ad-osx${BRIDGEHOST}"
   local MP_GROUP="AD01\\qa"
 
-  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEDOMAIN" "BRIDGEHOST" "ADUSERNAME" "ADPASSWORD" )
-  for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do
-    if [ -z "${!SETTING}" ]; then
-      echo -n "Required settings for ad_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
-      echo_skipped
-      return 0
-    fi
-  done
+  TEST_CNT=12
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    TEST_CNT=22
+
+    # Clean up any leftover items from previous failed SMB runs
+    osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOUNT}'; exit 0"
+  fi
+
+  set_test_group_text "1 - Create - Active Directory OS X tests" "${TEST_CNT}"
+  CLASSNAME=ixbuild.resty.functional.create.ad_osx
+
+  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
+     echo -n "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing AD settings"
+     return 0
+  fi
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'

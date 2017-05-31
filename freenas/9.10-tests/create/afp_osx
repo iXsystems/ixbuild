@@ -17,18 +17,17 @@ afp_osx_tests()
   local DATASET="afp-osx"
   local AFP_NAME="My AFP Share"
   local AFP_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
-  local MP_GROUP="wheel"
+  local MOUNTPOINT="/tmp/afp-osx${BRIDGEHOST}"
+  local MP_GROUP="qa"
 
-  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" )
-  for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do
-    if [ -z "${!SETTING}" ]; then
-      echo -n "Required settings for afp_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
-      echo_skipped
-      return 0
-    fi
-  done
+  # Set the test count based on config settings
+  TESTS_CNT="14"
+  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
+    TESTS_CNT="18"
+
+    # Clean up any leftover items from previous failed AFP runs
+    osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0;"
+  fi
 
   # Clean up any leftover items from previous failed runs
   rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'

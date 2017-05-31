@@ -18,7 +18,7 @@ smb_osx_tests()
   local DATASET="smb-osx"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/smb-osx${BRIDGEHOST}"
   local MP_GROUP="wheel"
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" "BRIDGEDOMAIN" "ADUSERNAME" "ADPASSWORD" )

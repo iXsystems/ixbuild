@@ -272,34 +272,35 @@ ssh_test()
     return 1
   fi
 
-  # Test fuser and fpass values
-  if [ -z "${fpass}" ] || [ -z "${fuser}" ] ; then
-    echo "SSH server username and password required for ssh_test()."
+  # Test fuser value
+  if [ -z "${fuser}" ] ; then
+    echo "SSH server username required for ssh_test()."
     return 1
   fi
 
-  # Make SSH connection
-  sshpass -p ${fpass} \
+  # Use password auth if password set and no local ssh key found
+  if [ -n "${fpass}" ] && ssh-add -l | grep -q 'The agent has no identities.'; then
+    sshpass -p ${fpass} \
+      ssh -vvv \
+          -o StrictHostKeyChecking=no \
+          -o ConnectionAttempts=15 \
+          -o ConnectTimeout=30 \
+          -o ServerAliveInterval=5 \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
     ssh -vvv \
+        -o StrictHostKeyChecking=no \
         -o ConnectionAttempts=15 \
         -o ConnectTimeout=30 \
         -o ServerAliveInterval=5 \
-        -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${fuser}@${sshserver} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  local EXITSTATUS=$?
-
-  if [ "$SILENT" == "false" ]; then
-    if [ $EXITSTATUS -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      echo "Failed running: $1"
-    fi
   fi
 
-  return $EXITSTATUS
+  return $?
 }
 
 # (Optional) -q switch as first argument silences std_out
@@ -328,28 +329,29 @@ ssh_repl_test()
     return 1
   fi
 
-  # Make SSH connection
-  sshpass -p ${REPLPASSWORD} \
+  # Use password auth if password set and no local ssh key found
+  if [ -n "${REPLPASSWORD}" ] && ssh-add -l | grep -q 'The agent has no identities.'; then
+    sshpass -p ${REPLPASSWORD} \
+      ssh -vvv \
+          -o StrictHostKeyChecking=no \
+          -o ConnectionAttempts=15 \
+          -o ConnectTimeout=30 \
+          -o ServerAliveInterval=5 \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${fuser}@${REPLTARGET} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
     ssh -vvv \
+        -o StrictHostKeyChecking=no \
         -o ConnectionAttempts=15 \
         -o ConnectTimeout=30 \
         -o ServerAliveInterval=5 \
-        -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${REPLUSERNAME}@${REPLTARGET} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  local EXITSTATUS=$?
-
-  if [ "$SILENT" == "false" ]; then
-    if [ $EXITSTATUS -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      echo "Failed running: $1"
-    fi
   fi
 
-  return $EXITSTATUS
+  return $?
 }
 
 # (Optional) -q switch as first argument silences std_out
@@ -418,8 +420,23 @@ __scp_test()
     password=$3
   fi
 
-  # SCP connection
-  sshpass -p ${password} \
+  # Test fuser value
+  if [ -z "${fuser}" ] ; then
+    echo "SCP server username required for scp_test()."
+    return 1
+  fi
+
+  # Use password auth if password set and no local ssh key found
+  if [ -n "${password}" ] && ssh-add -l | grep -q 'The agent has no identities.'; then
+    sshpass -p ${password} \
+      scp -o StrictHostKeyChecking=no \
+          -o ConnectionAttempts=15 \
+          -o ConnectTimeout=30 \
+          -o ServerAliveInterval=5 \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  else
     scp -o StrictHostKeyChecking=no \
         -o ConnectionAttempts=15 \
         -o ConnectTimeout=30 \
@@ -427,6 +444,8 @@ __scp_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         "${1}" "${2}" >$TESTSTDOUT 2>$TESTSTDERR
+  fi
+
   local EXITSTATUS=$?
 
   if [ "$SILENT" == "false" ]; then
@@ -461,13 +480,23 @@ osx_test()
     return 1
   fi
 
-  if [ -z "${OSX_USERNAME}" ] || [ -z "${OSX_PASSWORD}" ] ; then
-    echo "SSH server username and password required for osx_test()."
+  if [ -z "${OSX_USERNAME}" ] ; then
+    echo "SSH server username required for osx_test()."
     return 1
   fi
 
-  # Make SSH connection
-  sshpass -p ${OSX_PASSWORD} \
+  # Use SSH keys if the $OSX_PASSWORD is not set
+  if [ -n "${OSX_PASSWORD}" ]; then
+    sshpass -p ${OSX_PASSWORD} \
+      ssh -vvv \
+          -o ConnectionAttempts=15 \
+          -o ConnectTimeout=30 \
+          -o ServerAliveInterval=5 \
+          -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
     ssh -vvv \
         -o ConnectionAttempts=15 \
         -o ConnectTimeout=30 \
@@ -476,18 +505,44 @@ osx_test()
         -o UserKnownHostsFile=/dev/null \
         -o VerifyHostKeyDNS=no \
         ${OSX_USERNAME}@${OSX_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
-  local EXITSTATUS=$?
-
-  if [ "$SILENT" == "false" ]; then
-    if [ $EXITSTATUS -eq 0 ]; then
-      echo_ok
-    else
-      echo_fail
-      echo "Failed running: $1"
-    fi
   fi
 
-  return $EXITSTATUS
+  return $?
+}
+
+# $1 = Command to run
+bsd_test()
+{
+  export TESTSTDOUT="/tmp/.bsdCmdTestStdOut"
+  export TESTSTDERR="/tmp/.bsdCmdTestStdErr"
+  touch $TESTSTDOUT
+  touch $TESTSTDERR
+
+  if [ -z "${BSD_HOST}" ] ; then
+    echo "SSH server IP address required for bsd_test()."
+    return 1
+  fi
+
+  if [ -z "${BSD_USERNAME}" ] ; then
+    echo "SSH server username required for bsd_test()."
+    return 1
+  fi
+
+  # Use SSH keys if the $BSD_PASSWORD is not set
+  if [ -n "${BSD_PASSWORD}" ]; then
+    sshpass -p ${BSD_PASSWORD} \
+      ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o VerifyHostKeyDNS=no \
+          ${BSD_USERNAME}@${BSD_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  else
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o VerifyHostKeyDNS=no \
+        ${BSD_USERNAME}@${BSD_HOST} ${1} >$TESTSTDOUT 2>$TESTSTDERR
+  fi
+
+  return $?
 }
 
 echo_ok()
@@ -757,7 +812,8 @@ wait_for_bsd_mnt()
 
   while :
   do
-    mount -l | grep -q "${1}" && break
+    bsd_test "mount -l | grep -q \"${1}\""
+    check_exit_status -q && break
     (( loop_cnt++ ))
     if [ $loop_cnt -gt $LOOP_LIMIT ]; then
       return 1

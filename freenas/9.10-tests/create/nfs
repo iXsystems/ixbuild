@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+nfs_tests()
+{
+  local NFS_PATH="/mnt/tank/share"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}nfs"
+
+  # Set the group text and number of tests
+  set_test_group_text "1 - Create - NFS tests" "14"
+  CLASSNAME=ixbuild.resty.functional.create.nfs
+
+  # Enable NFS server
+  echo_test_title "Creating the NFS server"
+  rest_request "PUT" "/services/nfs/" '{ "nfs_srv_bindip": "'"${BRIDGEIP}"'", "nfs_srv_mountd_port": 618, "nfs_srv_allow_nonroot": false, "nfs_srv_servers": 10, "nfs_srv_udp": false, "nfs_srv_rpcstatd_port": 871, "nfs_srv_rpclockd_port": 32803, "nfs_srv_v4": false, "nfs_srv_v4_krb": false, "id": 1 }'
+  check_rest_response "200 OK"
+
+  # Check creating a NFS share
+  echo_test_title "Creating a NFS share on ${NFS_PATH}"
+  rest_request "POST" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  check_rest_response "201 Created"
+
+  # Now start the service
+  echo_test_title "Starting NFS service"
+  rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": true }'
+  check_rest_response "200 OK"
+
+  # Give NFS time to start
+  echo_test_title "Verify that the NFS port is open on the host"
+  wait_for_avail_port "618"
+  check_exit_status || return 1
+
+  echo_test_title "Verify that nfsd shows up in netstat results"
+  ssh_test "netstat -lap tcp | grep nfsd | awk '\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\" '"
+  check_exit_status || return 1
+
+  echo_test_title "Verify NFS server on host"
+  wait_for_fnas_mnt "${NFS_PATH}" "Everyone"
+  check_exit_status || return 1
+
+  echo_test_title "Checking to see if NFS service is enabled"
+  rest_request "GET" "/services/services/nfs/"
+  check_service_status "RUNNING" || return 1
+
+  # Now check if we can mount NFS / create / rename / copy / delete / umount
+  echo_test_title "Creating NFS mountpoint"
+  bsd_test "mkdir \"${MOUNTPOINT}\""
+  check_exit_status || return 1
+
+  echo_test_title "Mounting NFS"
+  bsd_test "mount_nfs ${BRIDGEIP}:${NFS_PATH} ${MOUNTPOINT}" "umount '${MOUNTPOINT}' ; rmdir '${MOUNTPOINT}'" "60"
+  check_exit_status || return 1
+
+  echo_test_title "Creating NFS file"
+  bsd_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'"
+  check_exit_status || return 1
+
+  echo_test_title "Moving NFS file"
+  bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'"
+  check_exit_status || return 1
+
+  echo_test_title "Copying NFS file"
+  bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'"
+  check_exit_status || return 1
+
+  echo_test_title "Deleting NFS file"
+  bsd_test "rm '${MOUNTPOINT}/testfile2'"
+  check_exit_status || return 1
+
+  echo_test_title "Unmounting NFS"
+  bsd_test "umount '${MOUNTPOINT}'"
+  check_exit_status || return 1
+
+  echo_test_title "Removing NFS mountpoint"
+  bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
+  check_exit_status || return 1
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+nfs_init()
+{
+  # Run all the nfs tests
+  case $TESTSET in
+        SMOKE) nfs_tests ;;
+     COMPLETE) nfs_tests ;;
+    BENCHMARK) ;;
+            *) nfs_tests ;;
+  esac
+}
+

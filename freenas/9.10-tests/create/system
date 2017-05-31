@@ -44,13 +44,13 @@ system_tests()
   loop_cnt=0
   while :
   do
-    ping -c1 ${FNASTESTIP} &>/dev/null
+    ping -c1 -W 1 ${FNASTESTIP} &>/dev/null
     if [ $? -ne 0 ]; then
       # Ping response from VM has ceased responding
       echo_ok && break;
     fi
     (( loop_cnt++ ))
-    if [ $loop_cnt -gt 15 ]; then
+    if [ $loop_cnt -gt 60 ]; then
       echo_fail
       return 1
     fi
