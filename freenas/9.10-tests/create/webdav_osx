@@ -21,7 +21,7 @@ webdav_osx_tests()
   local SHARE_PASS="davtest"
   local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
 
-  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEHOST" "BRIDGEIP" )
+  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEHOST" "BRIDGEIP" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
   do
     if [ -z "${!SETTING}" ]; then

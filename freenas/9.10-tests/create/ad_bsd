@@ -15,7 +15,7 @@ ad_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/${BRIDGEHOST}ad-bsd"
-  local MP_GROUP="qa"
+  local MP_GROUP="AD01\\qa"
 
   set_test_group_text "1 - Create - Active Directory BSD tests" "25"
   CLASSNAME=ixbuild.resty.functional.create.ad_bsd

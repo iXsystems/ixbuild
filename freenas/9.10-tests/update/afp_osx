@@ -21,7 +21,7 @@ afp_osx_tests()
   local MOUNTPOINT="/tmp/afp-osx${BRIDGEHOST}"
   local MP_GROUP="wheel"
 
-  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "OSX_PASSWORD" "BRIDGEIP" "BRIDGEHOST" )
+  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEIP" "BRIDGEHOST" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
   do
     if [ -z "${!SETTING}" ]; then
