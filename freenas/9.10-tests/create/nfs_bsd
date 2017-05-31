@@ -19,7 +19,7 @@ nfs_bsd_tests()
   local MP_GROUP="wheel"
 
   # If BRIDGEIP is set, default to it
-  if [ -z "${BRIDGEIP}" ]; then
+  if [ -n "${BRIDGEIP}" ]; then
     NFS_HOST=${BRIDGEIP}
   elif [ -z "${NFS_HOST}" -a -n "${FNASTESTIP}" ]; then
     NFS_HOST=${FNASTESTIP}
