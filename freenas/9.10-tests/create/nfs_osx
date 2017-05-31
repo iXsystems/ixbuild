@@ -17,7 +17,7 @@ nfs_osx_tests()
 
   local DATASET="nfs-osx"
   local NFS_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}nfs-osx"
   local NFS_HOST=${BRIDGEIP}
   local NFS_PORT=618
   local MP_GROUP="wheel"

@@ -19,7 +19,7 @@ webdav_osx_tests()
   local SHARE_NAME="webdavshare"
   local SHARE_USER="webdav"
   local SHARE_PASS="davtest"
-  local MOUNTPOINT="/Volumes/${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}webdav-osx"
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEHOST" "BRIDGEIP" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
