@@ -68,8 +68,8 @@ smb_osx_tests()
   rest_request "GET" "/services/services/cifs/"
   check_service_status "RUNNING" || return 1
 
-  echo_test_title "Checking permissions on ${SMB_PATH}"
-  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
+  #echo_test_title "Checking permissions on ${SMB_PATH}"
+  #check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   # Mount share on OSX system and create a test file
   echo_test_title "Create mount-point for SMB on OSX system"

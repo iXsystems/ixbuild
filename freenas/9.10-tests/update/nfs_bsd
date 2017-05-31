@@ -47,8 +47,8 @@ nfs_bsd_tests()
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${NFS_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'"${MP_GROUP}"'" }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Checking permissions on ${NFS_PATH}"
-  check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
+  #echo_test_title "Checking permissions on ${NFS_PATH}"
+  #check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
 
   # Enable NFS server
   echo_test_title "Creating the NFS server"
@@ -81,8 +81,8 @@ nfs_bsd_tests()
   rest_request "GET" "/services/services/nfs/"
   check_service_status "RUNNING" || return 1
 
-  echo_test_title "Checking permissions on ${NFS_PATH}"
-  check_dataset_group "${NFS_PATH}" "${MP_GROUP}" || return 1
+  #echo_test_title "Checking permissions on ${NFS_PATH}"
+  #check_dataset_group "${NFS_PATH}" "${MP_GROUP}" || return 1
 
   echo_test_title "Verify NFSv2 is running over TCP"
   rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=2 proto=tcp | grep -q nfs" || return 1

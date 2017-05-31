@@ -86,8 +86,8 @@ ldap_bsd_tests()
   bsd_test "mkdir -p '${MOUNTPOINT}' && sync"
   check_exit_status || return 1
 
-  echo_test_title "Checking permissions on ${SMB_PATH}"
-  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
+  #echo_test_title "Checking permissions on ${SMB_PATH}"
+  #check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   # The LDAPUSER user must exist in LDAP with this password
   echo_test_title "Store LDAP credentials for mount_smbfs."

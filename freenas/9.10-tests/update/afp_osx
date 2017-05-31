@@ -70,8 +70,8 @@ afp_osx_tests()
   rest_request "POST" "/sharing/afp/" '{ "afp_name": "'"${AFP_NAME}"'", "afp_path": "'"${AFP_PATH}"'" }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Checking permissions on ${AFP_PATH}"
-  check_dataset_group "${AFP_PATH}" "${MP_GROUP}" || return 1
+  #echo_test_title "Checking permissions on ${AFP_PATH}"
+  #check_dataset_group "${AFP_PATH}" "${MP_GROUP}" || return 1
 
   # Verify mountability and permissions of AFP share after config changes
   echo_test_title "Check to see if AFP can be accessed from OS X"

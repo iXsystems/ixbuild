@@ -80,8 +80,8 @@ ad_nfs_tests()
   rest_request "GET" "/services/services/nfs/"
   check_service_status "RUNNING" || return 1
 
-  echo_test_title "Checking permissions on ${NFS_PATH}"
-  check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
+  #echo_test_title "Checking permissions on ${NFS_PATH}"
+  #check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating NFS mountpoint"

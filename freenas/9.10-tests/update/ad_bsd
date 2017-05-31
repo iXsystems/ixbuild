@@ -85,8 +85,8 @@ ad_bsd_tests()
   bsd_test "mkdir -p '${MOUNTPOINT}' && sync"
   check_exit_status || return 1
 
-  echo_test_title "Checking permissions on ${SMB_PATH}"
-  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
+  #echo_test_title "Checking permissions on ${SMB_PATH}"
+  #check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   # The ADUSER user must exist in AD with this password
   echo_test_title "Store Active Directory credentials in file for mount_smbfs"

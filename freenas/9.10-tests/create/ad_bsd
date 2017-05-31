@@ -83,8 +83,8 @@ ad_bsd_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
-  echo_test_title "Checking permissions on ${SMB_PATH}"
-  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
+  #echo_test_title "Checking permissions on ${SMB_PATH}"
+  #check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   # The ADUSER user must exist in AD with this password
   echo_test_title "Store AD credentials in a file for mount_smbfs"

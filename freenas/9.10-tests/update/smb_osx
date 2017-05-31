@@ -73,8 +73,8 @@ smb_osx_tests()
   rest_request "GET" "/services/services/cifs/"
   check_service_status "RUNNING" || return 1
 
-  echo_test_title "Checking permissions on ${SMB_PATH}"
-  check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
+  #echo_test_title "Checking permissions on ${SMB_PATH}"
+  #check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
 
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     # Mount share on OSX system and create a test file

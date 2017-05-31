@@ -79,8 +79,8 @@ nfs_osx_tests()
   rest_request "GET" "/services/services/nfs/"
   check_service_status "RUNNING" || return 1
 
-  echo_test_title "Checking permissions on ${NFS_PATH}"
-  check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
+  #echo_test_title "Checking permissions on ${NFS_PATH}"
+  #check_dataset_group "${NFS_PATH}" "${MP_GROUP}"
 
   echo_test_title "Verify NFSv2 is running over UDP"
   rc_test "rpcinfo -p ${NFS_HOST} | awk '\$2 == vers && \$3 == proto && \$5 == \"nfs\" {print}' vers=2 proto=udp | grep -q nfs" || return 1

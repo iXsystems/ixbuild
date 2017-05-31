@@ -13,7 +13,6 @@ ldap_nfs_tests()
 {
   local DATASET=( "ldap-nfs-share" "ldap-nfs-share2" )
   local NFS_PATH=( "/mnt/tank/${DATASET[0]}" "/mnt/tank/${DATASET[1]}" )
-  local MOUNTPOINT="/tmp/nfs-mnt.$$"
   local NFS_HOST=${ip}
   local NFS_PORT=618
   local MP_USER="Ldap User"
@@ -48,8 +47,6 @@ ldap_nfs_tests()
     rest_request "DELETE" "/sharing/nfs/" '{ "nfs_paths": ["'"${NFS_PATH[$idx]}"'"], "nfs_maproot_user": "'"${MP_USER}"'", "nfs_maproot_group": "'"${MP_GROUP}"'" }'
     rest_request "DELETE" "/storage/volume/1/datasets/${DATASET[$idx]}/"
   done
-  umount -A &>/dev/null
-  rmdir /tmp/nfs-mnt.* &>/dev/null
 
   # Configure LDAP and verify service
 
@@ -101,11 +98,13 @@ ldap_nfs_tests()
   check_exit_status || return 1
 
   echo_test_title "Verify that nfsd shows up in netstat results"
-  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd" || return 1
+  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd"
+  check_exit_status || return 1
 
   for idx in ${!DATASET[@]}; do
     echo_test_title "Verify NFS share \"${NFS_PATH[$idx]}\" on host is found in mount results"
     ssh_test "mount | awk '\$3 == \"${NFS_PATH[$idx]}\"' | grep -q \"${NFS_PATH[$idx]}\""
+    check_exit_status
   done
 
   echo_test_title "Checking to see if NFS service is enabled"
