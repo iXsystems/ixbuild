@@ -20,14 +20,6 @@ ad_osx_tests()
   local MOUNTPOINT="/tmp/ad-osx${BRIDGEHOST}"
   local MP_GROUP="AD01\\qa"
 
-  TEST_CNT=12
-  if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
-    TEST_CNT=22
-
-    # Clean up any leftover items from previous failed SMB runs
-    osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOUNT}'; exit 0"
-  fi
-
   set_test_group_text "1 - Create - Active Directory OS X tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.ad_osx
 
@@ -44,7 +36,7 @@ ad_osx_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  osx_test -q "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
+  osx_test "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\""
 
   # Set auxilary parameters to allow mount_smbfs to work with Active Directory
   echo_test_title "Setting auxilary parameters for mount_smbfs.."
@@ -89,15 +81,14 @@ ad_osx_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created" || return 1
 
-  #echo_test_title "Checking permissions on ${SMB_PATH}"
-  #check_dataset_group "${SMB_PATH}" "${MP_GROUP}" || return 1
-
   # Mount share on OSX system and create a test file
   echo_test_title "Create mount-point for SMB on OSX system"
-  osx_test "mkdir -p '${MOUNTPOINT}' && sync" || return 1
+  osx_test "mkdir -p '${MOUNTPOINT}' && sync"
+  check_exit_status || return 1
 
   echo_test_title "Mount SMB share on OSX system"
-  osx_test "mount -t smbfs 'smb://${ADUSERNAME}:${ADPASSWORD}@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'" || return 1
+  osx_test "mount -t smbfs 'smb://${ADUSERNAME}:${ADPASSWORD}@${BRIDGEIP}/${SMB_NAME}' '${MOUNTPOINT}'"
+  check_exit_status || return 1
 
   echo_test_title "Verify SMB share has been mounted on OSX"
   # //{ADUSERNAME}@{FNASTESTIP}/{SMB_NAME} on {MOUNTPOINT} (smbfs, nodev, nosuid, mounted by jenkins)
@@ -105,27 +96,33 @@ ad_osx_tests()
   check_exit_status || return 1
 
   echo_test_title "Checking for ability to list files on volume"
-  osx_test "time ls -la ${MOUNTPOINT}" || return 1
+  osx_test "time ls -la ${MOUNTPOINT}"
+  check_exit_status || return 1
 
   echo_test_title "Create file on SMB share via OSX to test permissions"
-  osx_test "touch '${MOUNTPOINT}/testfile.txt'" || return 1
+  osx_test "touch '${MOUNTPOINT}/testfile.txt'"
+  check_exit_status || return 1
 
   # Move test file to a new location on the SMB share
   echo_test_title "Moving SMB test file into a new directory"
-  osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'" || return 1
+  osx_test "mkdir -p '${MOUNTPOINT}/tmp' && mv '${MOUNTPOINT}/testfile.txt' '${MOUNTPOINT}/tmp/testfile.txt'"
+  check_exit_status || return 1
 
   # Delete test file and test directory from SMB share
   echo_test_title "Deleting test file and directory from SMB share"
-  osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'" || return 1
+  osx_test "rm -f '${MOUNTPOINT}/tmp/testfile.txt' && rmdir '${MOUNTPOINT}/tmp'"
+  check_exit_status || return 1
 
   echo_test_title "Verifying that test file and directory were successfully removed"
-  osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ." || return 1
+  osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ."
+  check_exit_status || return 1
 
   # Clean up mounted SMB share
   # OS X `umount` manpage reports that umount may fail often.
   # "It is recommended that diskutil(1) (as in, ``diskutil unmount /mnt'') be used instead."
   echo_test_title "Unmount SMB share"
-  osx_test "diskutil unmount force '${MOUNTPOINT}'" || return 1
+  osx_test "diskutil unmount force '${MOUNTPOINT}'"
+  check_exit_status || return 1
 
   # Disable Active Directory Directory
   echo_test_title "Disabling Active Directory.."

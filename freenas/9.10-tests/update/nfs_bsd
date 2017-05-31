@@ -70,7 +70,8 @@ nfs_bsd_tests()
   check_exit_status || return 1
 
   echo_test_title "Verify that nfsd shows up in netstat results"
-  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd" || return 1
+  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd"
+  check_exit_status || return 1
 
   echo_test_title "Verify NFS on host in showmount results"
   wait_for_fnas_mnt "${NFS_PATH}" "Everyone"

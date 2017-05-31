@@ -95,8 +95,10 @@ replication_tests()
     echo_test_title "Creating file \"${uri}\" on the dataset \"${PUSH_DATASET_PATH}\""
     if [ "." == "${dir_name}" -a -n "${uri}" ]; then
       ssh_test "touch \"${PUSH_DATASET_PATH}${uri}\""
+      check_exit_status
     else
       ssh_test "mkdir -p \"${PUSH_DATASET_PATH}${dir_name}\" && touch \"${PUSH_DATASET_PATH}${uri}\""
+      check_exit_status
     fi
   done
 
@@ -129,7 +131,8 @@ replication_tests()
   check_rest_response "200"  || return 1
 
   echo_test_title "Add ECDSA auth to our the root user's \".ssh/known_hosts\""
-  ssh_test "ssh-keyscan ${REPLTARGET} >> \"/root/.ssh/known_hosts\"" || return 1
+  ssh_test "ssh-keyscan ${REPLTARGET} >> \"/root/.ssh/known_hosts\""
+  check_exit_status || return 1
 
   # Create replication job for our snapshot, using the PULL SSH public key
   local repl_begin="$(date "+%H:%M:%S")"
@@ -166,8 +169,10 @@ replication_tests()
     echo_test_title "Verify that \"${uri}\" was created on the replication target"
     if [ "." == "${dir_name}" -a -n "${uri}" ]; then
       ssh_repl_test "test -f \"${PULL_DATASET_PATH}/${PUSH_DATASET}/${uri}\""
+      check_exit_status
     else
       ssh_repl_test "test -d \"${PULL_DATASET_PATH}/${PUSH_DATASET}/${dir_name}\" && test -f \"${PULL_DATASET_PATH}/${PUSH_DATASET}/${uri}\""
+      check_exit_status
     fi
   done
 
@@ -215,6 +220,7 @@ replication_tests()
   if [ -n "${PUSH_DATASET_PATH}" ] && [ "$PUSH_DATASET_PATH" != "/" ]; then
     echo_test_title "Delete all file objects create on the testing target"
     ssh_test "test -d \"${PUSH_DATASET_PATH}\" && rm -rf \"${PUSH_DATASET_PATH}/*\""
+    check_exit_status
   fi
 
   echo_test_title "Delete the testing target dataset \"${PUSH_DATASET}\""

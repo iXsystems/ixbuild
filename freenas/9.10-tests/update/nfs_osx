@@ -33,7 +33,7 @@ nfs_osx_tests()
   done
 
   # Clean up any leftover items from previous failed NFS runs
-  osx_test -q "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
+  osx_test "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\""
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
@@ -69,7 +69,8 @@ nfs_osx_tests()
   check_exit_status || return 1
 
   echo_test_title "Verify that nfsd shows up in netstat results"
-  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd" || return 1
+  ssh_test "netstat -lap tcp | awk '\$4 == \"${NFS_HOST}.nfsd\" && (\$6 == \"LISTEN\" || \$6 == \"ESTABLISHED\")' | grep -q nfsd"
+  check_exit_status || return 1
 
   echo_test_title "Verify NFS on host in showmount results"
   wait_for_fnas_mnt "${NFS_PATH}" "Everyone"
@@ -93,57 +94,72 @@ nfs_osx_tests()
 
   # Perform our create/update/delete tests
   echo_test_title "Create mount-point for NFS on OSX"
-  osx_test "mkdir -p '${MOUNTPOINT}' && sync" || return 1
+  osx_test "mkdir -p '${MOUNTPOINT}' && sync"
+  check_exit_status || return 1
 
   echo_test_title "Mount NFSv4 share to OSX system"
-  osx_test "mount -o vers=4 -o sync -t nfs \"${NFS_HOST}:${NFS_PATH}\" \"${MOUNTPOINT}\"" || return 1
+  osx_test "mount -o vers=4 -o sync -t nfs \"${NFS_HOST}:${NFS_PATH}\" \"${MOUNTPOINT}\""
+  check_exit_status || return 1
 
   echo_test_title "Verify NFS share has been mounted on OSX"
   wait_for_osx_mnt "${MOUNTPOINT}"
   check_exit_status || return 1
 
   echo_test_title "Check ability to list files on ${MOUNTPOINT}"
-  osx_test "time ls -la \"${MOUNTPOINT}\"" || return 1
+  osx_test "time ls -la \"${MOUNTPOINT}\""
+  check_exit_status || return 1
 
   echo_test_title "Create file on NFS share via OSX to test permissions"
-  osx_test "touch \"${MOUNTPOINT}/testfile.txt\"" || return 1
+  osx_test "touch \"${MOUNTPOINT}/testfile.txt\""
+  check_exit_status || return 1
 
   echo_test_title "Move test file into a new directory"
-  osx_test "mkdir -p \"${MOUNTPOINT}/tmp\" && mv \"${MOUNTPOINT}/testfile.txt\" \"${MOUNTPOINT}/tmp/testfile.txt\"" || return 1
+  osx_test "mkdir -p \"${MOUNTPOINT}/tmp\" && mv \"${MOUNTPOINT}/testfile.txt\" \"${MOUNTPOINT}/tmp/testfile.txt\""
+  check_exit_status || return 1
 
   echo_test_title "Delete test file and directory from NFS share"
-  osx_test "rm -f \"${MOUNTPOINT}/tmp/testfile.txt\" && rmdir \"${MOUNTPOINT}/tmp\"" || return 1
+  osx_test "rm -f \"${MOUNTPOINT}/tmp/testfile.txt\" && rmdir \"${MOUNTPOINT}/tmp\""
+  check_exit_status || return 1
 
   echo_test_title "Verify that test file and directory were successfully removed"
-  osx_test "find -- \"${MOUNTPOINT}/\" -prune -type d -empty | grep -q ." || return 1
+  osx_test "find -- \"${MOUNTPOINT}/\" -prune -type d -empty | grep -q ."
+  check_exit_status || return 1
 
   echo_test_title "Unmount NFS share"
-  osx_test "umount -f \"${MOUNTPOINT}\""
+  osx_test "diskutil unmount force \"${MOUNTPOINT}\""
+  check_exit_status
 
   # Now try the create/update/delete tests over UDP with NFSv3
   echo_test_title "Re-create mount-point for NFS on OSX"
-  osx_test "mkdir -p '${MOUNTPOINT}' && sync" || return 1
+  osx_test "mkdir -p '${MOUNTPOINT}' && sync"
+  check_exit_status || return 1
 
   echo_test_title "Mount NFSv3 share to OSX system over UDP"
-  osx_test "mount -o udp -o mntudp -o vers=3 -o sync -t nfs \"${NFS_HOST}:${NFS_PATH}\" \"${MOUNTPOINT}\"" || return 1
+  osx_test "mount -o udp -o mntudp -o vers=3 -o sync -t nfs \"${NFS_HOST}:${NFS_PATH}\" \"${MOUNTPOINT}\""
+  check_exit_status || return 1
 
   echo_test_title "Create file on NFS share via OSX to test permissions"
-  osx_test "touch \"${MOUNTPOINT}/testfile.txt\"" || return 1
+  osx_test "touch \"${MOUNTPOINT}/testfile.txt\""
+  check_exit_status || return 1
 
   echo_test_title "Move test file into a new directory"
-  osx_test "mkdir -p \"${MOUNTPOINT}/tmp\" && mv \"${MOUNTPOINT}/testfile.txt\" \"${MOUNTPOINT}/tmp/testfile.txt\"" || return 1
+  osx_test "mkdir -p \"${MOUNTPOINT}/tmp\" && mv \"${MOUNTPOINT}/testfile.txt\" \"${MOUNTPOINT}/tmp/testfile.txt\""
+  check_exit_status || return 1
 
   echo_test_title "Delete test file and directory from NFS share"
-  osx_test "rm -f \"${MOUNTPOINT}/tmp/testfile.txt\" && rmdir \"${MOUNTPOINT}/tmp\"" || return 1
+  osx_test "rm -f \"${MOUNTPOINT}/tmp/testfile.txt\" && rmdir \"${MOUNTPOINT}/tmp\""
+  check_exit_status || return 1
 
   echo_test_title "Verify that test file and directory were successfully removed"
-  osx_test "find -- \"${MOUNTPOINT}/\" -prune -type d -empty | grep -q ." || return 1
+  osx_test "find -- \"${MOUNTPOINT}/\" -prune -type d -empty | grep -q ."
+  check_exit_status || return 1
 
   # Clean up mounted NFS share
   # OS X `umount` manpage reports that umount may fail often.
   # "It is recommended that diskutil(1) (as in, ``diskutil unmount /mnt'') be used instead."
   echo_test_title "Unmount NFS share"
-  osx_test "diskutil unmount force '${MOUNTPOINT}'" || return 1
+  osx_test "diskutil unmount force '${MOUNTPOINT}'"
+  check_exit_status || return 1
 
   echo_test_title "Removing NFS share on ${NFS_PATH}"
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
