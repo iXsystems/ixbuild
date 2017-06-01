@@ -29,8 +29,7 @@ ad_nfs_tests()
   set_test_group_text "1 - Create - AD NFS tests" "24"
   CLASSNAME=ixbuild.resty.functional.create.ad_nfs
 
-  echo "AD NFS tests are disabled."
-  echo_skipped
+  echo -n "AD NFS tests are disabled." && echo_skipped
   return 0
 
   # Clean up any leftover items from previous failed NFS runs
