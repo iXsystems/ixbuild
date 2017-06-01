@@ -150,10 +150,10 @@ replication_tests()
     rest_request "GET" "/storage/replication/${repl_id}/"
     if [ $poll_cnt -eq 0 ]; then
       # Last attempt, print exit status
-      check_property_value "return this.repl_status" "Succeeded"
+      check_property_value ".repl_status" "Succeeded"
     else
       # Silent, only print success or re-try
-      check_property_value -q "return this.repl_status" "Succeeded"
+      check_property_value -q ".repl_status" "Succeeded"
       if [ "$?" == "0" ]; then
         echo_ok
         break

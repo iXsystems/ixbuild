@@ -24,38 +24,42 @@ system_tests()
   rest_request "PUT" "/system/settings/" '{ "stg_timezone": "America/New_York" }'
   check_rest_response "200 OK"
 
-  # Create loader tunable
-  echo_test_title "Creating system tunable 'dummynet'.."
-  rest_request "POST" "/system/tunable/" '{ "tun_var": "dummynet_load", "tun_enabled": true, "tun_value": "YES", "tun_type": "loader" }'
-  check_rest_response "201 Created"
-
   # Check loader tunable
   echo_test_title "Checking system tunable 'dummynet'.."
   rest_request "GET" "/system/tunable/"
-  check_property_value "return this.tun_var" "dummynet_load"
+  if ! check_property_value -q ".[].tun_var" "dummynet_load"; then
+    echo -n " not loaded. " && echo_ok
 
-  # Reboot system to enable tunable
-  echo_test_title "Reboot system to enable tunable.."
-  rest_request "POST" "/system/reboot/"
-  check_rest_response "202" || return 1
+    # Create loader tunable
+    echo_test_title "Creating system tunable 'dummynet'.."
+    rest_request "POST" "/system/tunable/" '{ "tun_var": "dummynet_load", "tun_enabled": true, "tun_value": "YES", "tun_type": "loader" }'
+    check_rest_response "201 Created"
 
-  # Ensure shutdown is complete before polling for initialization
-  echo_test_title "Waiting for VM to shut down"
-  loop_cnt=0
-  while :
-  do
-    ping -c1 -W 1 ${FNASTESTIP} &>/dev/null
-    if [ $? -ne 0 ]; then
-      # Ping response from VM has ceased responding
-      echo_ok && break;
-    fi
-    (( loop_cnt++ ))
-    if [ $loop_cnt -gt 60 ]; then
-      echo_fail
-      return 1
-    fi
-    sleep 4 && echo -n ".";
-  done
+    # Reboot system to enable tunable
+    echo_test_title "Reboot system to enable tunable.."
+    rest_request "POST" "/system/reboot/"
+    check_rest_response "202" || return 1
+
+    # Ensure shutdown is complete before polling for initialization
+    echo_test_title "Waiting for VM to shut down"
+    loop_cnt=0
+    while :
+    do
+      ping -c 1 -W 1 ${FNASTESTIP} &>/dev/null
+      if [ $? -ne 0 ]; then
+        # Ping response from VM has ceased responding
+        echo_ok && break;
+      fi
+      (( loop_cnt++ ))
+      if [ $loop_cnt -gt 60 ]; then
+        echo_fail
+        return 1
+      fi
+      sleep 4 && echo -n ".";
+    done
+  else
+    echo -n " already loaded." && echo_skipped
+  fi
 
   echo_test_title "Waiting for HTTP server and API initialization after reboot"
   wait_for_avail_port "80" && wait_for_avail && echo_ok || (echo_fail && return 1)

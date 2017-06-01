@@ -25,7 +25,7 @@ iscsi_tests()
   #   echo -n "iSCSI service does not appear to be running."
   #   echo_skipped
   #   return 0
-  # fi  
+  # fi
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
@@ -50,7 +50,7 @@ iscsi_tests()
   echo_test_title "Connecting to iSCSI target"
   bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
   check_exit_status || return 1
- 
+
   echo_test_title "Waiting for iscsi connection before grabbing device name"
   # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
   # have been established before -L[isting] results

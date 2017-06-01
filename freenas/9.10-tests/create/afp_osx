@@ -16,12 +16,12 @@ afp_osx_tests()
 
   local REQUIRED_SETTINGS=( "BRIDGEIP" "OSX_HOST" )
   for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do  
+  do
     if [ -z "${!SETTING}" ]; then
       echo -n "Required settings for afp_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
       echo_skipped
       return 0
-    fi  
+    fi
   done
 
   local DATASET="afp-osx"

@@ -86,7 +86,7 @@ nfs_bsd_tests()
   check_exit_status
 
   echo_test_title "Mounting NFS share ${NFS_PATH} to ${MOUNTPOUNT}"
-  bsd_test "mount_nfs ${NFS_HOST}:${NFS_PATH} ${MOUNTPOINT}"
+  bsd_test "mount -t nfs ${NFS_HOST}:${NFS_PATH} ${MOUNTPOINT}"
   check_exit_status || return 1
 
   echo_test_title "Verify that the NFS share has been mounted"

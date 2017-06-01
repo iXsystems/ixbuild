@@ -52,7 +52,7 @@ ldap_bsd_tests()
   # Check LDAP
   echo_test_title "Checking LDAP.."
   rest_request "GET" "/directoryservice/ldap/"
-  check_property_value "return this.ldap_enable" "true"
+  check_property_value ".ldap_enable" "true"
 
   echo_test_title "Enabling SMB service"
   rest_request "PUT" "/services/cifs/" '{ "cifs_srv_description": "Test FreeNAS Server", "cifs_srv_guest": "nobody", "cifs_hostname_lookup": false, "cifs_srv_aio_enable": false }'
@@ -155,7 +155,7 @@ ldap_bsd_tests()
   # Check LDAP
   echo_test_title "Verify LDAP is disabled.."
   rest_request "GET" "/directoryservice/ldap/"
-  check_property_value "return this.ldap_enable" "false"
+  check_property_value ".ldap_enable" "false"
 
   echo_test_title "Verify SMB service is disabled"
   rest_request "GET" "/services/services/cifs/"

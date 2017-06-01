@@ -49,11 +49,11 @@ snmp_tests()
 
   echo_test_title "Validate that SNMP settings were updated by the API"
   rest_request "GET" "/services/snmp/"
-  check_property_value -q "this.snmp_community" "${COMMUNITY}" \
-    && check_property_value -q "this.snmp_traps" "${TRAPS}" \
-    && check_property_value -q "this.snmp_contact" "${CONTACT}" \
-    && check_property_value -q "this.snmp_location" "${LOCATION}" \
-    && check_property_value -q "this.snmp_v3_password" "${PASSWORD}" \
+  check_property_value -q ".snmp_community" "${COMMUNITY}" \
+    && check_property_value -q ".snmp_traps" "${TRAPS}" \
+    && check_property_value -q ".snmp_contact" "${CONTACT}" \
+    && check_property_value -q ".snmp_location" "${LOCATION}" \
+    && check_property_value -q ".snmp_v3_password" "${PASSWORD}" \
     && echo_ok || echo_fail
 
   echo_test_title "Verify that we can get a response from the SNMP server"

@@ -36,17 +36,17 @@ while [ $# -gt 0 ] ; do
   val=`echo $1 | cut -d '=' -f 2`
 
   case "$key" in
-    testset|TESTSET) case "$val" in
-      SMOKE|smoke) export TESTSET="SMOKE" ;;
+    testset|TESTSET)
+      case "$val" in
+        SMOKE|smoke) export TESTSET="SMOKE" ;;
         COMPLETE|complete) export TESTSET="COMPLETE" ;;
-    BENCHMARK|benchmark) export TESTSET="BENCHMARK" ;;
-      *) ;;
-                     esac
-                     ;; 
-     module|MODULE) runmod="$val $runmod" ;;
-     ip|IP) ip="$val" ; manualip="YES" ;;
-     user|USER) fuser="$val" ;;
-     pass|PASS) fpass="$val" ;;
+        BENCHMARK|benchmark) export TESTSET="BENCHMARK" ;;
+        *) ;;
+      esac ;; 
+    module|MODULE) runmod="$val $runmod" ;;
+    ip|IP) ip="$val" ; manualip="YES" ;;
+    user|USER) fuser="$val" ;;
+    pass|PASS) fpass="$val" ;;
     *) ;;
   esac
   shift

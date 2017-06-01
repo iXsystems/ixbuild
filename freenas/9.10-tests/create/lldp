@@ -26,9 +26,9 @@ lldp_tests()
   check_rest_response "200 OK" || return 1
 
   echo_test_title "Checking that API reports LLDP configuration as saved"
-  check_property_value -q "this.lldp_country" "${COUNTRY}" \
-    && check_property_value -q "this.lldp_intdesc" "${INTDESC}" \
-    && check_property_value -q "this.lldp_location" "${LOCATION}" \
+  check_property_value -q ".lldp_country" "${COUNTRY}" \
+    && check_property_value -q ".lldp_intdesc" "${INTDESC}" \
+    && check_property_value -q ".lldp_location" "${LOCATION}" \
     && echo_ok || echo_fail
 
   echo_test_title "Enable LLDP service"

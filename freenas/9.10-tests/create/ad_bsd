@@ -50,7 +50,7 @@ ad_bsd_tests()
 
   echo_test_title "Checking Active Directory.."
   rest_request "GET" "/directoryservice/activedirectory/"
-  check_property_value "return this.ad_enable" "true" || return 1
+  check_property_value ".ad_enable" "true" || return 1
 
   echo_test_title "Checking to see if SMB service is enabled"
   rest_request "GET" "/services/services/cifs/"
@@ -143,7 +143,7 @@ ad_bsd_tests()
   # Check Active Directory
   echo_test_title "Verify Active Directory is disabled.."
   rest_request "GET" "/directoryservice/activedirectory/"
-  check_property_value "return this.ad_enable" "false" || return 1
+  check_property_value ".ad_enable" "false" || return 1
 
   echo_test_title "Verify SMB service is disabled"
   rest_request "GET" "/services/services/cifs/"

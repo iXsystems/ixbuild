@@ -75,61 +75,63 @@ iscsi_tests()
   wait_for_avail_port "3260"
   check_exit_status || return 1
 
-  # Now connect to iSCSI target
-  echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
-  check_exit_status || return 1
+  if which iscsictl &>/dev/null ; then
+    # Now connect to iSCSI target
+    echo_test_title "Connecting to iSCSI target"
+    bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
+    check_exit_status || return 1
 
-  echo_test_title "Waiting for iscsi connection before grabbing device name"
-  # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
-  # have been established before -L[isting] results
-  bsd_test "iscsictl -L -w 30"
-  check_exit_status || return 1
+    echo_test_title "Waiting for iscsi connection before grabbing device name"
+    # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
+    # have been established before -L[isting] results
+    bsd_test "iscsictl -L -w 30"
+    check_exit_status || return 1
 
-  # Get the device for the connect target
-  echo_test_title "Get the iSCSI target device name for the connection target"
-  bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
-  check_exit_status || return 1
+    # Get the device for the connect target
+    echo_test_title "Get the iSCSI target device name for the connection target"
+    bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
+    check_exit_status || return 1
 
-  echo_test_title "Format the target volume"
-  bsd_test "newfs /dev/\`cat \"${DEVICE_NAME_PATH}\"\`"
-  check_exit_status || return 1
+    echo_test_title "Format the target volume"
+    bsd_test "newfs /dev/\`cat \"${DEVICE_NAME_PATH}\"\`"
+    check_exit_status || return 1
 
-  echo_test_title "Creating iSCSI mountpoint"
-  bsd_test "mkdir '${MOUNTPOINT}'"
-  check_exit_status || return 1
+    echo_test_title "Creating iSCSI mountpoint"
+    bsd_test "mkdir '${MOUNTPOINT}'"
+    check_exit_status || return 1
 
-  echo_test_title "Mount the target volume"
-  bsd_test "mount \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
-  check_exit_status || return 1
+    echo_test_title "Mount the target volume"
+    bsd_test "mount \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
+    check_exit_status || return 1
 
-  echo_test_title "Creating file"
-  bsd_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'"
-  check_exit_status || return 1
+    echo_test_title "Creating file"
+    bsd_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'"
+    check_exit_status || return 1
 
-  echo_test_title "Moving file"
-  bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'"
-  check_exit_status || return 1
+    echo_test_title "Moving file"
+    bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'"
+    check_exit_status || return 1
 
-  echo_test_title "Copying file"
-  bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'"
-  check_exit_status || return 1
+    echo_test_title "Copying file"
+    bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'"
+    check_exit_status || return 1
 
-  echo_test_title "Deleting file"
-  bsd_test "rm '${MOUNTPOINT}/testfile2'"
-  check_exit_status || return 1
+    echo_test_title "Deleting file"
+    bsd_test "rm '${MOUNTPOINT}/testfile2'"
+    check_exit_status || return 1
 
-  echo_test_title "Unmounting iSCSI volume"
-  bsd_test "umount '${MOUNTPOINT}'"
-  check_exit_status || return 1
+    echo_test_title "Unmounting iSCSI volume"
+    bsd_test "umount '${MOUNTPOINT}'"
+    check_exit_status || return 1
 
-  echo_test_title "Removing iSCSI volume mountpoint"
-  bsd_test "rmdir '${MOUNTPOINT}'"
-  check_exit_status || return 1
+    echo_test_title "Removing iSCSI volume mountpoint"
+    bsd_test "rmdir '${MOUNTPOINT}'"
+    check_exit_status || return 1
 
-  echo_test_title "Disconnect all targets"
-  bsd_test "iscsictl -R -t ${TARGET_NAME}"
-  check_exit_status || return 1
+    echo_test_title "Disconnect all targets"
+    bsd_test "iscsictl -R -t ${TARGET_NAME}"
+    check_exit_status || return 1
+  fi
 
   # Disable the iSCSI service
   echo_test_title "Disable iSCSI service"

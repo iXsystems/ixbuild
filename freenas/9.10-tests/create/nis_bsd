@@ -11,7 +11,7 @@ export REQUIRES
 
 nis_bsd_tests()
 {
-  # define variables 
+  # define variables
   local SERVER="${NISSERVER}"
   local DOMAIN="${NISDOMAIN}"
 

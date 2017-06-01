@@ -19,7 +19,7 @@ group_tests() {
   check_rest_response "201 Created" || return 1
 
   # Get the ID of this group
-  groupid=`cat ${RESTYOUT} | ${JSAWK} 'return this.id'`
+  groupid=`cat ${RESTYOUT} | jq '.id'`
 
   # Save the ID of this group for other jobs
   echo $groupid > /tmp/.ixbuild_test_groupid

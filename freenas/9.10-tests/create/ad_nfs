@@ -19,7 +19,7 @@ ad_nfs_tests()
   local MP_GROUP="wheel"
 
   # Default to BRIDGEIP if set
-  if [ -n "${BRIDGEIP}" ]; then 
+  if [ -n "${BRIDGEIP}" ]; then
     NFS_HOST=${BRIDGEIP}
   elif [ -z "${NFS_PATH}" -a -n "${FNASTESTIP}" ]; then
     NFS_HOST=${FNASTESTIP}

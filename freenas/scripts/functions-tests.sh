@@ -623,7 +623,7 @@ check_exit_status()
 # (Optional) -q switch as first argument silences std_out
 check_service_status()
 {
-  SRV_PROPERTY='return this.srv_state'
+  SRV_PROPERTY='.srv_state'
   if [ "${1}" == "-q" ]; then
     check_property_value $1 "${SRV_PROPERTY}" $2
   else
@@ -632,7 +632,7 @@ check_service_status()
   return $?
 }
 
-# $1 = JSON property to check $2 (value) against, using JSAWK syntax
+# $1 = JSON property to check $2 (value) against, using jq syntax
 # $2 = Expected value returned by API property specified in $1
 # (Optional) -q switch as first argument silences std_out
 check_property_value()
@@ -656,10 +656,10 @@ check_property_value()
     return 1
   fi  
 
-  PROP_VALUE=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
+  PROP_VALUE=`cat ${RESTYOUT} | jq "${1}"`
   # If 'srv_state' property not found, return 'SKIPPED' status
   # This can be removed once the API is in sync with TrueNAS/FreeNAS stable - 03/17/17, CD
-  if [ "${1}" == "return this.srv_state" -a -z "$PROP_VALUE" ]; then
+  if [ "${1}" == ".srv_state" -a -z "$PROP_VALUE" ]; then
     if [ "$SILENT" == "false" ]; then
       echo_skipped
     fi
@@ -686,22 +686,26 @@ check_rest_response()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
+  local SILENT="false"
+  if [ "$1" == "-q" ]; then
+    SILENT="true"
+    shift
+  fi
+
   grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
   if [ $? -ne 0 ] ; then
-    cat ${RESTYERR}
-    cat ${RESTYOUT}
-    echo_fail
+    if [ "$SILENT" == "false" ]; then
+      cat ${RESTYERR}
+      cat ${RESTYOUT}
+      echo_fail
+    fi
     return 1
   fi
 
-  echo_ok
+  if [ "$SILENT" == "false" ]; then
+    echo_ok
+  fi
   return 0
-}
-
-check_rest_response_continue()
-{
-  grep -qi "^.*HTTP\/1\.[01] $1" ${RESTYERR}
-  return $?
 }
 
 set_test_group_text()
@@ -744,7 +748,7 @@ wait_for_avail()
   while :
   do
     rest_request "GET" "${ENDPOINT}"
-    check_rest_response_continue "200 OK"
+    check_rest_response -q "200 OK"
     check_exit_status -q && break
     echo -n "."
     sleep $LOOP_SLEEP
@@ -1046,7 +1050,7 @@ do_ha_status() {
     echo_test_title "Checking the alert level for each node"
     rest_request "GET" "/system/alert/" ""
     check_rest_response "200 OK"
-    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
+    NODESTATUS=$(cat ${RESTYOUT} | jq '.[].message')
     echo "NODESTATUS: $NODESTATUS"
     echo $NODESTATUS | grep -q 'Failed to check failover status with the other node: timed out'
     if [ $? -ne 0 ] ; then
