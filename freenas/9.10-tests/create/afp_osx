@@ -54,7 +54,7 @@ afp_osx_tests()
   check_service_status "RUNNING" || return 1
 
   echo_test_title "Changing permissions on ${AFP_PATH}"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'${MP_GROUP}'" }'
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'${AFP_PATH}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "'$(printf "%q" ${MP_GROUP})'" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Creating a AFP share on ${AFP_PATH}"
