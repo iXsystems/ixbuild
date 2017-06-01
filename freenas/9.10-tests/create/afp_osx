@@ -28,7 +28,7 @@ afp_osx_tests()
   local AFP_NAME="My AFP Share"
   local AFP_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/${BRIDGEHOST}afp-osx"
-  local MP_GROUP="AD01\\qa"
+  local MP_GROUP="wheel"
 
   # Clean up any leftover items from previous failed runs
   rest_request "PUT" "/services/afp/" '{ "afp_srv_guest": false }'
