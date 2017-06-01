@@ -71,7 +71,13 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y wget"
 fi
 
-pkg info -q lang/python27 >/dev/null 2>/dev/null
+which jq &>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing jq.."
+  rc_halt "pkg-static install -y jq"
+fi
+
+pkg info -q python27 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing lang/python27.."
   rc_halt "pkg-static install -y python27"
