@@ -556,11 +556,7 @@ wait_for_avail()
   # Sum: wait for 720 secs
   local LOOP_SLEEP=3
   local LOOP_LIMIT=240
-  local ENDPOINT="/system/info/hardware/"
-
-  if [ -n "$FREENASLEGACY" ] ; then
-    ENDPOINT="/storage/disk/"
-  fi
+  local ENDPOINT="/system/version/"
 
   local count=0
   while :
