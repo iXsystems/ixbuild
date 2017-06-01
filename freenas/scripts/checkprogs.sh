@@ -68,7 +68,7 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y spidermonkey24"
 fi
 
-which jq &>/dev/null
+pkg info -q jq &>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing jq.."
   rc_halt "pkg-static install -y jq"
