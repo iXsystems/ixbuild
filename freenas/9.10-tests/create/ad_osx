@@ -23,12 +23,15 @@ ad_osx_tests()
   set_test_group_text "1 - Create - Active Directory OS X tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.ad_osx
 
-  if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
-     echo -n "Missing the ADUSERNAME / ADPASSWORD settings, test skipped.."
-     echo_skipped
-     add_xml_result "skipped" "Skipped due to missing AD settings"
-     return 0
-  fi
+  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEIP" "BRIDGEDOMAIN" "BRIDGEHOST" "ADUSERNAME" "ADPASSWORD" )
+  for SETTING in "${REQUIRED_SETTINGS[@]}"
+  do
+    if [ -z "${!SETTING}" ]; then
+      echo -n "Required settings for ad_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+      echo_skipped
+      return 0
+    fi
+  done
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
