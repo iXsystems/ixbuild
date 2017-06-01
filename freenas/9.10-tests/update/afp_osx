@@ -18,7 +18,7 @@ afp_osx_tests()
   local DATASET="afp-osx"
   local AFP_NAME="My AFP Share"
   local AFP_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/tmp/afp-osx${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}afp-osx"
   local MP_GROUP="wheel"
 
   local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEIP" "BRIDGEHOST" )

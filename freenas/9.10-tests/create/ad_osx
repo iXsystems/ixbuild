@@ -17,7 +17,7 @@ ad_osx_tests()
   local DATASET="ad-osx"
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/tmp/ad-osx${BRIDGEHOST}"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}ad-osx"
   local MP_GROUP="AD01\\qa"
 
   set_test_group_text "1 - Create - Active Directory OS X tests" "${TEST_CNT}"

@@ -13,7 +13,7 @@ ad_nfs_tests()
 {
   local DATASET="ad-nfs"
   local NFS_PATH="/mnt/tank/${DATASET}"
-  local MOUNTPOINT="/tmp/ad-nfs"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}ad-nfs"
   local NFS_HOST=${ip}
   local NFS_PORT=618
   local MP_GROUP="wheel"
