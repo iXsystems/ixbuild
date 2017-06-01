@@ -71,7 +71,7 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y wget"
 fi
 
-pkg info -q jq &>/dev/null
+pkg info -q jq
 if [ "$?" != "0" ]; then
   echo "Installing jq.."
   rc_halt "pkg-static install -y jq"
