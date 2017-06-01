@@ -26,8 +26,7 @@ ftp_tests() {
   check_service_status "RUNNING"
 
   echo_test_title "Fetching file via FTP"
-  rc_test "ftp -o /tmp/ftpfile ftp://testuser:test@${BRIDGEIP}/.cshrc"
-  check_exit_status || return 1
+  rc_test "ftp -o /tmp/ftpfile ftp://testuser:test@${BRIDGEIP}/.cshrc" || return 1
 
   return 0
 }
