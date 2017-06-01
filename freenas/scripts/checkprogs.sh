@@ -38,7 +38,7 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y xorriso"
 fi
 
-pkg info -q gmake >/dev/null 2>/dev/null
+pkg info -q gmake
 if [ "$?" != "0" ]; then
   echo "Installing gmake.."
   rc_halt "pkg-static install -y gmake"
@@ -68,67 +68,67 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y spidermonkey24"
 fi
 
-pkg info -q jq &>/dev/null
+pkg info -q jq
 if [ "$?" != "0" ]; then
   echo "Installing jq.."
   rc_halt "pkg-static install -y jq"
 fi
 
-pkg info -q python27 >/dev/null 2>/dev/null
+pkg info -q python27
 if [ "$?" != "0" ]; then
   echo "Installing python27.."
   rc_halt "pkg-static install -y python27"
 fi
 
-pkg info python >/dev/null 2>&1
+pkg info -q python
 if [ "$?" != "0" ]; then
   echo "Installing python.."
   rc_halt "pkg-static install -y python"
 fi
 
-pkg info python36 >/dev/null 2>&1
+pkg info -q python36
 if [ "$?" != "0" ]; then
   echo "Installing python36.."
   rc_halt "pkg-static install -y python36"
 fi
 
-pkg info -q py27-sphinx >/dev/null 2>/dev/null
+pkg info -q py27-sphinx
 if [ "$?" != "0" ]; then
   echo "Installing sphinx.."
   rc_halt "pkg-static install -y py27-sphinx"
 fi
 
-pkg info -q py27-sphinx-intl >/dev/null 2>/dev/null
+pkg info -q py27-sphinx-intl
 if [ "$?" != "0" ]; then
   echo "Installing sphinx-intl.."
   rc_halt "pkg-static install -y py27-sphinx-intl"
 fi
 
-pkg info -q py27-sphinx_numfig >/dev/null 2>/dev/null
+pkg info -q py27-sphinx_numfig
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_numfig.."
   rc_halt "pkg-static install -y py27-sphinx_numfig"
 fi
 
-pkg info -q py27-sphinx_rtd_theme >/dev/null 2>/dev/null
+pkg info -q py27-sphinx_rtd_theme
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_rtd_theme.."
   rc_halt "pkg-static install -y py27-sphinx_rtd_theme"
 fi
 
-pkg info -q py27-sphinx_wikipedia >/dev/null 2>/dev/null
+pkg info -q py27-sphinx_wikipedia
 if [ "$?" != "0" ]; then
   echo "Installing sphinx_wikipedia.."
   rc_halt "pkg-static install -y py27-sphinx_wikipedia"
 fi
 
-pkg info -q py27-sphinxcontrib-httpdomain >/dev/null 2>/dev/null
+pkg info -q py27-sphinxcontrib-httpdomain
 if [ "$?" != "0" ]; then
   echo "Installing sphinxcontrib-httpdomain.."
   rc_halt "pkg-static install -y py27-sphinxcontrib-httpdomain"
 fi
 
-pkg info -q compat9x-amd64 >/dev/null 2>/dev/null
+pkg info -q compat9x-amd64
 if [ "$?" != "0" ]; then
   echo "Installing compat9x-amd64.."
   rc_halt "pkg-static install -y compat9x-amd64"
