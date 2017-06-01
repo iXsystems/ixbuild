@@ -17,7 +17,7 @@ update_storage_tests()
 
   # Check updating a ZVOL
   echo_test_title "Updating ZVOL"
-  rest_request "PUT" "/storage/volume/tank/zvols/testzvol/" '{ "volsize" : "50M" }'
+  rest_request "PUT" "/storage/volume/tank/zvols/testzvol/" '{ "volsize" : "50M", "comment": "10M > 50M" }'
   check_rest_response "201" || return 1
 
   # Check rolling back a ZFS snapshot
