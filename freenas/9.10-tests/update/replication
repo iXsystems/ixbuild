@@ -155,13 +155,13 @@ replication_tests()
   echo_test_title "Create user \"${REPL_DEDICATEDUSER}\" on replication PULL host"
   repl_rest_request "POST" "/account/users/" '{ "bsdusr_username": "'"${REPL_DEDICATEDUSER}"'", "bsdusr_home": "/mnt/tank/", "bsdusr_uid": "'${repl_uid}'", "bsdusr_mode": 755, "bsdusr_creategroup": true, "bsdusr_full_name": "Replication '"${BRIDGEHOST}"'PULL", "bsdusr_password": "'"${REPL_DEDICATEDUSERPASS}"'", "bsdusr_sshpubkey": "'"${push_user_pubkey}"'" }'
   check_rest_response "201 Created" || return 1
-  local pull_user_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+  local pull_user_id="$(cat ${RESTYOUT} | jq '.id')"
 
   # Create user on PUSH host for our replication's dedicated user
   echo_test_title "Create user \"${REPL_DEDICATEDUSER}\" on replication PUSH host"
   rest_request "POST" "/account/users/" '{ "bsdusr_username": "'"${REPL_DEDICATEDUSER}"'", "bsdusr_home": "/mnt/tank/", "bsdusr_uid": "'${repl_uid}'", "bsdusr_mode": 755, "bsdusr_creategroup": true, "bsdusr_full_name": "Replication '"${BRIDGEHOST}"'PULL", "bsdusr_password": "'"${REPL_DEDICATEDUSERPASS}"'" }' #, "bsdusr_sshpubkey": "'"${pull_user_pubkey}"'" }'
   check_rest_response "201 Created" || return 1
-  local push_user_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+  local push_user_id="$(cat ${RESTYOUT} | jq '.id')"
 
   echo_test_title "Creating dataset \"${PULL_DATASET}\" on replication target host"
   repl_rest_request "POST" "/storage/volume/${REPLVOLUME}/datasets/" '{ "name": "'"${PULL_DATASET}"'" }'
@@ -186,7 +186,7 @@ replication_tests()
   echo_test_title "Create replication job for the snapshot \"${PUSH_ZVOL}\""
   rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${PUSH_ZVOL}"'", "repl_zfs": "'"${REPLVOLUME}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard", "repl_remote_hostkey": "'"${pull_user_pubkey}"'", "repl_remote_dedicateduser_enabled": true, "repl_remote_dedicateduser": "'"${REPL_DEDICATEDUSER}"'" }'
   check_rest_response "201 Created" || return 1
-  local repl_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+  local repl_id="$(cat ${RESTYOUT} | jq '.id')"
 
   # TODO - Observed: "Failed: tank/cd-freenasqa (auto-20170424.1250-2d)"
 
@@ -229,7 +229,7 @@ replication_tests()
   check_rest_response "204" || return 1
 
   rest_request "GET" "/storage/task/"
-  local snapshot_tasks=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  local snapshot_tasks=$(cat ${RESTYOUT} | jq '.[] | select(.task_filesystem == "tank/'"${PUSH_ZVOL}"'") | .id')
   for snapshot_id in ${snapshot_tasks[@]}
   do
     echo_test_title "Delete the snapshot task \"tank/${PUSH_ZVOL}\"(${snapshot_id})"
@@ -239,7 +239,7 @@ replication_tests()
 
   # Snapshot ID example: tank/bridgehost/bridgehost@auto-20170417.1632-2d
   repl_rest_request "GET" "/storage/snapshot/"
-  local replicated_snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "'"${REPLVOLUME}/${PULL_DATASET}/${PUSH_ZVOL}"'") { out(this.id) }')
+  local replicated_snapshots=$(cat ${RESTYOUT} | jq '.[] | select(.filesystem == "'"${REPLVOLUME}/${PULL_DATASET}/${PUSH_ZVOL}"'") | .id')
   for snapshot_id in ${replicated_snapshots[@]}
   do
     echo_test_title "Deleting replicated snapshot \"${snapshot_id}\" from replication target"
@@ -253,7 +253,7 @@ replication_tests()
   check_rest_response "204" || return 1
 
   rest_request "GET" "/storage/snapshot/"
-  local snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  local snapshots=$(cat ${RESTYOUT} | jq '.[] | select(.filesystem == "tank/'"${PUSH_ZVOL}"'") | .id')
   for snapshot_id in ${snapshots[@]}
   do
     echo_test_title "Deleting testing target snapshot \"${snapshot_id}\""

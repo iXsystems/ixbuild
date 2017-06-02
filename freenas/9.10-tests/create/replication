@@ -124,7 +124,7 @@ replication_tests()
   echo_test_title "Get the ID for the root user account on our PULL host"
   repl_rest_request "GET" "/account/users/"
   check_rest_response "200" || return 1
-  local pull_root_user_id=$(cat "$RESTYOUT" | jsawk -n 'if (this.bsdusr_username == "root") { out(this.id) }')
+  local pull_root_user_id=$(cat "$RESTYOUT" | jq '.[] | select(.bsdusr_username == "root") | .id')
 
   echo_test_title "Add our SSH public key to the root user account on our PULL host"
   repl_rest_request "PUT" "/account/users/${pull_root_user_id}/" '{ "bsdusr_sshpubkey": "'"${push_user_pubkey}"'" }'
