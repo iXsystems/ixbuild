@@ -15,7 +15,7 @@ ldap_bsd_tests()
   local SMB_NAME="TestShare"
   local SMB_PATH="/mnt/tank/${DATASET}"
   local MOUNTPOINT="/tmp/${BRIDGEHOST}ldap-bsd"
-  local VOL_GROUP="ga"
+  local VOL_GROUP="qa"
 
   set_test_group_text "1 - Create - LDAP BSD tests" "27"
   CLASSNAME=ixbuild.resty.functional.create.ldap_bsd
