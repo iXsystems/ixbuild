@@ -38,7 +38,7 @@ ssh_tests()
 
   # Get the root user id so we can add ssh keys to the test target
   rest_request "GET" "/account/users/"
-  local root_user_id=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.bsdusr_username == "root") { out(this.id) }')
+  local root_user_id=$(cat ${RESTYOUT} | jq '.[] | select(.bsdusr_username == "root") | .id')
   local ssh_pubkey="$(cat ~/.ssh/id_rsa.pub)"
 
   echo_test_title "Adding SSH public key from the executor to the root user account"

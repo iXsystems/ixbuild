@@ -150,7 +150,7 @@ else
     echo_test_title "Checking to make sure each node is online to continue upgrade"
     rest_request "GET" "/system/alert/" ""
     check_rest_response "200 OK"
-    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
+    NODESTATUS=$(cat ${RESTYOUT} | jq -r '.[].message')
     echo "NODESTATUS: $NODESTATUS"
     echo $NODESTATUS | grep -q 'TrueNAS versions mismatch in failover. Update both nodes to the same version.'
     if [ $? -eq 0 ] ; then
@@ -195,7 +195,7 @@ else
     echo_test_title "Checking the alert level for each node"
     rest_request "GET" "/system/alert/" ""
     check_rest_response "200 OK"
-    NODESTATUS=$(cat ${RESTYOUT} | ${JSAWK} 'return this.message')
+    NODESTATUS=$(cat ${RESTYOUT} | jq -r '.[].message')
     echo "NODESTATUS: $NODESTATUS"
     echo $NODESTATUS | grep -q 'Failed to check failover status with the other node: timed out'
     if [ $? -ne 0 ] ; then

@@ -55,12 +55,12 @@ replication_tests()
 
   # Remove replication tasks
   rest_request "GET" "/storage/replication/"
-  local repl_id_list=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.repl_remote_hostname == "'"${REPLTARGET}"'" && this.repl_filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  local repl_id_list=$(cat ${RESTYOUT} | jq '.[] | select(.repl_remote_hostname == "'"${REPLTARGET}"'") | .id')
   for repl_id in ${repl_id_list[@]}; do rest_request "DELETE" "/storage/replication/${repl_id}/"; done
 
   # Remove snapshot tasks
   rest_request "GET" "/storage/task/"
-  local snapshot_id_list=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  local snapshot_id_list=$(cat ${RESTYOUT} | jq '.[] | select(.task_filesystem == "tank/'"${PUSH_DATASET}"') | .id')
   for snapshot_id in ${snapshot_id_list[@]}; do rest_request "DELETE" "/storage/task/${snapshot_id}/"; done
 
   # Remove datasets and leftover tmp files
@@ -140,7 +140,7 @@ replication_tests()
   echo_test_title "Create replication job for the snapshot \"${PUSH_DATASET}\""
   rest_request "POST" "/storage/replication/" '{ "repl_filesystem": "tank/'"${PUSH_DATASET}"'", "repl_zfs": "'"${REPLVOLUME}/${PULL_DATASET}"'", "repl_remote_hostname": "'"${REPLTARGET}"'", "repl_begin": "'"${repl_begin}"'", "repl_end": "'"${repl_end}"'", "repl_enabled": true, "repl_remote_cipher": "standard", "repl_remote_hostkey": "'"${pull_user_pubkey}"'" }'
   check_rest_response "201 Created" || return 1
-  local repl_id="`cat ${RESTYOUT} | ${JSAWK} -n 'out(this.id)'`"
+  local repl_id="$(cat ${RESTYOUT} | jq '.id')"
 
   # Check/poll replication job's repl_status for 'Succeeded' status
   echo_test_title "Verify that replication job succeeded for snapshot \"${PUSH_DATASET}\""
@@ -181,7 +181,7 @@ replication_tests()
   check_rest_response "204" || return 1
 
   rest_request "GET" "/storage/task/"
-  local snapshot_tasks=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  local snapshot_tasks=$(cat ${RESTYOUT} | jq '.[] | select(.task_filesystem == "tank/'"${PUSH_DATASET}"'") | .id')
   for snapshot_id in ${snapshot_tasks[@]}
   do
     echo_test_title "Delete the snapshot task \"tank/${PUSH_DATASET}\"(${snapshot_id})"
@@ -191,7 +191,7 @@ replication_tests()
 
   # Snapshot ID example: tank/bridgehost/bridgehost@auto-20170417.1632-2d
   repl_rest_request "GET" "/storage/snapshot/"
-  local replicated_snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "'"${REPLVOLUME}/${PULL_DATASET}/${PUSH_DATASET}"'") { out(this.id) }')
+  local replicated_snapshots=$(cat ${RESTYOUT} | jq '.[] | select(.filesystem == "'"${REPLVOLUME}/${PULL_DATASET}/${PUSH_DATASET}"'") | .id')
   for snapshot_id in ${replicated_snapshots[@]}
   do
     echo_test_title "Deleting replicated snapshot \"${snapshot_id}\" from replication target"
@@ -205,7 +205,7 @@ replication_tests()
   check_rest_response "204" || return 1
 
   rest_request "GET" "/storage/snapshot/"
-  local snapshots=$(cat ${RESTYOUT} | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_DATASET}"'") { out(this.id) }')
+  local snapshots=$(cat ${RESTYOUT} | jq '.[] | select(.filesystem == "'"${PUSH_DATASET}"'") | .id')
   for snapshot_id in ${snapshots[@]}
   do
     echo_test_title "Deleting testing target snapshot \"${snapshot_id}\""

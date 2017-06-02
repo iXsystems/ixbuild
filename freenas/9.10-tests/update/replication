@@ -69,30 +69,30 @@ replication_tests()
 
   # Remove replication tasks
   rest_request "GET" "/storage/replication/"
-  local repl_id_list=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.repl_remote_hostname == "'"${REPLTARGET}"'" && this.repl_filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  local repl_id_list=$(cat ${RESTYOUT} | jq '.[] | select(.repl_remote_hostname == "'"${REPLTARGET}"'") | .id')
   for repl_id in ${repl_id_list[@]}; do rest_request "DELETE" "/storage/replication/${repl_id}/"; done
 
   # Remove dedicated user accounts
   repl_rest_request "GET" "/account/users/"
-  local pull_user_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.bsdusr_username == "'${REPL_DEDICATEDUSER}'") { out(this.id) }')
+  local pull_user_id=$(cat ${RESTYOUT} | jq '.[] | select(.bsdusr_username == "'${REPL_DEDICATEDUSER}'") | .id')
   if [ -n "$pull_user_id" ]; then repl_rest_request "DELETE" "/account/users/${pull_user_id}/"; fi
   rest_request "GET" "/account/users/"
-  local push_user_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.bsdusr_username == "'${REPL_DEDICATEDUSER}'") { out(this.id) }')
+  local push_user_id=$(cat ${RESTYOUT} | jq '.[] | select(.bsdusr_username == "'${REPL_DEDICATEDUSER}'") | .id')
   if [ -n "$push_user_id" ]; then rest_request "DELETE" "/account/users/${push_user_id}/"; fi
 
   # Remove tunable entry for zfs.usermount
   repl_rest_request "GET" "/system/tunable/"
-  local tunable_id=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.tun_var == "zfs.usermount") { out(this.id) }')
+  local tunable_id=$(cat ${RESTYOUT} | jq '.[] | select(.tun_var == "zfs.usermount") | .id')
   if [ -n "$tunable_id" ]; then repl_rest_request "DELETE" "/system/tunable/${tunable_id}/"; fi
 
   # Remove snapshot task
   rest_request "GET" "/storage/task/"
-  local snapshot_id_list=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.task_filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  local snapshot_id_list=$(cat ${RESTYOUT} | jq '.[] | select(.task_filesystem == "tank/'"${PUSH_ZVOL}"'") | .id')
   for snapshot_id in ${snapshot_id_list[@]}; do rest_request "DELETE" "/storage/task/${snapshot_id}/"; done
 
   # Remove snapshot(s)
   rest_request "GET" "/storage/snapshot/"
-  local snapshot_id_list=$(cat "$RESTYOUT" | ${JSAWK} -n 'if (this.filesystem == "tank/'"${PUSH_ZVOL}"'") { out(this.id) }')
+  local snapshot_id_list=$(cat ${RESTYOUT} | jq '.[] | select(.filesystem == "tank/'"${PUSH_ZVOL}"'") | .id')
   for snapshot_id in ${snapshot_id_list[@]}; do rest_request "DELETE" "/storage/snapshot/${snapshot_id}/"; done
 
   # Remove zvols and leftover tmp files
@@ -149,7 +149,7 @@ replication_tests()
 
   # Ensure we get unique user id for our dedicated replication users
   repl_rest_request "GET" "/account/users/"
-  local repl_uid=$(( $(cat "$RESTYOUT" | ${JSAWK} -n 'out(this.bsdusr_uid)' | sort -u -g | tail -n 1)+1 ))
+  local repl_uid=$(( $(cat ${RESTYOUT} | jq '.[].bsdusr_uid' | sort -u -g | tail -n 1)+1 ))
 
   # Create user on PULL host for our replication's dedicated user
   echo_test_title "Create user \"${REPL_DEDICATEDUSER}\" on replication PULL host"
