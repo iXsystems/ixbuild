@@ -105,7 +105,7 @@ smb_bsd_tests()
   check_exit_status || return 1
 
   echo_test_title "Unmounting SMB"
-  bsd_test "umount ${MOUNTPOINT}"
+  bsd_test "umount -f \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Removing SMB mountpoint"

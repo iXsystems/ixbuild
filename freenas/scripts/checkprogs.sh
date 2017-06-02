@@ -8,13 +8,13 @@ PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"
 mkdir -p "${PROGDIR}/iso" >/dev/null 2>/dev/null
 mkdir -p "${PROGDIR}/log" >/dev/null 2>/dev/null
 
-which git >/dev/null 2>/dev/null
+which -s git
 if [ "$?" != "0" ]; then
   echo "Installing git.."
   rc_halt "pkg-static install git"
 fi
 
-which grub-mkrescue >/dev/null 2>/dev/null
+which -s grub-mkrescue
 if [ "$?" != "0" ]; then
   echo "Installing grub-mkrescue.."
   rc_halt "pkg-static install -y grub2-pcbsd"
@@ -26,13 +26,13 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y grub2-efi"
 fi
 
-which mkisofs >/dev/null 2>/dev/null
+which -s mkisofs
 if [ "$?" != "0" ]; then
   echo "Installing cdrtools.."
   rc_halt "pkg-static install -y cdrtools"
 fi
 
-which xorriso >/dev/null 2>/dev/null
+which -s xorriso
 if [ "$?" != "0" ]; then
   echo "Installing xorriso.."
   rc_halt "pkg-static install -y xorriso"
@@ -44,25 +44,25 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y gmake"
 fi
 
-which curl >/dev/null 2>/dev/null
+which -s curl
 if [ "$?" != "0" ]; then
   echo "Installing ftp/curl.."
   rc_halt "pkg-static install -y curl"
 fi
 
-which bash >/dev/null 2>/dev/null
+which -s bash
 if [ "$?" != "0" ]; then
   echo "Installing bash.."
   rc_halt "pkg-static install -y bash"
 fi
 
-which snmpwalk >/dev/null 2>/dev/null
+which -s snmpwalk
 if [ "$?" != "0" ]; then
   echo "Installing net-snmp.."
   rc_halt "pkg-static install -y net-snmp"
 fi
 
-which js24 >/dev/null 2>/dev/null
+which -s js24
 if [ "$?" != "0" ]; then
   echo "Installing spidermonkey24.."
   rc_halt "pkg-static install -y spidermonkey24"
@@ -134,25 +134,25 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y compat9x-amd64"
 fi
 
-which pxz >/dev/null 2>/dev/null
+which -s pxz
 if [ "$?" != "0" ]; then
   echo "Installing archivers/pxz"
   rc_halt "pkg-static install -y pxz"
 fi
 
-which poudriere >/dev/null 2>/dev/null
+which -s poudriere
 if [ "$?" != "0" ]; then
   echo "Installing poudriere-devel"
   rc_halt "pkg-static install -y poudriere-devel"
 fi
 
-which sshpass >/dev/null 2>/dev/null
+which -s sshpass
 if [ "$?" != "0" ]; then
   echo "Installing sshpass"
   rc_halt "pkg-static install -y sshpass"
 fi
 
-which pip3.6 > /dev/null 2>&1
+which -s pip3.6
 if [ "$?" != "0" ]; then
   echo "Installing pip"
   rc_halt "python3.6 -m ensurepip"

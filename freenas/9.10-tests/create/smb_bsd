@@ -28,7 +28,7 @@ smb_bsd_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
+  bsd_test "umount -f \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\""
 
   # Set auxilary parameters to allow mount_smbfs to work
   echo_test_title "Setting auxilary parameters for mount_smbfs.."
@@ -67,16 +67,17 @@ smb_bsd_tests()
   bsd_test "mkdir \"${MOUNTPOINT}\" && sync"
   check_exit_status || return 1
 
-  local mount_smbfs_found=$(which mount_smbfs)
-  local mount_found=$(which mount)
+  local mount_smbfs_found=$(which -s mount_smbfs)
+  local mount_found=$(which -s mount)
 
   if $mount_smbfs_found || $mount_found; then
     echo_test_title "Mounting SMB"
     if $mount_smbfs_found ; then
-      bsd_test "mount_smbfs -N -I ${BRIDGEIP} //guest@testnas/${SMB_NAME} ${MOUNTPOINT}" || return 1
+      bsd_test "mount_smbfs -N -I ${BRIDGEIP} //guest@testnas/${SMB_NAME} ${MOUNTPOINT}"
     elif $mount_found ; then
-      bsd_test "mount -t cifs -o user=guest -o password=testnas //${BRIDGEIP}/${SMB_NAME} ${MOUNTPOINT}"  || return 1
+      bsd_test "mount -t cifs -o user=guest -o password=testnas //${BRIDGEIP}/${SMB_NAME} ${MOUNTPOINT}"
     fi
+    check_exit_status || return 1
 
     echo_test_title "Verify that SMB share has been mounted"
     wait_for_bsd_mnt "${MOUNTPOINT}"
