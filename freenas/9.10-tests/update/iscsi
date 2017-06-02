@@ -30,8 +30,7 @@ iscsi_tests()
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
-  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
-  bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
+  bsd_test "umount -f \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\""
 
   # Enable the iSCSI service
   echo_test_title "Enable iSCSI service"

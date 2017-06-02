@@ -45,7 +45,7 @@ system_tests()
     loop_cnt=0
     while :
     do
-      ping -c 1 -W 1 ${FNASTESTIP} &>/dev/null
+      ping -c 1 -W 1 ${FNASTESTIP} >/dev/null 2>/dev/null
       if [ $? -ne 0 ]; then
         # Ping response from VM has ceased responding
         echo_ok && break;
