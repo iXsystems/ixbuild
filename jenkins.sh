@@ -47,6 +47,7 @@ freenas-push-api     - Push FreeNAS API
 freenas-push-nightly - Run 'release-push' for FreeNAS Nightly
 freenas-push         - Run 'release-push' for FreeNAS / TrueNAS
 mkcustard            - Build a Custard VM
+mktrueview           - Build a TrueView VM
 
 -- TrueOS Commands --
 trueos-world    - Builds the world
@@ -135,6 +136,7 @@ freenas-run-tests-jailed) jenkins_freenas_run_tests_jailed ;;
          freenas-combo) jenkins_freenas
                jenkins_freenas_tests ;;
              mkcustard)  jenkins_mkcustard ;;
+            mktrueview)  jenkins_mktrueview ;;
            ports-tests) jenkins_ports_tests ;;
                      *) echo "Invalid command: $1" 
              display_usage

@@ -1290,6 +1290,78 @@ jenkins_ports_tests()
   exit 0
 }
 
+jenkins_mktrueview()
+{
+  cd /root
+
+  # Roll back to clean snapshot
+  VBoxManage snapshot trueview restore clean
+  if [ $? -ne 0 ] ; then
+    echo "Failed to roll-back to @clean snapshot"
+    exit 1
+  fi
+
+  # Start the trueview VM and wait for it to finish
+  ( VBoxHeadless -s trueview >/dev/null 2>/dev/null ) &
+  count=0
+
+  echo "Waiting for TrueView prep to finish..."
+  while :
+  do
+    sleep 30
+    echo "."
+
+    vboxmanage list runningvms | grep -q "trueview"
+    if [ $? -ne 0 ] ; then
+      break
+    fi
+
+    count=`expr $count + 1`
+    if [ $count -gt 20 ] ; then
+      VBoxManage controlvm trueview poweroff
+      exit 1
+    fi
+  done
+
+  rm -rf /root/trueview/
+  mkdir /root/trueview
+  OUTFILE=/root/trueview/trueview-`date '+%Y-%m-%d-%H-%M'`
+
+  # Looks like trueview finished on its own, lets package it up
+  VBoxManage modifyvm trueview --nic1 bridged
+
+  echo "Exporting TrueView .ova file..."
+  VBoxManage export trueview -o ${OUTFILE}.ova
+  chmod 644 ${OUTFILE}.ova
+  echo "Exporting TrueView legacy .ova file..."
+  VBoxManage export trueview -o ${OUTFILE}-legacy.ova --legacy09
+  chmod 644 ${OUTFILE}-legacy.ova
+  echo "Exporting TrueView ovf20 .ova file..."
+  VBoxManage export trueview -o ${OUTFILE}-ovf20.ova --ovf20
+  chmod 644 ${OUTFILE}-ovf20.ova
+
+  # Export the RAW disk image
+  dimg=`ls /root/VirtualBox\ VMs/trueview/trueview*.vmdk`
+  vboxmanage clonemedium "$dimg" /root/trueview/trueview.vmdk --format VMDK --variant Fixed,ESX
+  cd /root/trueview
+  zip -r ${OUTFILE}-vmdk.zip trueview-flat.vmdk trueview.vmdk
+  chmod 644 ${OUTFILE}-vmdk.zip
+  rm trueview-flat.vmdk
+  rm trueview.vmdk
+
+  # Save the .ova to stage server
+  if [ -n "$SFTPHOST" ] ; then
+    STAGE="${SFTPFINALDIR}/iso/trueview/amd64"
+
+    echo "Moving TrueView to stage server..."
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${STAGE}" >/dev/null 2>/dev/null
+    rsync -va --delete -e 'ssh' /root/trueview/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+  fi
+
+  exit 0
+}
+
 jenkins_mkcustard()
 {
   cd /root
@@ -1500,6 +1572,7 @@ export BDIR
 case $TYPE in
   ports-tests) ;;
   mkcustard) ;;
+  mktrueview) ;;
   iocage_pkgs|iocage_pkgs_push) ;;
   *) do_build_env_setup ;;
 esac
