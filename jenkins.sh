@@ -95,48 +95,48 @@ fi
 ######################################################
 
 case $TYPE in
-    world|trueos-world) jenkins_world ;;
-        pkg|trueos-pkg) jenkins_pkg "release" ;;
-iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
-            sysadm-api) jenkins_sysadm_api ;;
-       push-sysadm-api) jenkins_sysadm_push_api ;;
-           sysadm-docs) jenkins_sysadm_docs ;;
-      push-sysadm-docs) jenkins_sysadm_push_docs ;;
-           trueos-docs) jenkins_trueos_docs ;;
-      push-trueos-docs) jenkins_trueos_push_docs ;;
-           lumina-docs) jenkins_trueos_lumina_docs ;;
-      push-lumina-docs) jenkins_trueos_push_lumina_docs ;;
-        iso|trueos-iso) jenkins_iso ;;
-           publish-iso) jenkins_publish_iso ;;
-      publish-iso-edge) jenkins_publish_iso "edge" ;;
-           publish-pkg) jenkins_publish_pkg ;;
-      publish-pkg-edge) jenkins_publish_pkg "edge" ;;
-      publish-pkg-ipfs) jenkins_publish_pkg_ipfs ;;
-           promote-pkg) jenkins_promote_pkg ;;
-          vm|trueos-vm) jenkins_vm ;;
-                  jail) jenkins_jail ;;
-           iocage_pkgs) jenkins_iocage_pkgs ;;
-      iocage_pkgs_push) jenkins_iocage_pkgs_push ;;
-               freenas) jenkins_freenas ;;
-         freenas-tests) jenkins_freenas_tests ;;
-  freenas-tests-jailed) jenkins_freenas_tests_jailed ;;
-     freenas-run-tests) jenkins_freenas_run_tests ;;
+      world|trueos-world) jenkins_world ;;
+          pkg|trueos-pkg) jenkins_pkg "release" ;;
+  iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
+              sysadm-api) jenkins_sysadm_api ;;
+         push-sysadm-api) jenkins_sysadm_push_api ;;
+             sysadm-docs) jenkins_sysadm_docs ;;
+        push-sysadm-docs) jenkins_sysadm_push_docs ;;
+             trueos-docs) jenkins_trueos_docs ;;
+        push-trueos-docs) jenkins_trueos_push_docs ;;
+             lumina-docs) jenkins_trueos_lumina_docs ;;
+        push-lumina-docs) jenkins_trueos_push_lumina_docs ;;
+          iso|trueos-iso) jenkins_iso ;;
+             publish-iso) jenkins_publish_iso ;;
+        publish-iso-edge) jenkins_publish_iso "edge" ;;
+             publish-pkg) jenkins_publish_pkg ;;
+        publish-pkg-edge) jenkins_publish_pkg "edge" ;;
+        publish-pkg-ipfs) jenkins_publish_pkg_ipfs ;;
+             promote-pkg) jenkins_promote_pkg ;;
+            vm|trueos-vm) jenkins_vm ;;
+                    jail) jenkins_jail ;;
+             iocage_pkgs) jenkins_iocage_pkgs ;;
+        iocage_pkgs_push) jenkins_iocage_pkgs_push ;;
+                 freenas) jenkins_freenas ;;
+           freenas-tests) jenkins_freenas_tests ;;
+    freenas-tests-jailed) jenkins_freenas_tests_jailed ;;
+       freenas-run-tests) jenkins_freenas_run_tests ;;
 freenas-run-tests-jailed) jenkins_freenas_run_tests_jailed ;;
-         freenas-ltest) jenkins_freenas_live_tests ;;
-      freenas-lupgrade) jenkins_freenas_live_upgrade ;;
-       freenas-tn-docs) jenkins_truenas_docs ;;
-          freenas-docs) jenkins_freenas_docs ;;
-     freenas-push-docs) jenkins_freenas_push_docs ;;
-  freenas-push-tn-docs) jenkins_truenas_push_docs ;;
-           freenas-api) jenkins_freenas_api ;;
-      freenas-push-api) jenkins_freenas_push_api ;;
-  freenas-push-nightly) jenkins_freenas_push_nightly ;;
-          freenas-push) jenkins_freenas_push ;;
-         freenas-combo) jenkins_freenas
-               jenkins_freenas_tests ;;
-             mkcustard)  jenkins_mkcustard ;;
-           ports-tests) jenkins_ports_tests ;;
-                     *) echo "Invalid command: $1" 
+           freenas-ltest) jenkins_freenas_live_tests ;;
+        freenas-lupgrade) jenkins_freenas_live_upgrade ;;
+         freenas-tn-docs) jenkins_truenas_docs ;;
+            freenas-docs) jenkins_freenas_docs ;;
+       freenas-push-docs) jenkins_freenas_push_docs ;;
+    freenas-push-tn-docs) jenkins_truenas_push_docs ;;
+             freenas-api) jenkins_freenas_api ;;
+        freenas-push-api) jenkins_freenas_push_api ;;
+    freenas-push-nightly) jenkins_freenas_push_nightly ;;
+            freenas-push) jenkins_freenas_push ;;
+           freenas-combo) jenkins_freenas
+                 jenkins_freenas_tests ;;
+               mkcustard)  jenkins_mkcustard ;;
+             ports-tests) jenkins_ports_tests ;;
+                       *) echo "Invalid command: $1" 
              display_usage
          exit 1
          ;;
