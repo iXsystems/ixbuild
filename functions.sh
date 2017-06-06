@@ -1145,7 +1145,7 @@ jenkins_freenas_tests()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  if [ -n "$SFTPHOST" ] ; then
+  if [ -n "$SFTPHOST" -a -n "$SFTPUSER" ] ; then
 
     # Now lets sync the ISOs
     if [ -d "${BEDIR}/release" ] ; then
@@ -1158,6 +1158,35 @@ jenkins_freenas_tests()
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
     rsync -va --delete --include="*/" --include="*.iso" --exclude="*" -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
     if [ $? -ne 0 ] ; then exit_clean ; fi
+  else
+    # List ISOs in ${BEDIR} and allow the user to select the target
+    cd "${BEDIR}"
+    iso_cnt=$(ls -l *.iso 2>/dev/null | wc -l)
+
+    # Exit cleanly if no ISO found...
+    if [ $iso_cnt -lt 1 ] ; then
+      echo "No local FreeNAS ISO found in \"${BEDIR}\"" && exit_clean
+    fi
+
+    # Loop until we get a valid user selection
+    while :
+    do
+      echo " Please select which ISO to test (1-$iso_cnt):"
+      # List ISOs in the ./freenas/iso/ directory, numbering the results for selection
+      ls -l *.iso | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
+      echo -n "Enter your selection and press [ENTER]: "
+      # Prompt user to determine which iso is used
+      read iso_selection
+      iso_name="$(ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}')"
+      echo -n "You have selected \"${iso_name}\", is this correct? (y/n): "
+      read iso_confirmed
+      if [ "${iso_confirmed}" == "y" -o "${iso_confirmed}" == "Y" ] ; then
+        break
+      fi
+    done
+
+    mkdir -p "${BEDIR}/release" && cd ${BEDIR}/release && \
+    ln -s "${BEDIR}/${iso_name}" "${iso_name}"
   fi
 
   if [ -n "$JAILED_TESTS" ] ; then
