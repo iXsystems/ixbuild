@@ -124,6 +124,7 @@ case $TYPE in
 freenas-run-tests-jailed) jenkins_freenas_run_tests_jailed ;;
            freenas-ltest) jenkins_freenas_live_tests ;;
         freenas-lupgrade) jenkins_freenas_live_upgrade ;;
+        freenas-ui-tests) jenkins_freenas_ui_tests ;;
          freenas-tn-docs) jenkins_truenas_docs ;;
             freenas-docs) jenkins_freenas_docs ;;
        freenas-push-docs) jenkins_freenas_push_docs ;;

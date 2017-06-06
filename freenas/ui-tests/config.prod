@@ -5,7 +5,7 @@
 #
 
 # A running selenium server address to use
-SELENIUMSERVER="{TODO}"
+SELENIUMSERVER="10.20.20.42"
 SELENIUMPORT="4444"
 
 #

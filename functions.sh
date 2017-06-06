@@ -1213,6 +1213,23 @@ jenkins_freenas_run_tests_jailed()
   iocage console $BUILDTAG
 }
 
+jenkins_freenas_ui_tests()
+{
+  create_workdir
+  cd ${TBUILDDIR}/scripts/
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+  echo ""
+  sleep 10
+  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+
+  # Make sure we have started a running version of FreeNAS to run UI tests against
+
+  # Ensure that the webdriver-manager has been updated and started.
+
+  # Run the UI tests for the Angular interface.
+
+  return 0
+}
 
 jenkins_push_fn_statedir()
 {

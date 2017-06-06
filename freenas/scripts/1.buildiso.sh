@@ -126,6 +126,10 @@ if [ -d "${FNASBDIR}" ]; then
 else
   rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
   rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
+  # Checkout specific git revision if previous jenkins job has propagated the $GIT_COMMIT.
+  if [ -n "${GIT_COMMIT}" ] ; then
+    rc_halt "cd \"${FNASBDIR}\" && git reset --hard ${GIT_COMMIT}"
+  fi
   git_fnas_up "${FNASSRC}" "${FNASSRC}"
 fi
 
