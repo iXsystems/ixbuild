@@ -16,6 +16,7 @@ net-p2p/deluge-cli
 net-p2p/transmission-daemon
 irc/quassel-core
 sysutils/linux-crashplan
+sysutils/tarsnap
 www/nextcloud
 www/nginx
 www/redmine
