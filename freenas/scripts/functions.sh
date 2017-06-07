@@ -152,25 +152,20 @@ rc_halt()
 # Set the FreeNAS _BE directory location
 get_bedir()
 {
-
   if [ -n "$OLDBUILDOPTS" ] ; then
     eval $OLDBUILDOPTS
   fi
+
   if [ -n "$BUILDOPTS" ] ; then
     eval $BUILDOPTS
   fi
 
-  if [ "${GITFNASBRANCH}" != "master" ] ; then
-    export BEDIR="${FNASBDIR}/_BE"
-    return 0
-  fi
-
-  if [ "$GITFNASURL" = "https://github.com/freenas/build.git" ] ; then
+  if [ -z "$LEGACYBEDIR" -a -n "${PROFILE}" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
     return 0
   else
     export BEDIR="${FNASBDIR}/_BE"
     return 0
   fi
-
 }
+
