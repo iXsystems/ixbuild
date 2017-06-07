@@ -11,7 +11,8 @@ VMDISK="ada0"
 ########################################################
 
 # Where is the program installed
-PROGDIR="`realpath ${0} | sed 's|/create-auto-install.sh||g'`/../" ; export PROGDIR
+PROGDIR="`dirname "`realpath "`dirname "$0"`"`"`"
+export PROGDIR
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
