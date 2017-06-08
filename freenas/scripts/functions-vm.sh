@@ -14,9 +14,9 @@ start_bhyve()
 {
   # Verify kernel modules are loaded if this is a BSD system
   if which kldstat >/dev/null 2>/dev/null ; then
-    kldstat | grep -q if_tap && kldload if_tap
-    kldstat | grep -q if_bridge && kldload if_bridge
-    kldstat | grep -q vmm && kldload vmm
+    kldstat | grep -q if_tap || kldload if_tap
+    kldstat | grep -q if_bridge || kldload if_bridge
+    kldstat | grep -q vmm || kldload vmm
   fi
 
   # Lets check status of "tap0" devices
