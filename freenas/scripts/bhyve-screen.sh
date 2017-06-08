@@ -1,16 +1,22 @@
 #!/usr/bin/env sh
 
+if pkg info -q uefi-edk2-bhyve ; then
+  echo "FAILED: requires bhyve, uefi-edk2-bhyve (for bootrom)"
+  exit 1
+fi
+
 PROGDIR=`dirname $0`
 PROGDIR=`realpath $PROGDIR`
 PROGDIR=`dirname $PROGDIR`
 BUILDTAG="$1"
 
-grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $BUILDTAG
+cpu=4
+ram=2048M
+fw=/usr/local/share/uefi-firmware/BHYVE_UEFI.fd
 
 if ! zfs list | grep -q tank/${BUILDTAG}vm0 ; then
   zfs create -V 8G tank/${BUILDTAG}vm0
 fi
-
 
 # Daemonize the bhyve process
 daemon -p /tmp/$BUILDTAG.pid \
@@ -21,9 +27,9 @@ daemon -p /tmp/$BUILDTAG.pid \
     -s 2:0,virtio-net,tap0 \
     -s 3:0,ahci-hd,/dev/zvol/tank/${BUILDTAG}vm0 \
     -s 4:0,ahci-cd,/$BUILDTAG.iso \
-    -l com1,stdio \
-    -c 4 \
-    -m 2048M $BUILDTAG
+    -l bootrom,${fw} \
+    -c ${cpu} \
+    -m ${ram} $BUILDTAG
 
 # Wait for initial bhyve startup
 count=0
@@ -47,3 +53,5 @@ done
 
 # Cleanup the old VM
 bhyvectl --destroy --vm=$BUILDTAG
+
+exit 0
