@@ -20,7 +20,7 @@ PIP="/usr/bin/env pip3.6"
 
 echo "Using API Address: http://${FNASTESTIP}/api/v2.0"
 
-git clone https://www.github.com/freenas/freenas --depth=1 /tmp/apiv2-freenas
+git clone -b freenas/11.0-stable https://www.github.com/freenas/freenas --depth=1 /tmp/apiv2-freenas
 cd /tmp/apiv2-freenas/src/middlewared
 $PIP uninstall -y middlewared.client
 $PYTHON setup_client.py install --user --single-version-externally-managed --record $(mktemp)
