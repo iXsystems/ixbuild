@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-if pkg info -q uefi-edk2-bhyve ; then
+if ! pkg info -q uefi-edk2-bhyve ; then
   echo "FAILED: requires bhyve, uefi-edk2-bhyve (for bootrom)"
   exit 1
 fi
