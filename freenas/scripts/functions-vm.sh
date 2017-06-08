@@ -14,13 +14,13 @@ start_bhyve()
 {
   # Verify kernel modules are loaded if this is a BSD system
   if which kldstat >/dev/null 2>/dev/null ; then
-    [ ! `kldstat | grep -q "if_tap"` ] && kldload if_tap
-    [ ! `kldstat | grep -q "if_bridge"` ] && kldload if_bridge
-    [ ! `kldstat | grep -q "vmm"` ] && kldload vmm
+    kldstat | grep -q if_tap && kldload if_tap
+    kldstat | grep -q if_bridge && kldload if_bridge
+    kldstat | grep -q vmm && kldload vmm
   fi
 
   # Lets check status of "tap0" devices
-  if ifconfig tap0 >/dev/null 2>/dev/null ; then
+  if ! ifconfig tap0 >/dev/null 2>/dev/null ; then
     iface="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
     bridge="bridge0"
 
@@ -78,14 +78,10 @@ start_vbox()
   # Get the default interface
   iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 
-  if ! kldstat | grep -q "vboxdrv" ; then
-    kldload vboxdrv >/dev/null 2>/dev/null
-  fi
-
-  if ! kldstat | grep -q "vboxnet" ; then
-    # Onestart will run even if service is started
-    service vboxnet onestart
-  fi
+  # Verify kernel modules are loaded
+  kldstat | grep -q vboxdrv && kldload vboxdrv >/dev/null 2>/dev/null
+  # Onestart will run even if service is started
+  kldstat | grep -q vboxnet && service vboxnet onestart
 
   # Now lets spin-up vbox and do an installation
   ######################################################
