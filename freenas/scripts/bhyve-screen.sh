@@ -3,10 +3,14 @@
 PROGDIR=`dirname $0`
 PROGDIR=`realpath $PROGDIR`
 PROGDIR=`dirname $PROGDIR`
-MFSFILE="$1"
-BUILDTAG="$2"
+BUILDTAG="$1"
 
 grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $BUILDTAG
+
+if ! zfs list | grep -q tank/${BUILDTAG}vm0 ; then
+  zfs create -V 8G tank/${BUILDTAG}vm0
+fi
+
 
 # Daemonize the bhyve process
 daemon -p /tmp/$BUILDTAG.pid \
@@ -15,7 +19,7 @@ daemon -p /tmp/$BUILDTAG.pid \
     -s 0:0,hostbridge \
     -s 1:0,lpc \
     -s 2:0,virtio-net,tap0 \
-    -s 3:0,virtio-blk,${MFSFILE} \
+    -s 3:0,ahci-hd,/dev/zvol/tank/${BUILDTAG}vm0 \
     -s 4:0,ahci-cd,/$BUILDTAG.iso \
     -l com1,stdio \
     -c 4 \

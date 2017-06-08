@@ -35,16 +35,10 @@ start_bhyve()
   # Now lets spin-up bhyve and do an installation
   ###############################################
 
-  MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
-  echo "Creating $MFSFILE"
-  rc_halt "truncate -s 5000M $MFSFILE"
-
-  #cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/
-
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
   install_screenlog="/tmp/${BUILDTAG}bhyve-install-screen.log"
-  screen -Dm -L ${install_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${MFSFILE} ${BUILDTAG}
+  screen -Dm -L ${install_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG}
 
   # Display output of screen command
   cat "${install_screenlog}" && echo ""
@@ -63,7 +57,7 @@ start_bhyve()
 
   echo "Running bhyve tests in screen session, output will display when finished..."
   tests_screenlog="/tmp/${BUILDTAG}bhyve-tests-screen.log"
-  screen -Dm -L ${tests_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${MFSFILE} ${BUILDTAG}
+  screen -Dm -L ${tests_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG}
 
   [ ! -f "${tests_screenlog}" ] && echo "No screenlog found." && exit 1
 
@@ -85,9 +79,9 @@ start_vbox()
   iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 
   # Verify kernel modules are loaded
-  kldstat | grep -q vboxdrv && kldload vboxdrv >/dev/null 2>/dev/null
+  kldstat | grep -q vboxdrv || kldload vboxdrv >/dev/null 2>/dev/null
   # Onestart will run even if service is started
-  kldstat | grep -q vboxnet && service vboxnet onestart
+  kldstat | grep -q vboxnet || service vboxnet onestart
 
   # Now lets spin-up vbox and do an installation
   ######################################################
