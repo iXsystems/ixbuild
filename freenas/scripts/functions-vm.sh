@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Where is the ixbuild program installed
-PROGDIR="`realpath . | sed 's|/scripts$||g'`" ; export PROGDIR
+export PROGDIR="`dirname "`realpath "`dirname "$0"`"`"`"
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
@@ -9,57 +9,59 @@ PROGDIR="`realpath . | sed 's|/scripts$||g'`" ; export PROGDIR
 
 start_bhyve()
 {
-  # Lets check status of "tap0" devices
-  ifconfig tap0 >/dev/null 2>/dev/null
-  if [ $? -ne 0 ] ; then
-    iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
-    ifconfig tap0 create
-    sysctl net.link.tap.up_on_open=1
-    ifconfig bridge0 create
-    ifconfig bridge0 addm ${iface} addm tap0
-    ifconfig bridge0 up
+  # Verify kernel modules are loaded if this is a BSD system
+  if which kldstat >/dev/null 2>/dev/null ; then
+    [ ! `kldstat | grep -q "if_tap"` ] && kldload if_tap
+    [ ! `kldstat | grep -q "if_bridge"` ] && kldload if_bridge
+    [ ! `kldstat | grep -q "vmm"` ] && kldload vmm
   fi
 
+  # Lets check status of "tap0" devices
+  if ifconfig tap0 >/dev/null 2>/dev/null ; then
+    iface="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
+    bridge="bridge0"
+
+    ifconfig tap0 create
+    sysctl net.link.tap.up_on_open=1
+    ifconfig ${bridge} create
+    ifconfig ${bridge} addm ${iface} addm tap0
+    ifconfig ${bridge} up
+  fi
+
+  ###############################################
   # Now lets spin-up bhyve and do an installation
-  ######################################################
+  ###############################################
+
   MFSFILE="${PROGDIR}/tmp/freenas-disk0.img"
   echo "Creating $MFSFILE"
   rc_halt "truncate -s 5000M $MFSFILE"
 
+  # TODO - use $HOME instead of /root?
   cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/
 
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
 
-  kldstat | grep -q "vmm"
-  if [ $? -ne 0 ] ; then
-    kldload vmm
-  fi
-
   # Check that this device seemed to install properly
   dSize=`du -m ${MFSFILE} | awk '{print $1}'`
   if [ $dSize -lt 10 ] ; then
-     # if the disk image is too small, installation didn't work, bail out!
-     echo "bhyve install failed!"
+     echo "Disk image is too small, bhyve install failed! Exiting..."
      exit 1
   fi
 
-  echo "Bhyve installation successful!"
-  sleep 1
-  echo "Starting Bhyve testing now!"
+  echo "Bhyve installation successful! Starting bhyve testing..."
 
-  # Start grub-bhyve
   echo "(hd0) ${MFSFILE}" > ${PROGDIR}/tmp/device.map
   echo "(cd0) ${PROGDIR}/tmp/$BUILDTAG.iso" >> ${PROGDIR}/tmp/device.map
 
-  # We run the bhyve commands in a seperate screen session, so that they can run
-  # in jenkins / save output
-  echo "Running bhyve tests in screen session, will display when finished..."
+  echo "Running bhyve tests in screen session, output will display when finished..."
   screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$BUILDTAG.sh
 
+  [ ! -f screenlog.0 ] && echo "No screenlog found." && exit 1
+
   # Display output of screen command
-  cat flush
-  echo ""
+  cat screenlog.0 && echo ""
+  return 0
 }
 
 start_vbox()
@@ -73,33 +75,30 @@ start_vbox()
   # Get the default interface
   iface=`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`
 
-  # This will try to load the module even if it is already loaded
-  # Load up VBOX
-  # kldstat | grep -q vboxdrv
-  # if [ $? -eq 0 ] ; then
-  #  kldload vboxdrv >/dev/null 2>/dev/null
-  # fi
-  # kldstat | grep -q vboxnet
-  # if [ $? -eq 0 ] ; then
-  # Onestart will run if even if service is started
-  #  service vboxnet onestart
-  # fi
+  if ! kldstat | grep -q "vboxdrv" ; then
+    kldload vboxdrv >/dev/null 2>/dev/null
+  fi
+
+  if ! kldstat | grep -q "vboxnet" ; then
+    # Onestart will run even if service is started
+    service vboxnet onestart
+  fi
 
   # Now lets spin-up vbox and do an installation
   ######################################################
   while :
   do
-  runningvm=$(VBoxManage list runningvms | grep ${VM})
-  OS=`echo $runningvm | cut -d \" -f 2`
-  if [ "${VM}" == "${OS}" ]; then
-    echo "A previous instance of ${VM} is still running!"
-    echo "Shutting down ${VM}"
-    VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
-    sleep 10
-  else
-    echo "Checking for previous running instances of ${VM}... none found"
-    break
-  fi
+    runningvm=$(VBoxManage list runningvms | grep ${VM})
+    OS=`echo $runningvm | cut -d \" -f 2`
+    if [ "${VM}" == "${OS}" ]; then
+      echo "A previous instance of ${VM} is still running!"
+      echo "Shutting down ${VM}"
+      VBoxManage controlvm $BUILDTAG poweroff >/dev/null 2>/dev/null
+      sleep 10
+    else
+      echo "Checking for previous running instances of ${VM}... none found"
+      break
+    fi
   done
 
   # Restarting vboxnet before tests can actually break networking

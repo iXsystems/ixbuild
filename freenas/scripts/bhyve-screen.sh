@@ -1,16 +1,26 @@
-#!/bin/sh
-count=0
+#!/usr/bin/env sh
 
-PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"
+PROGDIR="`dirname "`realpath "`dirname "$0"`"`"`"
 MFSFILE="$1"
 BUILDTAG="$2"
 
 grub-bhyve -m ${PROGDIR}/tmp/device.map -r cd0 -M 2048M $BUILDTAG
 
-daemon -p /tmp/$BUILDTAG.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -s 4:0,ahci-cd,${PROGDIR}/tmp/$BUILDTAG.iso -l com1,stdio -c 4 -m 2048M $BUILDTAG
-#daemon -p /tmp/$BUILDTAG.pid bhyve -AI -H -P -s 0:0,hostbridge -s 1:0,lpc -s 2:0,virtio-net,tap0 -s 3:0,virtio-blk,${MFSFILE} -l com1,stdio -c 4 -m 2048M $BUILDTAG
+# Daemonize the bhyve process
+daemon -p /tmp/$BUILDTAG.pid \
+  bhyve \
+    -AI -H -P \
+    -s 0:0,hostbridge \
+    -s 1:0,lpc \
+    -s 2:0,virtio-net,tap0 \
+    -s 3:0,virtio-blk,${MFSFILE} \
+    -s 4:0,ahci-cd,${PROGDIR}/tmp/$BUILDTAG.iso \
+    -l com1,stdio \
+    -c 4 \
+    -m 2048M $BUILDTAG
 
 # Wait for initial bhyve startup
+count=0
 while :
 do
   # Break from loop when the process ID file disappears
