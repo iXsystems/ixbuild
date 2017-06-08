@@ -39,10 +39,15 @@ start_bhyve()
   echo "Creating $MFSFILE"
   rc_halt "truncate -s 5000M $MFSFILE"
 
-  cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/
+  #cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/
 
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
+  install_screenlog="/tmp/${BUILDTAG}bhyve-install-screen.log"
+  screen -Dm -L ${install_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${MFSFILE} ${BUILDTAG}
+
+  # Display output of screen command
+  cat "${install_screenlog}" && echo ""
 
   # Check that this device seemed to install properly
   dSize=`du -m ${MFSFILE} | awk '{print $1}'`
@@ -54,16 +59,17 @@ start_bhyve()
   echo "Bhyve installation successful! Starting bhyve testing..."
 
   echo "(hd0) ${MFSFILE}" > ${PROGDIR}/tmp/device.map
-  echo "(cd0) ${PROGDIR}/tmp/$BUILDTAG.iso" >> ${PROGDIR}/tmp/device.map
+  echo "(cd0) /$BUILDTAG.iso" >> ${PROGDIR}/tmp/device.map
 
   echo "Running bhyve tests in screen session, output will display when finished..."
-  screenlog="/tmp/${BUILDTAG}bhyve-screen.log"
-  screen -Dm -L ${screenlog} -S vmscreen ${PROGDIR}/tmp/bhyve-screen.sh ${MFSFILE} ${BUILDTAG}
+  tests_screenlog="/tmp/${BUILDTAG}bhyve-tests-screen.log"
+  screen -Dm -L ${tests_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${MFSFILE} ${BUILDTAG}
 
-  [ ! -f "${screenlog}" ] && echo "No screenlog found." && exit 1
+  [ ! -f "${tests_screenlog}" ] && echo "No screenlog found." && exit 1
 
   # Display output of screen command
-  cat "${screenlog}" && echo ""
+  cat "${tests_screenlog}" && echo ""
+
   return 0
 }
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-PROGDIR="`dirname "`realpath "`dirname "$0"`"`"`"
+PROGDIR=`dirname $0`
+PROGDIR=`realpath $PROGDIR`
+PROGDIR=`dirname $PROGDIR`
 MFSFILE="$1"
 BUILDTAG="$2"
 
@@ -14,7 +16,7 @@ daemon -p /tmp/$BUILDTAG.pid \
     -s 1:0,lpc \
     -s 2:0,virtio-net,tap0 \
     -s 3:0,virtio-blk,${MFSFILE} \
-    -s 4:0,ahci-cd,${PROGDIR}/tmp/$BUILDTAG.iso \
+    -s 4:0,ahci-cd,/$BUILDTAG.iso \
     -l com1,stdio \
     -c 4 \
     -m 2048M $BUILDTAG
