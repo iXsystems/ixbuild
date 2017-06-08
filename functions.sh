@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Set the build tag
 BUILDTAG="$BUILD"
@@ -1142,64 +1142,75 @@ jenkins_freenas_tests()
 
   get_bedir
 
-  cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean ; fi
+  # Ensure we have a build directory for our ixbuild checkout
+  mkdir -p "${TBUILDDIR}" && cd "${TBUILDDIR}"
+  [ "`pwd | realpath`" != "${TBUILDDIR}" ] && exit_clean
 
+  # Clean-up previous test builds
+  [ -d "${BEDIR}/release" ] && rm -rf "${BEDIR}/release"
+
+  # Ensure we have a /release directory to copy our ISO to
+  mkdir -p "${BEDIR}/release" && cd ${BEDIR}/release
+  [ "`pwd | realpath`" != "${BEDIR}/release" ] && exit_clean
+
+  # Use SFTP setting to pull $ISOSTAGE
   if [ -n "$SFTPHOST" -a -n "$SFTPUSER" ] ; then
-
     # Now lets sync the ISOs
-    if [ -d "${BEDIR}/release" ] ; then
-      rm -rf ${BEDIR}/release
-    fi
-    mkdir -p ${BEDIR}/release
-    cd ${BEDIR}/release
-    if [ $? -ne 0 ] ; then exit_clean; fi
-
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
     rsync -va --delete --include="*/" --include="*.iso" --exclude="*" -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
-    if [ $? -ne 0 ] ; then exit_clean ; fi
+    [ $? -ne 0 ] && exit_clean
   else
     # List ISOs in ${BEDIR} and allow the user to select the target
-    cd "${BEDIR}"
-    iso_cnt=$(ls -l *.iso 2>/dev/null | wc -l)
+    iso_cnt=`cd ${BEDIR} && ls -l *.iso 2>/dev/null | wc -l | sed 's| ||g'`
 
     # Exit cleanly if no ISO found...
-    if [ $iso_cnt -lt 1 ] ; then
-      echo "No local FreeNAS ISO found in \"${BEDIR}\"" && exit_clean
-    fi
+    [ $iso_cnt -lt 1 ] && echo "No local ISO found in \"${BEDIR}\"" && exit_clean
+
+    mkdir -p "/${BUILDTAG}/objs" && cd "/${BUILDTAG}/objs"
+    [ "`pwd | realpath`" != "/${BUILDTAG}/objs" ] && exit_clean
 
     # Loop until we get a valid user selection
     while :
     do
-      echo " Please select which ISO to test (1-$iso_cnt):"
+      echo "Please select which ISO to test (1-$iso_cnt):"
+
       # List ISOs in the ./freenas/iso/ directory, numbering the results for selection
-      ls -l *.iso | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
+      ls -l "${BEDIR}"/*.iso 2>/dev/null | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
       echo -n "Enter your selection and press [ENTER]: "
+
       # Prompt user to determine which iso is used
       read iso_selection
-      iso_name="$(ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}')"
-      echo -n "You have selected \"${iso_name}\", is this correct? (y/n): "
-      read iso_confirmed
-      if [ "${iso_confirmed}" == "y" -o "${iso_confirmed}" == "Y" ] ; then
-        break
+
+      # Only accept integer chars
+      iso_selection=${iso_selection##*[!0-9]*}
+      if [ -z $iso_selection ] || [ $iso_selection -lt 1 ] || [ $iso_selection -gt $iso_cnt ] 2>/dev/null; then
+        echo -n "Invalid selection.." && sleep 1 && echo -n "." && sleep 1 && echo "."
+      elif [ -n "`echo $iso_selection | sed 's| ||g'`" ] ; then
+        iso_name="`cd ${BEDIR} && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}'`"
+
+        echo -n "You have selected \"${iso_name}\", is this correct? (y/n): "
+
+        # Prompt user for selection confirmation
+        read iso_confirmed
+
+        if [ "${iso_confirmed}" == "y" -o "${iso_confirmed}" == "Y" ] ; then
+          ln -s "${BEDIR}/${iso_name}" "/$BUILDTAG/objs/${iso_name}"
+          break
+        fi
       fi
     done
-
-    mkdir -p "${BEDIR}/release" && cd ${BEDIR}/release && \
-    ln -s "${BEDIR}/${iso_name}" "${iso_name}"
   fi
 
-  if [ -n "$JAILED_TESTS" ] ; then
-    cd ${TBUILDDIR}
-    make tests  
-  else
-    cd ${TBUILDDIR}
-    make tests
-    if [ $? -ne 0 ] ; then exit_clean ; fi
+  cd ${TBUILDDIR}
+  make tests
+  EXIT_STATUS=$?
+
+  if [ -z "$JAILED_TESTS" ] ; then
+    if [ $EXIT_STATUS -ne 0 ] ; then exit_clean ; fi
     cleanup_workdir
   fi        
 
-  return 0
+  return $EXIT_STATUS
 }
 
 jenkins_freenas_tests_jailed()
