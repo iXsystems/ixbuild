@@ -36,7 +36,6 @@ start_bhyve()
   echo "Creating $MFSFILE"
   rc_halt "truncate -s 5000M $MFSFILE"
 
-  # TODO - use $HOME instead of /root?
   cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/
 
   # Just in case the install hung, we don't need to be waiting for over an hour
@@ -55,12 +54,13 @@ start_bhyve()
   echo "(cd0) ${PROGDIR}/tmp/$BUILDTAG.iso" >> ${PROGDIR}/tmp/device.map
 
   echo "Running bhyve tests in screen session, output will display when finished..."
-  screen -Dm -L -S vmscreen ${PROGDIR}/tmp/screen-$BUILDTAG.sh
+  screenlog="/tmp/${BUILDTAG}bhyve-screen.log"
+  screen -Dm -L ${screenlog} -S vmscreen ${PROGDIR}/tmp/bhyve-screen.sh ${MFSFILE} ${BUILDTAG}
 
-  [ ! -f screenlog.0 ] && echo "No screenlog found." && exit 1
+  [ ! -f "${screenlog}" ] && echo "No screenlog found." && exit 1
 
   # Display output of screen command
-  cat screenlog.0 && echo ""
+  cat "${screenlog}" && echo ""
   return 0
 }
 
@@ -115,7 +115,7 @@ start_vbox()
   rm -rf "/root/VirtualBox VMs/$BUILDTAG" >/dev/null 2>/dev/null
 
   # Copy ISO over to /root in case we need to grab it from jenkins node later
-    cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
+  cp ${PROGDIR}/tmp/$BUILDTAG.iso /root/$BUILDTAG.iso
 
   # Remove from the vbox registry
   VBoxManage closemedium dvd ${PROGDIR}/tmp/$BUILDTAG.iso >/dev/null 2>/dev/null
