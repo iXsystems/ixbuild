@@ -1,7 +1,10 @@
 #!/usr/bin/env sh
 
 # Where is the ixbuild program installed
-export PROGDIR="`dirname "`realpath "`dirname "$0"`"`"`"
+PROGDIR=`dirname $0`
+PROGDIR=`realpath $PROGDIR`
+PROGDIR=`dirname $PROGDIR`
+export PROGDIR
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh

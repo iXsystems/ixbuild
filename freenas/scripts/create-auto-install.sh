@@ -11,7 +11,9 @@ VMDISK="ada0"
 ########################################################
 
 # Where is the program installed
-PROGDIR="`dirname "`realpath "`dirname "$0"`"`"`"
+PROGDIR=`dirname $0`
+PROGDIR=`realpath $PROGDIR`
+PROGDIR=`dirname $PROGDIR`
 export PROGDIR
 
 # Source our functions
