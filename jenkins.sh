@@ -1,9 +1,9 @@
 #!/bin/sh
 
+export PROGDIR="`dirname $0 | realpath`"
+
 # Change directory
-mypath=`realpath $0`
-cd `dirname $mypath`
-export PROGDIR="`realpath`"
+cd "${PROGDIR}"
 
 # Skip updating git repo if we are using iocage basejails
 if [ -d "/mnt/tank/ixbuild/" ] ; then
@@ -91,8 +91,9 @@ if [ -z "$1" ] ; then
 fi
  
 # Source our functions
-. build.conf
-. functions.sh
+cwd="`realpath $0 | xargs dirname`"
+. ${cwd}/build.conf
+. ${cwd}/functions.sh
 
 ######################################################
 

@@ -4,7 +4,8 @@
 # Location for tests into REST API of FreeNAS 9.10
 
 # Where is the ixbuild program installed
-PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"; export PROGDIR
+PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
+export PROGDIR
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions.sh

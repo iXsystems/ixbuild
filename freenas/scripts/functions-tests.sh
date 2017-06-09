@@ -817,7 +817,16 @@ read_module_dir() {
 }
 
 run_tests() {
-/ixbuild/jenkins.sh freenas-run-tests ${BUILDTAG}
+  if [ -d "/ixbuild" -a -x "/ixbuild/jenkins.sh" ] ; then
+    /ixbuild/jenkins.sh freenas-run-tests ${BUILDTAG}
+    EXIT_STATUS=$?
+  else
+    local PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
+    "${PROGDIR}"/../jenkins.sh freenas-run-tests ${BUILDTAG}
+    EXIT_STATUS=$?
+  fi
+
+  return $EXIT_STATUS
 }
 
 # Do a TrueNAS HA failover

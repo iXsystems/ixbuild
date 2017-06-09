@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
 # Where is the pcbsd-build program installed
-PROGDIR="`realpath | sed 's|/scripts$||g'`" ; export PROGDIR
+PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
+export PROGDIR
+
+# ISO absolute file path
+ISOFILE="${1}"
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
@@ -31,24 +35,31 @@ export FNASBDIR
 
 get_bedir
 
-# Figure out the ISO name
-echo "Finding ISO file..."
-if [ -d "${FNASBDIR}/objs" ] ; then
-  ISOFILE=`find ${FNASBDIR}/objs | grep '\.iso$' | head -n 1`
-elif [ -d "${BEDIR}/release" ] ; then
-  ISOFILE=`find ${BEDIR}/release | grep '\.iso$' | head -n 1`
-else
-  if [ -n "$1" ] ; then
-    ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`
+# If no ISO file path given as argument, figure out the ISO name
+if [ -z "${ISOFILE}" ] ; then
+  echo "Finding ISO file..."
+    
+  if [ -d "${FNASBDIR}/objs" ] ; then
+    ISOFILE=`find ${FNASBDIR}/objs | grep '\.iso$' | head -n 1`
+  elif [ -d "${BEDIR}/release" ] ; then
+    ISOFILE=`find ${BEDIR}/release | grep '\.iso$' | head -n 1`
   else
-    ISOFILE=`find ${PROGDIR}/../objs | grep '\.iso$' | head -n 1`
+    if [ -n "$1" ] ; then
+      ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`
+    else
+      ISOFILE=`find ${PROGDIR}/../objs | grep '\.iso$' | head -n 1`
+    fi
   fi
+
+  # If no ISO found
+  if [ -z "$ISOFILE" ] ; then
+    exit_err "Failed locating ISO file, did 'make release' work?"
+  fi
+
+elif [ ! -f "${ISOFILE}" ] ; then
+  exit_err "Failed locating ISO file - \"${ISOFILE}\""
 fi
 
-# If no ISO found
-if [ -z "$ISOFILE" ] ; then
-  exit_err "Failed locating ISO file, did 'make release' work?"
-fi
 
 # Is this TrueNAS or FreeNAS?
 echo $ISOFILE | grep -q "TrueNAS"
@@ -110,4 +121,5 @@ if [ -f "/tmp/${BUILDTAG}" ] ; then
   exit 0
 else
   run_tests
+  exit $?
 fi

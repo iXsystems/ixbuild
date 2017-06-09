@@ -128,11 +128,13 @@ create_workdir()
     fi
   fi
 
-  cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  if [ -d "${BDIR}/${BUILD}" ] ; then
+    cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
+    if [ $? -ne 0 ] ; then exit_clean; fi
 
-  cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
+    cd ${TBUILDDIR}
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
 }
 
 push_pkgworkdir()
@@ -1142,32 +1144,24 @@ jenkins_freenas_tests()
 
   get_bedir
 
-  # Ensure we have a build directory for our ixbuild checkout
-  mkdir -p "${TBUILDDIR}" && cd "${TBUILDDIR}"
-  [ "`pwd | realpath`" != "${TBUILDDIR}" ] && exit_clean
+  # If we aren't running as part of the build process, list ISOs in the $ISODIR
+  if [ -z "$SFTPHOST" -o -z "$SFTPUSER" ] ; then
 
-  # Clean-up previous test builds
-  [ -d "${BEDIR}/release" ] && rm -rf "${BEDIR}/release"
+    # Default to prompting for ISOs from ./ixbuild/freenas/iso/*
+    ISODIR="${PROGDIR}/freenas/iso/"
 
-  # Ensure we have a /release directory to copy our ISO to
-  mkdir -p "${BEDIR}/release" && cd ${BEDIR}/release
-  [ "`pwd | realpath`" != "${BEDIR}/release" ] && exit_clean
+    # Allow $ISODIR to be overridden by $IXBUILD_FREENAS_ISODIR if it exists
+    if [ -n "${IXBUILD_FREENAS_ISODIR}" ] ; then
+      ISODIR="${IXBUILD_FREENAS_ISODIR}"
+    fi
 
-  # Use SFTP setting to pull $ISOSTAGE
-  if [ -n "$SFTPHOST" -a -n "$SFTPUSER" ] ; then
-    # Now lets sync the ISOs
-    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete --include="*/" --include="*.iso" --exclude="*" -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
-    [ $? -ne 0 ] && exit_clean
-  else
-    # List ISOs in ${BEDIR} and allow the user to select the target
-    iso_cnt=`cd ${BEDIR} && ls -l *.iso 2>/dev/null | wc -l | sed 's| ||g'`
+    [ ! -d "${ISODIR}" ] && "Directory not found: ${ISODIR}" && exit_clean
+
+    # List ISOs in ${ISODIR} and allow the user to select the target
+    iso_cnt=`cd ${ISODIR} && ls -l *.iso 2>/dev/null | wc -l | sed 's| ||g'`
 
     # Exit cleanly if no ISO found...
-    [ $iso_cnt -lt 1 ] && echo "No local ISO found in \"${BEDIR}\"" && exit_clean
-
-    mkdir -p "/${BUILDTAG}/objs" && cd "/${BUILDTAG}/objs"
-    [ "`pwd | realpath`" != "/${BUILDTAG}/objs" ] && exit_clean
+    [ $iso_cnt -lt 1 ] && echo "No local ISO found in \"${ISODIR}\"" && exit_clean
 
     # Loop until we get a valid user selection
     while :
@@ -1175,7 +1169,7 @@ jenkins_freenas_tests()
       echo "Please select which ISO to test (1-$iso_cnt):"
 
       # List ISOs in the ./freenas/iso/ directory, numbering the results for selection
-      ls -l "${BEDIR}"/*.iso 2>/dev/null | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
+      ls -l "${ISODIR}"*.iso 2>/dev/null | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
       echo -n "Enter your selection and press [ENTER]: "
 
       # Prompt user to determine which iso is used
@@ -1183,10 +1177,12 @@ jenkins_freenas_tests()
 
       # Only accept integer chars
       iso_selection=${iso_selection##*[!0-9]*}
+
       if [ -z $iso_selection ] || [ $iso_selection -lt 1 ] || [ $iso_selection -gt $iso_cnt ] 2>/dev/null; then
         echo -n "Invalid selection.." && sleep 1 && echo -n "." && sleep 1 && echo "."
       elif [ -n "`echo $iso_selection | sed 's| ||g'`" ] ; then
-        iso_name="`cd ${BEDIR} && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}'`"
+
+        iso_name="`cd ${ISODIR} && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}'`"
 
         echo -n "You have selected \"${iso_name}\", is this correct? (y/n): "
 
@@ -1194,16 +1190,37 @@ jenkins_freenas_tests()
         read iso_confirmed
 
         if [ "${iso_confirmed}" == "y" -o "${iso_confirmed}" == "Y" ] ; then
-          ln -s "${BEDIR}/${iso_name}" "/$BUILDTAG/objs/${iso_name}"
+          "${PROGDIR}"/freenas/scripts/2.runtests.sh "${ISODIR}${iso_name}"
+          EXIT_STATUS=$?
           break
         fi
       fi
     done
-  fi
+  else
+    # As part of the process of building a FreeNAS ISO and testing it,
+    # if the $SFTPHOST and $SFTPUSER settings exist, pull the built ISO
+    # from the build environment directory, copying it to the release dir.
 
-  cd ${TBUILDDIR}
-  make tests
-  EXIT_STATUS=$?
+    # Ensure we have a build directory for our ixbuild checkout
+    mkdir -p "${TBUILDDIR}" && cd "${TBUILDDIR}"
+    [ "`pwd | realpath`" != "${TBUILDDIR}" ] && exit_clean
+
+    # Clean-up previous test builds
+    [ -d "${BEDIR}/release" ] && rm -rf "${BEDIR}/release"
+
+    # Ensure we have a /release directory to copy our ISO to
+    mkdir -p "${BEDIR}/release" && cd ${BEDIR}/release
+    [ "`pwd | realpath`" != "${BEDIR}/release" ] && exit_clean
+
+    # Now lets sync the ISOs
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
+    rsync -va --delete --include="*/" --include="*.iso" --exclude="*" -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
+    [ $? -ne 0 ] && exit_clean
+
+    cd ${TBUILDDIR}
+    make tests
+    EXIT_STATUS=$?
+  fi
 
   if [ -z "$JAILED_TESTS" ] ; then
     if [ $EXIT_STATUS -ne 0 ] ; then exit_clean ; fi
@@ -1634,15 +1651,18 @@ jenkins_iocage_pkgs_push()
 
 }
 
-# Set the builds directory
-BDIR="./builds"
-export BDIR
+# TODO: This cannot abide, functions.sh is to be imported and then selectively ran.
+# Refactor with the above rule, but do not re-enabled the following.
 
-# Check the type of build being done
-case $TYPE in
-  ports-tests) ;;
-  mkcustard) ;;
-  mktrueview) ;;
-  iocage_pkgs|iocage_pkgs_push) ;;
-  *) do_build_env_setup ;;
-esac
+## Set the builds directory
+#BDIR="./builds"
+#export BDIR
+#
+## Check the type of build being done
+#case $TYPE in
+#  ports-tests) ;;
+#  mkcustard) ;;
+#  mktrueview) ;;
+#  iocage_pkgs|iocage_pkgs_push) ;;
+#  *) do_build_env_setup ;;
+#esac

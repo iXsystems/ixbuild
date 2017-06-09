@@ -5,9 +5,7 @@ if ! pkg info -q uefi-edk2-bhyve ; then
   exit 1
 fi
 
-PROGDIR=`dirname $0`
-PROGDIR=`realpath $PROGDIR`
-PROGDIR=`dirname $PROGDIR`
+PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
 BUILDTAG="$1"
 
 cpu=4

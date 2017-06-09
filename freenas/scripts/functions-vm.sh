@@ -1,9 +1,7 @@
 #!/usr/bin/env sh
 
 # Where is the ixbuild program installed
-PROGDIR=`dirname $0`
-PROGDIR=`realpath $PROGDIR`
-PROGDIR=`dirname $PROGDIR`
+PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
 export PROGDIR
 
 # Source our functions
@@ -37,32 +35,20 @@ start_bhyve()
 
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
+
+  # Display output of screen command
   install_screenlog="/tmp/${BUILDTAG}bhyve-install-screen.log"
-  screen -Dm -L ${install_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG}
+  screen -Dm -L ${install_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG} \
+    && cat "${install_screenlog}" && echo ""
+
+  #echo "Running bhyve tests in screen session, output will display when finished..."
+  #tests_screenlog="/tmp/${BUILDTAG}bhyve-tests-screen.log"
+  #screen -Dm -L ${tests_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG}
+
+  #[ ! -f "${tests_screenlog}" ] && echo "No screenlog found." && exit 1
 
   # Display output of screen command
-  cat "${install_screenlog}" && echo ""
-
-  # Check that this device seemed to install properly
-  dSize=`du -m ${MFSFILE} | awk '{print $1}'`
-  if [ $dSize -lt 10 ] ; then
-     echo "Disk image is too small, bhyve install failed! Exiting..."
-     exit 1
-  fi
-
-  echo "Bhyve installation successful! Starting bhyve testing..."
-
-  echo "(hd0) ${MFSFILE}" > ${PROGDIR}/tmp/device.map
-  echo "(cd0) /$BUILDTAG.iso" >> ${PROGDIR}/tmp/device.map
-
-  echo "Running bhyve tests in screen session, output will display when finished..."
-  tests_screenlog="/tmp/${BUILDTAG}bhyve-tests-screen.log"
-  screen -Dm -L ${tests_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG}
-
-  [ ! -f "${tests_screenlog}" ] && echo "No screenlog found." && exit 1
-
-  # Display output of screen command
-  cat "${tests_screenlog}" && echo ""
+  #cat "${tests_screenlog}" && echo ""
 
   return 0
 }
