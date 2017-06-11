@@ -47,7 +47,7 @@ start_bhyve()
     -s 11,fbuf,tcp=0.0.0.0:5900,w=1600,h=900 \
     -s 20,xhci,tablet \
     -s 31,lpc \
-    -l bootrom,/images/BHYVE_UEFI_20160526.fd \
+    -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     -m 2G -H -w \
    $BUILDTAG
 
