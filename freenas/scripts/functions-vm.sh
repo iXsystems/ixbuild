@@ -83,6 +83,7 @@ start_bhyve()
   done
 
   # Shutdown VM, stop output
+  sleep 30
   bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
   killall cu 2>/dev/null &
 
