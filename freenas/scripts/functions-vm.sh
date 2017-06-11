@@ -20,8 +20,8 @@ start_bhyve()
   # Lets check status of "tap0" devices
   if ! ifconfig tap0 >/dev/null 2>/dev/null ; then
     if [ -z "$iface" ] ; then
-    iface="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
-  fi
+      iface="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
+    fi
     bridge="bridge0"
 
     ifconfig tap0 create
