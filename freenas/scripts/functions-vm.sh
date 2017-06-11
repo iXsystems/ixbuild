@@ -63,7 +63,7 @@ start_bhyve()
     -m 2G -H -w \
    $BUILDTAG &
 
-  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null &
+  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null & 
 
   #Get console output for install
   tpid=$!
@@ -102,8 +102,7 @@ start_bhyve()
     -m 2G -H -w \
    $BUILDTAG &
 
-  sleep 5 
-  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null &
+  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null & 
 
   echo "Booting ${VM}..."
 
