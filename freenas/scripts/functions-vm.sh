@@ -53,7 +53,7 @@ start_bhyve()
     -m 2G -H -w \
    $BUILDTAG &
 
-  cu -l /dev/nmdm0B > /tmp/buildtag.out 2>/dev/null & 
+  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null & 
 
   #Get console output for install
   tpid=$!
