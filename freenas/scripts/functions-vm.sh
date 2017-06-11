@@ -37,20 +37,19 @@ start_bhyve()
 
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
+  
+  trunacte -s 20G /$BUILDTAG-os.img
 
-  # Display output of screen command
-  install_screenlog="/tmp/${BUILDTAG}bhyve-install-screen.log"
-  screen -Dm -L ${install_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG} \
-    && cat "${install_screenlog}" && echo ""
-
-  #echo "Running bhyve tests in screen session, output will display when finished..."
-  #tests_screenlog="/tmp/${BUILDTAG}bhyve-tests-screen.log"
-  #screen -Dm -L ${tests_screenlog} -S vmscreen ${PROGDIR}/scripts/bhyve-screen.sh ${BUILDTAG}
-
-  #[ ! -f "${tests_screenlog}" ] && echo "No screenlog found." && exit 1
-
-  # Display output of screen command
-  #cat "${tests_screenlog}" && echo ""
+  bhyve \
+    -c 1 \
+    -s 3,ahci-cd,/$BUILDTAG.iso \
+    -s 4,ahci-hd,/$BUILDTAG-os.img \
+    -s 11,fbuf,tcp=0.0.0.0:5900,w=1600,h=900,wait \
+    -s 20,xhci,tablet \
+    -s 31,lpc \
+    -l bootrom,/images/BHYVE_UEFI_20160526.fd \
+    -m 2G -H -w \
+   $BUILDTAG
 
   return 0
 }
