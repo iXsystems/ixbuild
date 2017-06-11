@@ -52,7 +52,30 @@ start_bhyve()
     -m 2G -H -w \
    $BUILDTAG &
 
-  cu -l /dev/nmdm0B
+  cu -l /dev/nmdm0B > /tmp/buildtag.out 2>/dev/null & 
+
+  #Get console output for install
+  tpid=$!
+  tail -f /tmp/$BUILDTAG.out 2>/dev/null &
+    
+  timeout_seconds=1800
+  timeout_when=$(( $(date +%s) + $timeout_seconds ))
+  
+  # Wait for installation to finish
+  while ! grep -q "Installation finished. No error reported." /tmp/$BUILDTAG.out
+  do
+    if [ $(date +%s) -gt $timeout_when ]; then
+      echo "Timeout reached before installation finished. Exiting."
+        break
+    fi
+    sleep 2
+  done
+
+  # Shutdown VM, stop output, and cleanup 
+  bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
+  killall cu 2>/dev/null &
+  ifconfig bridge0 destroy 2>/dev/null &
+  ifconfig tap0 destroy 2>/dev/null &
 
   return 0
 }
