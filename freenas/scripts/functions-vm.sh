@@ -39,6 +39,7 @@ start_bhyve()
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
   
+  rm /$BUILDTAG-os.img
   truncate -s 20G /$BUILDTAG-os.img
 
   bhyve \
