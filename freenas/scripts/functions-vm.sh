@@ -44,12 +44,14 @@ start_bhyve()
     -c 1 \
     -s 3,ahci-cd,/$BUILDTAG.iso \
     -s 4,ahci-hd,/$BUILDTAG-os.img \
-    -s 11,fbuf,tcp=0.0.0.0:5900,w=1600,h=900 \
     -s 20,xhci,tablet \
     -s 31,lpc \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
+    -l com1,/dev/nmdm0A \
     -m 2G -H -w \
-   $BUILDTAG
+   $BUILDTAG &
+
+  cu -l /dev/nmdm0B
 
   return 0
 }
