@@ -17,6 +17,12 @@ start_bhyve()
     kldstat | grep -q vmm || kldload vmm
     kldstat | grep -q nmdm || kldload nmdm
   fi
+  
+  # Shutdown VM, stop output, and cleanup
+  bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
+  killall cu 2>/dev/null &
+  ifconfig bridge0 destroy 2>/dev/null &
+  ifconfig tap0 destroy 2>/dev/null &
 
   # Lets check status of "tap0" devices
   if ! ifconfig tap0 >/dev/null 2>/dev/null ; then
@@ -39,14 +45,18 @@ start_bhyve()
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
   
+  # Cleanup existing disk images
   rm /$BUILDTAG-os.img
+  rm /$BUILDTAG-data1.img
+  rm /$BUILDTAG-data2.img
+
+  # Create OS disk image
   truncate -s 20G /$BUILDTAG-os.img
 
   bhyve \
     -c 1 \
     -s 3,ahci-cd,/$BUILDTAG.iso \
     -s 4,ahci-hd,/$BUILDTAG-os.img \
-    -s 20,xhci,tablet \
     -s 31,lpc \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     -l com1,/dev/nmdm0A \
@@ -72,11 +82,46 @@ start_bhyve()
     sleep 2
   done
 
-  # Shutdown VM, stop output, and cleanup 
+  # Shutdown VM, stop output
   bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
   killall cu 2>/dev/null &
-  ifconfig bridge0 destroy 2>/dev/null &
-  ifconfig tap0 destroy 2>/dev/null &
+
+  # Create disk images for testing storage pool 
+  truncate -s 50G /$BUILDTAG-data1.img
+  truncate -s 50G /$BUILDTAG-data2.img
+
+  bhyve \
+    -c 1 \
+    -s 3,ahci-hd,/$BUILDTAG-os.img \
+    -s 4,ahci-hd,/$BUILDTAG-data1.img \
+    -s 5,ahci-hd,/$BUILDTAG-data2.img \
+    -s 31,lpc \
+    -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
+    -l com1,/dev/nmdm0A \
+    -m 2G -H -w \
+   $BUILDTAG &
+
+  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null &
+
+  echo "Booting ${VM}..."
+
+  #Get console output for bootup
+  tpid=$!
+  tail -f /tmp/$BUILDTAG.out 2>/dev/null &
+
+  timeout_seconds=1800
+  timeout_when=$(( $(date +%s) + $timeout_seconds ))
+
+  # Wait for bootup to finish
+  # Wait for bootup to finish
+  while ! ((grep -q "Starting nginx." /tmp/$BUILDTAG.out) || (grep -q "Plugin loaded: SSHPlugin" /tmp/$BUILDTAG.out))
+  do
+    if [ $(date +%s) -gt $timeout_when ]; then
+      echo "Timeout reached before bootup finished."
+      break
+    fi
+    sleep 2
+  done
 
   return 0
 }
