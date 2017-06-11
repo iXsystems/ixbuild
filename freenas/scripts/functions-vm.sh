@@ -44,7 +44,7 @@ start_bhyve()
     -c 1 \
     -s 3,ahci-cd,/$BUILDTAG.iso \
     -s 4,ahci-hd,/$BUILDTAG-os.img \
-    -s 11,fbuf,tcp=0.0.0.0:5900,w=1600,h=900,wait \
+    -s 11,fbuf,tcp=0.0.0.0:5900,w=1600,h=900 \
     -s 20,xhci,tablet \
     -s 31,lpc \
     -l bootrom,/images/BHYVE_UEFI_20160526.fd \
