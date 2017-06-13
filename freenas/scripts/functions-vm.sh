@@ -98,10 +98,9 @@ start_bhyve()
       echo "Timeout reached before installation finished. Exiting."
       break
     fi
-    echo -n "."
     sleep 2
   done
-  echo -n " installation complete."
+  echo "Installation complete. Booting up our installation.."
 
   # Shutdown VM, stop output
   sleep 30
@@ -126,14 +125,14 @@ start_bhyve()
 
   # Connect to our nullmodem com port and tail -f the output during installation.
   cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/^Starting nginx./ q' &
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/^Starting nginx./ q' | sed '/^Plugin loaded: SSHPlugin/ q' &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
   echo "Booting ${VM}..."
   # Wait for bootup to finish
-  while ! ((grep -q "Starting nginx." ${SCREEN_LOG}) || (grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT}))
+  while ! ((grep -q "Starting nginx." ${VM_OUTPUT}) || (grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT}))
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before bootup finished."
