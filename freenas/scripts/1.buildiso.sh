@@ -55,11 +55,6 @@ else
 fi
 export FNASBDIR
 
-# Kludge for now, this dir gets full and kills free space
-if [ -d "/builds/FreeNAS" ] ; then
-  rm -rf /builds/FreeNAS
-fi
-
 # Error output log
 LOUT="/tmp/fnas-error-debug.txt"
 touch ${LOUT}
