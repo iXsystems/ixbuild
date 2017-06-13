@@ -10,32 +10,57 @@ export PROGDIR
 
 start_bhyve()
 {
+  # Allow the $IX_BRIDGE, $IX_IFACE, $IX_TAP to be overridden
+  [ -z "${IX_BRIDGE}" ] && export IX_BRIDGE="bridge0"
+  [ -z "${IX_IFACE}" ] && export IX_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
+  [ -z "${IX_TAP}" ] && export IX_TAP="tap0"
+
+  local VM_WORKSPACE="/tmp/${BUILDTAG}bhyve/"
+  local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
+  local DATADISKOS="${VM_WORKSPACE}${BUILDTAG}-os.img"
+  local DATADISK1="${VM_WORKSPACE}${BUILDTAG}-data1.img"
+  local DATADISK2="${VM_WORKSPACE}${BUILDTAG}-data2.img"
+
+  # Determine which nullmodem slot to use
+  local com_idx=0
+  until [ ! -f "/dev/nmdm${com_idx}A" ] ; do com_idx=$(expr $com_cnt + 1); done
+  local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
+  local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
+
+  # FreeBSD 12.0 and greater includes a patch for increasing max length of filesystem paths.
+  # Therefor if we are dealing with an older release (eg, for TrueNAS), use '/' as working dir.
+  if [ `uname -a | grep -o -E "FreeBSD [0-9]{1,2}" | sed 's|FreeBSD\ ||'` -lt 12 ] ; then
+    VM_WORKSPACE="/"
+  elif [ ! -d "${VM_WORKSPACE}" ] ; then
+    mkdir -p "${VM_WORKSPACE}"
+  fi
+
   # Verify kernel modules are loaded if this is a BSD system
   if which kldstat >/dev/null 2>/dev/null ; then
     kldstat | grep -q if_tap || kldload if_tap
     kldstat | grep -q if_bridge || kldload if_bridge
-    kldstat | grep -q vmm || kldload vmm
+    kldstat | grep -q vmm || kldload vmm 
     kldstat | grep -q nmdm || kldload nmdm
-  fi
-  
+  fi  
+
   # Shutdown VM, stop output, and cleanup
-  bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
-  killall cu 2>/dev/null &
-  ifconfig bridge0 destroy 2>/dev/null &
-  ifconfig tap0 destroy 2>/dev/null &
+  bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
+  killall cu &>/dev/null
+  ifconfig ${IX_BRIDGE} destroy &>/dev/null
+  ifconfig ${IX_TAP} destroy &>/dev/null
+  rm "${DATADISKOS}" "${DATADISK1}" "${DATADISK2}" "${VM_OUTPUT}" >/dev/null 2>/dev/null
 
   # Lets check status of "tap0" devices
-  if ! ifconfig tap0 >/dev/null 2>/dev/null ; then
-    if [ -z "$iface" ] ; then
-      iface="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
-    fi
-    bridge="bridge0"
+  if ! ifconfig ${IX_TAP} >/dev/null 2>/dev/null ; then
+    ifconfig ${IX_TAP} create
+    sysctl net.link.tap.up_on_open=1 >/dev/null
+  fi  
 
-    ifconfig tap0 create
-    sysctl net.link.tap.up_on_open=1
-    ifconfig ${bridge} create
-    ifconfig ${bridge} addm ${iface} addm tap0
-    ifconfig ${bridge} up
+  # Check the status of our network bridge
+  if ! ifconfig ${IX_BRIDGE} >/dev/null 2>/dev/null ; then
+    ifconfig ${IX_BRIDGE} create
+    ifconfig ${IX_BRIDGE} addm ${IX_IFACE} addm ${IX_TAP}
+    ifconfig ${IX_BRIDGE} up
   fi
 
   ###############################################
@@ -44,85 +69,80 @@ start_bhyve()
 
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
-  
-  # Cleanup existing disk images
-  rm /$BUILDTAG-os.img
-  rm /$BUILDTAG-data1.img
-  rm /$BUILDTAG-data2.img
 
   # Create OS disk image
-  truncate -s 20G /$BUILDTAG-os.img
+  truncate -s 20G ${DATADISKOS} &>/dev/null
 
+  # Install from our ISO
   bhyve \
     -c 1 \
     -s 3,ahci-cd,/$BUILDTAG.iso \
-    -s 4,ahci-hd,/$BUILDTAG-os.img \
+    -s 4,ahci-hd,${DATADISKOS} \
     -s 31,lpc \
+    -l com1,${VM_COM_BROADCAST} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
-    -l com1,/dev/nmdm0A \
     -m 2G -H -w \
-   $BUILDTAG &
+    $BUILDTAG &
 
-  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null & 
+  # Connect to our nullmodem com port and tail -f the output during installation.
+  cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} &
 
-  #Get console output for install
-  tpid=$!
-  tail -f /tmp/$BUILDTAG.out 2>/dev/null &
-    
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
-  
-  # Wait for installation to finish
-  while ! grep -q "Installation finished. No error reported." /tmp/$BUILDTAG.out
+
+  echo -n "Waiting for installation to finish.."
+  while ! grep -q "Installation finished. No error reported." ${VM_OUTPUT} 2>/dev/null
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before installation finished. Exiting."
-        break
+      break
     fi
+    echo -n "."
     sleep 2
   done
+  echo -n " installation complete."
 
   # Shutdown VM, stop output
   sleep 30
   bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
   killall cu 2>/dev/null &
 
-  # Create disk images for testing storage pool 
-  truncate -s 50G /$BUILDTAG-data1.img
-  truncate -s 50G /$BUILDTAG-data2.img
+  # Create disk images for testing storage pool
+  truncate -s 50G ${DATADISK1}
+  truncate -s 50G ${DATADISK2}
 
+  # Boot up our installation
   bhyve \
     -c 1 \
-    -s 3,ahci-hd,/$BUILDTAG-os.img \
-    -s 4,ahci-hd,/$BUILDTAG-data1.img \
-    -s 5,ahci-hd,/$BUILDTAG-data2.img \
+    -s 3,ahci-hd,${DATADISKOS} \
+    -s 4,ahci-hd,${DATADISK1} \
+    -s 5,ahci-hd,${DATADISK2} \
     -s 31,lpc \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
-    -l com1,/dev/nmdm0A \
+    -l com1,${VM_COM_BROADCAST} \
     -m 2G -H -w \
-   $BUILDTAG &
+    $BUILDTAG &
 
-  cu -l /dev/nmdm0B > /tmp/$BUILDTAG.out 2>/dev/null & 
-
-  echo "Booting ${VM}..."
-
-  #Get console output for bootup
-  tpid=$!
-  tail -f /tmp/$BUILDTAG.out 2>/dev/null &
+  # Connect to our nullmodem com port and tail -f the output during installation.
+  cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
 
+  echo "Booting ${VM}..."
   # Wait for bootup to finish
-  # Wait for bootup to finish
-  while ! ((grep -q "Starting nginx." /tmp/$BUILDTAG.out) || (grep -q "Plugin loaded: SSHPlugin" /tmp/$BUILDTAG.out))
+  while ! ((grep -q "Starting nginx." ${SCREEN_LOG}) || (grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT}))
   do
     if [ $(date +%s) -gt $timeout_when ]; then
       echo "Timeout reached before bootup finished."
       break
     fi
+    echo -n "."
     sleep 2
   done
+  echo -n " completed."
 
   return 0
 }
