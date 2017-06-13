@@ -1308,7 +1308,7 @@ jenkins_mktrueview()
   echo "Waiting for TrueView prep to finish..."
   while :
   do
-    sleep 30
+    sleep 60
     echo "."
 
     vboxmanage list runningvms | grep -q "trueview"
