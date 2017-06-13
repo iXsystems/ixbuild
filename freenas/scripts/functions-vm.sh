@@ -39,9 +39,9 @@ start_bhyve()
   if which kldstat >/dev/null 2>/dev/null ; then
     kldstat | grep -q if_tap || kldload if_tap
     kldstat | grep -q if_bridge || kldload if_bridge
-    kldstat | grep -q vmm || kldload vmm 
+    kldstat | grep -q vmm || kldload vmm
     kldstat | grep -q nmdm || kldload nmdm
-  fi  
+  fi
 
   # Shutdown VM, stop output, and cleanup
   bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
@@ -54,7 +54,7 @@ start_bhyve()
   if ! ifconfig ${IX_TAP} >/dev/null 2>/dev/null ; then
     ifconfig ${IX_TAP} create
     sysctl net.link.tap.up_on_open=1 >/dev/null
-  fi  
+  fi
 
   # Check the status of our network bridge
   if ! ifconfig ${IX_BRIDGE} >/dev/null 2>/dev/null ; then
@@ -86,7 +86,7 @@ start_bhyve()
 
   # Connect to our nullmodem com port and tail -f the output during installation.
   cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} &
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/^Installation finished. No error reported.$/ q' &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
@@ -126,7 +126,7 @@ start_bhyve()
 
   # Connect to our nullmodem com port and tail -f the output during installation.
   cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} &
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/^Starting nginx./ q' &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
