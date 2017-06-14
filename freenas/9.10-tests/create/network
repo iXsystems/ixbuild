@@ -11,9 +11,17 @@ export REQUIRES
 
 network_tests()
 {
-  TEST_CNT=3
+  local TEST_CNT=3
   if [ -n "$BRIDGEIP" ]; then
     TEST_CNT=4
+  fi
+
+  local IFACE="em0"
+  local IFACE2="em1"
+
+  if [ "${VMBACKEND}" == "bhyve" ] ; then
+    IFACE="vtnet0"
+    IFACE2="vtnet1"
   fi
 
   # Set the group text and number of tests
@@ -32,7 +40,7 @@ network_tests()
   echo_ok
 
   # Add $FNASTESTIP to database
-  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "em0" }'
+  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "'${IFACE}'" }'
 
   # Wait for port 80 response before trying more REST queries again
   echo_test_title "Wait for FreeNAS UI by polling port 80"
@@ -42,7 +50,7 @@ network_tests()
   if [ -n "$BRIDGEIP" ] ; then
     # Using the bridged adapter settings
     echo_test_title "Setting bridged IP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "em1" }'
+    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "'${IFACE2}'" }'
     check_rest_response "201 Created"
 
     # Set the global config stuff
