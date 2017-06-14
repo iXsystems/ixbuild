@@ -143,7 +143,7 @@ push_pkgworkdir()
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKPKG}" >/dev/null 2>/dev/null
 
   echo "Pushing cached pkgs..."
-  rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
@@ -166,7 +166,7 @@ pull_pkgworkdir()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   echo "Pulling cached pkgs..."
-  rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${WORKPKG}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
 
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
@@ -188,20 +188,20 @@ push_world()
   # Push world packages to work directory
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${WORKWORLD}" >/dev/null 2>/dev/null
 
-  rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 
   if [ -n "$PKGBASE" ] ; then
     # Push packages to base directory
     cd ${TBUILDDIR}/fbsd-pkg
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}-base" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
 
   # Dist files to dist directory
   cd ${TBUILDDIR}/fbsd-dist
   ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}/dist" >/dev/null 2>/dev/null
-  rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/dist/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/dist/ >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
 }
 
 pull_world()
@@ -234,13 +234,13 @@ pull_world()
     cd ${TBUILDDIR}/fbsd-pkg
     if [ $? -ne 0 ] ; then exit_clean; fi
     echo "Pulling base packages..."
-    rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE}-base/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   fi
 
   cd ${TBUILDDIR}/fbsd-dist
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${WORKWORLD}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
   return 0
 }
@@ -262,7 +262,7 @@ pull_iso()
   cd ${TBUILDDIR}/iso
   if [ $? -ne 0 ] ; then exit_clean; fi
 
-  rsync -va --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}/ . >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
   if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
 }
 
@@ -368,7 +368,7 @@ jenkins_pkg()
   if [ -n "$SFTPHOST" ] ; then
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${PKGSTAGE}" >/dev/null 2>/dev/null
 
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${PKGSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
     if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
   fi
 
@@ -398,7 +398,7 @@ jenkins_iso()
 
   if [ -n "$SFTPHOST" ] ; then
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} >${MASTERWRKDIR}/push.log 2>${MASTERWRKDIR}/push.log
     if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
   fi
 
@@ -429,7 +429,7 @@ jenkins_publish_pkg()
   ssh ${scale} "mkdir -p ${target}/${RTARGET}" >/dev/null 2>/dev/null
 
   # Copy packages
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/pkg/${TARGETREL}/ ${scale}:${target}/${RTARGET}/
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPFINALDIR}/pkg/${TARGETREL}/ ${scale}:${target}/${RTARGET}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
 }
@@ -510,7 +510,7 @@ jenkins_publish_iso()
   done
 
   # Copy the ISOs
-  rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${RTARGET}/${ARCH}/
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${RTARGET}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 }
 
@@ -533,7 +533,7 @@ jenkins_vm()
 
   if [ -n "$SFTPHOST" ] ; then
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -550,14 +550,14 @@ jenkins_truenas_push_docs()
     mkdir -p /tmp/handbookpush
 
     # Get the docs from the staging server
-    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook/ /tmp/handbookpush
+    rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook/ /tmp/handbookpush
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     cd /tmp/handbookpush
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    rsync -a -O -v -z --delete -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@support.ixsystems.com:/usr/local/www/vhosts/truenas-guide
+    rsync -a -O -v -z --delete -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@support.ixsystems.com:/usr/local/www/vhosts/truenas-guide
     if [ $? -ne 0 ] ; then exit_clean; fi
     rm -rf /tmp/handbookpush 2>/dev/null
   fi
@@ -573,14 +573,14 @@ jenkins_freenas_push_docs()
     mkdir -p /tmp/handbookpush
 
     # Get the docs from the staging server
-    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook/ /tmp/handbookpush
+    rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook/ /tmp/handbookpush
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     cd /tmp/handbookpush
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html11
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html11
     if [ $? -ne 0 ] ; then exit_clean; fi
     rm -rf /tmp/handbookpush 2>/dev/null
   fi
@@ -596,14 +596,14 @@ jenkins_freenas_push_api()
     mkdir -p /tmp/apipush
 
     # Get the docs from the staging server
-    rsync -va --delete-delay --delay-updates -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api/ /tmp/apipush
+    rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api/ /tmp/apipush
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     cd /tmp/apipush
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/api/html
+    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/api/html
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     rm -rf /tmp/apipush 2>/dev/null
@@ -728,7 +728,7 @@ jenkins_truenas_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/tn-handbook" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/tn-handbook
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -744,7 +744,7 @@ jenkins_freenas_docs()
      mkdir /tmp/build
   fi
 
-  DDIR=`mktemp -d /tmp/build/XXXX` 
+  DDIR=`mktemp -d /tmp/build/XXXX`
 
   git clone --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
@@ -761,7 +761,7 @@ jenkins_freenas_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -793,7 +793,7 @@ jenkins_freenas_api()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/api" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/api
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -808,7 +808,7 @@ jenkins_sysadm_api()
      mkdir /tmp/build
   fi
 
-  DDIR=`mktemp -d /tmp/build/XXXX` 
+  DDIR=`mktemp -d /tmp/build/XXXX`
 
   git clone --depth=1 https://github.com/trueos/sysadm-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
@@ -824,7 +824,7 @@ jenkins_sysadm_api()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/api" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/api
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/api
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -855,7 +855,7 @@ jenkins_sysadm_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/client" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/client
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/client
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -871,7 +871,7 @@ jenkins_sysadm_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/sysadm-docs/server" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/server
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/sysadm-docs/server
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -903,7 +903,7 @@ jenkins_trueos_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/trueos-docs" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/trueos-docs
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/trueos-docs
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -916,7 +916,7 @@ jenkins_trueos_push_docs()
   cd /outgoing/doc/master/trueos-docs
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/trueos.org/handbook/
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" . docpush@web.pcbsd.org:/home/pcbsd/www/trueos.org/handbook/
   return 0
 }
 
@@ -925,7 +925,7 @@ jenkins_sysadm_push_api()
   cd /outgoing/doc/master/sysadm-docs/api
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/api.sysadm.us/
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" . docpush@web.pcbsd.org:/home/pcbsd/www/api.sysadm.us/
   return 0
 }
 
@@ -934,12 +934,12 @@ jenkins_sysadm_push_docs()
   cd /outgoing/doc/master/sysadm-docs/client
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/client
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/client
 
   cd /outgoing/doc/master/sysadm-docs/server
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/server
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" . docpush@web.pcbsd.org:/home/pcbsd/www/sysadm.us/handbook/server
   return 0
 }
 
@@ -968,7 +968,7 @@ jenkins_trueos_lumina_docs()
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/lumina-docs" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/lumina-docs
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/lumina-docs
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
@@ -981,7 +981,7 @@ jenkins_trueos_push_lumina_docs()
   cd /outgoing/doc/master/lumina-docs
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  rsync -va --delete-delay --delay-updates -e 'ssh' . docpush@web.pcbsd.org:/home/pcbsd/www/lumina-desktop.org/handbook/
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" . docpush@web.pcbsd.org:/home/pcbsd/www/lumina-desktop.org/handbook/
   return 0
 }
 
@@ -1050,7 +1050,7 @@ jenkins_freenas()
 
     # Sync the ISO / Update files now
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va ${RSYNCFLAGS} -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
+    rsync -va ${RSYNCFLAGS} -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE}
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     # Sync the releng build_env
@@ -1068,7 +1068,7 @@ jenkins_freenas()
       fi
       cd ${envdir}
       ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ENVSTAGE}" >/dev/null 2>/dev/null
-      rsync -va ${RSYNCFLAGS} -e 'ssh' . ${SFTPUSER}@${SFTPHOST}:${ENVSTAGE}
+      rsync -va ${RSYNCFLAGS} -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${ENVSTAGE}
     fi
 
   fi
@@ -1132,7 +1132,7 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete --include="*/" --include="*.iso" --exclude="*"  -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
+    rsync -va --delete --include="*/" --include="*.iso" --exclude="*" -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
@@ -1223,7 +1223,7 @@ jenkins_push_fn_statedir()
 
   # Now rsync this sucker
   echo "Copying build-state to remote... ${FNASBDIR}/ -> ${FNSTATEDIR}/"
-  rsync -a --delete -e 'ssh' ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/
+  rsync -a --delete -e "ssh -o StrictHostKeyChecking=no" ${FNASBDIR}/ ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
 }
 
@@ -1246,7 +1246,7 @@ jenkins_pull_fn_statedir()
 
   # Now rsync this sucker
   echo "Copying build-state from remote... ${FNSTATEDIR}/ -> ${FNASBDIR}/"
-  rsync -a --delete -e 'ssh' ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/ ${FNASBDIR}/
+  rsync -a --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${FNSTATEDIR}/ ${FNASBDIR}/
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   # Make sure to set proper ownership
@@ -1355,7 +1355,7 @@ jenkins_mktrueview()
 
     echo "Moving TrueView to stage server..."
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${STAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' /root/trueview/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
+    rsync -va --delete "ssh -o StrictHostKeyChecking=no" /root/trueview/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
@@ -1428,7 +1428,7 @@ jenkins_mkcustard()
 
     echo "Moving CUSTARD to stage server..."
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${STAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete -e 'ssh' /root/custard/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" /root/custard/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
@@ -1559,7 +1559,7 @@ jenkins_iocage_pkgs_push()
   ssh ${scale} "mkdir -p ${target}" >/dev/null 2>/dev/null
 
   # Copy packages
-  rsync -va --delete-delay --delay-updates -e 'ssh' /outgoing/pkg/iocage/ ${scale}:${target}/
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" /outgoing/pkg/iocage/ ${scale}:${target}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
 }
