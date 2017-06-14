@@ -21,12 +21,6 @@ start_bhyve()
   local DATADISK1="${VM_WORKSPACE}${BUILDTAG}-data1.img"
   local DATADISK2="${VM_WORKSPACE}${BUILDTAG}-data2.img"
 
-  # Determine which nullmodem slot to use
-  local com_idx=0
-  until [ ! -f "/dev/nmdm${com_idx}A" ] ; do com_idx=$(expr $com_cnt + 1); done
-  local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
-  local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
-
   # FreeBSD 12.0 and greater includes a patch for increasing max length of filesystem paths.
   # Therefor if we are dealing with an older release (eg, for TrueNAS), use '/' as working dir.
   if [ `uname -a | grep -o -E "FreeBSD [0-9]{1,2}" | sed 's|FreeBSD\ ||'` -lt 12 ] ; then
@@ -70,6 +64,12 @@ start_bhyve()
   # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
 
+  # Determine which nullmodem slot to use for the installation
+  local com_idx=0
+  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
+  local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
+  local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
+
   # Create OS disk image
   truncate -s 20G ${DATADISKOS} &>/dev/null
 
@@ -100,7 +100,6 @@ start_bhyve()
     fi
     sleep 2
   done
-  echo "Installation complete. Booting up our installation.."
 
   # Shutdown VM, stop output
   sleep 30
@@ -110,6 +109,12 @@ start_bhyve()
   # Create disk images for testing storage pool
   truncate -s 50G ${DATADISK1}
   truncate -s 50G ${DATADISK2}
+
+  # Determine a new nullmodem slot to use for the boot-up
+  local com_idx=0
+  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
+  local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
+  local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
 
   # Boot up our installation
   bhyve \
@@ -138,10 +143,8 @@ start_bhyve()
       echo "Timeout reached before bootup finished."
       break
     fi
-    echo -n "."
     sleep 2
   done
-  echo -n " completed."
 
   return 0
 }
