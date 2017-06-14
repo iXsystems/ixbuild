@@ -11,9 +11,10 @@ export PROGDIR
 start_bhyve()
 {
   # Allow the $IX_BRIDGE, $IX_IFACE, $IX_TAP to be overridden
-  [ -z "${IX_BRIDGE}" ] && export IX_BRIDGE="bridge0"
+  [ -z "${IX_BRIDGE}" ] && export IX_BRIDGE="ixbuildbridge0"
   [ -z "${IX_IFACE}" ] && export IX_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
-  [ -z "${IX_TAP}" ] && export IX_TAP="tap0"
+  [ -z "${IX_TAP}" ] && export IX_TAP="${BUILDTAG}tap0"
+  [ -z "${IX_TAP2}" ] && export IX_TAP2="${BUILDTAG}tap1"
 
   local VM_WORKSPACE="/tmp/${BUILDTAG}bhyve/"
   local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
@@ -44,10 +45,15 @@ start_bhyve()
   ifconfig ${IX_TAP} destroy &>/dev/null
   rm "${DATADISKOS}" "${DATADISK1}" "${DATADISK2}" "${VM_OUTPUT}" >/dev/null 2>/dev/null
 
-  # Lets check status of "tap0" devices
+  # Lets check status of ${IX_TAP} device
   if ! ifconfig ${IX_TAP} >/dev/null 2>/dev/null ; then
     ifconfig ${IX_TAP} create
-    sysctl net.link.tap.up_on_open=1 >/dev/null
+    sysctl net.link.tap.up_on_open=1 &>/dev/null
+  fi
+
+  # Lets check status of ${IX_TAP2} device
+  if ! ifconfig ${IX_TAP2} >/dev/null 2>/dev/null ; then
+    ifconfig ${IX_TAP2} create
   fi
 
   # Check the status of our network bridge
@@ -78,6 +84,8 @@ start_bhyve()
     -c 1 \
     -s 3,ahci-cd,/$BUILDTAG.iso \
     -s 4,ahci-hd,${DATADISKOS} \
+    -s 6,virtio-net,${IX_TAP} \
+    -s 7,virtio-net,${IX_TAP2} \
     -s 31,lpc \
     -l com1,${VM_COM_BROADCAST} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
@@ -122,6 +130,8 @@ start_bhyve()
     -s 3,ahci-hd,${DATADISKOS} \
     -s 4,ahci-hd,${DATADISK1} \
     -s 5,ahci-hd,${DATADISK2} \
+    -s 6,virtio-net,${IX_TAP} \
+    -s 7,virtio-net,${IX_TAP2} \
     -s 31,lpc \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     -l com1,${VM_COM_BROADCAST} \
