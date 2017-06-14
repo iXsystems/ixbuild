@@ -94,7 +94,7 @@ start_bhyve()
 
   # Connect to our nullmodem com port and tail -f the output during installation.
   cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/^Installation finished. No error reported.$/ q' &
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Installation finished. No error reported./ q' &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
@@ -112,7 +112,7 @@ start_bhyve()
   # Shutdown VM, stop output
   sleep 30
   bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
-  killall cu 2>/dev/null &
+  killall cu &>/dev/null
 
   # Create disk images for testing storage pool
   truncate -s 50G ${DATADISK1}
@@ -140,7 +140,7 @@ start_bhyve()
 
   # Connect to our nullmodem com port and tail -f the output during installation.
   cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/^Starting nginx./ q' | sed '/^Plugin loaded: SSHPlugin/ q' &
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Starting nginx./ q' | sed '/Plugin loaded: SSHPlugin/ q' &
 
   timeout_seconds=1800
   timeout_when=$(( $(date +%s) + $timeout_seconds ))
@@ -155,6 +155,9 @@ start_bhyve()
     fi
     sleep 2
   done
+
+  # Stop `cu` output and interaction once boot-up is complete
+  killall cu &>/dev/null
 
   return 0
 }
