@@ -1355,7 +1355,7 @@ jenkins_mktrueview()
 
     echo "Moving TrueView to stage server..."
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${STAGE}" >/dev/null 2>/dev/null
-    rsync -va --delete "ssh -o StrictHostKeyChecking=no" /root/trueview/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" /root/trueview/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
