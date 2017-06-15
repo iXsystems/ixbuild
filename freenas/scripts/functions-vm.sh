@@ -13,8 +13,8 @@ start_bhyve()
   # Allow the $IX_BRIDGE, $IX_IFACE, $IX_TAP to be overridden
   [ -z "${IX_BRIDGE}" ] && export IX_BRIDGE="ixbuildbridge0"
   [ -z "${IX_IFACE}" ] && export IX_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
-  [ -z "${IX_TAP}" ] && export IX_TAP="${BUILDTAG}tap0"
-  [ -z "${IX_TAP2}" ] && export IX_TAP2="${BUILDTAG}tap1"
+  [ -z "${IX_TAP}" ] && export IX_TAP="ixbuildtap0"
+  [ -z "${IX_TAP2}" ] && export IX_TAP2="ixbuildtap1"
 
   local VM_WORKSPACE="/tmp/${BUILDTAG}bhyve/"
   local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
@@ -47,18 +47,21 @@ start_bhyve()
 
   # Lets check status of ${IX_TAP} device
   if ! ifconfig ${IX_TAP} >/dev/null 2>/dev/null ; then
-    ifconfig ${IX_TAP} create
+    tap=$(ifconfig tap create)
+    ifconfig ${tap} name ${IX_TAP}
     sysctl net.link.tap.up_on_open=1 &>/dev/null
   fi
 
   # Lets check status of ${IX_TAP2} device
   if ! ifconfig ${IX_TAP2} >/dev/null 2>/dev/null ; then
-    ifconfig ${IX_TAP2} create
+    tap=$(ifconfig tap create)
+    ifconfig ${tap} name ${IX_TAP2}
   fi
 
   # Check the status of our network bridge
   if ! ifconfig ${IX_BRIDGE} >/dev/null 2>/dev/null ; then
-    ifconfig ${IX_BRIDGE} create
+    bridge=$(ifconfig bridge create)
+    ifconfig ${bridge} name ${IX_BRIDGE}
     ifconfig ${IX_BRIDGE} addm ${IX_IFACE} addm ${IX_TAP}
     ifconfig ${IX_BRIDGE} up
   fi

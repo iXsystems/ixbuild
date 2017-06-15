@@ -6,6 +6,8 @@ export PROGDIR
 
 # ISO absolute file path
 ISOFILE="${1}"
+# Local location of FreeNAS build
+[ -n "$BUILDTAG" ] && export FNASBDIR="/$BUILDTAG" || export FNASBDIR="/freenas"
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
@@ -20,56 +22,33 @@ ${PROGDIR}/scripts/checkprogs.sh
 
 # Run the REST tests now
 cd ${PROGDIR}/scripts
-
-# Prepare to build autoinstall ISO
-if [ ! -d "${PROGDIR}/tmp" ] ; then
-  mkdir ${PROGDIR}/tmp
-fi
-# Set local location of FreeNAS build
-if [ -n "$BUILDTAG" ] ; then
-  FNASBDIR="/$BUILDTAG"
-else
-  FNASBDIR="/freenas"
-fi
-export FNASBDIR
-
 get_bedir
 
 # If no ISO file path given as argument, figure out the ISO name
 if [ -z "${ISOFILE}" ] ; then
   echo "Finding ISO file..."
-
   if [ -d "${FNASBDIR}/objs" ] ; then
     ISOFILE=`find ${FNASBDIR}/objs | grep '\.iso$' | head -n 1`
   elif [ -d "${BEDIR}/release" ] ; then
     ISOFILE=`find ${BEDIR}/release | grep '\.iso$' | head -n 1`
   else
-    if [ -n "$1" ] ; then
-      ISOFILE=`find ${1} | grep '\.iso$' | head -n 1`
-    else
-      ISOFILE=`find ${PROGDIR}/../objs | grep '\.iso$' | head -n 1`
-    fi
+    ISOFILE=`find ${PROGDIR}/../objs | grep '\.iso$' | head -n 1`
   fi
+fi
 
-  # If no ISO found
-  if [ -z "$ISOFILE" ] ; then
-    exit_err "Failed locating ISO file, did 'make release' work?"
-  fi
-
+# Validate that an ISO selection was determined and exists
+if [ -z "$ISOFILE" ] ; then
+  exit_err "Failed locating ISO file, did 'make release' work?"
 elif [ ! -f "${ISOFILE}" ] ; then
   exit_err "Failed locating ISO file - \"${ISOFILE}\""
 fi
 
-
 # Is this TrueNAS or FreeNAS?
-echo $ISOFILE | grep -q "TrueNAS"
-if [ $? -eq 0 ] ; then
-   export FLAVOR="TRUENAS"
-else
-   export FLAVOR="FREENAS"
-fi
-
+echo $ISOFILE | grep -q "TrueNAS" && export FLAVOR="TRUENAS" || export FLAVOR="FREENAS"
 echo "Using ISO: $ISOFILE"
+
+# Prepare to build autoinstall ISO
+[ ! -d "${PROGDIR}/tmp" ] && mkdir ${PROGDIR}/tmp
 
 # Create the automatic ISO installer
 cd ${PROGDIR}/tmp
@@ -87,10 +66,8 @@ if [ -z "$VMBACKEND" ] ; then
   VMBACKEND="vbox"
 fi
 
-# Copy ISO to autoinstalls if using jails
-if [ -f /tmp/$BUILDTAG ] ; then
-  cp /$BUILDTAG.iso /autoinstalls
-fi
+# Copy ISO to autoinstalls if using jailed test executor
+[ -f "/tmp/$BUILDTAG" ] && cp /$BUILDTAG.iso /autoinstalls
 
 # Determine which VM backend to start
 case ${VMBACKEND} in
@@ -107,19 +84,16 @@ case ${VMBACKEND} in
     sleep 30
     install_vmware
     sleep 60
-    boot_vmware
-    ;;
+    boot_vmware ;;
   *) start_vbox ;;
 esac
 
 # Cleanup old test results before running tests
 clean_xml_results
 
+# If running in a jailed executor, remove build dir and exit
+[ -f "/tmp/${BUILDTAG}" ] && (rm -rf /tmp/build; exit 0)
+
 # Run tests now
-if [ -f "/tmp/${BUILDTAG}" ] ; then
-  rm -rf /tmp/build
-  exit 0
-else
-  run_tests
-  exit $?
-fi
+run_tests
+exit $?
