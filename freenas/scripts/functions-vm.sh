@@ -13,10 +13,10 @@ start_bhyve()
   # Allow the $IX_BRIDGE, $IX_IFACE, $IX_TAP to be overridden
   [ -z "${IX_BRIDGE}" ] && export IX_BRIDGE="ixbuildbridge0"
   [ -z "${IX_IFACE}" ] && export IX_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
-  [ -z "${IX_TAP}" ] && export IX_TAP="ixbuildtap0"
-  [ -z "${IX_TAP2}" ] && export IX_TAP2="ixbuildtap1"
+  [ -z "${IX_TAP}" ] && export IX_TAP="${BUILDTAG}tap0"
+  [ -z "${IX_TAP2}" ] && export IX_TAP2="${BUILDTAG}tap1"
 
-  local VM_WORKSPACE="/tmp/${BUILDTAG}bhyve/"
+  local VM_WORKSPACE="/tmp/${BUILDTAG}-bhyve/"
   local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
   local DATADISKOS="${VM_WORKSPACE}${BUILDTAG}-os.img"
   local DATADISK1="${VM_WORKSPACE}${BUILDTAG}-data1.img"
@@ -24,7 +24,9 @@ start_bhyve()
 
   # FreeBSD 12.0 and greater includes a patch for increasing max length of filesystem paths.
   # Therefor if we are dealing with an older release (eg, for TrueNAS), use '/' as working dir.
-  if [ `uname -a | grep -o -E "FreeBSD [0-9]{1,2}" | sed 's|FreeBSD\ ||'` -lt 12 ] ; then
+  version=$(uname -a | grep -o -E "FreeBSD [0-9]{1,2}" | sed 's|FreeBSD\ ||')
+  echo "FreeBSD version $version"
+  if [ $version -lt 12 ] ; then
     VM_WORKSPACE="/"
   elif [ ! -d "${VM_WORKSPACE}" ] ; then
     mkdir -p "${VM_WORKSPACE}"
@@ -45,16 +47,19 @@ start_bhyve()
   ifconfig ${IX_TAP} destroy &>/dev/null
   rm "${DATADISKOS}" "${DATADISK1}" "${DATADISK2}" "${VM_OUTPUT}" >/dev/null 2>/dev/null
 
+  # Auto-up tap devices and allow forwarding
+  sysctl net.link.tap.up_on_open=1 &>/dev/null
+  sysctl net.inet.ip.forwarding=1 &>/dev/null
+
   # Lets check status of ${IX_TAP} device
   if ! ifconfig ${IX_TAP} >/dev/null 2>/dev/null ; then
-    tap=$(ifconfig tap create)
+    tap=$(ifconfig tap create up)
     ifconfig ${tap} name ${IX_TAP}
-    sysctl net.link.tap.up_on_open=1 &>/dev/null
   fi
 
   # Lets check status of ${IX_TAP2} device
   if ! ifconfig ${IX_TAP2} >/dev/null 2>/dev/null ; then
-    tap=$(ifconfig tap create)
+    tap=$(ifconfig tap create up)
     ifconfig ${tap} name ${IX_TAP2}
   fi
 
@@ -63,7 +68,10 @@ start_bhyve()
     bridge=$(ifconfig bridge create)
     ifconfig ${bridge} name ${IX_BRIDGE}
     ifconfig ${IX_BRIDGE} addm ${IX_IFACE} addm ${IX_TAP}
+    # XXX - assigning an IP may not be needed? Otherwise update this to a config setting.
+    #ifconfig ${IX_BRIDGE} inet 192.168.56.1 netmask 255.255.255.0
     ifconfig ${IX_BRIDGE} up
+    dhclient ${IX_BRIDGE}
   fi
 
   ###############################################
@@ -75,7 +83,7 @@ start_bhyve()
 
   # Determine which nullmodem slot to use for the installation
   local com_idx=0
-  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
+  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" 2>/dev/null ; do com_idx=$(expr $com_idx + 1); done
   local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
   local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
 
@@ -83,16 +91,15 @@ start_bhyve()
   truncate -s 20G ${DATADISKOS} &>/dev/null
 
   # Install from our ISO
-  bhyve \
-    -c 1 \
-    -s 3,ahci-cd,/$BUILDTAG.iso \
-    -s 4,ahci-hd,${DATADISKOS} \
-    -s 6,virtio-net,${IX_TAP} \
-    -s 7,virtio-net,${IX_TAP2} \
-    -s 31,lpc \
+  bhyve -w -A -H -P -c 1 -m 2G \
+    -s 0:0,hostbridge \
+    -s 1:0,lpc \
+    -s 2:0,virtio-net,${IX_TAP} \
+    -s 3:0,virtio-net,${IX_TAP2} \
+    -s 4:0,ahci-cd,/$BUILDTAG.iso \
+    -s 5:0,ahci-hd,${DATADISKOS} \
     -l com1,${VM_COM_BROADCAST} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
-    -m 2G -H -w \
     $BUILDTAG &
 
   # Connect to our nullmodem com port and tail -f the output during installation.
@@ -123,22 +130,21 @@ start_bhyve()
 
   # Determine a new nullmodem slot to use for the boot-up
   local com_idx=0
-  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
+  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" 2>/dev/null ; do com_idx=$(expr $com_idx + 1); done
   local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
   local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
 
   # Boot up our installation
-  bhyve \
-    -c 1 \
-    -s 3,ahci-hd,${DATADISKOS} \
-    -s 4,ahci-hd,${DATADISK1} \
-    -s 5,ahci-hd,${DATADISK2} \
-    -s 6,virtio-net,${IX_TAP} \
-    -s 7,virtio-net,${IX_TAP2} \
-    -s 31,lpc \
+  bhyve -w -A -H -P -c 1 -m 2G \
+    -s 0:0,hostbridge \
+    -s 1:0,lpc \
+    -s 2:0,virtio-net,${IX_TAP} \
+    -s 3:0,virtio-net,${IX_TAP2} \
+    -s 4:0,ahci-hd,${DATADISKOS} \
+    -s 5:0,ahci-hd,${DATADISK1} \
+    -s 6:0,ahci-hd,${DATADISK2} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     -l com1,${VM_COM_BROADCAST} \
-    -m 2G -H -w \
     $BUILDTAG &
 
   # Connect to our nullmodem com port and tail -f the output during installation.
