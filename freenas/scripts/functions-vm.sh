@@ -13,8 +13,8 @@ start_bhyve()
   # Allow the $IX_BRIDGE, $IX_IFACE, $IX_TAP to be overridden
   [ -z "${IX_BRIDGE}" ] && export IX_BRIDGE="ixbuildbridge0"
   [ -z "${IX_IFACE}" ] && export IX_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
-  [ -z "${IX_TAP}" ] && export IX_TAP="${BUILDTAG}tap0"
-  [ -z "${IX_TAP2}" ] && export IX_TAP2="${BUILDTAG}tap1"
+  [ -z "${IX_TAP}" ] && export IX_TAP="tap"
+  [ -z "${IX_TAP2}" ] && export IX_TAP2="tap"
 
   local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
   local VOLUME="tank"
@@ -50,14 +50,12 @@ start_bhyve()
 
   # Lets check status of ${IX_TAP} device
   if ! ifconfig ${IX_TAP} >/dev/null 2>/dev/null ; then
-    tap=$(ifconfig tap create up)
-    ifconfig ${tap} name ${IX_TAP}
+    IX_TAP=$(ifconfig ${IX_TAP} create up)
   fi
 
   # Lets check status of ${IX_TAP2} device
   if ! ifconfig ${IX_TAP2} >/dev/null 2>/dev/null ; then
-    tap=$(ifconfig tap create up)
-    ifconfig ${tap} name ${IX_TAP2}
+    IX_TAP2=$(ifconfig ${IX_TAP2} create up)
   fi
 
   # Check the status of our network bridge
@@ -65,8 +63,6 @@ start_bhyve()
     bridge=$(ifconfig bridge create)
     ifconfig ${bridge} name ${IX_BRIDGE}
     ifconfig ${IX_BRIDGE} addm ${IX_IFACE} addm ${IX_TAP}
-    # XXX - assigning an IP may not be needed? Otherwise update this to a config setting.
-    #ifconfig ${IX_BRIDGE} inet 192.168.56.1 netmask 255.255.255.0
     ifconfig ${IX_BRIDGE} up
     dhclient ${IX_BRIDGE}
   fi
@@ -75,7 +71,6 @@ start_bhyve()
   # Now lets spin-up bhyve and do an installation
   ###############################################
 
-  # Just in case the install hung, we don't need to be waiting for over an hour
   echo "Performing bhyve installation..."
 
   # Determine which nullmodem slot to use for the installation
