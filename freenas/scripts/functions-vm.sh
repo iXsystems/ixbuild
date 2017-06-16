@@ -16,21 +16,11 @@ start_bhyve()
   [ -z "${IX_TAP}" ] && export IX_TAP="${BUILDTAG}tap0"
   [ -z "${IX_TAP2}" ] && export IX_TAP2="${BUILDTAG}tap1"
 
-  local VM_WORKSPACE="/tmp/${BUILDTAG}-bhyve/"
   local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
-  local DATADISKOS="${VM_WORKSPACE}${BUILDTAG}-os.img"
-  local DATADISK1="${VM_WORKSPACE}${BUILDTAG}-data1.img"
-  local DATADISK2="${VM_WORKSPACE}${BUILDTAG}-data2.img"
-
-  # FreeBSD 12.0 and greater includes a patch for increasing max length of filesystem paths.
-  # Therefor if we are dealing with an older release (eg, for TrueNAS), use '/' as working dir.
-  version=$(uname -a | grep -o -E "FreeBSD [0-9]{1,2}" | sed 's|FreeBSD\ ||')
-  echo "FreeBSD version $version"
-  if [ $version -lt 12 ] ; then
-    VM_WORKSPACE="/"
-  elif [ ! -d "${VM_WORKSPACE}" ] ; then
-    mkdir -p "${VM_WORKSPACE}"
-  fi
+  local VOLUME="tank"
+  local DATADISKOS="${BUILDTAG}-os"
+  local DATADISK1="${BUILDTAG}-data1"
+  local DATADISK2="${BUILDTAG}-data"
 
   # Verify kernel modules are loaded if this is a BSD system
   if which kldstat >/dev/null 2>/dev/null ; then
@@ -42,10 +32,17 @@ start_bhyve()
 
   # Shutdown VM, stop output, and cleanup
   bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
-  killall cu &>/dev/null
   ifconfig ${IX_BRIDGE} destroy &>/dev/null
   ifconfig ${IX_TAP} destroy &>/dev/null
-  rm "${DATADISKOS}" "${DATADISK1}" "${DATADISK2}" "${VM_OUTPUT}" >/dev/null 2>/dev/null
+  ifconfig ${IX_TAP2} destroy &>/dev/null
+  rm "${VM_OUTPUT}" >/dev/null 2>/dev/null
+  killall cu &>/dev/null
+
+  # Destroy zvols from previous runs
+  local zfs_list=$(zfs list | awk 'NR>1 {print $1}')
+  echo ${zfs_list} | grep -q "${VOLUME}/${DATADISKOS}" && zfs destroy ${VOLUME}/${DATADISKOS}
+  echo ${zfs_list} | grep -q "${VOLUME}/${DATADISK1}" && zfs destroy ${VOLUME}/${DATADISK1}
+  echo ${zfs_list} | grep -q "${VOLUME}/${DATADISK2}" && zfs destroy ${VOLUME}/${DATADISK2}
 
   # Auto-up tap devices and allow forwarding
   sysctl net.link.tap.up_on_open=1 &>/dev/null
@@ -83,12 +80,16 @@ start_bhyve()
 
   # Determine which nullmodem slot to use for the installation
   local com_idx=0
-  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" 2>/dev/null ; do com_idx=$(expr $com_idx + 1); done
+  until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
   local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
   local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
 
-  # Create OS disk image
-  truncate -s 20G ${DATADISKOS} &>/dev/null
+  # Create our OS disk and data disks
+  # To stop the host from sniffing partitions, which could cause the install
+  # to fail, we set the zfs option volmode=dev on the OS parition
+  zfs create -V 20G -o volmode=dev ${VOLUME}/${DATADISKOS}
+  zfs create -V 50G ${VOLUME}/${DATADISK1}
+  zfs create -V 50G ${VOLUME}/${DATADISK2}
 
   # Install from our ISO
   bhyve -w -A -H -P -c 1 -m 2G \
@@ -97,7 +98,7 @@ start_bhyve()
     -s 2:0,virtio-net,${IX_TAP} \
     -s 3:0,virtio-net,${IX_TAP2} \
     -s 4:0,ahci-cd,/$BUILDTAG.iso \
-    -s 5:0,ahci-hd,${DATADISKOS} \
+    -s 5:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISKOS} \
     -l com1,${VM_COM_BROADCAST} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     $BUILDTAG &
@@ -124,13 +125,9 @@ start_bhyve()
   bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
   killall cu &>/dev/null
 
-  # Create disk images for testing storage pool
-  truncate -s 50G ${DATADISK1}
-  truncate -s 50G ${DATADISK2}
-
-  # Determine a new nullmodem slot to use for the boot-up
+  # Determine which nullmodem slot to use for boot-up
   local com_idx=0
-  until ! ls /dev/nmdm* | grep -q "/dev/nmdm${com_idx}A" 2>/dev/null ; do com_idx=$(expr $com_idx + 1); done
+  until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
   local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
   local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
 
@@ -140,9 +137,9 @@ start_bhyve()
     -s 1:0,lpc \
     -s 2:0,virtio-net,${IX_TAP} \
     -s 3:0,virtio-net,${IX_TAP2} \
-    -s 4:0,ahci-hd,${DATADISKOS} \
-    -s 5:0,ahci-hd,${DATADISK1} \
-    -s 6:0,ahci-hd,${DATADISK2} \
+    -s 5:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISKOS} \
+    -s 6:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK1} \
+    -s 7:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK2} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     -l com1,${VM_COM_BROADCAST} \
     $BUILDTAG &
