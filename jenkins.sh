@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export PROGDIR="`dirname $0 | realpath`"
+export PROGDIR="`realpath $0 | xargs dirname`"
 
 # Change directory
 cd "${PROGDIR}"

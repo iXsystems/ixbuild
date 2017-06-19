@@ -10,17 +10,19 @@ export PROGDIR
 
 start_bhyve()
 {
-  # Allow the $IX_BRIDGE, $IX_IFACE, $IX_TAP to be overridden
-  [ -z "${IX_BRIDGE}" ] && export IX_BRIDGE="ixbuildbridge0"
-  [ -z "${IX_IFACE}" ] && export IX_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
-  [ -z "${IX_TAP}" ] && export IX_TAP="tap"
-  [ -z "${IX_TAP2}" ] && export IX_TAP2="tap"
+  # Allow the $IXBUILD_BRIDGE, $IXBUILD_IFACE, $IXBUILD_TAP to be overridden
+  [ -z "${IXBUILD_BRIDGE}" ] && export IXBUILD_BRIDGE="ixbuildbridge0"
+  [ -z "${IXBUILD_IFACE}" ] && export IXBUILD_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
+  [ -z "${IXBUILD_TAP}" ] && export IXBUILD_TAP="tap"
 
   local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
   local VOLUME="tank"
   local DATADISKOS="${BUILDTAG}-os"
   local DATADISK1="${BUILDTAG}-data1"
   local DATADISK2="${BUILDTAG}-data"
+  local IXBUILD_DNSMASQ=$(test -n "${IXBUILD_DNSMASQ}" && echo "${IXBUILD_DNSMASQ}" || which dnsmasq)
+  local INSTALL_PIDFILE="/tmp/.cu-${BUILDTAG}-install.pid"
+  local BOOT_PIDFILE="/tmp/.cu-${BUILDTAG}-boot.pid"
 
   # Verify kernel modules are loaded if this is a BSD system
   if which kldstat >/dev/null 2>/dev/null ; then
@@ -32,11 +34,11 @@ start_bhyve()
 
   # Shutdown VM, stop output, and cleanup
   bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
-  ifconfig ${IX_BRIDGE} destroy &>/dev/null
-  ifconfig ${IX_TAP} destroy &>/dev/null
-  ifconfig ${IX_TAP2} destroy &>/dev/null
+  ifconfig ${IXBUILD_BRIDGE} destroy &>/dev/null
+  ifconfig ${IXBUILD_TAP} destroy &>/dev/null
   rm "${VM_OUTPUT}" >/dev/null 2>/dev/null
-  killall cu &>/dev/null
+  [ -f "${INSTALL_PIDFILE}" ] && cat "${INSTALL_PIDFILE}" | xargs kill
+  [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill
 
   # Destroy zvols from previous runs
   local zfs_list=$(zfs list | awk 'NR>1 {print $1}')
@@ -48,23 +50,18 @@ start_bhyve()
   sysctl net.link.tap.up_on_open=1 &>/dev/null
   sysctl net.inet.ip.forwarding=1 &>/dev/null
 
-  # Lets check status of ${IX_TAP} device
-  if ! ifconfig ${IX_TAP} >/dev/null 2>/dev/null ; then
-    IX_TAP=$(ifconfig ${IX_TAP} create up)
-  fi
-
-  # Lets check status of ${IX_TAP2} device
-  if ! ifconfig ${IX_TAP2} >/dev/null 2>/dev/null ; then
-    IX_TAP2=$(ifconfig ${IX_TAP2} create up)
+  # Lets check status of ${IXBUILD_TAP} device
+  if ! ifconfig ${IXBUILD_TAP} >/dev/null 2>/dev/null ; then
+    IXBUILD_TAP=$(ifconfig ${IXBUILD_TAP} create up)
   fi
 
   # Check the status of our network bridge
-  if ! ifconfig ${IX_BRIDGE} >/dev/null 2>/dev/null ; then
+  if ! ifconfig ${IXBUILD_BRIDGE} >/dev/null 2>/dev/null ; then
     bridge=$(ifconfig bridge create)
-    ifconfig ${bridge} name ${IX_BRIDGE}
-    ifconfig ${IX_BRIDGE} addm ${IX_IFACE} addm ${IX_TAP}
-    ifconfig ${IX_BRIDGE} up
-    dhclient ${IX_BRIDGE}
+    ifconfig ${bridge} name ${IXBUILD_BRIDGE}
+    ifconfig ${IXBUILD_BRIDGE} addm ${IXBUILD_IFACE} addm ${IXBUILD_TAP}
+    ifconfig ${IXBUILD_BRIDGE} up
+    dhclient ${IXBUILD_BRIDGE}
   fi
 
   ###############################################
@@ -90,8 +87,7 @@ start_bhyve()
   bhyve -w -A -H -P -c 1 -m 2G \
     -s 0:0,hostbridge \
     -s 1:0,lpc \
-    -s 2:0,virtio-net,${IX_TAP} \
-    -s 3:0,virtio-net,${IX_TAP2} \
+    -s 2:0,virtio-net,${IXBUILD_TAP} \
     -s 4:0,ahci-cd,/$BUILDTAG.iso \
     -s 5:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISKOS} \
     -l com1,${VM_COM_BROADCAST} \
@@ -99,7 +95,8 @@ start_bhyve()
     $BUILDTAG &
 
   # Connect to our nullmodem com port and tail -f the output during installation.
-  cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
+  ( cu -l ${VM_COM_LISTEN} >> ${VM_OUTPUT} 2>/dev/null ) &
+  echo "$!" > ${INSTALL_PIDFILE}
   [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Installation finished. No error reported./ q' &
 
   timeout_seconds=1800
@@ -118,7 +115,7 @@ start_bhyve()
   # Shutdown VM, stop output
   sleep 30
   bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
-  killall cu &>/dev/null
+  [ -f "${INSTALL_PIDFILE}" ] && cat "${INSTALL_PIDFILE}" | xargs kill
 
   # Determine which nullmodem slot to use for boot-up
   local com_idx=0
@@ -130,8 +127,7 @@ start_bhyve()
   bhyve -w -A -H -P -c 1 -m 2G \
     -s 0:0,hostbridge \
     -s 1:0,lpc \
-    -s 2:0,virtio-net,${IX_TAP} \
-    -s 3:0,virtio-net,${IX_TAP2} \
+    -s 2:0,virtio-net,${IXBUILD_TAP} \
     -s 5:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISKOS} \
     -s 6:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK1} \
     -s 7:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK2} \
@@ -140,7 +136,8 @@ start_bhyve()
     $BUILDTAG &
 
   # Connect to our nullmodem com port and tail -f the output during installation.
-  cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null &
+  ( cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null ) &
+  echo "$!" > ${BOOT_PIDFILE}
   [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Starting nginx./ q' | sed '/Plugin loaded: SSHPlugin/ q' &
 
   timeout_seconds=1800
@@ -158,7 +155,7 @@ start_bhyve()
   done
 
   # Stop `cu` output and interaction once boot-up is complete
-  killall cu &>/dev/null
+  [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill
 
   return 0
 }

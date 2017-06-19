@@ -18,7 +18,9 @@ ISOFILE="${1}"
 . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
 # Make sure we have all the required packages installed
-${PROGDIR}/scripts/checkprogs.sh
+if uname -a | grep -q "FreeBSD" ; then
+  ${PROGDIR}/scripts/checkprogs.sh
+fi
 
 # Run the REST tests now
 cd ${PROGDIR}/scripts
@@ -71,7 +73,10 @@ fi
 
 # Determine which VM backend to start
 case ${VMBACKEND} in
-  bhyve) start_bhyve ;;
+  bhyve) start_bhyve \
+    && export FNASTESTIP=$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 2 && $1 == "inet" {print $2;exit}' /tmp/${BUILDTAG}-bhyve.out)
+    echo "HERE: ${FNASTESTIP}"
+    ;;
   esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null &
     daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
     sleep 30
