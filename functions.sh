@@ -583,7 +583,7 @@ jenkins_freenas_push_be()
     echo "Missing $PUSHPATH"
   fi
   ssh $RSYNCHOST mkdir -p $PUSHPATH/$FLAVOR/$JENKINSVERSION 2>/dev/null
-  rsync -avh /$BUILDTAG/freenas/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env
+  rsync -avh /$BUILDTAG/freenas/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/
   rsync -avh /$BUILDTAG/freenas/_BE/objs/debug/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/debug/
   rsync -avh /$BUILDTAG/freenas/_BE/objs/world/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/world/
   rsync -avh /$BUILDTAG/freenas/_BE/release/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/release/
