@@ -565,6 +565,16 @@ jenkins_truenas_push_docs()
   return 0
 }
 
+jenkins_freenas_push_be()
+{
+  if [ -z "$RSYNCHOST" ] ; then
+    exit 1
+    echo "Missing $RSYNCHOST"
+  fi
+  rsync -avh $BUILDTAG/$PRODUCTNAME/_BE/repo-manifest $RSYNCHOST:/mnt/tank/storage/$PRODUCTNAME/build_env/$JENKINSVERSION/
+  rsync -avh $BUILDTAG/$PRODUCTNAME/_BE/objs/debug/ $RSYNCHOST:/mnt/tank/storage/$PRODUCTNAME/build_env/$JENKINSVERSION/debug/
+  rsync -avh $BUILDTAG/$PRODUCTNAME/_BE/objs/world/ $RSYNCHOST:/mnt/tank/storage/$PRODUCTNAME/build_env/$JENKINSVERSION/world
+}
 jenkins_freenas_push_docs()
 {
   # Now lets upload the docs

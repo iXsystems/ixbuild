@@ -131,6 +131,7 @@ freenas-run-tests-jailed) jenkins_freenas_run_tests_jailed ;;
   freenas-push-tn-docs) jenkins_truenas_push_docs ;;
            freenas-api) jenkins_freenas_api ;;
       freenas-push-api) jenkins_freenas_push_api ;;
+       freenas-push-be) jenkins_freenas_push_be ;;
   freenas-push-nightly) jenkins_freenas_push_nightly ;;
           freenas-push) jenkins_freenas_push ;;
          freenas-combo) jenkins_freenas
