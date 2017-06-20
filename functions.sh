@@ -586,6 +586,7 @@ jenkins_freenas_push_be()
   rsync -avhR /$BUILDTAG/freenas/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/
   rsync -avhR /$BUILDTAG/freenas/_BE/objs/debug/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/debug/
   rsync -avhR /$BUILDTAG/freenas/_BE/objs/world/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/world/
+  rsync -avhR /$BUILDTAG/freenas/_BE/release/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/release/
 }
 jenkins_freenas_push_docs()
 {
