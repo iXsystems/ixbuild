@@ -579,9 +579,9 @@ jenkins_freenas_push_be()
     exit 1
     echo "Missing $PUSHPATH"
   fi
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/build_env/$JENKINSVERSION/
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/debug/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/build_env/$JENKINSVERSION/debug/
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/world/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/build_env/$JENKINSVERSION/world/
+  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/$JENKINSVERSION/build_env/
+  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/debug/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/$JENKINSVERSION/build_env/debug/
+  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/world/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/$JENKINSVERSION/build_env/world/
 }
 jenkins_freenas_push_docs()
 {
