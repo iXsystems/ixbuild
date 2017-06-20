@@ -568,6 +568,12 @@ jenkins_truenas_push_docs()
 jenkins_freenas_push_be()
 {
   # Figure out the flavor for this test
+  echo $BUILDTAG | grep -q "truenas"
+  if [ $? -eq 0 ] ; then
+    FLAVOR="truenas"
+  else
+    FLAVOR="freensa"
+  fi
   if [ -z "${RSYNCHOST}" ] ; then
     exit 1
     echo "Missing $RSYNCHOST"
@@ -576,9 +582,9 @@ jenkins_freenas_push_be()
     exit 1
     echo "Missing $PUSHPATH"
   fi
-  rsync -avhR /$BUILDTAG/freenas/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/$JENKINSVERSION/build_env/
-  rsync -avhR /$BUILDTAG/freenas/_BE/objs/debug/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/$JENKINSVERSION/build_env/debug/
-  rsync -avhR /$BUILDTAG/freenas/_BE/objs/world/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/$JENKINSVERSION/build_env/world/
+  rsync -avhR /$BUILDTAG/freenas/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/
+  rsync -avhR /$BUILDTAG/freenas/_BE/objs/debug/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/debug/
+  rsync -avhR /$BUILDTAG/freenas/_BE/objs/world/ $RSYNCHOST:$PUSHPATH/$FLAVOR/$JENKINSVERSION/build_env/world/
 }
 jenkins_freenas_push_docs()
 {
