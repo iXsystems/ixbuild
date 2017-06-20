@@ -571,14 +571,17 @@ jenkins_freenas_push_be()
   echo "${PRODUCTNAME}"
   echo "${JENKINSVERSION}"
   echo "${RSYNCHOST}"
-  if [ -z "$RSYNCHOST" ] ; then
+  if [ -z "${RSYNCHOST}" ] ; then
     exit 1
     echo "Missing $RSYNCHOST"
   fi
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/repo-manifest $RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/$JENKINSVERSION/build_env/
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/debug/ $RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/$JENKINSVERSION/build_env/debug/
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/world/ $RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/$JENKINSVERSION/build_env/world/
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/release/ $RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/$JENKINSVERSION/release/
+  if [ -z "${PUSHPATH}" ] ; then
+    exit 1
+    echo "Missing $PUSHPATH"
+  fi
+  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/repo-manifest $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/build_env/$JENKINSVERSION/
+  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/debug/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/build_env/$JENKINSVERSION/debug/
+  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/world/ $RSYNCHOST:$PUSHPATH/$PRODUCTNAME/build_env/$JENKINSVERSION/world/
 }
 jenkins_freenas_push_docs()
 {
