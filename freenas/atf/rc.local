@@ -25,10 +25,10 @@ if [ -e "/etc/netcli" ] ; then
   fi
 
   # Check if we are running in bhyve
-  #/sbin/ifconfig vtnet0 2>/dev/null >/dev/null
-  #if [ $? -eq 0 ] ; then
-  #  /sbin/ifconfig vtnet0 %%IP%% 255.255.255.0
-  #fi
+  /sbin/ifconfig vtnet0 2>/dev/null >/dev/null
+  if [ $? -eq 0 ] ; then
+    /sbin/ifconfig vtnet0 %%IP%% 255.255.255.0
+  fi
 
   # Display ifconfig settings
   /sbin/ifconfig

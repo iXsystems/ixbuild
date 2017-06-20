@@ -40,7 +40,9 @@ network_tests()
   echo_ok
 
   # Add $FNASTESTIP to database
-  rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "'${IFACE}'" }'
+  if ! ifconfig ${IFACE} | awk '$1 == "inet" {print $2}' | grep -q "${FNASTRESTIP}" ; then
+    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "'${IFACE}'" }'
+  fi
 
   # Wait for port 80 response before trying more REST queries again
   echo_test_title "Wait for FreeNAS UI by polling port 80"
@@ -48,10 +50,12 @@ network_tests()
   check_exit_status || return 1
 
   if [ -n "$BRIDGEIP" ] ; then
-    # Using the bridged adapter settings
-    echo_test_title "Setting bridged IP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "'${IFACE2}'" }'
-    check_rest_response "201 Created"
+    if [ "${BRIDGEIP}" != "${FNASTESTIP}" ] ; then
+      # Using the bridged adapter settings
+      echo_test_title "Setting bridged IP on em1"
+      rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "'${IFACE2}'" }'
+      check_rest_response "201 Created"
+    fi
 
     # Set the global config stuff
     echo_test_title "Setting default route and DNS"
@@ -60,7 +64,7 @@ network_tests()
   else
     # Using the NAT mode
     echo_test_title "Setting DHCP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "em1" }'
+    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "'${IFACE2}'" }'
     check_rest_response "201 Created"
   fi
 }

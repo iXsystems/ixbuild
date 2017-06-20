@@ -52,11 +52,11 @@ echo "Using ISO: $ISOFILE"
 # Prepare to build autoinstall ISO
 [ ! -d "${PROGDIR}/tmp" ] && mkdir ${PROGDIR}/tmp
 
-# Create the automatic ISO installer
-cd ${PROGDIR}/tmp
-${PROGDIR}/scripts/create-auto-install.sh ${ISOFILE}
-if [ $? -ne 0 ] ; then
-  exit_err "Failed creating auto-install ISO!"
+# Create the automatic ISO installer if not using bhyve as VM backend,
+# bhyve is able to interact with the installer to set the root password.
+if [ "${VMBACKEND}" != "bhyve" ] ; then
+  cd ${PROGDIR}/tmp
+  ${PROGDIR}/scripts/create-auto-install.sh ${ISOFILE} || exit_err "Failed creating auto-install ISO!"
 fi
 
 # Set the name for VM
@@ -73,9 +73,11 @@ fi
 
 # Determine which VM backend to start
 case ${VMBACKEND} in
-  bhyve) start_bhyve \
-    && export FNASTESTIP=$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 2 && $1 == "inet" {print $2;exit}' /tmp/${BUILDTAG}-bhyve.out)
-    echo "HERE: ${FNASTESTIP}"
+  bhyve)
+    start_bhyve
+    export FNASTESTIP=$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 2 && $1 == "inet" {print $2;exit}' /tmp/${BUILDTAG}-bhyve.out)
+    export BRIDGEIP=${FNASTESTIP}
+    echo "Bhyve IP Address assigned: ${FNASTESTIP}"
     ;;
   esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null &
     daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &

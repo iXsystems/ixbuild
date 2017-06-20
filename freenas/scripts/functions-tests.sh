@@ -572,6 +572,8 @@ wait_for_avail()
     fi
     (( count++ ))
   done
+
+  return 0
 }
 
 # Use netcat to determine if a service port is open on FreeNAS

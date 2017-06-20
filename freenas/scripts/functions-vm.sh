@@ -23,6 +23,7 @@ start_bhyve()
   local IXBUILD_DNSMASQ=$(test -n "${IXBUILD_DNSMASQ}" && echo "${IXBUILD_DNSMASQ}" || which dnsmasq)
   local INSTALL_PIDFILE="/tmp/.cu-${BUILDTAG}-install.pid"
   local BOOT_PIDFILE="/tmp/.cu-${BUILDTAG}-boot.pid"
+  local TAP_LOCKFILE="/tmp/.tap-${BUILDTAG}.lck"
 
   # Verify kernel modules are loaded if this is a BSD system
   if which kldstat >/dev/null 2>/dev/null ; then
@@ -36,9 +37,10 @@ start_bhyve()
   bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
   ifconfig ${IXBUILD_BRIDGE} destroy &>/dev/null
   ifconfig ${IXBUILD_TAP} destroy &>/dev/null
-  rm "${VM_OUTPUT}" >/dev/null 2>/dev/null
-  [ -f "${INSTALL_PIDFILE}" ] && cat "${INSTALL_PIDFILE}" | xargs kill
-  [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill
+  rm "${VM_OUTPUT}" &>/dev/null
+  [ -f "${INSTALL_PIDFILE}" ] && cat "${INSTALL_PIDFILE}" | xargs kill &>/dev/null
+  [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill &>/dev/null
+  [ -f "${TAP_LOCKFILE}" ] && cat "${TAP_LOCKFILE}" | xargs -I {} ifconfig {} destroy && rm "${TAP_LOCKFILE}"
 
   # Destroy zvols from previous runs
   local zfs_list=$(zfs list | awk 'NR>1 {print $1}')
@@ -52,17 +54,29 @@ start_bhyve()
 
   # Lets check status of ${IXBUILD_TAP} device
   if ! ifconfig ${IXBUILD_TAP} >/dev/null 2>/dev/null ; then
-    IXBUILD_TAP=$(ifconfig ${IXBUILD_TAP} create up)
+    IXBUILD_TAP=$(ifconfig ${IXBUILD_TAP} create)
+    # Save the tap interface name, generated or specified. Used for clean-up.
+    echo ${IXBUILD_TAP} > ${TAP_LOCKFILE}
   fi
 
   # Check the status of our network bridge
   if ! ifconfig ${IXBUILD_BRIDGE} >/dev/null 2>/dev/null ; then
     bridge=$(ifconfig bridge create)
     ifconfig ${bridge} name ${IXBUILD_BRIDGE}
-    ifconfig ${IXBUILD_BRIDGE} addm ${IXBUILD_IFACE} addm ${IXBUILD_TAP}
-    ifconfig ${IXBUILD_BRIDGE} up
-    dhclient ${IXBUILD_BRIDGE}
   fi
+
+  # Ensure $IXBUILD_IFACE is a member of our bridge.
+  if ! ifconfig ${IXBUILD_BRIDGE} | grep -q "member: ${IXBUILD_IFACE}" ; then
+    ifconfig ${IXBUILD_BRIDGE} addm ${IXBUILD_IFACE}
+  fi
+
+  # Ensure $IXBUILD_TAP is a member of our bridge.
+  if ! ifconfig ${IXBUILD_BRIDGE} | grep -q "member: ${IXBUILD_TAP}" ; then
+    ifconfig ${IXBUILD_BRIDGE} addm ${IXBUILD_TAP}
+  fi
+
+  # Finally, have our bridge pickup an IP Address
+  ifconfig ${IXBUILD_BRIDGE} up && dhclient ${IXBUILD_BRIDGE}
 
   ###############################################
   # Now lets spin-up bhyve and do an installation
@@ -94,23 +108,17 @@ start_bhyve()
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     $BUILDTAG &
 
+  # Run our expect script to automate the installation process
+  ( ${PROGDIR}/scripts/bhyve-installer.exp "${VM_COM_LISTEN}" "${VM_OUTPUT}" ) &
+  echo "DEBUG: bhyve autoinstall script exited, PID: $!"
+  [ -f "${VM_OUTPUT}" ] && timeout 1800 tail -f ${VM_OUTPUT} | sed '/Installation finished. No error reported./ q' | sed '/Boot Failed./ q'
+  echo "DEBUG: Installation tail -f of VM_OUTPUT exited." 
+  sleep 100000
+  #killall cu
+
   # Connect to our nullmodem com port and tail -f the output during installation.
-  ( cu -l ${VM_COM_LISTEN} >> ${VM_OUTPUT} 2>/dev/null ) &
-  echo "$!" > ${INSTALL_PIDFILE}
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Installation finished. No error reported./ q' &
-
-  timeout_seconds=1800
-  timeout_when=$(( $(date +%s) + $timeout_seconds ))
-
-  echo -n "Waiting for installation to finish.."
-  while ! grep -q "Installation finished. No error reported." ${VM_OUTPUT} 2>/dev/null
-  do
-    if [ $(date +%s) -gt $timeout_when ]; then
-      echo "Timeout reached before installation finished. Exiting."
-      break
-    fi
-    sleep 2
-  done
+  #( cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null ) &
+  #echo "$!" > ${INSTALL_PIDFILE}
 
   # Shutdown VM, stop output
   sleep 30
@@ -136,23 +144,9 @@ start_bhyve()
     $BUILDTAG &
 
   # Connect to our nullmodem com port and tail -f the output during installation.
-  ( cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null ) &
+  ( cu -l ${VM_COM_LISTEN} >> ${VM_OUTPUT} 2>/dev/null ) &
   echo "$!" > ${BOOT_PIDFILE}
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Starting nginx./ q' | sed '/Plugin loaded: SSHPlugin/ q' &
-
-  timeout_seconds=1800
-  timeout_when=$(( $(date +%s) + $timeout_seconds ))
-
-  echo "Booting ${VM}..."
-  # Wait for bootup to finish
-  while ! ((grep -q "Starting nginx." ${VM_OUTPUT}) || (grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT}))
-  do
-    if [ $(date +%s) -gt $timeout_when ]; then
-      echo "Timeout reached before bootup finished."
-      break
-    fi
-    sleep 2
-  done
+  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Starting nginx./ q' | sed '/Plugin loaded: SSHPlugin/ q'
 
   # Stop `cu` output and interaction once boot-up is complete
   [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill

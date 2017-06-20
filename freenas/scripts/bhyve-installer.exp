@@ -1,0 +1,66 @@
+#!/usr/bin/env expect
+
+# Usage: ./bhyve-installer.exp /dev/nmdm0B /tmp/bhyve-installer.out
+set nullmodem [lindex $argv 0];
+set logfilepath [lindex $argv 1];
+
+log_file "$logfilepath"
+# Connect to our bhyve instance over the specified nullmodem serial connection
+set PID [spawn cu -l "$nullmodem"]
+puts "Expect script spawn PID: $PID"
+
+# Grub2 menu item selection - second entry enables Serial Output for the installer
+expect {The highlighted entry will be executed automatically}
+# Sending down-arrow key with "send {^[[B}" does not work, so instead fall back to the
+# emacs-like key bindings that grub allows: Ctrl+P = Up, Ctrl+N = Down (mnemonic: up/down)
+# Ctrl+N
+send \003N
+sleep .5
+send "\r"
+
+expect "Press any key to continue..."
+send "\r"
+
+# Installer
+expect "Console Setup"
+send "\r"
+expect "Continue installation?"
+send "Y"
+sleep .5
+
+# Select/populate ada0 as boot/install target with spacebar:
+send \040
+# Confirm install target by submitting 'OK' button
+send "\r"
+
+# 4G limit on something something, do you want to continue...
+expect "Proceed with the installation?"
+send "\r"
+
+# Set the default root account password:
+expect "Password:"
+send "testing"
+# Tab to next field
+send \011
+send "testing"
+# Tab to submit/OK button
+send \011
+# Submit/confirm password dialog
+send "\r"
+
+# Select boot method:
+expect "Boot via UFEI"
+send "\r"
+
+# Complete!
+expect "Installation finished. No error reported."
+puts "Done, now we should exit.."
+# The {FreeNAS} installation on {ada0} succeeded!
+# Stop the `cu` process.
+# exec kill -9 $PID
+# exec ps aux | grep "cu -l $nullmodem" | awk "{print \$2}" | xargs kill
+# Exit from the expect script
+expect EOF
+puts "EOF found.."
+exit 0
+puts "exited... but not really"
