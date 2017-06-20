@@ -572,7 +572,7 @@ jenkins_freenas_push_be()
   if [ $? -eq 0 ] ; then
     FLAVOR="truenas"
   else
-    FLAVOR="freensa"
+    FLAVOR="freenas"
   fi
   if [ -z "${RSYNCHOST}" ] ; then
     exit 1
