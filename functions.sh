@@ -567,6 +567,10 @@ jenkins_truenas_push_docs()
 
 jenkins_freenas_push_be()
 {
+  echo "${BUILDTAG}"
+  echo "${PRODUCTNAME}"
+  echo "${JENKINSVERSION}"
+  echo "${RSYNCHOST}"
   if [ -z "$RSYNCHOST" ] ; then
     exit 1
     echo "Missing $RSYNCHOST"
