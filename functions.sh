@@ -577,7 +577,7 @@ jenkins_freenas_push_be()
   fi
   rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/repo-manifest $RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/build_env/$JENKINSVERSION/
   rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/debug/ $RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/build_env/$JENKINSVERSION/debug/
-  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/world/$RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/build_env/$JENKINSVERSION/world/
+  rsync -avh /$BUILDTAG/$PRODUCTNAME/_BE/objs/world/ $RSYNCHOST:/mnt/tank/builds/$PRODUCTNAME/build_env/$JENKINSVERSION/world/
 }
 jenkins_freenas_push_docs()
 {
