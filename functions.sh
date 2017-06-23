@@ -1148,11 +1148,11 @@ jenkins_freenas_tests()
   if [ -z "$SFTPHOST" -o -z "$SFTPUSER" ] ; then
 
     # Default to prompting for ISOs from ./ixbuild/freenas/iso/*
-    ISODIR="${PROGDIR}/freenas/iso/"
+    local ISODIR="${PROGDIR}/freenas/iso/"
 
     # Allow $ISODIR to be overridden by $IXBUILD_FREENAS_ISODIR if it exists
     if [ -n "${IXBUILD_FREENAS_ISODIR}" ] ; then
-      ISODIR="${IXBUILD_FREENAS_ISODIR}"
+      ISODIR="$(echo "${IXBUILD_FREENAS_ISODIR}" | sed 's|/$||g')/"
     fi
 
     [ ! -d "${ISODIR}" ] && "Directory not found: ${ISODIR}" && exit_clean
@@ -1161,7 +1161,11 @@ jenkins_freenas_tests()
     iso_cnt=`cd ${ISODIR} && ls -l *.iso 2>/dev/null | wc -l | sed 's| ||g'`
 
     # Exit cleanly if no ISO found...
-    [ $iso_cnt -lt 1 ] && echo "No local ISO found in \"${ISODIR}\"" && exit_clean
+    if [ $iso_cnt -lt 1 ] ; then
+      echo "No local ISO found in \"${ISODIR}\""
+      echo "You can change this path by setting \$IXBUILD_FREENAS_ISODIR in build.conf"
+      exit_clean
+    fi
 
     # Loop until we get a valid user selection
     while :
@@ -1169,7 +1173,7 @@ jenkins_freenas_tests()
       echo "Please select which ISO to test (1-$iso_cnt):"
 
       # List ISOs in the ./freenas/iso/ directory, numbering the results for selection
-      ls -l "${ISODIR}"*.iso 2>/dev/null | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
+      ls -l "${ISODIR}"*.iso | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
       echo -n "Enter your selection and press [ENTER]: "
 
       # Prompt user to determine which iso is used
@@ -1182,14 +1186,14 @@ jenkins_freenas_tests()
         echo -n "Invalid selection.." && sleep 1 && echo -n "." && sleep 1 && echo "."
       elif [ -n "`echo $iso_selection | sed 's| ||g'`" ] ; then
 
-        iso_name="`cd ${ISODIR} && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}'`"
+        iso_name="$(cd ${ISODIR} && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}')"
 
-        echo -n "You have selected \"${iso_name}\", is this correct? (y/n): "
+        printf "You have selected \"${iso_name}\", is this correct? (y/n): "
 
         # Prompt user for selection confirmation
         read iso_confirmed
 
-        if [ "${iso_confirmed}" == "y" -o "${iso_confirmed}" == "Y" ] ; then
+        if test -n "${iso_confirmed}" && test "${iso_confirmed}" = "y" ; then
           "${PROGDIR}"/freenas/scripts/2.runtests.sh "${ISODIR}${iso_name}"
           EXIT_STATUS=$?
           break

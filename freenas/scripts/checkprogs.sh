@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+# Only re-run checkprogs.sh if $IXBUILD_CHECKPROGS equals "true"
+if [ "${IXBUILD_CHECKPROGS}" != "true" ] ; then
+  [ -f /tmp/.ixbuild_checkprogs ] && exit 0
+fi
+
 # Source our functions
 if [ -z "$PROGDIR" ] ; then
   . functions.sh
@@ -220,3 +225,6 @@ if [ "$?" != "0" ]; then
   echo "Installing pytest-xdist"
   rc_halt "pip3.6 install pytest-xdist"
 fi
+
+# Notify consecutive ixbuild runs that we've already ran checkprogs.sh 
+touch /tmp/.ixbuild_checkprogs

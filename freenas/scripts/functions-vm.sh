@@ -10,6 +10,12 @@ export PROGDIR
 
 start_bhyve()
 {
+  if [ ! -f "/usr/local/share/uefi-firmware/BHYVE_UEFI.fd" ] ; then
+    echo "File not found: /usr/local/share/uefi-firmware/BHYVE_UEFI.fd"
+    echo "Install the \"uefi-edk2-bhyve\" port. Exiting."
+    exit 1
+  fi
+
   # Allow the $IXBUILD_BRIDGE, $IXBUILD_IFACE, $IXBUILD_TAP to be overridden
   [ -z "${IXBUILD_BRIDGE}" ] && export IXBUILD_BRIDGE="ixbuildbridge0"
   [ -z "${IXBUILD_IFACE}" ] && export IXBUILD_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
@@ -93,9 +99,15 @@ start_bhyve()
   # Create our OS disk and data disks
   # To stop the host from sniffing partitions, which could cause the install
   # to fail, we set the zfs option volmode=dev on the OS parition
-  zfs create -V 20G -o volmode=dev ${VOLUME}/${DATADISKOS}
-  zfs create -V 50G ${VOLUME}/${DATADISK1}
-  zfs create -V 50G ${VOLUME}/${DATADISK2}
+  if [ $(df -h | awk '$7 == "/" {print $5}' | sed 's|G$||') -gt 120 ] ; then
+    zfs create -V 20G -o volmode=dev ${VOLUME}/${DATADISKOS}
+    zfs create -V 50G ${VOLUME}/${DATADISK1}
+    zfs create -V 50G ${VOLUME}/${DATADISK2}
+  else
+    zfs create -V 10G -o volmode=dev ${VOLUME}/${DATADISKOS}
+    zfs create -V 5G ${VOLUME}/${DATADISK1}
+    zfs create -V 5G ${VOLUME}/${DATADISK2}
+  fi
 
   # Install from our ISO
   bhyve -w -A -H -P -c 1 -m 2G \

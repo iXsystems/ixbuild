@@ -61,6 +61,4 @@ puts "Done, now we should exit.."
 # exec ps aux | grep "cu -l $nullmodem" | awk "{print \$2}" | xargs kill
 # Exit from the expect script
 expect EOF
-puts "EOF found.."
 exit 0
-puts "exited... but not really"
