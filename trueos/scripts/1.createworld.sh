@@ -88,7 +88,7 @@ create_base_pkg_files()
   rc_halt "tar xvpf ${ODISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/lib/libgcc_eh.a ./usr/lib/libgcc_eh_p.a"
   rc_halt "tar xvpf ${ODISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/share/examples"
   rc_halt "tar xvpf ${ODISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/share/calendar"
-  rc_halt "tar xvpf ${ODISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/share/tmac"
+  rc_nohalt "tar xvpf ${ODISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/share/tmac"
   rc_halt "tar xvpf ${ODISTDIR}/base.txz -C ${PROGDIR}/fbsd-distrib ./usr/include"
 
   # Signing script
