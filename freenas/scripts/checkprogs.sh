@@ -1,12 +1,18 @@
 #!/usr/bin/env sh
 
+# Flag to notify consecutive runs that checkprogs has already ran.
+# Allow this file path to be overridden in build.conf
+if [ -z "${IXBUILD_CHECKPROGS_INSTALLED}" ]; then
+  IXBUILD_CHECKPROGS_INSTALLED="$HOME/.ixbuild_checkprogs_installed"
+fi
+
 # Only re-run checkprogs.sh if $IXBUILD_CHECKPROGS equals "true"
 if [ "${IXBUILD_CHECKPROGS}" != "true" ] ; then
-  [ -f /tmp/.ixbuild_checkprogs ] && exit 0
+  [ -f "${IXBUILD_CHECKPROGS_INSTALLED}" ] && exit 0
 fi
 
 # Source our functions
-if [ -z "$PROGDIR" ] ; then
+if [ -z "${PROGDIR}" ] ; then
   . functions.sh
 else
   . ${PROGDIR}/scripts/functions.sh
@@ -227,4 +233,4 @@ if [ "$?" != "0" ]; then
 fi
 
 # Notify consecutive ixbuild runs that we've already ran checkprogs.sh 
-touch /tmp/.ixbuild_checkprogs
+touch "${IXBUILD_CHECKPROGS_INSTALLED}"
