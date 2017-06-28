@@ -74,12 +74,12 @@ fi
 # Determine which VM backend to start
 case ${VMBACKEND} in
   bhyve)
-    start_bhyve
-    export FNASTESTIP=$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 2 && $1 == "inet" {print $2;exit}' /tmp/${BUILDTAG}-bhyve.out)
+    # Grab assigned FNASTESTIP from bhyve installation/boot-up output
+    export FNASTESTIP=$(start_bhyve $ISOFILE | tee /dev/tty | grep '^FNASTESTIP=' | sed 's|^FNASTESTIP=||g')
     export BRIDGEIP=${FNASTESTIP}
-    echo "Bhyve IP Address assigned: ${FNASTESTIP}"
     ;;
-  esxi) cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null &
+  esxi)
+    cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null &
     daemon -p /tmp/vmcu.pid cu -l /dev/ttyu0 -s 115200 > /tmp/console.log 2>/dev/null &
     sleep 30
     clean_xml_results
@@ -91,8 +91,11 @@ case ${VMBACKEND} in
     sleep 30
     install_vmware
     sleep 60
-    boot_vmware ;;
-  *) start_vbox ;;
+    boot_vmware
+    ;;
+  *)
+    start_vbox
+    ;;
 esac
 
 # Cleanup old test results before running tests
