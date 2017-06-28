@@ -21,13 +21,13 @@ start_bhyve()
   [ -z "${IXBUILD_IFACE}" ] && export IXBUILD_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
   [ -z "${IXBUILD_TAP}" ] && export IXBUILD_TAP="tap"
 
+  local ISOFILE=$1
   local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
   local VOLUME="tank"
   local DATADISKOS="${BUILDTAG}-os"
   local DATADISK1="${BUILDTAG}-data1"
-  local DATADISK2="${BUILDTAG}-data"
+  local DATADISK2="${BUILDTAG}-data2"
   local IXBUILD_DNSMASQ=$(test -n "${IXBUILD_DNSMASQ}" && echo "${IXBUILD_DNSMASQ}" || which dnsmasq)
-  local INSTALL_PIDFILE="/tmp/.cu-${BUILDTAG}-install.pid"
   local BOOT_PIDFILE="/tmp/.cu-${BUILDTAG}-boot.pid"
   local TAP_LOCKFILE="/tmp/.tap-${BUILDTAG}.lck"
 
@@ -44,7 +44,6 @@ start_bhyve()
   ifconfig ${IXBUILD_BRIDGE} destroy &>/dev/null
   ifconfig ${IXBUILD_TAP} destroy &>/dev/null
   rm "${VM_OUTPUT}" &>/dev/null
-  [ -f "${INSTALL_PIDFILE}" ] && cat "${INSTALL_PIDFILE}" | xargs kill &>/dev/null
   [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill &>/dev/null
   [ -f "${TAP_LOCKFILE}" ] && cat "${TAP_LOCKFILE}" | xargs -I {} ifconfig {} destroy && rm "${TAP_LOCKFILE}"
 
@@ -53,6 +52,8 @@ start_bhyve()
   echo ${zfs_list} | grep -q "${VOLUME}/${DATADISKOS}" && zfs destroy ${VOLUME}/${DATADISKOS}
   echo ${zfs_list} | grep -q "${VOLUME}/${DATADISK1}" && zfs destroy ${VOLUME}/${DATADISK1}
   echo ${zfs_list} | grep -q "${VOLUME}/${DATADISK2}" && zfs destroy ${VOLUME}/${DATADISK2}
+
+  echo "Setting up bhyve network interfaces..."
 
   # Auto-up tap devices and allow forwarding
   sysctl net.link.tap.up_on_open=1 &>/dev/null
@@ -68,7 +69,7 @@ start_bhyve()
   # Check the status of our network bridge
   if ! ifconfig ${IXBUILD_BRIDGE} >/dev/null 2>/dev/null ; then
     bridge=$(ifconfig bridge create)
-    ifconfig ${bridge} name ${IXBUILD_BRIDGE}
+    ifconfig ${bridge} name ${IXBUILD_BRIDGE} >/dev/null
   fi
 
   # Ensure $IXBUILD_IFACE is a member of our bridge.
@@ -82,7 +83,8 @@ start_bhyve()
   fi
 
   # Finally, have our bridge pickup an IP Address
-  ifconfig ${IXBUILD_BRIDGE} up && dhclient ${IXBUILD_BRIDGE}
+  #ifconfig ${IXBUILD_BRIDGE} up && dhclient ${IXBUILD_BRIDGE}
+  ifconfig ${IXBUILD_BRIDGE} up
 
   ###############################################
   # Now lets spin-up bhyve and do an installation
@@ -93,58 +95,50 @@ start_bhyve()
   # Determine which nullmodem slot to use for the installation
   local com_idx=0
   until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
-  local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
-  local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
+  local COM_BROADCAST="/dev/nmdm${com_idx}A"
+  local COM_LISTEN="/dev/nmdm${com_idx}B"
 
   # Create our OS disk and data disks
   # To stop the host from sniffing partitions, which could cause the install
   # to fail, we set the zfs option volmode=dev on the OS parition
-  if [ $(df -h | awk '$7 == "/" {print $5}' | sed 's|G$||') -gt 120 ] ; then
-    zfs create -V 20G -o volmode=dev ${VOLUME}/${DATADISKOS}
-    zfs create -V 50G ${VOLUME}/${DATADISK1}
-    zfs create -V 50G ${VOLUME}/${DATADISK2}
-  else
-    zfs create -V 10G -o volmode=dev ${VOLUME}/${DATADISKOS}
-    zfs create -V 5G ${VOLUME}/${DATADISK1}
-    zfs create -V 5G ${VOLUME}/${DATADISK2}
-  fi
+  local os_size=20
+  local disk_size=50
+  local freespace=$(df -h | awk '$6 == "/" {print $4}' | sed 's|G$||')
+  # Decrease os and data disk sizes if less than 120G is avail on the root mountpoint
+  if [ -n "$freespace" -a $freespace -le 120 ] ; then os_size=10; disk_size=5; fi
+
+  zfs create -V ${os_size}G -o volmode=dev ${VOLUME}/${DATADISKOS}
+  zfs create -V ${disk_size}G ${VOLUME}/${DATADISK1}
+  zfs create -V ${disk_size}G ${VOLUME}/${DATADISK2}
 
   # Install from our ISO
-  bhyve -w -A -H -P -c 1 -m 2G \
+  ( bhyve -w -A -H -P -c 1 -m 2G \
     -s 0:0,hostbridge \
     -s 1:0,lpc \
     -s 2:0,virtio-net,${IXBUILD_TAP} \
-    -s 4:0,ahci-cd,/$BUILDTAG.iso \
+    -s 4:0,ahci-cd,${ISOFILE} \
     -s 5:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISKOS} \
-    -l com1,${VM_COM_BROADCAST} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
-    $BUILDTAG &
+    -l com1,${COM_BROADCAST} \
+    $BUILDTAG ) &
 
-  # Run our expect script to automate the installation process
-  ( ${PROGDIR}/scripts/bhyve-installer.exp "${VM_COM_LISTEN}" "${VM_OUTPUT}" ) &
-  echo "DEBUG: bhyve autoinstall script exited, PID: $!"
-  [ -f "${VM_OUTPUT}" ] && timeout 1800 tail -f ${VM_OUTPUT} | sed '/Installation finished. No error reported./ q' | sed '/Boot Failed./ q'
-  echo "DEBUG: Installation tail -f of VM_OUTPUT exited." 
-  sleep 100000
-  #killall cu
-
-  # Connect to our nullmodem com port and tail -f the output during installation.
-  #( cu -l ${VM_COM_LISTEN} > ${VM_OUTPUT} 2>/dev/null ) &
-  #echo "$!" > ${INSTALL_PIDFILE}
+  # Reset output after installation is complete
+  ${PROGDIR}/scripts/bhyve-installer.exp "${COM_LISTEN}" "${VM_OUTPUT}"
+  local EXIT_STATUS=$?
+  echo -e \\033c
+  echo "Installation completed with status: ${EXIT_STATUS}"
 
   # Shutdown VM, stop output
   sleep 30
-  bhyvectl --destroy --vm=$BUILDTAG 2>/dev/null &
-  [ -f "${INSTALL_PIDFILE}" ] && cat "${INSTALL_PIDFILE}" | xargs kill
+  bhyvectl --destroy --vm=$BUILDTAG &>/dev/null
 
   # Determine which nullmodem slot to use for boot-up
-  local com_idx=0
-  until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
-  local VM_COM_BROADCAST="/dev/nmdm${com_idx}A"
-  local VM_COM_LISTEN="/dev/nmdm${com_idx}B"
+  #local com_idx=0
+  #until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
+  #local COM_BROADCAST="/dev/nmdm${com_idx}A"
+  #local COM_LISTEN="/dev/nmdm${com_idx}B"
 
-  # Boot up our installation
-  bhyve -w -A -H -P -c 1 -m 2G \
+  ( bhyve -w -A -H -P -c 1 -m 2G \
     -s 0:0,hostbridge \
     -s 1:0,lpc \
     -s 2:0,virtio-net,${IXBUILD_TAP} \
@@ -152,18 +146,27 @@ start_bhyve()
     -s 6:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK1} \
     -s 7:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK2} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
-    -l com1,${VM_COM_BROADCAST} \
-    $BUILDTAG &
+    -l com1,${COM_BROADCAST} \
+    $BUILDTAG ) &
 
   # Connect to our nullmodem com port and tail -f the output during installation.
-  ( cu -l ${VM_COM_LISTEN} >> ${VM_OUTPUT} 2>/dev/null ) &
-  echo "$!" > ${BOOT_PIDFILE}
-  [ -f "${VM_OUTPUT}" ] && tail -f ${VM_OUTPUT} | sed '/Starting nginx./ q' | sed '/Plugin loaded: SSHPlugin/ q'
+  # ERROR: "vm_open: Invalid argument"
+  cu -l ${COM_LISTEN} | tee /dev/tty >> ${VM_OUTPUT}
+  #( cu -l ${COM_LISTEN} &>> ${VM_OUTPUT} ) &
+  #echo "DEBUG: Starting tail of boot-up output"
+  #[ -f "${VM_OUTPUT}" ] && tail -f -n 0 ${VM_OUTPUT} | tee /dev/tty | sed '/Starting nginx./ q' | sed '/Plugin loaded: SSHPlugin/ q'
+  #echo "DEBUG: Done tailing boot-up"
 
-  # Stop `cu` output and interaction once boot-up is complete
-  [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill
+  local EXIT_STATUS=1
+  if grep -q "Starting nginx." ${VM_OUTPUT} || grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT} ; then
+    local FNASTESTIP="$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 2 && $1 == "inet" {print $2;exit}' ${VM_OUTPUT})"
+    if [ -n "${FNASTESTIP}" ] ; then
+      echo "FNASTESTIP=${FNASTESTIP}"
+      EXIT_STATUS=0
+    fi
+  fi
 
-  return 0
+  return $EXIT_STATUS
 }
 
 start_vbox()
