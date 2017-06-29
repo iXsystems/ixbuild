@@ -159,6 +159,7 @@ start_bhyve()
       echo "FNASTESTIP=${FNASTESTIP}"
       EXIT_STATUS=0
     else
+      echo "FNASTESTIP=0.0.0.0"
       echo "ERROR: No ip address assigned to VM. FNASTESTIP not set."
     fi
   fi
