@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
+export PROGDIR
+
 # Exit if this is not a FreeBSD host.
 if ! uname -a | grep -q "FreeBSD" ; then
   echo "Unabled to install required packages. Manual installation will be required."
@@ -18,12 +21,7 @@ if [ "${IXBUILD_CHECKPROGS}" != "true" ] ; then
   [ -f "${IXBUILD_CHECKPROGS_INSTALLED}" ] && exit 0
 fi
 
-# Source our functions
-if [ -z "${PROGDIR}" ] ; then
-  . functions.sh
-else
-  . ${PROGDIR}/scripts/functions.sh
-fi
+. ${PROGDIR}/scripts/functions.sh
 
 # Make sure we have some  directories we need
 mkdir -p ${PROGDIR}/iso >/dev/null 2>/dev/null
