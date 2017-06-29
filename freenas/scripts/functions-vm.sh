@@ -83,8 +83,7 @@ start_bhyve()
   fi
 
   # Finally, have our bridge pickup an IP Address
-  #ifconfig ${IXBUILD_BRIDGE} up && dhclient ${IXBUILD_BRIDGE}
-  ifconfig ${IXBUILD_BRIDGE} up
+  ifconfig ${IXBUILD_BRIDGE} up && dhclient ${IXBUILD_BRIDGE}
 
   ###############################################
   # Now lets spin-up bhyve and do an installation
@@ -122,21 +121,23 @@ start_bhyve()
     -l com1,${COM_BROADCAST} \
     $BUILDTAG ) &
 
-  # Reset output after installation is complete
+  # Run our expect/tcl script to automate the installation dialog
   ${PROGDIR}/scripts/bhyve-installer.exp "${COM_LISTEN}" "${VM_OUTPUT}"
-  local EXIT_STATUS=$?
-  echo -e \\033c
-  echo "Installation completed with status: ${EXIT_STATUS}"
+  echo -e \\033c # Reset/clear to get native term dimensions
+  echo "Installation completed."
 
   # Shutdown VM, stop output
   sleep 30
-  bhyvectl --destroy --vm=$BUILDTAG &>/dev/null
+  bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
 
   # Determine which nullmodem slot to use for boot-up
-  #local com_idx=0
-  #until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
-  #local COM_BROADCAST="/dev/nmdm${com_idx}A"
-  #local COM_LISTEN="/dev/nmdm${com_idx}B"
+  local com_idx=0
+  until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
+  local COM_BROADCAST="/dev/nmdm${com_idx}A"
+  local COM_LISTEN="/dev/nmdm${com_idx}B"
+
+  # Fixes: ERROR: "vm_open: Invalid argument"
+  sleep 10
 
   ( bhyve -w -A -H -P -c 1 -m 2G \
     -s 0:0,hostbridge \
@@ -149,13 +150,8 @@ start_bhyve()
     -l com1,${COM_BROADCAST} \
     $BUILDTAG ) &
 
-  # Connect to our nullmodem com port and tail -f the output during installation.
-  # ERROR: "vm_open: Invalid argument"
-  cu -l ${COM_LISTEN} | tee /dev/tty >> ${VM_OUTPUT}
-  #( cu -l ${COM_LISTEN} &>> ${VM_OUTPUT} ) &
-  #echo "DEBUG: Starting tail of boot-up output"
-  #[ -f "${VM_OUTPUT}" ] && tail -f -n 0 ${VM_OUTPUT} | tee /dev/tty | sed '/Starting nginx./ q' | sed '/Plugin loaded: SSHPlugin/ q'
-  #echo "DEBUG: Done tailing boot-up"
+  ${PROGDIR}/scripts/bhyve-bootup.exp "${COM_LISTEN}" "${VM_OUTPUT}"
+  echo "Exiting boot-up script."
 
   local EXIT_STATUS=1
   if grep -q "Starting nginx." ${VM_OUTPUT} || grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT} ; then
@@ -165,6 +161,7 @@ start_bhyve()
       EXIT_STATUS=0
     fi
   fi
+  echo "Exiting"
 
   return $EXIT_STATUS
 }
