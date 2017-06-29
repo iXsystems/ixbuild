@@ -15,19 +15,19 @@ set timeout 1800
 set PID [spawn cu -l $nullmodem]
 send_user "Spawned PID: $PID \n"
 
-expect {
-  "Press enter to boot the selected OS" {
-    sleep .5
-    send "\r"
-  }
-}
-
-expect {
-  "Press any key to continue..." {
-    sleep .5
-    send "\r"
-  }
-}
+#expect {
+#  "Press enter to boot the selected OS" {
+#    sleep .5
+#    send "\r"
+#  }
+#}
+#
+#expect {
+#  "Press any key to continue..." {
+#    sleep .5
+#    send "\r"
+#  }
+#}
 
 # This is not yet working...
 #expect {
@@ -41,6 +41,7 @@ expect {
 expect {
   "Enter an option from 1-12:" {
     sleep .5
+    puts "Sending ~."
     send \176.
     exit
   }
