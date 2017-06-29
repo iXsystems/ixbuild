@@ -75,6 +75,12 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install -y bash"
 fi
 
+which expect >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing shells/expect..."
+  rc_halt "pkg-static install -y expect"
+fi
+
 which js24 >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing lang/spidermonkey24.."

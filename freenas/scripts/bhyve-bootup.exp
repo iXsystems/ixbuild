@@ -16,7 +16,7 @@ set PID [spawn cu -l $nullmodem]
 send_user "Spawned PID: $PID \n"
 
 expect {
-  "The highlighted entry will be executed automatically" {
+  "Press enter to boot the selected OS" {
     sleep .5
     send "\r"
   }
@@ -41,6 +41,7 @@ expect {
 expect {
   "Enter an option from 1-12:" {
     sleep .5
+    send "~."
     exit
   }
 }
