@@ -151,7 +151,6 @@ start_bhyve()
     $BUILDTAG ) &
 
   ${PROGDIR}/scripts/bhyve-bootup.exp "${COM_LISTEN}" "${VM_OUTPUT}"
-  echo "Exiting boot-up script."
 
   local EXIT_STATUS=1
   if grep -q "Starting nginx." ${VM_OUTPUT} || grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT} ; then
@@ -159,9 +158,10 @@ start_bhyve()
     if [ -n "${FNASTESTIP}" ] ; then
       echo "FNASTESTIP=${FNASTESTIP}"
       EXIT_STATUS=0
+    else
+      echo "ERROR: No ip address assigned to VM. FNASTESTIP not set."
     fi
   fi
-  echo "Exiting"
 
   return $EXIT_STATUS
 }
