@@ -151,6 +151,7 @@ start_bhyve()
     $BUILDTAG ) &
 
   ${PROGDIR}/scripts/bhyve-bootup.exp "${COM_LISTEN}" "${VM_OUTPUT}"
+  echo -e \\033c # Reset/clear to get native term dimensions
 
   local EXIT_STATUS=1
   if grep -q "Starting nginx." ${VM_OUTPUT} || grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT} ; then
