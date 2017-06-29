@@ -41,7 +41,7 @@ expect {
 expect {
   "Enter an option from 1-12:" {
     sleep .5
-    send "~."
+    send \176.
     exit
   }
 }

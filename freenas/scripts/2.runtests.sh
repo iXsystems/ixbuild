@@ -8,6 +8,8 @@ export PROGDIR
 ISOFILE="${1}"
 # Local location of FreeNAS build
 [ -n "$BUILDTAG" ] && export FNASBDIR="/$BUILDTAG" || export FNASBDIR="/freenas"
+# Set the default VMBACKEND
+[ -z "${VMBACKEND}" ] && export VMBACKEND="bhyve"
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
@@ -60,11 +62,6 @@ fi
 # Set the name for VM
 VM="$BUILDTAG"
 export VM
-
-# Set the default VMBACKEND
-if [ -z "$VMBACKEND" ] ; then
-  VMBACKEND="bhyve"
-fi
 
 # Copy ISO to autoinstalls if using jailed test executor
 [ -f "/tmp/$BUILDTAG" ] && cp /$BUILDTAG.iso /autoinstalls
