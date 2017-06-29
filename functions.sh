@@ -1194,6 +1194,7 @@ jenkins_freenas_tests()
         read iso_confirmed
 
         if test -n "${iso_confirmed}" && test "${iso_confirmed}" = "y" ; then
+          "${PROGDIR}"/freenas/scripts/checkprogs.sh
           "${PROGDIR}"/freenas/scripts/2.runtests.sh "${ISODIR}${iso_name}"
           EXIT_STATUS=$?
           break

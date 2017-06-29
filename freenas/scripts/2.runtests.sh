@@ -18,9 +18,7 @@ ISOFILE="${1}"
 . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
 # Make sure we have all the required packages installed
-if uname -a | grep -q "FreeBSD" ; then
-  ${PROGDIR}/scripts/checkprogs.sh
-fi
+${PROGDIR}/scripts/checkprogs.sh
 
 # Run the REST tests now
 cd ${PROGDIR}/scripts

@@ -1,5 +1,12 @@
 #!/usr/bin/env sh
 
+# Exit if this is not a FreeBSD host.
+if ! uname -a | grep -q "FreeBSD" ; then
+  echo "Unabled to install required packages. Manual installation will be required."
+  echo "See \"./ixbuild/freenas/scripts/checkprogs.sh\" for requirements."
+  exit 1
+fi
+
 # Flag to notify consecutive runs that checkprogs has already ran.
 # Allow this file path to be overridden in build.conf
 if [ -z "${IXBUILD_CHECKPROGS_INSTALLED}" ]; then

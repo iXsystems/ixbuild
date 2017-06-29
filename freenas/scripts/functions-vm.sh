@@ -66,6 +66,10 @@ start_bhyve()
     echo ${IXBUILD_TAP} > ${TAP_LOCKFILE}
   fi
 
+  #
+  # @TODO: If $IXBUILD_IFACE is wlan0, setup NAT with DHCP (using dnsmasq)
+  #
+
   # Check the status of our network bridge
   if ! ifconfig ${IXBUILD_BRIDGE} >/dev/null 2>/dev/null ; then
     bridge=$(ifconfig bridge create)
