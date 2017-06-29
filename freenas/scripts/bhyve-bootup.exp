@@ -15,6 +15,20 @@ set timeout 1800
 set PID [spawn cu -l $nullmodem]
 send_user "Spawned PID: $PID \n"
 
+expect {
+  "The highlighted entry will be executed automatically" {
+    sleep .5
+    send "\r"
+  }
+}
+
+expect {
+  "Press any key to continue..." {
+    sleep .5
+    send "\r"
+  }
+}
+
 # This is not yet working...
 #expect {
 #  -re {http://(\d+)(\D)(\d+)(\D)(\d+)(\D)(\d+)} {
