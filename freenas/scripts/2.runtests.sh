@@ -65,7 +65,7 @@ export VM
 
 # Set the default VMBACKEND
 if [ -z "$VMBACKEND" ] ; then
-  VMBACKEND="vbox"
+  VMBACKEND="bhyve"
 fi
 
 # Copy ISO to autoinstalls if using jailed test executor
