@@ -12,7 +12,7 @@ export REQUIRES
 iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
-  local DEVICE_NAME_PATH="/tmp/iscsi_dev_name"
+  local DEVICE_NAME_PATH="/tmp/${BUILDTAG}iscsi"
   local TARGET_NAME="iqn.${BUILDTAG}:target0"
 
   # Set the group text and number of tests
@@ -96,7 +96,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Creating iSCSI mountpoint"
-  bsd_test "mkdir '${MOUNTPOINT}'"
+  bsd_test "mkdir -p '${MOUNTPOINT}'"
   check_exit_status || return 1
 
   echo_test_title "Mount the target volume"
