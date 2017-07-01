@@ -285,7 +285,7 @@ if [ -n "${PRBUILDER}" ] ; then
    rm -rf ${PROFILE}/_BE/${PRBUILDER}
    echo "Replacing repo with PR-updated version:"
    echo "${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
-   cp -r ${WORKSPACE} ${PROFILE}/_BE/${PRBUILDER}
+   cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
 fi
 
 # Display output to stdout
