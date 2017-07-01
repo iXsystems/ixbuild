@@ -273,6 +273,21 @@ if [ $CPUS -gt 10 ] ; then
   export POUDRIERE_JOBS="10"
 fi
 
+# We are doing a build as a result of a PR
+# Lets copy the repo from WORKSPACE into the correct location
+if [ -n "${PRBUILDER}" ] ; then
+   cd ${FNASBDIR}
+   eval $PROFILEARGS
+   if [ ! -d "${PROFILE}/_BE/${PRBUILDER}" ] ; then
+      echo "ERROR: Could not locate PR repo: ${PROFILE}/_BE/${PRBUILDER}"
+      exit 1
+   fi
+   rm -rf ${PROFILE}/_BE/${PRBUILDER}
+   echo "Replacing repo with PR-updated version:"
+   echo "${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
+   cp -r ${WORKSPACE} ${PROFILE}/_BE/${PRBUILDER}
+fi
+
 # Display output to stdout
 touch $OUTFILE
 (sleep 5 ; tail -f $OUTFILE 2>/dev/null) &
