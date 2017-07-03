@@ -59,6 +59,7 @@ publish-iso     - Upload ISO files to ScaleEngine
 publish-iso-edge- Upload ISO files to ScaleEngine (Bleeding Edge)
 publish-pkg     - Upload PKG files to ScaleEngine
 publish-pkg-edge- Upload PKG files to ScaleEngine (Bleeding Edge)
+publish-pkg-unstable- Upload PKG files to ScaleEngine (Unstable)
 publish-pkg-ipfs- Add and pin PKG files to IPFS repo
 promote-pkg  - Promote packages from UNSTABLE -> STABLE
 trueos-docs     - Create TrueOS handbook
@@ -112,6 +113,7 @@ iso-pkg|trueos-iso-pkg) jenkins_pkg "iso" ;;
       publish-iso-edge) jenkins_publish_iso "edge" ;;
            publish-pkg) jenkins_publish_pkg ;;
       publish-pkg-edge) jenkins_publish_pkg "edge" ;;
+  publish-pkg-unstable) jenkins_publish_pkg "unstable" ;;
       publish-pkg-ipfs) jenkins_publish_pkg_ipfs ;;
            promote-pkg) jenkins_promote_pkg ;;
           vm|trueos-vm) jenkins_vm ;;
