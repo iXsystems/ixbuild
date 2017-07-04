@@ -48,7 +48,7 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
+  bsd_test "until iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}; do sleep 3; done"
   check_exit_status || return 1
  
   echo_test_title "Waiting for iscsi connection before grabbing device name"
