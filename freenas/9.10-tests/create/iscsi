@@ -28,7 +28,7 @@ iscsi_tests()
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  bsd_test "test -f \"${DEVICE_NAME_PATH}\" && iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t ${TARGET_NAME}"
   bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
   bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
