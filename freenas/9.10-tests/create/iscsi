@@ -13,7 +13,7 @@ iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
   local DEVICE_NAME_PATH="/tmp/${BUILDTAG}iscsi"
-  local TARGET_NAME="iqn.${BUILDTAG}:target0"
+  local TARGET_NAME="iqn.$(echo ${BUILDTAG} | sed 's|-||g'):target0"
 
   # Set the group text and number of tests
   set_test_group_text "1 - Create - iSCSI tests" "24"
@@ -77,6 +77,7 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
+  local loop_cnt=0
   while [ $loop_cnt -le 6 ] ; do
     bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
     if [ $? -ne 0 ] ; then
@@ -88,15 +89,26 @@ iscsi_tests()
   done
 
   echo_test_title "Waiting for iscsi connection before grabbing device name"
-  # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
-  # have been established before -L[isting] results
-  bsd_test "iscsictl -L -w 30"
-  check_exit_status || return 1
+  local loop_cnt=0
+  while [ $loop_cnt -le 12 ] ; do
+    bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" {print \$1}'"
+    local iscsi_results=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $0}')
+    local iscsi_state=$(echo ${iscsi_results} | awk '{print $3}')
+    local iscsi_dev=$(echo ${iscsi_results} | awk '{print $4}')
 
-  # Get the device for the connect target
-  echo_test_title "Get the iSCSI target device name for the connection target"
-  bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
-  check_exit_status || return 1
+    if [ -n "${iscsi_state}" -a "${iscsi_state}" == "Connected:" ] ; then
+      if [ -n "${iscsi_dev}" ] ; then
+        DEVICE_NAME_PATH=$iscsi_dev
+        echo_ok && break
+      else
+        echo -n "... connected with no device"
+      fi
+    fi
+
+    $loop_cnt=$(expr $loop_cnt + 1)
+    [ $loop_cnt -gt 12 ] && echo_fail && return 1
+    sleep 3
+  done
 
   echo_test_title "Format the target volume"
   bsd_test "newfs /dev/\`cat \"${DEVICE_NAME_PATH}\"\`"
