@@ -105,7 +105,7 @@ iscsi_tests()
       fi
     fi
 
-    $loop_cnt=$(expr $loop_cnt + 1)
+    loop_cnt=$(expr $loop_cnt + 1)
     [ $loop_cnt -gt 12 ] && echo_fail && return 1
     sleep 3
   done
