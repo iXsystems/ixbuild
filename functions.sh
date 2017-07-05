@@ -104,6 +104,7 @@ create_workdir()
   # If this is a github pull request builder, check if branch needs to be overridden
   if [ -n "$ghprbTargetBranch" ] ; then
     IXBUILDBRANCH=$ghprbTargetBranch
+    echo "Building GitHub PR, using builder branch: $IXBUILDBRANCH"
   fi
 
   cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
