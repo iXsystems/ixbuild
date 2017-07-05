@@ -101,6 +101,11 @@ create_workdir()
 
   MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
+  # If this is a github pull request builder, check if branch needs to be overridden
+  if [ -n "$ghprbTargetBranch" ] ; then
+    IXBUILDBRANCH=$ghprbTargetBranch
+  fi
+
   cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
   echo "Cloning with: $cocmd"
   $cocmd
