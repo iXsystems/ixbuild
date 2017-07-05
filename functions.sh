@@ -424,11 +424,11 @@ jenkins_publish_pkg()
   scale="pcbsd@pcbsd-master.scaleengine.net"
   target="/usr/home/pcbsd/mirror/pkg"
 
-  if [ -n "$1" -a "$1" = "edge" ] ; then
-    RTARGET="${TARGETREL}/edge"
-  else
-    RTARGET="${TARGETREL}"
-  fi
+  case ${1} in
+	  edge) RTARGET="${TARGETREL}/edge" ;;
+	  unstable) RTARGET="${TARGETREL}/unstable" ;;
+	  *) RTARGET="${TARGETREL}" ;;
+  esac
 
   # Make sure remote target exists
   echo "ssh ${scale} mkdir -p ${target}/${RTARGET}"
@@ -1552,6 +1552,12 @@ do_build_env_setup()
     ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/edge/${PACKAGE_ARCH}"
     DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/edge"
     WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/edge/${PACKAGE_ARCH}"
+    WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/${PACKAGE_ARCH}"
+  elif [ "$BRANCH" = "UNSTABLE" -o "$BRANCH" = "unstable" ] ; then
+    PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/unstable/${PACKAGE_ARCH}"
+    ISOSTAGE="${SFTPFINALDIR}/iso/${TARGETREL}/unstable/${PACKAGE_ARCH}"
+    DOCSTAGE="${SFTPFINALDIR}/doc/${TARGETREL}/unstable"
+    WORKPKG="${SFTPWORKDIR}/pkg/${PKGVERUPLOAD}/unstable/${PACKAGE_ARCH}"
     WORKWORLD="${SFTPWORKDIR}/world/${WORLDTREL}/${PACKAGE_ARCH}"
   elif [ "$BRANCH" = "ENTERPRISE" -o "$BRANCH" = "enterprise" ] ; then
     PKGSTAGE="${SFTPFINALDIR}/pkg/${PKGVERUPLOAD}/enterprise/${PACKAGE_ARCH}"

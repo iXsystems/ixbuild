@@ -52,7 +52,7 @@ nfs_tests()
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
   echo_test_title "Creating NFS mountpoint"
-  bsd_test "mkdir \"${MOUNTPOINT}\""
+  bsd_test "mkdir -p \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Mounting NFS"

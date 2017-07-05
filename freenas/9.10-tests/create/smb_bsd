@@ -60,7 +60,7 @@ smb_bsd_tests()
 
   # Now check if we can mount SMB / create / rename / copy / delete / umount
   echo_test_title "Creating SMB mountpoint"
-  bsd_test "mkdir \"${MOUNTPOINT}\" && sync"
+  bsd_test "mkdir -p \"${MOUNTPOINT}\" && sync"
   check_exit_status || return 1
 
   echo_test_title "Mounting SMB"

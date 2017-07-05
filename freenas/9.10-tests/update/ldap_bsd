@@ -83,7 +83,7 @@ ldap_bsd_tests()
 
   # Now check if we can mount SMB / create / rename / copy / delete / umount
   echo_test_title "Creating SMB mountpoint"
-  bsd_test "mkdir \"${MOUNTPOINT}\" && sync"
+  bsd_test "mkdir -p \"${MOUNTPOINT}\" && sync"
   check_exit_status || return 1
 
   # The LDAPUSER user must exist in LDAP with this password
@@ -133,7 +133,7 @@ ldap_bsd_tests()
   check_exit_status
 
   echo_test_title "Removing SMB mountpoint"
-  bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
+  bsd_test "test -d\"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
   check_exit_status || return 1
 
   echo_test_title "Removing SMB share on ${SMB_PATH}"
