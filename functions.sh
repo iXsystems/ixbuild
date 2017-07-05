@@ -101,25 +101,11 @@ create_workdir()
 
   MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
-  # If this is a github pull request builder, check if branch needs to be overridden
-  if [ -n "$ghprbTargetBranch" ] ; then
-    IXBUILDBRANCH=$ghprbTargetBranch
-    echo "Building GitHub PR, using builder branch: $IXBUILDBRANCH"
-  fi
-
-  if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
-    # PR Build
-    echo "Doing PR build of the build/ repo"
-    echo "${WORKSPACE} -> ${MASTERWRKDIR}"
-    cp -r "${WORKSPACE}" "${MASTERWRKDIR}"
-    if [ $? -ne 0 ] ; then exit_clean; fi
-  else
-    # Vanilla Checkout
-    cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
-    echo "Cloning with: $cocmd"
-    $cocmd
-    if [ $? -ne 0 ] ; then exit_clean; fi
-  fi
+  # Vanilla Checkout
+  cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
+  echo "Cloning with: $cocmd"
+  $cocmd
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
   cd ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi

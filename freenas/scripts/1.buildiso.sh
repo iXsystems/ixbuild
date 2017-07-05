@@ -73,6 +73,12 @@ if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
   rm -rf ${BEDIR}
 fi
 
+# If this is a github pull request builder, check if branch needs to be overridden
+if [ -n "$ghprbTargetBranch" ] ; then
+  GITFNASBRANCH="$gbprbTargetBranch"
+  echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
+fi
+
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
   echo "Doing incremental build!"
   cd ${FNASBDIR}
@@ -101,16 +107,29 @@ if [ -n "$BUILDSENV" ] ; then
   BUILDSENV="env $BUILDSENV"
 fi
 
-if [ -d "${FNASBDIR}" ] ; then
-  rc_halt "cd ${FNASBDIR}"
-  OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
-  if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
-     # Branch mismatch, re-clone
-     echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
-     cd ${PROGDIR}
-     rm -rf ${FNASBDIR}
-     chflags -R noschg ${FNASBDIR}
-     rm -rf ${FNASBDIR}
+if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
+  # PR Build
+  echo "Doing PR build of the build/ repo"
+  echo "${WORKSPACE} -> ${FNASBDIR}"
+  cd ${PROGDIR}
+  rm -rf ${FNASBDIR}
+  chflags -R noschg ${FNASBDIR}
+  rm -rf ${FNASBDIR}
+  cp -r "${WORKSPACE}" "${FNASBDIR}"
+  if [ $? -ne 0 ] ; then exit_clean; fi
+else
+  # Regular build
+  if [ -d "${FNASBDIR}" ] ; then
+    rc_halt "cd ${FNASBDIR}"
+    OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
+    if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
+       # Branch mismatch, re-clone
+       echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
+       cd ${PROGDIR}
+       rm -rf ${FNASBDIR}
+       chflags -R noschg ${FNASBDIR}
+       rm -rf ${FNASBDIR}
+    fi
   fi
 fi
 
