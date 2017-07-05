@@ -131,17 +131,16 @@ else
        rm -rf ${FNASBDIR}
     fi
   fi
-fi
 
-# Make sure we have our freenas sources
-if [ -d "${FNASBDIR}" ]; then
-  rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
-  git_fnas_up "${FNASSRC}" "${FNASSRC}"
-else
-  rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
-  rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
-  git_fnas_up "${FNASSRC}" "${FNASSRC}"
+  # Make sure we have our freenas sources
+  if [ -d "${FNASBDIR}" ]; then
+    git_fnas_up "${FNASSRC}" "${FNASSRC}"
+  else
+    rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+    git_fnas_up "${FNASSRC}" "${FNASSRC}"
+  fi
 fi
+rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
 
 # Lets keep our distfiles around and use previous ones
 if [ ! -d "/usr/ports/distfiles" ] ; then
