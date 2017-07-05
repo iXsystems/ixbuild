@@ -13,6 +13,8 @@ export REQUIRES
 # We also leave it enabled, so we have access to VM if something hangs / goes wrong
 ssh_tests()
 {
+  local ssh_keypath="${HOME}/.ssh/id_rsa"
+
   set_test_group_text "1 - Create - SSH Tests" "4"
   CLASSNAME=ixbuild.resty.functional.create.ssh
 
@@ -28,18 +30,25 @@ ssh_tests()
   rest_request "GET" "/services/services/ssh/"
   check_service_status "RUNNING"
 
-  # Generate ssh rsa key if one doesn't exist
+  echo_test_title "Ensure that we have a running ssh-agent"
+  ssh-add -L 2>&1 | grep -q "Error connecting to agent" && echo_fail && return 1 || echo_ok
+
+  # Grab the path if an RSA key already exists and is ready to use
   if ssh-add -L | grep -q "^ssh-rsa" ; then
-    if [ ! -f ${HOME}/.ssh/id_rsa ] ; then
-      ssh-keygen -b 4096 -t rsa -q -N ""
+    ssh_keypath=$(ssh-add -L | awk '$1 == "ssh-rsa" {print $3}' | head -n 1)
+  else
+    if [ ! -f "${ssh_keypath}" -a -f "${HOME}/.ssh/id_rsa.tests" ] ; then
+      ssh_keypath="${HOME}/.ssh/id_rsa.tests"
+    elif [ ! -f "${ssh_keypath}" ] ; then
+      ssh-keygen -b 4096 -t rsa -q -N "" -f "${ssh_keypath}" >/dev/null 2>/dev/null
     fi
-    ssh-add ${HOME}/.ssh/id_rsa &>/dev/null
+    ssh-add "${ssh_keypath}" >/dev/null 2>/dev/null
   fi
 
   # Get the root user id so we can add ssh keys to the test target
   rest_request "GET" "/account/users/"
   local root_user_id=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.bsdusr_username == "root") { out(this.id) }')
-  local ssh_pubkey="$(cat ~/.ssh/id_rsa.pub)"
+  local ssh_pubkey="$(cat "${ssh_keypath}".pub)"
 
   echo_test_title "Adding SSH public key from the executor to the root user account"
   if [ -n "$root_user_id" -a -n "$ssh_pubkey" ]; then

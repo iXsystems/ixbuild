@@ -15,23 +15,23 @@ storage_tests()
   set_test_group_text "1 - Create - Storage tests" "46"
   CLASSNAME=ixbuild.resty.functional.create.storage
 
-# Set the default VMBACKEND
-if [ -z "$VMBACKEND" ] ; then
-  VMBACKEND="vbox"
-  echo "No virtual machine backend specified, defaulting to '${VMBACKEND}'."
-fi
+  # Set the default VMBACKEND
+  if [ -z "$VMBACKEND" ] ; then
+    VMBACKEND="vbox"
+    echo "No virtual machine backend specified, defaulting to '${VMBACKEND}'."
+  fi
 
-# Determine which VM backend to use for storage
-case ${VMBACKEND} in
-  esxi)
-    export disk1="da0"
-    export disk2="da1"
-    ;;
-  vbox)
-    export disk1="ada1"
-    export disk2="ada2"
-    ;;
-esac
+  # Determine which VM backend to use for storage
+  case ${VMBACKEND} in
+    esxi)
+      export disk1="da0"
+      export disk2="da1"
+      ;;
+    vbox|bhyve)
+      export disk1="ada1"
+      export disk2="ada2"
+      ;;
+  esac
 
   # Check getting disks
   echo_test_title "Disks / API functionality"
