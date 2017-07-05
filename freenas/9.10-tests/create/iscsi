@@ -91,10 +91,9 @@ iscsi_tests()
   echo_test_title "Waiting for iscsi connection before grabbing device name"
   local loop_cnt=0
   while [ $loop_cnt -le 12 ] ; do
-    bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" {print \$1}'"
-    local iscsi_results=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $0}')
-    local iscsi_state=$(echo ${iscsi_results} | awk '{print $3}')
-    local iscsi_dev=$(echo ${iscsi_results} | awk '{print $4}')
+    bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" {print \$0}'"
+    local iscsi_state=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $3}')
+    local iscsi_dev=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $4}')
 
     if [ -n "${iscsi_state}" -a "${iscsi_state}" == "Connected:" ] ; then
       if [ -n "${iscsi_dev}" ] ; then
