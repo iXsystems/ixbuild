@@ -275,7 +275,7 @@ fi
 
 # We are doing a build as a result of a PR
 # Lets copy the repo from WORKSPACE into the correct location
-if [ -n "${PRBUILDER}" ] ; then
+if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
    cd ${FNASBDIR}
    eval $PROFILEARGS
    if [ ! -d "${PROFILE}/_BE/${PRBUILDER}" ] ; then

@@ -107,10 +107,19 @@ create_workdir()
     echo "Building GitHub PR, using builder branch: $IXBUILDBRANCH"
   fi
 
-  cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
-  echo "Cloning with: $cocmd"
-  $cocmd
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
+    # PR Build
+    echo "Doing PR build of the build/ repo"
+    echo "${WORKSPACE} -> ${MASTERWRKDIR}"
+    cp -r "${WORKSPACE}" "${MASTERWRKDIR}"
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  else
+    # Vanilla Checkout
+    cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
+    echo "Cloning with: $cocmd"
+    $cocmd
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
 
   cd ${MASTERWRKDIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
