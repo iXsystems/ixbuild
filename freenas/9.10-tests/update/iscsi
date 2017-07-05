@@ -51,7 +51,7 @@ iscsi_tests()
   while [ $loop_cnt -le 6 ] ; do
     bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
     if [ $? -ne 0 ] ; then
-      $loop_cnt=$(expr $loop_cnt + 1)
+      loop_cnt=$(expr $loop_cnt + 1)
       [ $loop_cnt -gt 6 ] && echo_fail && return 1
       sleep 3
     fi  
