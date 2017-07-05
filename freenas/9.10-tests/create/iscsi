@@ -13,7 +13,7 @@ iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
   local DEVICE_NAME_PATH="/tmp/${BUILDTAG}iscsi"
-  local TARGET_NAME="iqn.$(echo ${BUILDTAG} | sed 's|-||g'):target0"
+  local TARGET_NAME="iqn.1994-09.${BUILDTAG}qa:target0"
 
   # Set the group text and number of tests
   set_test_group_text "1 - Create - iSCSI tests" "24"
