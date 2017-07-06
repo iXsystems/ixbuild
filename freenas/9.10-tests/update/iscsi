@@ -48,6 +48,7 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
+  local loop_cnt=0;
   while [ $loop_cnt -le 6 ] ; do
     bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
     if [ $? -eq 0 ] ; then
