@@ -75,7 +75,7 @@ fi
 
 # If this is a github pull request builder, check if branch needs to be overridden
 if [ -n "$ghprbTargetBranch" ] ; then
-  GITFNASBRANCH="$gbprbTargetBranch"
+  GITFNASBRANCH="$ghprbTargetBranch"
   echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
 fi
 
@@ -107,14 +107,18 @@ if [ -n "$BUILDSENV" ] ; then
   BUILDSENV="env $BUILDSENV"
 fi
 
+if [ -n "$PRBUILDER" ] ; then
+  # Nuke the build dir if doing Pull Request Build
+  cd ${PROGDIR}
+  rm -rf ${FNASBDIR} 2>/dev/null
+  chflags -R noschg ${FNASBDIR} 2>/dev/null
+  rm -rf ${FNASBDIR} 2>/dev/null
+fi
+
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
   # PR Build
   echo "Doing PR build of the build/ repo"
   echo "${WORKSPACE} -> ${FNASBDIR}"
-  cd ${PROGDIR}
-  rm -rf ${FNASBDIR}
-  chflags -R noschg ${FNASBDIR}
-  rm -rf ${FNASBDIR}
   cp -r "${WORKSPACE}" "${FNASBDIR}"
   if [ $? -ne 0 ] ; then exit_clean; fi
 else
@@ -126,9 +130,9 @@ else
        # Branch mismatch, re-clone
        echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
        cd ${PROGDIR}
-       rm -rf ${FNASBDIR}
-       chflags -R noschg ${FNASBDIR}
-       rm -rf ${FNASBDIR}
+       rm -rf ${FNASBDIR} 2>/dev/null
+       chflags -R noschg ${FNASBDIR} 2>/dev/null
+       rm -rf ${FNASBDIR} 2>/dev/null
     fi
   fi
 
