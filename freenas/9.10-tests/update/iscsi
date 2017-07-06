@@ -50,13 +50,17 @@ iscsi_tests()
   echo_test_title "Connecting to iSCSI target"
   while [ $loop_cnt -le 6 ] ; do
     bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
-    if [ $? -ne 0 ] ; then
-      loop_cnt=$(expr $loop_cnt + 1)
-      [ $loop_cnt -gt 6 ] && echo_fail && return 1
-      sleep 3
-    fi  
-    echo_ok && break
+    if [ $? -eq 0 ] ; then
+      echo_ok
+      break
+    fi
+    loop_cnt=$(expr $loop_cnt + 1)
+    [ $loop_cnt -gt 6 ] && echo_fail && return 1
+    sleep 3
   done
+
+  # TODO: remove debug sleep
+  sleep 15
  
   echo_test_title "Waiting for iscsi connection before grabbing device name.."
   local loop_cnt=0
@@ -67,7 +71,8 @@ iscsi_tests()
 
     if [ -n "${iscsi_state}" -a "${iscsi_state}" == "Connected:" ] ; then
       if [ -n "${iscsi_dev}" ] ; then
-        DEVICE_NAME_PATH=$iscsi_dev
+        DEVICE_NAME=$iscsi_dev
+        echo -n " using \"${DEVICE_NAME}\""
         echo_ok && break
       else
         echo -n "... connected with no device"
@@ -87,7 +92,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Mount the target volume"
-  bsd_test "mount \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
+  bsd_test "mount \"/dev/${DEVICE_NAME}\" \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Creating 45MB file to verify vzol size increase"

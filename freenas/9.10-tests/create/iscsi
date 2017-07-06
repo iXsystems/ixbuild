@@ -12,7 +12,7 @@ export REQUIRES
 iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
-  local DEVICE_NAME_PATH="/tmp/${BUILDTAG}iscsi"
+  local DEVICE_NAME="/tmp/${BUILDTAG}iscsi"
   local TARGET_NAME="iqn.1994-09.${BUILDTAG}qa:target0"
 
   # Set the group text and number of tests
@@ -76,17 +76,22 @@ iscsi_tests()
   check_exit_status || return 1
 
   # Now connect to iSCSI target
-  echo_test_title "Connecting to iSCSI target"
+  echo_test_title "Connecting to iSCSI target.."
   local loop_cnt=0
   while [ $loop_cnt -le 6 ] ; do
     bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
-    if [ $? -ne 0 ] ; then
-      loop_cnt=$(expr $loop_cnt + 1)
-      [ $loop_cnt -gt 6 ] && echo_fail && return 1
-      sleep 3
+    if [ $? -eq 0 ] ; then
+      echo_ok
+      break
     fi
-    echo_ok && break
+    loop_cnt=$(expr $loop_cnt + 1)
+    [ $loop_cnt -gt 6 ] && echo_fail && return 1
+    echo -n "."
+    sleep 3
   done
+
+  # TODO: remove debug sleep
+  sleep 15
 
   echo_test_title "Waiting for iscsi connection before grabbing device name.."
   local loop_cnt=0
@@ -97,7 +102,8 @@ iscsi_tests()
 
     if [ -n "${iscsi_state}" -a "${iscsi_state}" == "Connected:" ] ; then
       if [ -n "${iscsi_dev}" ] ; then
-        DEVICE_NAME_PATH=$iscsi_dev
+        DEVICE_NAME=$iscsi_dev
+        echo -n " using \"${DEVICE_NAME}\""
         echo_ok && break
       else
         echo -n "... connected with no device"
@@ -111,7 +117,7 @@ iscsi_tests()
   done
 
   echo_test_title "Format the target volume"
-  bsd_test "newfs /dev/\`cat \"${DEVICE_NAME_PATH}\"\`"
+  bsd_test "newfs \"/dev/${DEVICE_NAME}\""
   check_exit_status || return 1
 
   echo_test_title "Creating iSCSI mountpoint"
@@ -119,7 +125,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Mount the target volume"
-  bsd_test "mount \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
+  bsd_test "mount \"/dev/${DEVICE_NAME}\" \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Creating file"
