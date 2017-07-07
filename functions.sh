@@ -1140,10 +1140,6 @@ jenkins_freenas_live_tests()
 
 jenkins_freenas_tests()
 {
-  create_workdir
-
-  get_bedir
-
   # If we aren't running as part of the build process, list ISOs in the $ISODIR
   if [ -z "$SFTPHOST" -o -z "$SFTPUSER" ] ; then
 
@@ -1205,6 +1201,8 @@ jenkins_freenas_tests()
     # As part of the process of building a FreeNAS ISO and testing it,
     # if the $SFTPHOST and $SFTPUSER settings exist, pull the built ISO
     # from the build environment directory, copying it to the release dir.
+    create_workdir
+    get_bedir
 
     # Ensure we have a build directory for our ixbuild checkout
     mkdir -p "${TBUILDDIR}" && cd "${TBUILDDIR}"

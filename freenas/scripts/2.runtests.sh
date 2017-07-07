@@ -72,7 +72,7 @@ case ${VMBACKEND} in
     # Grab assigned FNASTESTIP from bhyve installation/boot-up output
     #export FNASTESTIP=$(start_bhyve $ISOFILE | tee /dev/tty | grep '^FNASTESTIP=' | sed 's|^FNASTESTIP=||g')
     start_bhyve "${ISOFILE}"
-    local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
+    VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
     export FNASTESTIP=$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 2 && $1 == "inet" {print $2;exit}' ${VM_OUTPUT})
     export BRIDGEIP=${FNASTESTIP}
     ;;
