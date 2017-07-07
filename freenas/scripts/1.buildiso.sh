@@ -77,6 +77,9 @@ fi
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
   echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
+  newTrain="PR-${PRBUILDER}-`echo $ghprbTargetBranch | sed 's|/|-|g'`"
+  echo "Setting new TRAIN=$newTrain"
+  BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
 fi
 
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
