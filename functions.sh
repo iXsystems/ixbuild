@@ -116,7 +116,7 @@ create_workdir()
     cp -r /ixbuild/builds ${MASTERWRKDIR}/builds
   fi
 
-  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas" -e "corral"
+  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas"
   if [ $? -eq 0 ] ; then
     TBUILDDIR="${MASTERWRKDIR}/freenas"
   else
@@ -1242,12 +1242,22 @@ jenkins_freenas_tests_jailed()
 
 jenkins_freenas_run_tests()
 {
-  create_workdir
-  cd ${TBUILDDIR}/scripts/
-  if [ $? -ne 0 ] ; then exit_clean ; fi
-  echo ""
-  sleep 10
-  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+  if [ -n "${VMBACKEND}" -a "${VMBACKEND}" == "bhyve" ]; then
+    ps -aux | awk '/tail\ -f\ \/tmp\/'${BUILDTAG}'-tests-[a-z]+.log/ {print $2}' | xargs kill
+    local VM_OUTPUT="/tmp/${BUILDTAG}console.log"
+    export FNASTESTIP="$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 1 && $1 == "inet" {print $2;exit}' ${VM_OUTPUT})"
+    export BRIDGEIP=$FNASTESTIP
+    cd "${PROGDIR}/freenas/scripts/"
+    [ $? -ne 0 ] && exit_clean
+  else
+    create_workdir
+    cd ${TBUILDDIR}/scripts/
+    [ $? -ne 0 ] && exit_clean
+    echo ""
+    sleep 10
+    pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+  fi
+
   echo ""
   echo "Output from REST API calls:"
   echo "-----------------------------------------"
