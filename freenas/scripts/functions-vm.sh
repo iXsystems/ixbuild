@@ -22,12 +22,12 @@ start_bhyve()
   [ -z "${IXBUILD_TAP}" ] && export IXBUILD_TAP="tap"
 
   local ISOFILE=$1
-  local VM_OUTPUT="/tmp/${BUILDTAG}-bhyve.out"
+  local VM_OUTPUT="/tmp/${BUILDTAG}console.log"
   local VOLUME="tank"
   local DATADISKOS="${BUILDTAG}-os"
   local DATADISK1="${BUILDTAG}-data1"
   local DATADISK2="${BUILDTAG}-data2"
-  local IXBUILD_DNSMASQ=$(test -n "${IXBUILD_DNSMASQ}" && echo "${IXBUILD_DNSMASQ}" || which dnsmasq)
+  local IXBUILD_DNSMASQ=$(test -n "${IXBUILD_DNSMASQ}" && echo "${IXBUILD_DNSMASQ}" || which dnsmasq 2>/dev/null)
   local BOOT_PIDFILE="/tmp/.cu-${BUILDTAG}-boot.pid"
   local TAP_LOCKFILE="/tmp/.tap-${BUILDTAG}.lck"
 
@@ -131,7 +131,7 @@ start_bhyve()
   echo "Installation completed."
 
   # Shutdown VM, stop output
-  sleep 30
+  sleep 10
   bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
 
   # Determine which nullmodem slot to use for boot-up
@@ -152,14 +152,14 @@ start_bhyve()
     -s 7:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK2} \
     -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
     -l com1,${COM_BROADCAST} \
-    $BUILDTAG ) &
+    $BUILDTAG ) & disown
 
   ${PROGDIR}/scripts/bhyve-bootup.exp "${COM_LISTEN}" "${VM_OUTPUT}"
   echo -e \\033c # Reset/clear to get native term dimensions
 
   local EXIT_STATUS=1
   if grep -q "Starting nginx." ${VM_OUTPUT} || grep -q "Plugin loaded: SSHPlugin" ${VM_OUTPUT} ; then
-    local FNASTESTIP="$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 2 && $1 == "inet" {print $2;exit}' ${VM_OUTPUT})"
+    local FNASTESTIP="$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 1 && $1 == "inet" {print $2;exit}' ${VM_OUTPUT})"
     if [ -n "${FNASTESTIP}" ] ; then
       echo "FNASTESTIP=${FNASTESTIP}"
       EXIT_STATUS=0
