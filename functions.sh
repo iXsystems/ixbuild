@@ -1156,47 +1156,59 @@ jenkins_freenas_tests()
     # List ISOs in ${ISODIR} and allow the user to select the target
     iso_cnt=`cd ${ISODIR} && ls -l *.iso 2>/dev/null | wc -l | sed 's| ||g'`
 
-    # Exit cleanly if no ISO found...
+    # Exit cleanly if no ISO found in $ISODIR
     if [ $iso_cnt -lt 1 ] ; then
       echo "No local ISO found in \"${ISODIR}\""
       echo "You can change this path by setting \$IXBUILD_FREENAS_ISODIR in build.conf"
       exit_clean
     fi
 
-    # Loop until we get a valid user selection
-    while :
-    do
-      echo "Please select which ISO to test (1-$iso_cnt):"
+    # Our to-be-determined file name of the ISO to test; must be inside $ISODIR
+    local iso_name=""
 
-      # List ISOs in the ./freenas/iso/ directory, numbering the results for selection
-      ls -l "${ISODIR}"*.iso | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
-      echo -n "Enter your selection and press [ENTER]: "
+    # If there's only one ISO in the $ISODIR, assume it's for testing.
+    if [ $iso_cnt -eq 1 ] ; then
+      # Snatch the first (only) ISO listed in the directory
+      iso_name="$(cd "${ISODIR}" && ls -l *.iso | awk 'NR == 1 {print $9}')"
+    else 
+      # Otherwise, loop until we get a valid user selection
+      while :
+      do
+        echo "Please select which ISO to test (1-$iso_cnt):"
 
-      # Prompt user to determine which iso is used
-      read iso_selection
+        # Listing ISOs in the ./freenas/iso/ directory, numbering the results for selection
+        ls -l "${ISODIR}"*.iso | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
+        echo -n "Enter your selection and press [ENTER]: "
 
-      # Only accept integer chars
-      iso_selection=${iso_selection##*[!0-9]*}
+        # Prompt user to determine which ISO to use
+        read iso_selection
 
-      if [ -z $iso_selection ] || [ $iso_selection -lt 1 ] || [ $iso_selection -gt $iso_cnt ] 2>/dev/null; then
-        echo -n "Invalid selection.." && sleep 1 && echo -n "." && sleep 1 && echo "."
-      elif [ -n "`echo $iso_selection | sed 's| ||g'`" ] ; then
+        # Only accept integer chars for our ISO selection
+        iso_selection=${iso_selection##*[!0-9]*}
 
-        iso_name="$(cd ${ISODIR} && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}')"
+        # If an invalid selection, notify the user, pause briefly and then re-prompt for a selection
+        if [ -z $iso_selection ] || [ $iso_selection -lt 1 ] || [ $iso_selection -gt $iso_cnt ] 2>/dev/null; then
+          echo -n "Invalid selection.." && sleep 1 && echo -n "." && sleep 1 && echo "."
+        elif [ -n "`echo $iso_selection | sed 's| ||g'`" ] ; then
 
-        printf "You have selected \"${iso_name}\", is this correct? (y/n): "
+          # Confirm our user's ISO selection with another prompt
+          iso_name="$(cd "${ISODIR}" && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}')"
+          printf "You have selected \"${iso_name}\", is this correct? (y/n): "
+          read iso_confirmed
 
-        # Prompt user for selection confirmation
-        read iso_confirmed
-
-        if test -n "${iso_confirmed}" && test "${iso_confirmed}" = "y" ; then
-          "${PROGDIR}"/freenas/scripts/checkprogs.sh
-          "${PROGDIR}"/freenas/scripts/2.runtests.sh "${ISODIR}${iso_name}"
-          EXIT_STATUS=$?
-          break
+          if test -n "${iso_confirmed}" && test "${iso_confirmed}" = "y" ; then
+            break
+          fi
         fi
-      fi
-    done
+      done
+    fi
+
+    # Install required system packages if they aren't already installed
+    "${PROGDIR}"/freenas/scripts/checkprogs.sh
+    # Run the tests against our selected ISO
+    "${PROGDIR}"/freenas/scripts/2.runtests.sh "${ISODIR}${iso_name}"
+    # Store the test suite's exit code for our function's return value
+    local EXIT_STATUS=$?
   else
     # As part of the process of building a FreeNAS ISO and testing it,
     # if the $SFTPHOST and $SFTPUSER settings exist, pull the built ISO
@@ -1222,11 +1234,11 @@ jenkins_freenas_tests()
 
     cd ${TBUILDDIR}
     make tests
-    EXIT_STATUS=$?
+    local EXIT_STATUS=$?
   fi
 
   if [ -z "$JAILED_TESTS" ] ; then
-    if [ $EXIT_STATUS -ne 0 ] ; then exit_clean ; fi
+    [ $EXIT_STATUS -ne 0 ] && exit_clean
     cleanup_workdir
   fi        
 
