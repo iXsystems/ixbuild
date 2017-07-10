@@ -73,6 +73,15 @@ if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
   rm -rf ${BEDIR}
 fi
 
+# If this is a github pull request builder, check if branch needs to be overridden
+if [ -n "$ghprbTargetBranch" ] ; then
+  GITFNASBRANCH="$ghprbTargetBranch"
+  echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
+  newTrain="PR-${PRBUILDER}-`echo $ghprbTargetBranch | sed 's|/|-|g'`"
+  echo "Setting new TRAIN=$newTrain"
+  BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
+fi
+
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
   echo "Doing incremental build!"
   cd ${FNASBDIR}
@@ -101,28 +110,44 @@ if [ -n "$BUILDSENV" ] ; then
   BUILDSENV="env $BUILDSENV"
 fi
 
-if [ -d "${FNASBDIR}" ] ; then
-  rc_halt "cd ${FNASBDIR}"
-  OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
-  if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
-     # Branch mismatch, re-clone
-     echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
-     cd ${PROGDIR}
-     rm -rf ${FNASBDIR}
-     chflags -R noschg ${FNASBDIR}
-     rm -rf ${FNASBDIR}
-  fi
+if [ -n "$PRBUILDER" ] ; then
+  # Nuke the build dir if doing Pull Request Build
+  cd ${PROGDIR}
+  rm -rf ${FNASBDIR} 2>/dev/null
+  chflags -R noschg ${FNASBDIR} 2>/dev/null
+  rm -rf ${FNASBDIR} 2>/dev/null
 fi
 
-# Make sure we have our freenas sources
-if [ -d "${FNASBDIR}" ]; then
-  rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
-  git_fnas_up "${FNASSRC}" "${FNASSRC}"
+if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
+  # PR Build
+  echo "Doing PR build of the build/ repo"
+  echo "${WORKSPACE} -> ${FNASBDIR}"
+  cp -r "${WORKSPACE}" "${FNASBDIR}"
+  if [ $? -ne 0 ] ; then exit_clean; fi
 else
-  rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
-  rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
-  git_fnas_up "${FNASSRC}" "${FNASSRC}"
+  # Regular build
+  if [ -d "${FNASBDIR}" ] ; then
+    rc_halt "cd ${FNASBDIR}"
+    OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
+    if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
+       # Branch mismatch, re-clone
+       echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
+       cd ${PROGDIR}
+       rm -rf ${FNASBDIR} 2>/dev/null
+       chflags -R noschg ${FNASBDIR} 2>/dev/null
+       rm -rf ${FNASBDIR} 2>/dev/null
+    fi
+  fi
+
+  # Make sure we have our freenas sources
+  if [ -d "${FNASBDIR}" ]; then
+    git_fnas_up "${FNASSRC}" "${FNASSRC}"
+  else
+    rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+    git_fnas_up "${FNASSRC}" "${FNASSRC}"
+  fi
 fi
+rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
 
 # Lets keep our distfiles around and use previous ones
 if [ ! -d "/usr/ports/distfiles" ] ; then
@@ -275,7 +300,7 @@ fi
 
 # We are doing a build as a result of a PR
 # Lets copy the repo from WORKSPACE into the correct location
-if [ -n "${PRBUILDER}" ] ; then
+if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
    cd ${FNASBDIR}
    eval $PROFILEARGS
    if [ ! -d "${PROFILE}/_BE/${PRBUILDER}" ] ; then

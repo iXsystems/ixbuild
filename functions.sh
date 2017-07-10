@@ -101,6 +101,7 @@ create_workdir()
 
   MASTERWRKDIR=`mktemp -d /tmp/build/XXXX` 
 
+  # Vanilla Checkout
   cocmd="git clone --depth=1 -b ${IXBUILDBRANCH} ${GITREPO} ${MASTERWRKDIR}"
   echo "Cloning with: $cocmd"
   $cocmd

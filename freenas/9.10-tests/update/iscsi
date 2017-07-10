@@ -13,7 +13,7 @@ iscsi_tests()
 {
   local MOUNTPOINT="/tmp/${BRIDGEHOST}iscsi"
   local DEVICE_NAME_PATH="/tmp/${BUILDTAG}iscsi"
-  local TARGET_NAME="iqn.${BUILDTAG}:target0"
+  local TARGET_NAME="iqn.1994-09.${BUILDTAG}qa:target0"
 
   # Set the group text and number of tests
   set_test_group_text "2 - Update - iSCSI tests" "16"
@@ -29,7 +29,7 @@ iscsi_tests()
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  bsd_test "iscsictl -R -t \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\""
+  bsd_test "iscsictl -R -t ${TARGET_NAME}"
   bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
   bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
@@ -48,18 +48,43 @@ iscsi_tests()
 
   # Now connect to iSCSI target
   echo_test_title "Connecting to iSCSI target"
-  bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
-  check_exit_status || return 1
- 
-  echo_test_title "Waiting for iscsi connection before grabbing device name"
-  # -w[aits] 30 seconds before timing out, holding for all iscsi connections to
-  # have been established before -L[isting] results
-  bsd_test "iscsictl -L -w 90"
-  check_exit_status || return 1
+  local loop_cnt=0;
+  while [ $loop_cnt -le 6 ] ; do
+    bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
+    if [ $? -eq 0 ] ; then
+      echo_ok
+      break
+    fi
+    loop_cnt=$(expr $loop_cnt + 1)
+    [ $loop_cnt -gt 6 ] && echo_fail && return 1
+    sleep 3
+  done
 
-  echo_test_title "Get the iSCSI target device name for the connection target"
-  bsd_test "iscsictl -L | awk '\$2 == \"${BRIDGEIP}:3620\" && \$3 == \"Connected:\" {print \$4}' > \"${DEVICE_NAME_PATH}\""
-  check_exit_status || return 1
+  # TODO: remove debug sleep
+  sleep 15
+ 
+  echo_test_title "Waiting for iscsi connection before grabbing device name.."
+  local loop_cnt=0
+  while [ $loop_cnt -le 12 ] ; do
+    bsd_test "iscsictl -L"
+    local iscsi_state=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $3}')
+    local iscsi_dev=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $4}')
+
+    if [ -n "${iscsi_state}" -a "${iscsi_state}" == "Connected:" ] ; then
+      if [ -n "${iscsi_dev}" ] ; then
+        DEVICE_NAME=$iscsi_dev
+        echo -n " using \"${DEVICE_NAME}\""
+        echo_ok && break
+      else
+        echo -n "... connected with no device"
+      fi  
+    fi  
+
+    loop_cnt=$(expr $loop_cnt + 1)
+    [ $loop_cnt -gt 12 ] && echo_fail && return 1
+    echo -n "."
+    sleep 3
+  done
 
   # Now check if we can mount target / create / rename / copy / delete / umount
 
@@ -68,7 +93,7 @@ iscsi_tests()
   check_exit_status || return 1
 
   echo_test_title "Mount the target volume"
-  bsd_test "mount \"/dev/\`cat \"${DEVICE_NAME_PATH}\"\`\" \"${MOUNTPOINT}\""
+  bsd_test "mount \"/dev/${DEVICE_NAME}\" \"${MOUNTPOINT}\""
   check_exit_status || return 1
 
   echo_test_title "Creating 45MB file to verify vzol size increase"

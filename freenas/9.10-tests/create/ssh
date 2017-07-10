@@ -13,6 +13,8 @@ export REQUIRES
 # We also leave it enabled, so we have access to VM if something hangs / goes wrong
 ssh_tests()
 {
+  local ssh_keypath="${HOME}/.ssh/id_rsa"
+
   set_test_group_text "1 - Create - SSH Tests" "4"
   CLASSNAME=ixbuild.resty.functional.create.ssh
 
@@ -28,18 +30,31 @@ ssh_tests()
   rest_request "GET" "/services/services/ssh/"
   check_service_status "RUNNING"
 
-  # Generate ssh rsa key if one doesn't exist
-  if ssh-add -L | grep -q "^ssh-rsa" ; then
-    if [ ! -f ${HOME}/.ssh/id_rsa ] ; then
-      ssh-keygen -b 4096 -t rsa -q -N ""
+  echo_test_title "Ensure that we have a running ssh-agent"
+  # Could not open a connection to your authentication agent.
+  ssh-add -L 2>&1 | \
+    grep -q -e "Error connecting to agent" -e "Could not open a connection to your authentication agent." \
+    && echo_fail && return 1 || echo_ok
+
+  # Grab the path if an RSA key already exists and is ready to use
+  if ssh-add -L 2>&1 | grep -q "^ssh-rsa" ; then
+    ssh_keypath=$(ssh-add -L | awk '$1 == "ssh-rsa" {print $3}' | head -n 1)
+  else
+    # Use id_rsa.tests key if it exists, otherwise use the id_rsa key
+    if [ -f "${HOME}/.ssh/id_rsa.tests" ] ; then
+      ssh_keypath="${HOME}/.ssh/id_rsa.tests"
+    elif [ ! -f "${ssh_keypath}" ] ; then
+      # Create the id_rsa key if it does not already exist
+      ssh-keygen -b 4096 -t rsa -q -N "" -f "${ssh_keypath}" >/dev/null 2>/dev/null
     fi
-    ssh-add ${HOME}/.ssh/id_rsa &>/dev/null
+    # Add whichever key, id_rsa or id_rsa.tests to our ssh-agent
+    ssh-add "${ssh_keypath}" >/dev/null 2>/dev/null
   fi
 
   # Get the root user id so we can add ssh keys to the test target
   rest_request "GET" "/account/users/"
   local root_user_id=$(cat $RESTYOUT | ${JSAWK} -n 'if (this.bsdusr_username == "root") { out(this.id) }')
-  local ssh_pubkey="$(cat ~/.ssh/id_rsa.pub)"
+  local ssh_pubkey="$(cat "${ssh_keypath}".pub)"
 
   echo_test_title "Adding SSH public key from the executor to the root user account"
   if [ -n "$root_user_id" -a -n "$ssh_pubkey" ]; then
