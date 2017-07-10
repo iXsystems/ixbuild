@@ -40,7 +40,7 @@ network_tests()
   echo_ok
 
   # Add $FNASTESTIP to database
-  if ! ifconfig ${IFACE} | awk '$1 == "inet" {print $2}' | grep -q "${FNASTRESTIP}" ; then
+  if ! bsd_test "ifconfig ${IFACE} | awk '\$1 == \"inet\" {print \$2}' | grep -q \"${FNASTRESTIP}\"" ; then
     rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "'${IFACE}'" }'
   fi
 
