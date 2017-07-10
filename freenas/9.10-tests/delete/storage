@@ -16,18 +16,18 @@ storage_tests()
   CLASSNAME=ixbuild.resty.functional.delete.storage
 
   # Check destroying a ZFS snapshot
-  echo_test_title "Destroying ZFS snapshot tank@test"
-  rest_request "DELETE" "/storage/snapshot/tank@test/"
+  echo_test_title "Destroying ZFS snapshot ${IXBUILD_ROOT_ZVOL}@test"
+  rest_request "DELETE" "/storage/snapshot/${IXBUILD_ROOT_ZVOL}@test/"
   check_rest_response "204" || return 1
 
   # Check destroying a ZVOL 1/2
   echo_test_title "Destroying ZVOL 01/20"
-  rest_request "DELETE" "/storage/volume/tank/zvols/testzvol1/"
+  rest_request "DELETE" "/storage/volume/${IXBUILD_ROOT_ZVOL}/zvols/testzvol1/"
   check_rest_response "204" || return 1
 
   # Check destroying a ZVOL 2/2
   echo_test_title "Destroying ZVOL 02/20"
-  rest_request "DELETE" "/storage/volume/tank/zvols/testzvol2/"
+  rest_request "DELETE" "/storage/volume/${IXBUILD_ROOT_ZVOL}/zvols/testzvol2/"
   check_rest_response "204" || return 1
 
   local DATASET_CNT=20

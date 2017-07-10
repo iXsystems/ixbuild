@@ -1140,6 +1140,8 @@ jenkins_freenas_live_tests()
 
 jenkins_freenas_tests()
 {
+  [ -z "${IXBUILD_ROOT_ZVOL}" ] && export IXBUILD_ROOT_ZVOL="tank"
+
   # If we aren't running as part of the build process, list ISOs in the $ISODIR
   if [ -z "$SFTPHOST" -o -z "$SFTPUSER" ] ; then
 
@@ -1254,6 +1256,8 @@ jenkins_freenas_tests_jailed()
 
 jenkins_freenas_run_tests()
 {
+  [ -z "${IXBUILD_ROOT_ZVOL}" ] && export IXBUILD_ROOT_ZVOL="tank"
+
   if [ -n "${VMBACKEND}" -a "${VMBACKEND}" == "bhyve" ]; then
     ps -aux | awk '/tail\ -f\ \/tmp\/'${BUILDTAG}'-tests-[a-z]+.log/ {print $2}' | xargs kill
     local VM_OUTPUT="/tmp/${BUILDTAG}console.log"

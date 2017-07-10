@@ -20,10 +20,11 @@ start_bhyve()
   [ -z "${IXBUILD_BRIDGE}" ] && export IXBUILD_BRIDGE="ixbuildbridge0"
   [ -z "${IXBUILD_IFACE}" ] && export IXBUILD_IFACE="`netstat -f inet -nrW | grep '^default' | awk '{ print $6 }'`"
   [ -z "${IXBUILD_TAP}" ] && export IXBUILD_TAP="tap"
+  [ -z "${IXBUILD_ROOT_ZVOL}" ] && export IXBUILD_ROOT_ZVOL="tank"
 
   local ISOFILE=$1
   local VM_OUTPUT="/tmp/${BUILDTAG}console.log"
-  local VOLUME="tank"
+  local VOLUME="${IXBUILD_ROOT_ZVOL}"
   local DATADISKOS="${BUILDTAG}-os"
   local DATADISK1="${BUILDTAG}-data1"
   local DATADISK2="${BUILDTAG}-data2"

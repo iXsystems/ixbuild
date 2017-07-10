@@ -64,7 +64,7 @@ network_tests()
   else
     # Using the NAT mode
     echo_test_title "Setting DHCP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "'${IFACE2}'" }'
+    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "'${IFACE}'" }'
     check_rest_response "201 Created"
   fi
 }

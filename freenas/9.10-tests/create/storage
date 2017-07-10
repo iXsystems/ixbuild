@@ -40,60 +40,60 @@ storage_tests()
 
   # Check creating a zpool
   echo_test_title "Creating volume"
-  rest_request "POST" "/storage/volume/" '{ "volume_name" : "tank", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "'${disk1}'", "'${disk2}'" ] } ] }'
+  rest_request "POST" "/storage/volume/" '{ "volume_name" : "'${IXBUILD_ROOT_ZVOL}'", "layout" : [ { "vdevtype" : "stripe", "disks" : [ "'${disk1}'", "'${disk2}'" ] } ] }'
   check_rest_response "201 Created" || return 1
 
   # Check creating a dataset 01/20 /share
-  echo_test_title "Creating dataset 01/20 tank/share"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "share" }'
+  echo_test_title "Creating dataset 01/20 ${IXBUILD_ROOT_ZVOL}/share"
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "share" }'
   check_rest_response "201 Created" || return 1
 
   # Check creating a dataset 02/20 /jails
-  echo_test_title "Creating dataset 02/20 tank/jails"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "jails" }'
+  echo_test_title "Creating dataset 02/20 ${IXBUILD_ROOT_ZVOL}/jails"
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "jails" }'
   check_rest_response "201 Created" || return 1
 
   # Set the permissions of the dataset 01/20
-  echo_test_title "Changing permissions on /mnt/tank/share"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  echo_test_title "Changing permissions on /mnt/${IXBUILD_ROOT_ZVOL}/share"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/share", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
   # Set the permissions of the dataset 02/20
-  echo_test_title "Changing permissions on /mnt/tank/jails"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/jails", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  echo_test_title "Changing permissions on /mnt/${IXBUILD_ROOT_ZVOL}/jails"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/jails", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
 
   local DATASET_CNT=20
   for count in $(seq -f "%02g" 3 $DATASET_CNT)
   do
-    echo_test_title "Creating dataset ${count}/${DATASET_CNT} tank/dataset${count}"
-    rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "dataset'"${count}"'" }'
+    echo_test_title "Creating dataset ${count}/${DATASET_CNT} ${IXBUILD_ROOT_ZVOL}/dataset${count}"
+    rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "dataset'"${count}"'" }'
     check_rest_response "201 Created" || return 1
 
-    echo_test_title "Changing permissions on /mnt/tank/dataset${count}"
-    rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/dataset'"${count}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+    echo_test_title "Changing permissions on /mnt/${IXBUILD_ROOT_ZVOL}/dataset${count}"
+    rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/dataset'"${count}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
     check_rest_response "201 Created" || return 1
   done
 
   # Check creating a ZFS snapshot
-  echo_test_title "Creating a ZFS snapshot tank@test"
-  rest_request "POST" "/storage/snapshot/" '{ "dataset": "tank", "name": "test" }'
+  echo_test_title "Creating a ZFS snapshot ${IXBUILD_ROOT_ZVOL}@test"
+  rest_request "POST" "/storage/snapshot/" '{ "dataset": "'${IXBUILD_ROOT_ZVOL}'", "name": "test" }'
   check_rest_response "201 Created" || return 1
 
   # Create a dataset for testing snapshot
-  echo_test_title "Creating dataset for testing snapshot rollback tank/snapcheck"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "snapcheck" }'
+  echo_test_title "Creating dataset for testing snapshot rollback ${IXBUILD_ROOT_ZVOL}/snapcheck"
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "snapcheck" }'
   check_rest_response "201 Created" || return 1
 
   # Check creating a ZVOL 1/2
   echo_test_title "Creating a ZVOL 1/2"
-  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol1", "volsize": "10M" }'
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/zvols/" '{ "name": "testzvol1", "volsize": "10M" }'
   check_rest_response "201" || return 1
 
   # Check creating a ZVOL 2/2
   echo_test_title "Creating a ZVOL 2/2"
-  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol2", "volsize": "10M" }'
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/zvols/" '{ "name": "testzvol2", "volsize": "10M" }'
   check_rest_response "201" || return 1
 
   return 0

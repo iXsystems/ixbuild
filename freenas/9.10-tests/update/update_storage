@@ -17,16 +17,16 @@ update_storage_tests()
 
   # Check updating a ZVOL
   echo_test_title "Updating ZVOL"
-  rest_request "PUT" "/storage/volume/tank/zvols/testzvol/" '{ "volsize" : "50M" }'
+  rest_request "PUT" "/storage/volume/${IXBUILD_ROOT_ZVOL}/zvols/testzvol/" '{ "volsize" : "50M" }'
   check_rest_response "201" || return 1
 
   # Check rolling back a ZFS snapshot
-  echo_test_title "Rolling back ZFS snapshot tank@test"
-  rest_request "POST" "/storage/snapshot/tank@test/rollback/" '{ "force": true }'
+  echo_test_title "Rolling back ZFS snapshot ${IXBUILD_ROOT_ZVOL}@test"
+  rest_request "POST" "/storage/snapshot/${IXBUILD_ROOT_ZVOL}@test/rollback/" '{ "force": true }'
   check_rest_response "202" || return 1
 
   # Check to verify snapshot was rolled back
-  # rest_request "GET" "/storage/volume/tank/datasets/"
+  # rest_request "GET" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/"
   # check_property_value "return this.name" "snapcheck"
 
   return 0
