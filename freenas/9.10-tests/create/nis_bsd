@@ -16,7 +16,7 @@ nis_bsd_tests()
   local DOMAIN="${NISDOMAIN}"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - nis_bsd test class" "3"
+  set_test_group_text "1 - Create - nis_bsd test class" "4"
   CLASSNAME=ixbuild.resty.functional.create.nis_bsd
 
   # skip if variable are not present
@@ -38,6 +38,10 @@ nis_bsd_tests()
   echo_test_title "Enabling NIS service.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_enable": true }'
   check_rest_response "200"
+
+  echo_test_title "Disabling NIS service.."
+  rest_request "PUT" "/directoryservice/nis/" '{ "nis_enable": false }'
+  check_test_response "200"
 
 }
 
