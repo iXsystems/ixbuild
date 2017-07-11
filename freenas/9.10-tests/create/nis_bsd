@@ -41,7 +41,7 @@ nis_bsd_tests()
 
   echo_test_title "Checking if NIS service is enable.."
   rest_request "GET" "/directoryservice/nis/"
-  check_property_value ".nis_enable" "true" || return 1
+  check_property_value "return this.nis_enable" "true" || return 1
   
   echo_test_title "Enabling secure mode.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_secure_mode": true }'
@@ -49,7 +49,7 @@ nis_bsd_tests()
 
   echo_test_title "Checking if secure mode is enable.."
   rest_request "GET" "/directoryservice/nis/"
-  check_property_value ".nis_secure_mode" "true" || return 1
+  check_property_value "return this.nis_secure_mode" "true" || return 1
 
   echo_test_title "Disabling secure mode.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_secure_mode": false }'
@@ -61,7 +61,7 @@ nis_bsd_tests()
 
   echo_test_title "Checking if manycast is enable.."
   rest_request "GET" "/directoryservice/nis/"
-  check_property_value ".nis_manycast" "true" || return 1
+  check_property_value "return this.nis_manycast" "true" || return 1
 
   echo_test_title "Disabling manycast.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_manycast": false }'
