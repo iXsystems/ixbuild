@@ -77,7 +77,7 @@ fi
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
   echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
-  newTrain="PR-${PRBUILDER}-`echo $ghprbTargetBranch | sed 's|/|-|g'`"
+  newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
   echo "Setting new TRAIN=$newTrain"
   BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
 fi
@@ -340,7 +340,7 @@ finish_xml_results "make"
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
   echo "Built GitHub PR, using builder branch: $GITFNASBRANCH"
-  newTrain="PR-${PRBUILDER}-`echo $ghprbTargetBranch | sed 's|/|-|g'`"
+  newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
   echo "Build TRAIN=$newTrain"
   cd ${FNASBDIR}
   eval $PROFILEARGS
