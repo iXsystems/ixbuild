@@ -598,9 +598,11 @@ rm ${PDESTDIR9}/.setPass.sh
 # Lets prune the file-system before we start archving
 prune_fs
 
-# Copy over the config.sh to install medium
-rc_halt "cp ${TRUEOSSRC}/config.sh ${PDESTDIR9}/root/config.sh"
-rc_halt "chmod 755 ${PDESTDIR9}/root/config.sh"
+# Set the default pkg branch
+if [ -z "$DEFAULTPKGBRANCH" ] ; then
+  DEFAULTPKGBRANCH="PRODUCTION"
+fi
+echo "$DEFAULTPKGBRANCH" > ${PDESTDIR9}/root/defaultpkgbranch
 
 # Compress the /root directory for extraction into a memory fs
 cp -r ${PROGDIR}/tmp/dep-list ${PDESTDIR9}/root/pkg-dep-lists
