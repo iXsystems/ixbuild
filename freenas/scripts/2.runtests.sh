@@ -69,7 +69,7 @@ export VM
 # Determine which VM backend to start
 case ${VMBACKEND} in
   bhyve)
-    start_bhyve "${ISOFILE}"
+    bhyve_install_iso "${ISOFILE}"
     ;;
   esxi)
     cp ${PROGDIR}/tmp/$BUILDTAG.iso /autoinstalls/$BUILDTAG.iso 2>/dev/null &

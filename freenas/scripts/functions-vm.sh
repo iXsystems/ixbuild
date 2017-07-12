@@ -1,14 +1,17 @@
 #!/usr/bin/env sh
 
 # Where is the ixbuild program installed
-PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
-export PROGDIR
+if [ -z "${PROGDIR}" ] ; then 
+  PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
+  export PROGDIR
+fi
 
 # Source our functions
 . ${PROGDIR}/scripts/functions.sh
 . ${PROGDIR}/scripts/functions-tests.sh
 
-start_bhyve()
+# $1 = The path to a FreeNAS/TrueNAS ISO for installation
+bhyve_install_iso()
 {
   if [ ! -f "/usr/local/share/uefi-firmware/BHYVE_UEFI.fd" ] ; then
     echo "File not found: /usr/local/share/uefi-firmware/BHYVE_UEFI.fd"
@@ -45,7 +48,7 @@ start_bhyve()
   ifconfig ${IXBUILD_BRIDGE} destroy &>/dev/null
   ifconfig ${IXBUILD_TAP} destroy &>/dev/null
   rm "${VM_OUTPUT}" &>/dev/null
-  [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs kill &>/dev/null
+  [ -f "${BOOT_PIDFILE}" ] && cat "${BOOT_PIDFILE}" | xargs -I {} kill {} &>/dev/null
   [ -f "${TAP_LOCKFILE}" ] && cat "${TAP_LOCKFILE}" | xargs -I {} ifconfig {} destroy && rm "${TAP_LOCKFILE}"
 
   # Destroy zvols from previous runs
@@ -129,33 +132,20 @@ start_bhyve()
   # Run our expect/tcl script to automate the installation dialog
   ${PROGDIR}/scripts/bhyve-installer.exp "${COM_LISTEN}" "${VM_OUTPUT}"
   echo -e \\033c # Reset/clear to get native term dimensions
-  echo "Installation completed."
+  echo "Success: Shutting down the installation VM.."
 
   # Shutdown VM, stop output
-  sleep 10
+  sleep 5
   bhyvectl --destroy --vm=$BUILDTAG &>/dev/null &
 
-  # Determine which nullmodem slot to use for boot-up
-  local com_idx=0
-  until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
-  local COM_BROADCAST="/dev/nmdm${com_idx}A"
-  local COM_LISTEN="/dev/nmdm${com_idx}B"
-
-  # Fixes: ERROR: "vm_open: Invalid argument"
-  sleep 10
-
-  ( bhyve -w -A -H -P -c 1 -m 2G \
-    -s 0:0,hostbridge \
-    -s 1:0,lpc \
-    -s 2:0,virtio-net,${IXBUILD_TAP} \
-    -s 5:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISKOS} \
-    -s 6:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK1} \
-    -s 7:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK2} \
-    -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
-    -l com1,${COM_BROADCAST} \
-    $BUILDTAG ) & disown
-
+  # If this cmd returned instead of hanging, it would be preferable to use. The alternative writes to a tmp file.
+  # local COM_LISTEN=$(boot_bhyve | tee /dev/tty | grep "^Listen: " | sed 's|Listen: ||g')
+  local BHYVE_BOOT_OUTPUT="/tmp/.boot-${BUILDTAG}output"
+  bhyve_boot > ${BHYVE_BOOT_OUTPUT}
+  local COM_LISTEN=$(cat ${BHYVE_BOOT_OUTPUT} | grep '^Listen: ' | sed 's|^Listen: ||')
+  echo "COM: ${COM_LISTEN}"
   ${PROGDIR}/scripts/bhyve-bootup.exp "${COM_LISTEN}" "${VM_OUTPUT}"
+
   echo -e \\033c # Reset/clear to get native term dimensions
 
   local EXIT_STATUS=1
@@ -171,6 +161,58 @@ start_bhyve()
   fi
 
   return $EXIT_STATUS
+}
+
+# Boots installed FreeNAS/TrueNAS bhyve VM
+bhyve_boot()
+{
+  local VOLUME="${IXBUILD_ROOT_ZVOL}"
+  local DATADISKOS="${BUILDTAG}-os"
+  local DATADISK1="${BUILDTAG}-data1"
+  local DATADISK2="${BUILDTAG}-data2"
+  local TAP_LOCKFILE="/tmp/.tap-${BUILDTAG}.lck"
+
+  [ -z "${IXBUILD_TAP}" ] && export IXBUILD_TAP="tap"
+
+  # If $TAP_LOCKFILE exists and ifconfig shows active $IXBUILD_TAP, skip network setup
+  if [ -f "${TAP_LOCKFILE}" ] && ifconfig ${IXBUILD_TAP} >/dev/null 2>/dev/null ; then
+    # If restarting existing boot-up, TAP_LOCKFILE will contain the correct tap name,
+    # and $IXBUILD_TAP will be 'tap'
+    IXBUILD_TAP=$(cat "${TAP_LOCKFILE}")
+  else
+    [ -f "${TAP_LOCKFILE}" ] && cat "${TAP_LOCKFILE}" | xargs -I {} ifconfig {} destroy && rm "${TAP_LOCKFILE}"
+
+    # Lets check status of ${IXBUILD_TAP} device
+    if ! ifconfig ${IXBUILD_TAP} >/dev/null 2>/dev/null ; then
+      IXBUILD_TAP=$(ifconfig ${IXBUILD_TAP} create)
+      # Save the tap interface name, generated or specified. Used for clean-up.
+      echo ${IXBUILD_TAP} > ${TAP_LOCKFILE}
+    fi
+  fi
+
+  echo "Determining which nullmodem slot to use for boot-up.."
+  local com_idx=0
+  until ! ls /dev/nmdm* 2>/dev/null | grep -q "/dev/nmdm${com_idx}A" ; do com_idx=$(expr $com_idx + 1); done
+  local COM_BROADCAST="/dev/nmdm${com_idx}A"
+  local COM_LISTEN="/dev/nmdm${com_idx}B"
+  echo "Broadcast: ${COM_BROADCAST}"
+  echo "Listen: ${COM_LISTEN}"
+
+  # Fixes: ERROR: "vm_open: Invalid argument"
+  sleep 10
+
+  ( bhyve -w -A -H -P -c 1 -m 2G \
+    -s 0:0,hostbridge \
+    -s 1:0,lpc \
+    -s 2:0,virtio-net,${IXBUILD_TAP} \
+    -s 5:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISKOS} \
+    -s 6:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK1} \
+    -s 7:0,ahci-hd,/dev/zvol/${VOLUME}/${DATADISK2} \
+    -l bootrom,/usr/local/share/uefi-firmware/BHYVE_UEFI.fd \
+    -l com1,${COM_BROADCAST} \
+    $BUILDTAG ) & disown
+
+  return 0
 }
 
 start_vbox()
