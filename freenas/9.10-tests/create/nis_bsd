@@ -45,7 +45,7 @@ nis_bsd_tests()
   
   echo_test_title "Enabling secure mode.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_secure_mode": true }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Checking if secure mode is enable.."
   rest_request "GET" "/directoryservice/nis/"
@@ -53,11 +53,11 @@ nis_bsd_tests()
 
   echo_test_title "Disabling secure mode.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_secure_mode": false }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Enabling manycast.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_manycast": true }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Checking if manycast is enable.."
   rest_request "GET" "/directoryservice/nis/"
@@ -65,11 +65,11 @@ nis_bsd_tests()
 
   echo_test_title "Disabling manycast.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_manycast": false }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Disabling NIS service.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_enable": false }'
-  check_test_response "200"
+  check_rest_response "200"
 
 }
 
