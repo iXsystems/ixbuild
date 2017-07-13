@@ -1274,37 +1274,43 @@ jenkins_freenas_run_tests()
     pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
   fi
 
+  local CREATE_LOG="/tmp/${VM}-tests-create.log"
+  local UPDATE_LOG="/tmp/${VM}-tests-update.log"
+  local DELETE_LOG="/tmp/${VM}-tests-delete.log"
+  local V2_LOG="/tmp/${VM}-tests-v2.0.log"
+  rm "${CREATE_LOG}" 2>/dev/null >/dev/null; touch "${CREATE_LOG}"
+  rm "${UPDATE_LOG}" 2>/dev/null >/dev/null; touch "${UPDATE_LOG}"
+  rm "${DELETE_LOG}" 2>/dev/null >/dev/null; touch "${DELETE_LOG}"
+  rm "${V2_LOG}" 2>/dev/null >/dev/null; touch "${V2_LOG}"
+
   echo ""
   echo "Output from REST API calls:"
   echo "-----------------------------------------"
   echo "Running API v1.0 test group create 1/3"
-  touch /tmp/$VM-tests-create.log 2>/dev/null
-  tail -f /tmp/$VM-tests-create.log 2>/dev/null &
-  tpid=$!
-  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
-  kill -9 $tpid
+  tail -f "${CREATE_LOG}" &
+  local tpid=$!
+  ./9.10-create-tests.sh ip=$FNASTESTIP > "${CREATE_LOG}" 2>&1
+  kill $tpid
   echo ""
   echo "Running API v1.0 test group update 2/3" 
-  touch /tmp/$VM-tests-update.log 2>/dev/null
-  tail -f /tmp/$VM-tests-update.log 2>/dev/null &
-  tpid=$!
-  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
-  kill -9 $tpid
+  tail -f "${UPDATE_LOG}" &
+  local tpid=$!
+  ./9.10-update-tests.sh ip=$FNASTESTIP > "${UPDATE_LOG}" 2>&1
+  kill $tpid
   echo ""
   echo "Running API v1.0 test group delete 3/3"
-  touch /tmp/$VM-tests-delete.log 2>/dev/null
-  tail -f /tmp/$VM-tests-delete.log 2>/dev/null &
-  tpid=$!
-  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
-  kill -9 $tpid
+  tail -f "${DELETE_LOG}" &
+  local tpid=$!
+  ./9.10-delete-tests.sh ip=$FNASTESTIP > "${DELETE_LOG}" 2>&1
+  kill $tpid
   echo ""
   sleep 10
   echo "Running API v2.0 tests"
-  touch /tmp/$VM-tests-v2.0.log 2>/dev/null
-  tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
-  tpid=$!
-  ./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
-  kill -9 $tpid 
+  #./api-v2.0-tests.sh ip=$FNASTESTIP #2>&1 | tee /dev/tty >/tmp/$VM-tests-v2.0.log
+  tail -f "${V2_LOG}"
+  local tpid=$!
+  ./api-v2.0-tests.sh ip=$FNASTESTIP > "${V2_LOG}" 2>&1
+  kill $tpid
   echo ""
   sleep 10
 
