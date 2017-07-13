@@ -1306,8 +1306,7 @@ jenkins_freenas_run_tests()
   echo ""
   sleep 10
   echo "Running API v2.0 tests"
-  #./api-v2.0-tests.sh ip=$FNASTESTIP #2>&1 | tee /dev/tty >/tmp/$VM-tests-v2.0.log
-  tail -f "${V2_LOG}"
+  tail -f "${V2_LOG}" &
   local tpid=$!
   ./api-v2.0-tests.sh ip=$FNASTESTIP > "${V2_LOG}" 2>&1
   kill $tpid
