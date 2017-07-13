@@ -14,9 +14,11 @@ nis_bsd_tests()
   # define variables
   local SERVER="${NISSERVER}"
   local DOMAIN="${NISDOMAIN}"
+  local DATASET="nis-bsd"
+  local NIS_PATH="/mnt/tank/${DATASET}"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - nis_bsd test class" "11"
+  set_test_group_text "1 - Create - nis_bsd test class" "13"
   CLASSNAME=ixbuild.resty.functional.create.nis_bsd
 
   # skip if variable are not present
@@ -43,6 +45,14 @@ nis_bsd_tests()
   rest_request "GET" "/directoryservice/nis/"
   check_property_value "return this.nis_enable" "true" || return 1
   
+  echo_test_title "Creating NIS dataset"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Changing permissions on ${NIS_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${NIS_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "jsmith", "mp_group": "wheel" }'
+  check_rest_response "201 Created"
+
   echo_test_title "Enabling secure mode.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_secure_mode": true }'
   check_rest_response "200"
