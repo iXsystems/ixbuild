@@ -46,7 +46,7 @@ system_tests()
     until ! ps -aux | grep "bhyve" | grep -q "${BUILDTAG}" ; do
       sleep 5
     done
-    bhyve_boot
+    bhyve_boot >/dev/null
   fi
 
   # Ensure shutdown is complete before polling for initialization
