@@ -15,7 +15,7 @@ ssh_tests()
 {
   local ssh_keypath="${HOME}/.ssh/id_rsa"
 
-  set_test_group_text "1 - Create - SSH Tests" "4"
+  set_test_group_text "1 - Create - SSH Tests" "5"
   CLASSNAME=ixbuild.resty.functional.create.ssh
 
   echo_test_title "Configuring SSH settings"
