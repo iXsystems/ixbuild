@@ -17,7 +17,7 @@ ad_bsd_tests()
   local MOUNTPOINT="/tmp/${BRIDGEHOST}ad-bsd"
   local VOL_GROUP="ga"
 
-  set_test_group_text "2 - Update - Active Directory BSD tests" "24"
+  set_test_group_text "2 - Update - Active Directory BSD tests" "25"
   CLASSNAME=ixbuild.resty.functional.update.ad_bsd
 
   if [ -z "$ADUSERNAME" -o -z "$ADPASSWORD" ] ; then
