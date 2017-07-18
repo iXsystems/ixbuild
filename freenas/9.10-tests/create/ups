@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Author: Rishabh Chauhan
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+ups_tests()
+{
+  # Set the group text and number of tests
+  set_test_group_text "1 - Create - UPS test class" "15"
+  CLASSNAME=ixbuild.resty.functional.create.ups
+
+  echo_test_title "Enabling UPS Service"
+  rest_request "PUT" "/services/services/ups/" '{ "srv_enable":true }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking if UPS service is Enable"
+  rest_request "GET" "/services/services/ups/"  
+  check_service_status "RUNNING"
+
+  echo_test_title "Enabling Remote Monitor"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_rmonitor":true }'
+  check_rest_response "200 OK" 
+
+  echo_test_title "Checking if Remote Monitor is Enable"
+  rest_request "GET" "/services/services/ups/"  
+  check_property_value "return this.ups_rmonitor" "true" || return 1
+
+  echo_test_title "Disabling Remote Monitor option"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_rmonitor": false }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Enabling email status update option"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_emailnotify": true }'
+  check_rest_response "200 OK"
+ 
+  echo_test_title "Checking if email status update option is Enable"
+  rest_request "GET" "/services/services/ups/"  
+  check_property_value "return this.ups_emailnotify" "true" || return 1
+
+  echo_test_title "Disabling email status update option"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_emailnotify": false }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Running UPS in Master Mode"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_mode": "master" }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking if UPS is running in Master Mode"
+  rest_request "GET" "/services/services/ups/"
+  check_propert_value "return this.ups_mode" "master" || return 1
+
+  echo_test_title "Running UPS in Slave Mode"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_mode": "slave" }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Checking if UPS is running in Slave Mode"
+  rest_request "GET" "/services/services/ups/"              
+  check_propert_value "return this.ups_mode" "slave" || return 1
+
+  echo_test_title "Setting UPS shutdown mode-Battery"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_shutdown": "batt" }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Setting UPS shutdown mode-Low Battery"
+  rest_request "PUT" "/services/services/ups/" '{ "ups_shutdown": "lowbatt" }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Disabling UPS Service"
+  rest_request "PUT" "/services/services/ups/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"  
+
+  # Tests all passed!
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+ups_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) ups_tests ; return $? ;;
+     COMPLETE) ups_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) ups_tests ; return $? ;;
+  esac
+}
+
