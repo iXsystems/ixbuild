@@ -1,11 +1,27 @@
 #!/usr/bin/env sh
 
-# Source our functions
-if [ -z "$PROGDIR" ] ; then
-  . functions.sh
-else
-  . ${PROGDIR}/scripts/functions.sh
+PROGDIR="`realpath $0 | xargs dirname | xargs dirname`"
+export PROGDIR
+
+# Exit if this is not a FreeBSD host.
+if ! uname -a | grep -q "FreeBSD" ; then
+  echo "Unabled to install required packages. Manual installation will be required."
+  echo "See \"./ixbuild/freenas/scripts/checkprogs.sh\" for requirements."
+  exit 1
 fi
+
+# Flag to notify consecutive runs that checkprogs has already ran.
+# Allow this file path to be overridden in build.conf
+if [ -z "${IXBUILD_CHECKPROGS_INSTALLED}" ]; then
+  IXBUILD_CHECKPROGS_INSTALLED="$HOME/.ixbuild_checkprogs_installed"
+fi
+
+# Only re-run checkprogs.sh if $IXBUILD_CHECKPROGS equals "true"
+if [ "${IXBUILD_CHECKPROGS}" != "true" ] ; then
+  [ -f "${IXBUILD_CHECKPROGS_INSTALLED}" ] && exit 0
+fi
+
+. ${PROGDIR}/scripts/functions.sh
 
 # Make sure we have some  directories we need
 mkdir -p ${PROGDIR}/iso >/dev/null 2>/dev/null
@@ -57,6 +73,12 @@ which bash >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing shells/bash.."
   rc_halt "pkg-static install -y bash"
+fi
+
+which expect >/dev/null 2>/dev/null
+if [ "$?" != "0" ]; then
+  echo "Installing shells/expect..."
+  rc_halt "pkg-static install -y expect"
 fi
 
 which js24 >/dev/null 2>/dev/null
@@ -220,3 +242,6 @@ if [ "$?" != "0" ]; then
   echo "Installing pytest-xdist"
   rc_halt "pip3.6 install pytest-xdist"
 fi
+
+# Notify consecutive ixbuild runs that we've already ran checkprogs.sh 
+touch "${IXBUILD_CHECKPROGS_INSTALLED}"

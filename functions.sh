@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Set the build tag
 BUILDTAG="$BUILD"
@@ -116,7 +116,7 @@ create_workdir()
     cp -r /ixbuild/builds ${MASTERWRKDIR}/builds
   fi
 
-  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas" -e "corral"
+  echo "$BUILDTAG" | grep -q -e "freenas" -e "truenas"
   if [ $? -eq 0 ] ; then
     TBUILDDIR="${MASTERWRKDIR}/freenas"
   else
@@ -128,11 +128,13 @@ create_workdir()
     fi
   fi
 
-  cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
+  if [ -d "${BDIR}/${BUILD}" ] ; then
+    cp ${BDIR}/${BUILD}/* ${TBUILDDIR}
+    if [ $? -ne 0 ] ; then exit_clean; fi
 
-  cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean; fi
+    cd ${TBUILDDIR}
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
 }
 
 push_pkgworkdir()
@@ -1138,39 +1140,111 @@ jenkins_freenas_live_tests()
 
 jenkins_freenas_tests()
 {
-  create_workdir
+  [ -z "${IXBUILD_ROOT_ZVOL}" ] && export IXBUILD_ROOT_ZVOL="tank"
 
-  get_bedir
+  # If we aren't running as part of the build process, list ISOs in the $ISODIR
+  if [ -z "$SFTPHOST" -o -z "$SFTPUSER" ] ; then
 
-  cd ${TBUILDDIR}
-  if [ $? -ne 0 ] ; then exit_clean ; fi
+    # Default to prompting for ISOs from ./ixbuild/freenas/iso/*
+    local ISODIR="${PROGDIR}/freenas/iso/"
 
-  if [ -n "$SFTPHOST" ] ; then
+    # Allow $ISODIR to be overridden by $IXBUILD_FREENAS_ISODIR if it exists
+    if [ -n "${IXBUILD_FREENAS_ISODIR}" ] ; then
+      ISODIR="$(echo "${IXBUILD_FREENAS_ISODIR}" | sed 's|/$||g')/"
+    fi
+
+    [ ! -d "${ISODIR}" ] && "Directory not found: ${ISODIR}" && exit_clean
+
+    # List ISOs in ${ISODIR} and allow the user to select the target
+    iso_cnt=`cd ${ISODIR} && ls -l *.iso 2>/dev/null | wc -l | sed 's| ||g'`
+
+    # Exit cleanly if no ISO found in $ISODIR
+    if [ $iso_cnt -lt 1 ] ; then
+      echo "No local ISO found in \"${ISODIR}\""
+      echo "You can change this path by setting \$IXBUILD_FREENAS_ISODIR in build.conf"
+      exit_clean
+    fi
+
+    # Our to-be-determined file name of the ISO to test; must be inside $ISODIR
+    local iso_name=""
+
+    # If there's only one ISO in the $ISODIR, assume it's for testing.
+    if [ $iso_cnt -eq 1 ] ; then
+      # Snatch the first (only) ISO listed in the directory
+      iso_name="$(cd "${ISODIR}" && ls -l *.iso | awk 'NR == 1 {print $9}')"
+    else 
+      # Otherwise, loop until we get a valid user selection
+      while :
+      do
+        echo "Please select which ISO to test (1-$iso_cnt):"
+
+        # Listing ISOs in the ./freenas/iso/ directory, numbering the results for selection
+        ls -l "${ISODIR}"*.iso | awk 'BEGIN{cnt=1} {print "    ("cnt") "$9; cnt+=1}'
+        echo -n "Enter your selection and press [ENTER]: "
+
+        # Prompt user to determine which ISO to use
+        read iso_selection
+
+        # Only accept integer chars for our ISO selection
+        iso_selection=${iso_selection##*[!0-9]*}
+
+        # If an invalid selection, notify the user, pause briefly and then re-prompt for a selection
+        if [ -z $iso_selection ] || [ $iso_selection -lt 1 ] || [ $iso_selection -gt $iso_cnt ] 2>/dev/null; then
+          echo -n "Invalid selection.." && sleep 1 && echo -n "." && sleep 1 && echo "."
+        elif [ -n "`echo $iso_selection | sed 's| ||g'`" ] ; then
+
+          # Confirm our user's ISO selection with another prompt
+          iso_name="$(cd "${ISODIR}" && ls -l *.iso | awk 'FNR == '$iso_selection' {print $9}')"
+          printf "You have selected \"${iso_name}\", is this correct? (y/n): "
+          read iso_confirmed
+
+          if test -n "${iso_confirmed}" && test "${iso_confirmed}" = "y" ; then
+            break
+          fi
+        fi
+      done
+    fi
+
+    # Install required system packages if they aren't already installed
+    "${PROGDIR}"/freenas/scripts/checkprogs.sh
+    # Run the tests against our selected ISO
+    "${PROGDIR}"/freenas/scripts/2.runtests.sh "${ISODIR}${iso_name}"
+    # Store the test suite's exit code for our function's return value
+    local EXIT_STATUS=$?
+  else
+    # As part of the process of building a FreeNAS ISO and testing it,
+    # if the $SFTPHOST and $SFTPUSER settings exist, pull the built ISO
+    # from the build environment directory, copying it to the release dir.
+    create_workdir
+    get_bedir
+
+    # Ensure we have a build directory for our ixbuild checkout
+    mkdir -p "${TBUILDDIR}" && cd "${TBUILDDIR}"
+    [ "`pwd | realpath`" != "${TBUILDDIR}" ] && exit_clean
+
+    # Clean-up previous test builds
+    [ -d "${BEDIR}/release" ] && rm -rf "${BEDIR}/release"
+
+    # Ensure we have a /release directory to copy our ISO to
+    mkdir -p "${BEDIR}/release" && cd ${BEDIR}/release
+    [ "`pwd | realpath`" != "${BEDIR}/release" ] && exit_clean
 
     # Now lets sync the ISOs
-    if [ -d "${BEDIR}/release" ] ; then
-      rm -rf ${BEDIR}/release
-    fi
-    mkdir -p ${BEDIR}/release
-    cd ${BEDIR}/release
-    if [ $? -ne 0 ] ; then exit_clean; fi
-
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${ISOSTAGE}" >/dev/null 2>/dev/null
     rsync -va --delete --include="*/" --include="*.iso" --exclude="*" -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${ISOSTAGE} ${BEDIR}/release/
-    if [ $? -ne 0 ] ; then exit_clean ; fi
-  fi
+    [ $? -ne 0 ] && exit_clean
 
-  if [ -n "$JAILED_TESTS" ] ; then
-    cd ${TBUILDDIR}
-    make tests  
-  else
     cd ${TBUILDDIR}
     make tests
-    if [ $? -ne 0 ] ; then exit_clean ; fi
+    local EXIT_STATUS=$?
+  fi
+
+  if [ -z "$JAILED_TESTS" ] ; then
+    [ $EXIT_STATUS -ne 0 ] && exit_clean
     cleanup_workdir
   fi        
 
-  return 0
+  return $EXIT_STATUS
 }
 
 jenkins_freenas_tests_jailed()
@@ -1182,43 +1256,60 @@ jenkins_freenas_tests_jailed()
 
 jenkins_freenas_run_tests()
 {
-  create_workdir
-  cd ${TBUILDDIR}/scripts/
-  if [ $? -ne 0 ] ; then exit_clean ; fi
-  echo ""
-  sleep 10
-  pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+  [ -z "${IXBUILD_ROOT_ZVOL}" ] && export IXBUILD_ROOT_ZVOL="tank"
+
+  if [ -n "${VMBACKEND}" -a "${VMBACKEND}" == "bhyve" ]; then
+    ps -aux | awk '/tail\ -f\ \/tmp\/'${BUILDTAG}'-tests-[a-z]+.log/ {print $2}' | xargs kill
+    local VM_OUTPUT="/tmp/${BUILDTAG}console.log"
+    export FNASTESTIP="$(awk '$0 ~ /^vtnet0:\ flags=/ {++n;next}; n == 1 && $1 == "inet" {print $2;exit}' ${VM_OUTPUT})"
+    export BRIDGEIP=$FNASTESTIP
+    cd "${PROGDIR}/freenas/scripts/"
+    [ $? -ne 0 ] && exit_clean
+  else
+    create_workdir
+    cd ${TBUILDDIR}/scripts/
+    [ $? -ne 0 ] && exit_clean
+    echo ""
+    sleep 10
+    pkill -F /tmp/vmcu.pid >/dev/null 2>/dev/null
+  fi
+
+  local CREATE_LOG="/tmp/${VM}-tests-create.log"
+  local UPDATE_LOG="/tmp/${VM}-tests-update.log"
+  local DELETE_LOG="/tmp/${VM}-tests-delete.log"
+  local V2_LOG="/tmp/${VM}-tests-v2.0.log"
+  rm "${CREATE_LOG}" 2>/dev/null >/dev/null; touch "${CREATE_LOG}"
+  rm "${UPDATE_LOG}" 2>/dev/null >/dev/null; touch "${UPDATE_LOG}"
+  rm "${DELETE_LOG}" 2>/dev/null >/dev/null; touch "${DELETE_LOG}"
+  rm "${V2_LOG}" 2>/dev/null >/dev/null; touch "${V2_LOG}"
+
   echo ""
   echo "Output from REST API calls:"
   echo "-----------------------------------------"
   echo "Running API v1.0 test group create 1/3"
-  touch /tmp/$VM-tests-create.log 2>/dev/null
-  tail -f /tmp/$VM-tests-create.log 2>/dev/null &
-  tpid=$!
-  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
-  kill -9 $tpid
+  tail -f "${CREATE_LOG}" &
+  local tpid=$!
+  ./9.10-create-tests.sh ip=$FNASTESTIP > "${CREATE_LOG}" 2>&1
+  kill $tpid
   echo ""
   echo "Running API v1.0 test group update 2/3" 
-  touch /tmp/$VM-tests-update.log 2>/dev/null
-  tail -f /tmp/$VM-tests-update.log 2>/dev/null &
-  tpid=$!
-  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
-  kill -9 $tpid
+  tail -f "${UPDATE_LOG}" &
+  local tpid=$!
+  ./9.10-update-tests.sh ip=$FNASTESTIP > "${UPDATE_LOG}" 2>&1
+  kill $tpid
   echo ""
   echo "Running API v1.0 test group delete 3/3"
-  touch /tmp/$VM-tests-delete.log 2>/dev/null
-  tail -f /tmp/$VM-tests-delete.log 2>/dev/null &
-  tpid=$!
-  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
-  kill -9 $tpid
+  tail -f "${DELETE_LOG}" &
+  local tpid=$!
+  ./9.10-delete-tests.sh ip=$FNASTESTIP > "${DELETE_LOG}" 2>&1
+  kill $tpid
   echo ""
   sleep 10
   echo "Running API v2.0 tests"
-  touch /tmp/$VM-tests-v2.0.log 2>/dev/null
-  tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
-  tpid=$!
-  ./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
-  kill -9 $tpid 
+  tail -f "${V2_LOG}" &
+  local tpid=$!
+  ./api-v2.0-tests.sh ip=$FNASTESTIP > "${V2_LOG}" 2>&1
+  kill $tpid
   echo ""
   sleep 10
 
@@ -1594,15 +1685,18 @@ jenkins_iocage_pkgs_push()
 
 }
 
-# Set the builds directory
-BDIR="./builds"
-export BDIR
+# TODO: This cannot abide, functions.sh is to be imported and then selectively ran.
+# Refactor with the above rule, but do not re-enabled the following.
 
-# Check the type of build being done
-case $TYPE in
-  ports-tests) ;;
-  mkcustard) ;;
-  mktrueview) ;;
-  iocage_pkgs|iocage_pkgs_push) ;;
-  *) do_build_env_setup ;;
-esac
+## Set the builds directory
+#BDIR="./builds"
+#export BDIR
+#
+## Check the type of build being done
+#case $TYPE in
+#  ports-tests) ;;
+#  mkcustard) ;;
+#  mktrueview) ;;
+#  iocage_pkgs|iocage_pkgs_push) ;;
+#  *) do_build_env_setup ;;
+#esac

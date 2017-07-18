@@ -16,16 +16,16 @@ tftp_tests()
   set_test_group_text "1 - Create - TFTP tests" "5"
   CLASSNAME=ixbuild.resty.functional.create.tftp
 
-  echo_test_title "Creating dataset tank/tftproot"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "tftproot" }'
+  echo_test_title "Creating dataset ${IXBUILD_ROOT_ZVOL}/tftproot"
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "tftproot" }'
   check_rest_response "201 Created" || return 1
 
-  echo_test_title "Setting permissions for TFTP on /mnt/tank/tftproot"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank/tftproot", "mp_acl": "unix", "mp_mode": "777", "mp_user": "nobody", "mp_group": "nobody" }'
+  echo_test_title "Setting permissions for TFTP on /mnt/${IXBUILD_ROOT_ZVOL}/tftproot"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/tftproot", "mp_acl": "unix", "mp_mode": "777", "mp_user": "nobody", "mp_group": "nobody" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Configuring TFTP service"
-  rest_request "PUT" "/services/tftp/" '{ "tftp_directory": "/mnt/tank/tftproot", "tftp_username": "nobody", "tftp_newfiles": true }'
+  rest_request "PUT" "/services/tftp/" '{ "tftp_directory": "/mnt/'${IXBUILD_ROOT_ZVOL}'/tftproot", "tftp_username": "nobody", "tftp_newfiles": true }'
   check_rest_response "200 OK" || return 1
 
   echo_test_title "Starting TFTP service"

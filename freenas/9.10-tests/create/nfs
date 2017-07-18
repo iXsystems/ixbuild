@@ -11,7 +11,7 @@ export REQUIRES
 
 nfs_tests()
 {
-  local NFS_PATH="/mnt/tank/share"
+  local NFS_PATH="/mnt/${IXBUILD_ROOT_ZVOL}/share"
   local MOUNTPOINT="/tmp/${BRIDGEHOST}nfs"
 
   # Set the group text and number of tests

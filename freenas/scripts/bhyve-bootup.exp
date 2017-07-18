@@ -1,0 +1,46 @@
+#!/usr/bin/env expect
+
+# Automates the bootup of bhyve VM's for FreeNAS.
+# Usage: ./bhyve-installer.exp /dev/nmdm0B /tmp/bhyve-bootup.out
+
+# Listening end of a nullmodem connection to the bhyve serial output
+set nullmodem [lindex $argv 0];
+# File path of where the serial output should be logged.
+set logfilepath [lindex $argv 1];
+
+log_file "$logfilepath"
+set timeout 1800
+
+# Connect to our bhyve instance over the specified nullmodem serial connection
+set PID [spawn cu -l $nullmodem]
+send_user "Spawned PID: $PID \n"
+
+#expect {
+#  "Press enter to boot the selected OS" {
+#    sleep .5
+#    send "\r"
+#  }
+#}
+#
+#expect {
+#  "Press any key to continue..." {
+#    sleep .5
+#    send "\r"
+#  }
+#}
+
+# This is not yet working...
+#expect {
+#  -re {http://(\d+)(\D)(\d+)(\D)(\d+)(\D)(\d+)} {
+#    set FNASTESTIP $expect_out(1,string)
+#    puts "==FNASTESTIP=="
+#    puts $FNASTESTIP
+#  }
+#}
+
+expect {
+  "Enter an option from 1-12:" {
+    sleep .5
+    exit
+  }
+}

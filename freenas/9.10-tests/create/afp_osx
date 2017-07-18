@@ -13,7 +13,7 @@ afp_osx_tests()
 {
   local DATASET="afp-osx"
   local AFP_NAME="My AFP Share"
-  local AFP_PATH="/mnt/tank/${DATASET}"
+  local AFP_PATH="/mnt/${IXBUILD_ROOT_ZVOL}/${DATASET}"
   local MOUNTPOINT="/tmp/afp-osx${BRIDGEHOST}"
   local VOL_GROUP="qa"
 
@@ -36,7 +36,7 @@ afp_osx_tests()
   CLASSNAME=ixbuild.resty.functional.create.afp_osx
 
   echo_test_title "Creating AFP dataset"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created" || return 1
 
   echo_test_title "Enabling AFP service"

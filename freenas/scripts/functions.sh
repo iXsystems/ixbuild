@@ -3,11 +3,25 @@
 # Most of these dont need to be modified
 #########################################################
 
+FNASCONF="/ixbuild/build.conf"
+
+if [ ! -f "${FNASCONF}" ] ; then
+  FNASCONF="${PROGDIR}/../build.conf"
+  if [ ! -f "${FNASCONF}" ] ; then
+    echo "Error: file not found \"${FNASCONF}\""
+    exit 1
+  fi
+fi
+
 # Source vars
 if [ -z "${PROGDIR}" ] ; then
   . ../freenas.cfg
-else
+elif [ -f "${PROGDIR}/freenas.cfg" ] ; then
   . ${PROGDIR}/freenas.cfg
+else
+  echo "Warning: file not found \"${PROGDIR}/freenas.cfg\""
+  echo "Copying freenas.cfg.dist"
+  cp "${PROGDIR}/freenas.cfg.dist" "${PROGDIR}/freenas.cfg" && . ${PROGDIR}/freenas.cfg
 fi
 
 # Where on disk is the FreeNAS GIT branch
@@ -26,7 +40,7 @@ if [ -z "$RESULTSDIR" ] ; then
 fi
 
 # Default IP4 Pool of addresses
-DEFAULT_IP4POOL="$(grep ^IP4POOL: /ixbuild/build.conf | cut -d' ' -f2)"
+DEFAULT_IP4POOL="$(grep ^IP4POOL: ${FNASCONF} | cut -d' ' -f2)"
 if [ -z "$DEFAULT_IP4POOL" ] ; then
    DEFAULT_IP4POOL="192.168.0.220"
    export DEFAULT_IP4POOL

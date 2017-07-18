@@ -26,7 +26,7 @@ rsync_tests() {
   check_service_status "RUNNING" || return 1
 
   echo_test_title "Creating rsync resource"
-  rest_request "POST" "/services/rsyncmod/" '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/tank/share" }'
+  rest_request "POST" "/services/rsyncmod/" '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/share" }'
   check_rest_response "201 Created"
 
   # Test rsync

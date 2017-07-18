@@ -39,6 +39,16 @@ system_tests()
   rest_request "POST" "/system/reboot"
   check_rest_response "202" || return 1
 
+  # bhyve requires manual re-start after shutting down.
+  if [ -n "${VMBACKEND}" -a "${VMBACKEND}" == "bhyve" ] ; then
+    . ${PROGDIR}/scripts/functions-vm.sh
+    # vm_reinit: Device busy - we need to wait for bhyve to shut down
+    until ! ps -aux | grep "bhyve" | grep -q "${BUILDTAG}" ; do
+      sleep 5
+    done
+    bhyve_boot >/dev/null
+  fi
+
   # Ensure shutdown is complete before polling for initialization
   echo_test_title "Waiting for VM to shut down"
   loop_cnt=0

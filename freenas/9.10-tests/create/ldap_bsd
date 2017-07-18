@@ -13,7 +13,7 @@ ldap_bsd_tests()
 {
   local DATASET="ldap-bsd"
   local SMB_NAME="TestShare"
-  local SMB_PATH="/mnt/tank/${DATASET}"
+  local SMB_PATH="/mnt/${IXBUILD_ROOT_ZVOL}/${DATASET}"
   local MOUNTPOINT="/tmp/${BRIDGEHOST}ldap-bsd"
   local VOL_GROUP="qa"
 
@@ -41,7 +41,7 @@ ldap_bsd_tests()
   check_rest_response "200 OK"
 
   echo_test_title "Creating SMB dataset"
-  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created"
 
   # Enable LDAP

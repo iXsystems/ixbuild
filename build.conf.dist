@@ -18,6 +18,10 @@ export SFTPFINALDIR
 SFTPWORKDIR=""
 export SFTPWORKDIR
 
+# The name of the root zvol, defaults to 'tank'
+# IXBUILD_ROOT_ZVOL="tank"
+# export IXBUILD_ROOT_ZVOL
+
 # Select which branch of ixbuild repo testing framework to use
 # (Optional)
 # IXBUILDBRANCH=""

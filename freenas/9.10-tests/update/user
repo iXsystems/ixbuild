@@ -24,7 +24,7 @@ user_tests() {
 
   # Update the testuser
   echo_test_title "Updating user: testuser"
-  rest_request "PUT" "/account/users/${userid}/" '{ "bsdusr_username": "testuser", "bsdusr_full_name": "Test Renamed", "bsdusr_password": "testing123", "bsdusr_uid": 1112, "bsdusr_home": "/mnt/tank/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }'
+  rest_request "PUT" "/account/users/${userid}/" '{ "bsdusr_username": "testuser", "bsdusr_full_name": "Test Renamed", "bsdusr_password": "testing123", "bsdusr_uid": 1112, "bsdusr_home": "/mnt/'${IXBUILD_ROOT_ZVOL}'/testuser", "bsdusr_mode": "755", "bsdusr_shell": "/bin/csh" }'
   check_rest_response "200"
 
   # Update password for testuser

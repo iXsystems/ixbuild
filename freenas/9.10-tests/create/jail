@@ -25,7 +25,7 @@ jail_tests() {
   . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass} -m 60
 
   echo_test_title "Configuring jails"
-  rest_request "PUT" "/jails/configuration/" '{ "jc_ipv4_network_start": "'"${JAILIP}"'", "jc_path": "/mnt/tank/jails" }'
+  rest_request "PUT" "/jails/configuration/" '{ "jc_ipv4_network_start": "'"${JAILIP}"'", "jc_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/jails" }'
   check_rest_response "201 Created"
 
   # Timeout if jail creation hangs
@@ -38,8 +38,8 @@ jail_tests() {
   # Remove timeout for other tests
   . ${PROGDIR}/../utils/resty -W "http://${ip}:80/api/v1.0" -H "Accept: application/json" -H "Content-Type: application/json" -u ${fuser}:${fpass}
 
-  echo_test_title "Mount tank/share into jail"
-  rest_request "POST" "/jails/mountpoints/" '{ "destination": "/mnt", "jail": "testjail", "mounted": true, "readonly": false, "source": "/mnt/tank/share" }'
+  echo_test_title "Mount ${IXBUILD_ROOT_ZVOL}/share into jail"
+  rest_request "POST" "/jails/mountpoints/" '{ "destination": "/mnt", "jail": "testjail", "mounted": true, "readonly": false, "source": "/mnt/'${IXBUILD_ROOT_ZVOL}'/share" }'
   check_rest_response "201 Created"
 
   echo_test_title "Starting jail"

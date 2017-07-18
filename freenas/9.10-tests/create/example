@@ -16,7 +16,7 @@ example_tests()
   CLASSNAME=ixbuild.resty.functional.create.example
 
   echo_test_title "Example test"
-  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/tank", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created" || return 1
 
   # Tests all passed!
