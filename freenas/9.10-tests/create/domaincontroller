@@ -25,7 +25,7 @@ CLASSNAME=ixbuild.resty.functional.create.dommain_ctrl
   # skip if variable are not present
   if [ -z "$REALMNAME" -o -z "$DOMAINNAME" -o -z "$DNSFORWARDER" ]; 
     then
-      echo -n "MISSING the NISSERVER / NISDOMAIN / DNS settings, test skipped.."
+      echo -n "MISSING the REALM / DOMAIN / DNS settings, test skipped.."
       echo_skipped
       add_xml_result "skipped" "skipped due to missing Domain Controller settings"
       return 0
