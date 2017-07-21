@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 user_tests() {
-  set_test_group_text "3 - Delete - User tests" "1"
+  set_test_group_text "3 - Delete - User tests" "2"
   CLASSNAME=ixbuild.resty.functional.delete.user
 
   # Get the ID of testuser

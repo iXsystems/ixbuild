@@ -15,7 +15,7 @@ nfs_tests()
   local MOUNTPOINT="/tmp/${BRIDGEHOST}nfs"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - NFS tests" "14"
+  set_test_group_text "1 - Create - NFS tests" "15"
   CLASSNAME=ixbuild.resty.functional.create.nfs
 
   # Enable NFS server

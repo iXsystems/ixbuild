@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Author: Rishabh Chauhan
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+domaincontroller_tests()
+{
+# define variables
+  local REALM="samdom.local"
+  local DOMAIN="samdom"
+  local DNSFORWARDER="10.20.20.122"
+  local FORESTLEVEL="2003"
+
+  # Set the group text and number of tests
+  set_test_group_text "1 - Create - domain controller test class" "5"
+  
+ 	
+  CLASSNAME=ixbuild.resty.functional.create.dommain_ctrl
+
+  # skip if variable are not present
+  if [ -z "$REALM" -o -z "$DOMAIN" -o -z "$DNSFORWARDER" ]; 
+    then
+      echo -n "MISSING the REALM / DOMAIN / DNS settings, test skipped.."
+      echo_skipped
+      add_xml_result "skipped" "skipped due to missing Domain Controller settings"
+      return 0
+  fi
+
+  echo_test_title "Setting Realm Name.."
+  rest_request "PUT" "/services/services/domaincontroller/" '{ "dc_realm": "'${REALM}'" }'
+  check_rest_response "200"
+
+  echo_test_title "Setting Domain name.."
+  rest_request "PUT" "/services/services/domaincontroller/" '{ "dc_domain": "'${DOMAIN}'" }'
+  check_rest_response "200"
+
+  echo_test_title "Setting DNS forwarder"
+  rest_request "PUT" "/services/services/domaincontroller/" '{ "dc_dns_forwarder": "'${DNSFORWARDER}'" }'
+  check_rest_response "200"
+
+  echo_test_title "Setting the Admin Password"
+  rest_request "PUT" "/services/services/domaincontroller/" '{ "dc_passwd": "'${ADPASSWORD}'" }'
+  check_rest_response "200"
+
+  echo_test_title "Setting the Forest level"
+  rest_request "PUT" "/services/services/domaincontroller/" '{ "dc_forest_level": "'${FORESTLEVEL}'" }'
+  check_rest_response "200"
+
+  # Tests all passed!
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+domaincontroller_init()
+{
+  # Run all the tests
+  case $TESTSET in
+        SMOKE) domaincontroller_tests ; return $? ;;
+     COMPLETE) domaincontroller_tests ; return $? ;;
+    BENCHMARK) ;;
+            *) domaincontroller_tests ; return $? ;;
+  esac
+}
+

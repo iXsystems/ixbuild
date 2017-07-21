@@ -14,9 +14,11 @@ nis_bsd_tests()
   # define variables
   local SERVER="${NISSERVER}"
   local DOMAIN="${NISDOMAIN}"
+  local DATASET="nis-bsd"
+  local NIS_PATH="/mnt/tank/${DATASET}"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - nis_bsd test class" "11"
+  set_test_group_text "1 - Create - nis_bsd test class" "12"
   CLASSNAME=ixbuild.resty.functional.create.nis_bsd
 
   # skip if variable are not present
@@ -41,35 +43,39 @@ nis_bsd_tests()
 
   echo_test_title "Checking if NIS service is enable.."
   rest_request "GET" "/directoryservice/nis/"
-  check_property_value ".nis_enable" "true" || return 1
+  check_property_value "return this.nis_enable" "true" || return 1
   
+  echo_test_title "Creating NIS dataset"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created"
+
   echo_test_title "Enabling secure mode.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_secure_mode": true }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Checking if secure mode is enable.."
   rest_request "GET" "/directoryservice/nis/"
-  check_property_value ".nis_secure_mode" "true" || return 1
+  check_property_value "return this.nis_secure_mode" "true" || return 1
 
   echo_test_title "Disabling secure mode.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_secure_mode": false }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Enabling manycast.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_manycast": true }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Checking if manycast is enable.."
   rest_request "GET" "/directoryservice/nis/"
-  check_property_value ".nis_manycast" "true" || return 1
+  check_property_value "return this.nis_manycast" "true" || return 1
 
   echo_test_title "Disabling manycast.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_manycast": false }'
-  check_test_response "200"
+  check_rest_response "200"
 
   echo_test_title "Disabling NIS service.."
   rest_request "PUT" "/directoryservice/nis/" '{ "nis_enable": false }'
-  check_test_response "200"
+  check_rest_response "200"
 
 }
 
