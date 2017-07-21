@@ -56,7 +56,7 @@ ups_tests()
   check_rest_response "200 OK"  
 
   echo_test_title "Setting Identifier"
-  res_request "PUT" "/services/services/ups/" '{ "ups_identifier": "ups" }'
+  rest_request "PUT" "/services/services/ups/" '{ "ups_identifier": "ups" }'
   check_rest_response "200 OK"
 
   # Tests all passed!
