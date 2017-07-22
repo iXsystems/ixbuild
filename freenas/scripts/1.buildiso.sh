@@ -77,7 +77,7 @@ fi
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
   echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
-  newTrain="PR-${PRBUILDER}-`echo $ghprbTargetBranch | sed 's|/|-|g'`"
+  newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
   echo "Setting new TRAIN=$newTrain"
   BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
 fi
@@ -335,6 +335,21 @@ echo_ok
 clean_artifacts
 save_artifacts_on_success
 finish_xml_results "make"
+
+# If this is a github pull request builder, check if branch needs to be overridden
+if [ -n "$ghprbTargetBranch" ] ; then
+  GITFNASBRANCH="$ghprbTargetBranch"
+  echo "Built GitHub PR, using builder branch: $GITFNASBRANCH"
+  newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
+  echo "Build TRAIN=$newTrain"
+  cd ${FNASBDIR}
+  eval $PROFILEARGS
+  if [ ! -d "${PROFILE}/_BE/release" ] ; then
+    echo "ERROR: Could not locate release dir: ${PROFILE}/_BE/release"
+  fi
+  echo "Saving build artifacts"
+  cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
+fi
 
 rm ${OUTFILE}
 exit 0
