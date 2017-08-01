@@ -32,6 +32,10 @@ rc_halt "mount_nullfs ${METAPKGDIR} ${ISODISTDIR}/packages"
 # Set the file-date
 fDate="`date '+%Y-%m-%d'`"
 
+if [ $DEFAULTPKGBRANCH = "UNSTABLE" ] ; then
+  fDate="${fDate}-UNSTABLE"
+fi
+
 # Base file name
 if [ "$SYSBUILD" = "trueos" ] ; then
   bFile="TrueOS-Server-${fDate}-${FARCH}"
@@ -95,12 +99,19 @@ md5 -q ${bFile}-DVD.iso >${bFile}-DVD.iso.md5
 sha256 -q ${bFile}-DVD.iso >${bFile}-DVD.iso.sha256
 if [ ! -e "latest.iso" ] ; then
   ln -s ${bFile}-DVD.iso latest.iso
+  ln -s ${bFile}-DVD.iso.torrent latest.iso.torrent
   ln -s ${bFile}-DVD.iso.md5 latest.iso.md5
   ln -s ${bFile}-DVD.iso.sha256 latest.iso.sha256
 fi
 
+if [ $DEFAULTPKGBRANCH = "UNSTABLE" ] ; then
+  tdir="unstable"
+else
+  tdir="master"
+fi
+
 # Create the .torrent
-mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/master/amd64/${bFile}-DVD.iso ${bFile}-DVD.iso
+mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/$tdir/amd64/${bFile}-DVD.iso ${bFile}-DVD.iso
 
 ######
 # Create the USB images
@@ -147,11 +158,12 @@ md5 -q ${OUTFILE} >${OUTFILE}.md5
 sha256 -q ${OUTFILE} >${OUTFILE}.sha256
 if [ ! -e "latest.img" ] ; then
   ln -s `basename ${OUTFILE}` latest.img
+  ln -s `basename ${OUTFILE}` latest.img.torrent
   ln -s `basename ${OUTFILE}.md5` latest.img.md5
   ln -s `basename ${OUTFILE}.sha256` latest.img.sha256
 fi
 
 # Create the .torrent
-mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/master/amd64/`basename ${OUTFILE}` ${OUTFILE}
+mktorrent -a udp://tracker.coppersurfer.tk:6969 -w http://download.trueos.org/$tdir/amd64/`basename ${OUTFILE}` ${OUTFILE}
 
 exit 0

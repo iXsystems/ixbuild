@@ -33,6 +33,9 @@ export SFTPWORKDIR
 # FreeNAS specific settings
 ###########################################################################
 
+# Allow middlewared tests to be skipped
+# NOMIDDLEWARED="YES"
+
 # (Optional) Define a VM Backend otherwise VirtualBox is used (possible types are bhyve, esxi)
 # VMBACKEND=""
 # export VMBACKEND
