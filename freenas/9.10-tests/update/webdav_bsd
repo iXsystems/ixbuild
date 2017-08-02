@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS 9.10
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES=""
+export REQUIRES
+
+webdav_bsd_tests()
+{
+  set_test_group_text "1 - Create - WebDAV BSD Tests" "17"
+  CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
+
+  local DATASET="webdavshare"
+  local DATASET_PATH="/mnt/tank/${DATASET}/"
+  local TMP_FILE="/tmp/testfile.txt"
+  local SHARE_NAME="webdavshare"
+  local SHARE_USER="webdav"
+  local SHARE_PASS="davtest2"
+
+  # Clean up any leftover items from previous failed test runs
+  rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by ixbuild tests", "webdav_path": "'"${DATASET_PATH}"'" }'
+  rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  rm "${TMP_FILE}" &>/dev/null
+
+  echo_test_title "Changing password for webdev"
+  rest_request "POST" "/services/services/webdav/" '{ "webdav_password": "'"${SHARE_PASS}"'" }'
+  check_rest_response "201 ok"
+
+  echo_test_title "Creating dataset for WebDAV use"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Changing permissions on ${DATASET_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Creating WebDAV share on ${DATASET_PATH}"
+  rest_request "POST" "/sharing/webdav/" '{ "webdav_name": "'${SHARE_NAME}'", "webdav_comment": "Auto-created by ixbuild tests", "webdav_path": "'"${DATASET_PATH}"'" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Starting WebDAV service"
+  rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": true }'
+  check_rest_response "200" || return 1
+
+  echo_test_title "Poll test target to ensure WebDAV service is up and running"
+  wait_for_avail_port "8080"
+  check_exit_status || return 1
+
+  echo_test_title "Verifying that WebDAV service is reported as enabled by the API"
+  rest_request "GET" "/services/services/webdav/"
+  check_service_status "RUNNING" || return 1
+
+  echo_test_title "Verify that user and group ownership was changed to \"webdav\" on \"${DATASET_PATH}\""
+  ssh_test "ls -l \"$(dirname ${DATASET_PATH})\" | awk 'NR > 1 && \$3 == \"webdav\" && \$4 == \"webdav\" {print \$9}' | grep \"${DATASET}\""
+  check_exit_status
+
+  # Test our WebDAV share using curl commands
+
+  touch "${TMP_FILE}"
+
+  echo_test_title "Create test file on the WebDAV share using curl"
+  rc_test "curl -f --digest -u \"${SHARE_USER}:${SHARE_PASS}\" -T \"${TMP_FILE}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/\" -w \"%{http_code}\" | grep -q 201"
+
+  echo_test_title "Create a new directory on the WebDAV share using curl"
+  rc_test "curl -f --digest -u \"${SHARE_USER}:${SHARE_PASS}\" -X MKCOL \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/\" -w \"%{http_code}\" | grep -q 201"
+
+  echo_test_title "Test moving file into new directory on WebDAV share using curl"
+  rc_test "curl -f --digest -u \"${SHARE_USER}:${SHARE_PASS}\" -X MOVE --header \"Destination:http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/testfile.txt\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/testfile.txt\" -w \"%{http_code}\" | grep -q 201"
+
+  echo_test_title "Test deleting file from the WebDAV share using curl"
+  curl --digest -u "${SHARE_USER}:${SHARE_PASS}" -X DELETE "http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/testfile.txt" &>/dev/null
+  rc_test "curl --digest -u \"${SHARE_USER}:${SHARE_PASS}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/testfile.txt\" -w \"%{http_code}\" 2>/dev/null | grep -q 404"
+
+  echo_test_title "Test deleting directory from the WebDAV share using curl"
+  curl --digest -u "${SHARE_USER}:${SHARE_PASS}" -X DELETE "http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/" &>/dev/null
+  rc_test "curl --digest -u \"${SHARE_USER}:${SHARE_PASS}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/\" -w \"%{http_code}\" 2>/dev/null | grep -q 404"
+
+  echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
+  rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
+  check_rest_response "204"
+
+  echo_test_title "Stopping WebDAV service"
+  rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verifying that the WebDAV service has stopped"
+  rest_request "GET" "/services/services/webdav"
+  check_service_status "STOPPED"
+
+  echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  check_rest_response "204" || return 1
+
+  # Remove tmp file created for testing
+  rm '/tmp/testfile.txt' &>/dev/null
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+webdav_bsd_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) webdav_bsd_tests ;;
+     COMPLETE) webdav_bsd_tests ;;
+    BENCHMARK) ;;
+            *) webdav_bsd_tests ;;
+  esac
+}
