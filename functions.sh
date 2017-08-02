@@ -1213,7 +1213,7 @@ jenkins_freenas_run_tests()
   kill -9 $tpid
   echo ""
   sleep 10
-  if [ -n "NOMIDDLEWARED" ] ; then
+  if [ -n "${NOMIDDLEWARED}" ] ; then
     echo "Skipping middlewared tests.."
   else
     echo "Running API v2.0 tests"
