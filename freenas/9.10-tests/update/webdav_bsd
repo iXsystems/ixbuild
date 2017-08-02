@@ -28,7 +28,7 @@ webdav_bsd_tests()
   rm "${TMP_FILE}" &>/dev/null
 
   echo_test_title "Changing password for webdev"
-  rest_request "POST" "/services/services/webdav/" '{ "webdav_password": "'"${SHARE_PASS}"'" }'
+  rest_request "PUT" "/services/services/webdav/" '{ "webdav_password": "'"${SHARE_PASS}"'" }'
   check_rest_response "201 ok"
 
   echo_test_title "Creating dataset for WebDAV use"
