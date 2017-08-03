@@ -13,7 +13,7 @@ webdav_bsd_tests()
 {
   set_test_group_text "1 - Create - WebDAV BSD Tests" "16"
   CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
-  return 0
+  #return 0
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local TMP_FILE="/tmp/testfile.txt"
