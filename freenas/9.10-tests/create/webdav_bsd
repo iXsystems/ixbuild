@@ -20,7 +20,7 @@ webdav_bsd_tests()
   local SHARE_NAME="webdavshare"
   local SHARE_USER="webdav"
   local SHARE_PASS="davtest"
-  return 0
+  
   # Clean up any leftover items from previous failed test runs
   rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by ixbuild tests", "webdav_path": "'"${DATASET_PATH}"'" }'
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
@@ -30,7 +30,7 @@ webdav_bsd_tests()
   echo_test_title "Creating dataset for WebDAV use"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created"
-
+  return 0
   echo_test_title "Changing permissions on ${DATASET_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created"
