@@ -37,12 +37,6 @@ webdav_osx_tests()
   #rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   #rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
 
-  #ech0_test_title "Changing the "
-
-  echo_test_title "Changing password for webdev"
-  rest_request "PUT" "/services/services/webdav/" '{ "webdav_password": "'"${SHARE_PASS}"'" }'
-  check_rest_response "201 ok"
-
   echo_test_title "Creating dataset for WebDAV use"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created"
@@ -58,6 +52,10 @@ webdav_osx_tests()
   echo_test_title "Starting WebDAV service"
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": true }'
   check_rest_response "200" || return 1
+
+  echo_test_title "Changing password for webdev"
+  rest_request "PUT" "/services/services/webdav/" '{ "webdav_password": "'"${SHARE_PASS}"'" }'
+  check_rest_response "200 ok"
   
   #Commenting exit_status and service_status
   #echo_test_title "Poll test target to ensure WebDAV service is up and running"
