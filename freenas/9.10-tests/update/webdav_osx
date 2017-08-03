@@ -13,7 +13,7 @@ webdav_osx_tests()
 {
   set_test_group_text "1 - Create - WebDAV OS X Tests" "21"
   CLASSNAME=ixbuild.resty.functional.create.webdav_osx
-
+  return 0
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local SHARE_NAME="webdavshare"
