@@ -85,9 +85,9 @@ webdav_bsd_tests()
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   check_rest_response "200 OK"
 
-  echo_test_title "Verifying that the WebDAV service has stopped"
-  rest_request "GET" "/services/services/webdav"
-  check_service_status "STOPPED"
+  #echo_test_title "Verifying that the WebDAV service has stopped"
+  #rest_request "GET" "/services/services/webdav"
+  #check_service_status "STOPPED"
 
   echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
