@@ -30,7 +30,7 @@ webdav_bsd_tests()
   echo_test_title "Creating dataset for WebDAV use"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created"
-  return 0
+  
   echo_test_title "Changing permissions on ${DATASET_PATH}"
   rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
   check_rest_response "201 Created"
