@@ -13,14 +13,14 @@ webdav_bsd_tests()
 {
   set_test_group_text "1 - Create - WebDAV BSD Tests" "16"
   CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
-  #return 0
+ 
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local TMP_FILE="/tmp/testfile.txt"
   local SHARE_NAME="webdavshare"
   local SHARE_USER="webdav"
   local SHARE_PASS="davtest"
-
+  return 0
   # Clean up any leftover items from previous failed test runs
   rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by ixbuild tests", "webdav_path": "'"${DATASET_PATH}"'" }'
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
