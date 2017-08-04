@@ -77,11 +77,11 @@ webdav_bsd_tests()
   echo_test_title "Test deleting directory from the WebDAV share using curl"
   curl --digest -u "${SHARE_USER}:${SHARE_PASS}" -X DELETE "http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/" &>/dev/null
   rc_test "curl --digest -u \"${SHARE_USER}:${SHARE_PASS}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/\" -w \"%{http_code}\" 2>/dev/null | grep -q 404"
-
+  return 0
   echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
   rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
   check_rest_response "204"
-  return 0
+  
   echo_test_title "Stopping WebDAV service"
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   check_rest_response "200 OK"
