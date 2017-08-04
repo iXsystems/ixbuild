@@ -93,9 +93,9 @@ webdav_bsd_tests()
   #rest_request "GET" "/services/services/webdav"
   #check_service_status "STOPPED"
 
-  echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
-  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  check_rest_response "204" || return 1
+  #echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
+  #rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  #check_rest_response "204" || return 1
 
   # Remove tmp file created for testing
   rm '/tmp/testfile.txt' &>/dev/null
