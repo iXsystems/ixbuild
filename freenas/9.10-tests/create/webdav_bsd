@@ -77,8 +77,8 @@ webdav_bsd_tests()
   curl --digest -u "${SHARE_USER}:${SHARE_PASS}" -X DELETE "http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/" &>/dev/null
   rc_test "curl --digest -u \"${SHARE_USER}:${SHARE_PASS}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/\" -w \"%{http_code}\" 2>/dev/null | grep -q 404"
  
-  #tests above this line are not the reason for XML falure
- 
+  #2 tests below this line are the reason for XML falure
+  #1st test
   #hiding the below test for curl testing
   #echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
   #rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
@@ -88,11 +88,11 @@ webdav_bsd_tests()
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   check_rest_response "200 OK"
   
-  #this test makes the build unstable
   echo_test_title "Verifying that the WebDAV service has stopped"
   rest_request "GET" "/services/services/webdav"
   check_service_status "STOPPED"
 
+  #2nd test
   #echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
   #rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   #check_rest_response "204" || return 1
