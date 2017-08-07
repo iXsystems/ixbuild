@@ -13,7 +13,7 @@ webdav_osx_tests()
 {
   set_test_group_text "1 - Create - WebDAV OS X Tests" "21"
   CLASSNAME=ixbuild.resty.functional.create.webdav_osx
-  return 0
+ 
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local SHARE_NAME="webdavshare"
@@ -111,21 +111,24 @@ webdav_osx_tests()
   #osx_test "diskutil unmount force '${MOUNTPOINT}'"
   #check_exit_status || return 1
 
-  echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
-  rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
-  check_rest_response "204"
+  #2 tests responsible for faulty XML file generation
+  #1st test
+  #echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
+  #rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
+  #check_rest_response "204"
 
   echo_test_title "Stopping WebDAV service"
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   check_rest_response "200 OK"
 
-  #echo_test_title "Verifying that the WebDAV service has stopped"
-  #rest_request "GET" "/services/services/webdav"
-  #check_service_status "STOPPED"
+  echo_test_title "Verifying that the WebDAV service has stopped"
+  rest_request "GET" "/services/services/webdav"
+  check_service_status "STOPPED"
 
-  echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
-  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  check_rest_response "204" || return 1
+  #2nd test
+  #echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
+  #rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  #check_rest_response "204" || return 1
 
   return 0
 }

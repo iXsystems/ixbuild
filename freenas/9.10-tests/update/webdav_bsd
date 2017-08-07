@@ -13,7 +13,7 @@ webdav_bsd_tests()
 {
   set_test_group_text "1 - Create - WebDAV BSD Tests" "17"
   CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
-  return 0
+  
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local TMP_FILE="/tmp/testfile.txt"
@@ -80,21 +80,24 @@ webdav_bsd_tests()
   curl --digest -u "${SHARE_USER}:${SHARE_PASS}" -X DELETE "http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/" &>/dev/null
   rc_test "curl --digest -u \"${SHARE_USER}:${SHARE_PASS}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/\" -w \"%{http_code}\" 2>/dev/null | grep -q 404"
 
-  echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
-  rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
-  check_rest_response "204"
+  #2 Tests responsible for faulty XML file generation
+  #1st test
+  #echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
+  #rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
+  #check_rest_response "204"
 
   echo_test_title "Stopping WebDAV service"
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
   check_rest_response "200 OK"
 
-  #echo_test_title "Verifying that the WebDAV service has stopped"
-  #rest_request "GET" "/services/services/webdav"
-  #check_service_status "STOPPED"
+  echo_test_title "Verifying that the WebDAV service has stopped"
+  rest_request "GET" "/services/services/webdav"
+  check_service_status "STOPPED"
 
-  echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
-  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  check_rest_response "204" || return 1
+  #2nd test
+  #echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
+  #rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  #check_rest_response "204" || return 1
 
   # Remove tmp file created for testing
   rm '/tmp/testfile.txt' &>/dev/null
