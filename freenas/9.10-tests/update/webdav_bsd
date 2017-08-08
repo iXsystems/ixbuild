@@ -24,8 +24,7 @@ webdav_bsd_tests()
   # Clean up any leftover items from previous failed test runs
   rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by ixbuild tests", "webdav_path": "'"${DATASET_PATH}"'" }'
   rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
-  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/" 
-  #rm "${TMP_FILE}" &>/dev/null
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/" rm "${TMP_FILE}" &>/dev/null
 
   echo_test_title "Creating dataset for WebDAV use"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
