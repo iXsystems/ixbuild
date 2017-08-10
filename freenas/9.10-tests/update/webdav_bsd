@@ -13,13 +13,15 @@ webdav_bsd_tests()
 {
   set_test_group_text "1 - Create - WebDAV BSD Tests" "17"
   CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
-  
+  ## Skipping test due to bug 25239/25240. This will need to be re-enabled when 25239/25240 is 
+  resolved.
+  return 0
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local TMP_FILE="/tmp/testfile.txt"
   local SHARE_NAME="webdavshare"
   local SHARE_USER="webdav"
-  local SHARE_PASS="davtest"
+  local SHARE_PASS="davtest2"
 
   # Clean up any leftover items from previous failed test runs
   rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by ixbuild tests", "webdav_path": "'"${DATASET_PATH}"'" }'
