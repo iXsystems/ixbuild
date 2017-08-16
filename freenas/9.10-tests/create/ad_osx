@@ -44,7 +44,6 @@ ad_osx_tests()
 
   # Set auxilary parameters to allow mount_smbfs to work with Active Directory
   echo_test_title "Setting auxilary parameters for mount_smbfs.."
-  # rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = no\nntlm auth = no \nraw NTLMv2 auth = no" }'
   rest_request "PUT" "/services/cifs/" '{ "cifs_srv_min_protocol": "CORE" }'
   check_rest_response "200 OK"
 
