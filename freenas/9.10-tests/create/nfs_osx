@@ -11,6 +11,7 @@ export REQUIRES
 
 nfs_osx_tests()
 {
+  return 0
   # Set the group text and number of tests
   set_test_group_text "1 - Create - NFS OSX tests" "26"
   CLASSNAME=ixbuild.resty.functional.create.nfs_osx
