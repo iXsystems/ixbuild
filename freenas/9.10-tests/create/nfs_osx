@@ -35,9 +35,10 @@ nfs_osx_tests()
   
   # Clean up any leftover items from previous failed NFS runs
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
+  return 0
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
-  return 0
+  #return 0
   osx_test "diskutil unmount force \"${MOUNTPOINT}\"; rmdir 
   \"${MOUNTPOINT}\""
   
