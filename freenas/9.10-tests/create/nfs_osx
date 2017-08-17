@@ -11,7 +11,7 @@ export REQUIRES
 
 nfs_osx_tests()
 {
-  return 0
+  
   # Set the group text and number of tests
   set_test_group_text "1 - Create - NFS OSX tests" "26"
   CLASSNAME=ixbuild.resty.functional.create.nfs_osx
@@ -32,7 +32,7 @@ nfs_osx_tests()
       return 0
     fi
   done
-
+  return 0
   # Clean up any leftover items from previous failed NFS runs
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
