@@ -37,8 +37,10 @@ nfs_osx_tests()
   rest_request "DELETE" "/sharing/nfs/" '{ "nfs_comment": "My Test Share", "nfs_paths": ["'"${NFS_PATH}"'"], "nfs_security": "sys" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
   rest_request "PUT" "/services/services/nfs/" '{ "srv_enable": false }'
-  osx_test "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\""
   return 0
+  osx_test "diskutil unmount force \"${MOUNTPOINT}\"; rmdir 
+  \"${MOUNTPOINT}\""
+  
   # Create a dataset to use with NFS
   echo_test_title "Creating dataset ${DATASET}"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
