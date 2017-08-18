@@ -52,13 +52,13 @@ do_iso()
   # If on ARM, only need single image
   echo "$PACKAGE_ARCH" | grep -q "arm"
   if [ $? -eq 0 ] ; then
-    SYSBUILD="desktop"
+    unset SYSBUILD
   fi
   
    # If on AMD64, only need single image
   echo "$PACKAGE_ARCH" | grep -q "amd64"
   if [ $? -eq 0 ] ; then
-    SYSBUILD="desktop"
+    SYSBUILD="both"
   fi
 
   # Are we building both TrueOS / PC-BSD images?
@@ -72,7 +72,7 @@ do_iso()
       echo "Script failed!"
       exit 1
     fi
-    SYSBUILD="trueos" ; export SYSBUILD
+    SYSBUILD="server" ; export SYSBUILD
     ${PROGDIR}/scripts/9.freesbie.sh
     if [ $? -ne 0 ] ; then
       echo "Script failed!"

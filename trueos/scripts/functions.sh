@@ -52,7 +52,7 @@ fi
 
 # Where are the config files
 PCONFDIR="${TRUEOSSRC}/build-files/conf/desktop" ; export PCONFDIR
-if [ "$SYSBUILD" = "trueos" ] ; then
+if [ "$SYSBUILD" = "server" ] ; then
   PCONFDIR="${TRUEOSSRC}/build-files/conf/server" ; export PCONFDIR
 fi
 
@@ -85,7 +85,7 @@ if [ -z "$PKGVERUPLOAD" ] ; then
 fi
 
 # Poud variables
-if [ "$SYSBUILD" = "trueos" -a -z "$DOINGSYSBOTH" ] ; then
+if [ "$SYSBUILD" = "server" -a -z "$DOINGSYSBOTH" ] ; then
   PBUILD="trueos-`echo $JAILVER | sed 's|\.||g'`"
   if [ "$ARCH" = "i386" ] ; then PBUILD="${PBUILD}-i386"; fi
 else

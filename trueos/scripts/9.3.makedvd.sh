@@ -37,7 +37,7 @@ if [ $DEFAULTPKGBRANCH = "UNSTABLE" ] ; then
 fi
 
 # Base file name
-if [ "$SYSBUILD" = "trueos" ] ; then
+if [ "$SYSBUILD" = "server" ] ; then
   bFile="TrueOS-Server-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
