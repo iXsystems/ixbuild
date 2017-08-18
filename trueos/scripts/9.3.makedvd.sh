@@ -41,10 +41,12 @@ if [ "$SYSBUILD" = "server" ] ; then
   bFile="TrueOS-Server-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
+  touch ${PDESTDIR9}/trueos-server
 else
   bFile="TrueOS-Desktop-${fDate}-${FARCH}"
   bTitle="TrueOS"
   brand="trueos"
+  touch ${PDESTDIR9}/trueos-desktop
 fi
 export bFile
 
