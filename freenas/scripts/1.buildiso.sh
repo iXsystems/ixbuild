@@ -116,6 +116,8 @@ if [ -n "$PRBUILDER" ] ; then
   rm -rf ${FNASBDIR} 2>/dev/null
   chflags -R noschg ${FNASBDIR} 2>/dev/null
   rm -rf ${FNASBDIR} 2>/dev/null
+  cd ${FNASSRC}
+  ${BUILDSENV} make clean ${PROFILEARGS}
 fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
