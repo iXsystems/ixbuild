@@ -56,8 +56,7 @@ do_iso()
   fi
   
    # If on AMD64, only need single image
-  echo "$PACKAGE_ARCH" | grep -q "amd64"
-  if [ $? -eq 0 ] ; then
+  if [ -z "$PACKAGE_ARCH" -o "$PACKAGE_ARCH" = "amd64" ] ; then
     SYSBUILD="both"
   fi
 
