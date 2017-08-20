@@ -64,7 +64,7 @@ uzip() {
     UZIPFILE=$1;
 
     echo -n "Compressing ${UFSFILE}..."
-    rc_halt "mkuzip -v -s 65536 -o ${UZIPFILE} ${UFSFILE}"
+    rc_halt "mkuzip -v -s 65536 -o ${UZIPFILE} ${UFSFILE}" 2>/dev/null >/dev/null
 
     UFSSIZE=$(ls -l ${UFSFILE} | awk '{print $5}')
     UZIPSIZE=$(ls -l ${UZIPFILE} | awk '{print $5}')
