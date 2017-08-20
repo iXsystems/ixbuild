@@ -100,10 +100,10 @@ cd ${PROGDIR}/iso
 md5 -q ${bFile}-DVD.iso >${bFile}-DVD.iso.md5
 sha256 -q ${bFile}-DVD.iso >${bFile}-DVD.iso.sha256
 if [ ! -e "latest.iso" ] ; then
-  ln -s ${bFile}-DVD.iso latest.iso
-  ln -s ${bFile}-DVD.iso.torrent latest.iso.torrent
-  ln -s ${bFile}-DVD.iso.md5 latest.iso.md5
-  ln -s ${bFile}-DVD.iso.sha256 latest.iso.sha256
+  ln -s ${bFile}-DVD.iso latest-${SYSBUILD}.iso
+  ln -s ${bFile}-DVD.iso.torrent latest-${SYSBUILD}.iso.torrent
+  ln -s ${bFile}-DVD.iso.md5 latest-${SYSBUILD}.iso.md5
+  ln -s ${bFile}-DVD.iso.sha256 latest-${SYSBUILD}.iso.sha256
 fi
 
 if [ $DEFAULTPKGBRANCH = "UNSTABLE" ] ; then
@@ -159,10 +159,10 @@ cd ${PROGDIR}/iso
 md5 -q ${OUTFILE} >${OUTFILE}.md5
 sha256 -q ${OUTFILE} >${OUTFILE}.sha256
 if [ ! -e "latest.img" ] ; then
-  ln -s `basename ${OUTFILE}` latest.img
-  ln -s `basename ${OUTFILE}` latest.img.torrent
-  ln -s `basename ${OUTFILE}.md5` latest.img.md5
-  ln -s `basename ${OUTFILE}.sha256` latest.img.sha256
+  ln -s `basename ${OUTFILE}` latest-${SYSBUILD}.img
+  ln -s `basename ${OUTFILE}` latest-${SYSBUILD}.img.torrent
+  ln -s `basename ${OUTFILE}.md5` latest-${SYSBUILD}.img.md5
+  ln -s `basename ${OUTFILE}.sha256` latest-${SYSBUILD}.img.sha256
 fi
 
 # Create the .torrent
