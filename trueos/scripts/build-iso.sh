@@ -57,7 +57,7 @@ do_iso()
   
    # If on AMD64, only need single image
   if [ -z "$PACKAGE_ARCH" -o "$PACKAGE_ARCH" = "amd64" ] ; then
-    SYSBUILD="both"
+    SYSBUILD="BOTH"
   fi
 
   # Are we building both TrueOS / PC-BSD images?
