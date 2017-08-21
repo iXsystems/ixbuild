@@ -68,9 +68,9 @@ get_bedir
 # Allow these defaults to be overridden
 BCONF="/usr/local/etc/poudriere-builders.conf"
 if [ -e "$BCONF" ] ; then
-  grep -q "^BUILDERS=" ${BCONF}
+  grep -q "^FNBUILDERS=" ${BCONF}
   if [ $? -eq 0 ] ; then
-    POUDRIERE_JOBS=$(grep "^BUILDERS=" ${BCONF} | cut -d '=' -f 2)
+    POUDRIERE_JOBS=$(grep "^FNBUILDERS=" ${BCONF} | cut -d '=' -f 2)
     echo "Setting POUDRIERE_JOBS=$POUDRIERE_JOBS"
     export POUDIRERE_JOBS
   fi
