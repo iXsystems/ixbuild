@@ -111,13 +111,16 @@ if [ -n "$BUILDSENV" ] ; then
 fi
 
 if [ -n "$PRBUILDER" ] ; then
-  # Nuke the build dir if doing Pull Request Build
-  cd ${PROGDIR}
-  rm -rf ${FNASBDIR} 2>/dev/null
-  chflags -R noschg ${FNASBDIR} 2>/dev/null
-  rm -rf ${FNASBDIR} 2>/dev/null
-  cd ${FNASSRC}
-  ${BUILDSENV} make clean ${PROFILEARGS}
+  echo "$ghprbCommentBody" | grep -q "CLEAN"
+  if [ $? -eq 0 ] ; then
+    # Nuke the build dir if doing Pull Request Build
+    cd ${PROGDIR}
+    rm -rf ${FNASBDIR} 2>/dev/null
+    chflags -R noschg ${FNASBDIR} 2>/dev/null
+    rm -rf ${FNASBDIR} 2>/dev/null
+    cd ${FNASSRC}
+    ${BUILDSENV} make clean ${PROFILEARGS}
+  fi
 fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
