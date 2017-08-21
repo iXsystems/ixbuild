@@ -71,7 +71,15 @@ if [ -e "$BCONF" ] ; then
   grep -q "^BUILDERS=" ${BCONF}
   if [ $? -eq 0 ] ; then
     POUDRIERE_JOBS=$(grep "^BUILDERS=" ${BCONF} | cut -d '=' -f 2)
+    echo "Setting POUDRIERE_JOBS=$POUDRIERE_JOBS"
     export POUDIRERE_JOBS
+  fi
+else
+  # Some tuning for our big build boxes
+  CPUS=$(sysctl -n kern.smp.cpus)
+  if [ $CPUS -gt 10 ] ; then
+    echo "Setting POUDRIERE_JOBS=10"
+    export POUDRIERE_JOBS="10"
   fi
 fi
 
@@ -304,13 +312,6 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
   # Set the jail name to use for these builds
   export POUDRIERE_JAILNAME="`echo ${BUILDTAG} | sed 's|\.||g'`"
 
-fi
-
-# Some tuning for our big build boxes
-CPUS=$(sysctl -n kern.smp.cpus)
-if [ $CPUS -gt 10 ] ; then
-  echo "Setting POUDRIERE_JOBS=10"
-  export POUDRIERE_JOBS="10"
 fi
 
 # We are doing a build as a result of a PR
