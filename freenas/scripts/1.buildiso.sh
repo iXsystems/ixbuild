@@ -65,6 +65,16 @@ fi
 
 get_bedir
 
+# Allow these defaults to be overridden
+BCONF="/usr/local/etc/poudriere-builders.conf"
+if [ -e "$BCONF" ] ; then
+  grep -q "^BUILDERS=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    POUDRIERE_JOBS=$(grep "^BUILDERS=" ${BCONF} | cut -d '=' -f 2)
+    export POUDIRERE_JOBS
+  fi
+fi
+
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
   echo "Doing fresh build!"
