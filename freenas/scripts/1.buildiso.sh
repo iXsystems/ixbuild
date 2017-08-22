@@ -251,21 +251,14 @@ set_test_group_text "Build phase tests" "2"
 
 OUTFILE="/tmp/fnas-build.out.$$"
 
-# Display output to stdout
-touch ${OUTFILE}
-(tail -f ${OUTFILE} 2>/dev/null) &
-TPID=$!
-
 echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/null
-echo "${BUILDSENV} make checkout ${PROFILEARGS}"
+echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} ***"
 ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
-  kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make checkout"
   finish_xml_results "make"
   exit 1
 fi
-kill -9 $TPID 2>/dev/null
 echo_ok
 
 # If this build is on the nightlies train, make the changelog
@@ -354,7 +347,7 @@ touch $OUTFILE
 TPID=$!
 
 echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
-echo "${BUILDSENV} make release ${PROFILEARGS}"
+echo "*** ${BUILDSENV} make release ${PROFILEARGS} ***"
 ${BUILDSENV} make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
