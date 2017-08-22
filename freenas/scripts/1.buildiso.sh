@@ -75,6 +75,12 @@ if [ -e "$BCONF" ] ; then
     POUDRIERE_JOBS=$(grep "^FNBUILDERS=" ${BCONF} | cut -d '=' -f 2)
     echo "Setting POUDRIERE_JOBS=$POUDRIERE_JOBS"
     export POUDRIERE_JOBS
+  else
+    CPUS=$(sysctl -n kern.smp.cpus)
+    if [ $CPUS -gt 10 ] ; then
+      echo "Setting POUDRIERE_JOBS=10"
+      export POUDRIERE_JOBS="10"
+    fi
   fi
 else
   # Some tuning for our big build boxes
