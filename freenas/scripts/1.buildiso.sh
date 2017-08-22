@@ -133,6 +133,7 @@ if [ -n "$PRBUILDER" ] ; then
   echo "$ghprbCommentBody" | grep -q "CLEAN"
   if [ $? -eq 0 ] ; then
     # Nuke the build dir if doing Pull Request Build
+    echo "*** Doing a clean build of PR as requested ***"
     cd ${PROGDIR}
     rm -rf ${FNASBDIR} 2>/dev/null
     chflags -R noschg ${FNASBDIR} 2>/dev/null
@@ -169,7 +170,6 @@ else
     git_fnas_up "${FNASSRC}" "${FNASSRC}"
   else
     rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
-    git_fnas_up "${FNASSRC}" "${FNASSRC}"
   fi
 fi
 rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
