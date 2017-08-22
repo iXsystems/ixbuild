@@ -72,7 +72,7 @@ if [ -e "$BCONF" ] ; then
   if [ $? -eq 0 ] ; then
     POUDRIERE_JOBS=$(grep "^FNBUILDERS=" ${BCONF} | cut -d '=' -f 2)
     echo "Setting POUDRIERE_JOBS=$POUDRIERE_JOBS"
-    export POUDIRERE_JOBS
+    export POUDRIERE_JOBS
   fi
 else
   # Some tuning for our big build boxes
