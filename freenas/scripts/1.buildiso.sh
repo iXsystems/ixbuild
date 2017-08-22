@@ -47,6 +47,12 @@ parse_build_error()
   fi
 }
 
+# Allowed settings for BUILDINCREMENTAL
+case $BUILDINCREMENTAL in
+   ON|on|YES|yes|true|TRUE) BUILDINCREMENTAL="true" ;;
+   *) BUILDINCREMENTAL="false" ;;
+esac
+
 # Set local location of FreeNAS build
 if [ -n "$BUILDTAG" ] ; then
   FNASBDIR="/$BUILDTAG"
@@ -58,10 +64,6 @@ export FNASBDIR
 # Error output log
 LOUT="/tmp/fnas-error-debug.txt"
 touch ${LOUT}
-
-if [ -z "$BUILDINCREMENTAL" ] ; then
-  BUILDINCREMENTAL="false"
-fi
 
 get_bedir
 
