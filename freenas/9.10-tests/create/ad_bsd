@@ -36,10 +36,7 @@ ad_bsd_tests()
   bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
 
   # Set auxilary parameters to allow mount_smbfs to work with Active Directory
-  echo_test_title "Setting auxilary parameters for mount_smbfs.."
-  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_min_protocol": "CORE" }'
-  check_rest_response "200 OK"
-
+  
   echo_test_title "Creating SMB dataset"
   rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created"
