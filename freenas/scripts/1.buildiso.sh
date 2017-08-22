@@ -173,9 +173,9 @@ else
     fi
   fi
 
-  # Make sure we have our freenas sources
+  # Make sure we have our freenas build sources updated
   if [ -d "${FNASBDIR}" ]; then
-    git_fnas_up "${FNASSRC}" "${FNASSRC}"
+    git_fnas_up "${FNASBDIR}"
   else
     rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
   fi
