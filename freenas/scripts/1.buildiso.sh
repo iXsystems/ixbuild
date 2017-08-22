@@ -105,7 +105,6 @@ fi
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
   echo "Doing incremental build!"
   cd ${FNASBDIR}
-  rc_halt "git reset --hard"
 
   # Nuke old ISO's / builds
   echo "Removing old build ISOs"
@@ -153,6 +152,7 @@ else
   # Regular build
   if [ -d "${FNASBDIR}" ] ; then
     rc_halt "cd ${FNASBDIR}"
+    git reset --hard
     OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
     if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
        # Branch mismatch, re-clone
