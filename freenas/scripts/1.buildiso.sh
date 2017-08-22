@@ -102,9 +102,9 @@ fi
 # If this is a github pull request builder, check if branch needs to be overridden
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
-  echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
+  echo "*** Building GitHub PR, using builder branch: $GITFNASBRANCH ***"
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
-  echo "Setting new TRAIN=$newTrain"
+  echo "*** Setting new TRAIN=$newTrain ***"
   BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
 fi
 
@@ -154,7 +154,6 @@ if [ -n "$PRBUILDER" ] ; then
       rm -rf ${PROFILE}/_BE/${PRBUILDER}
     fi
   fi
-
 fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
@@ -371,9 +370,9 @@ finish_xml_results "make"
 # If this is a github pull request builder, check if branch needs to be overridden
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
-  echo "Built GitHub PR, using builder branch: $GITFNASBRANCH"
+  echo "*** Built GitHub PR, using builder branch: $GITFNASBRANCH ***"
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
-  echo "Build TRAIN=$newTrain"
+  echo "*** Build TRAIN=$newTrain ***"
   cd ${FNASBDIR}
   eval $PROFILEARGS
   if [ ! -d "${PROFILE}/_BE/release" ] ; then
