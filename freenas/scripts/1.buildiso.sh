@@ -153,7 +153,7 @@ fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
   # PR Build
-  echo "Doing PR build of the build/ repo"
+  echo "*** Doing PR build of the build/ repo ***"
   echo "${WORKSPACE} -> ${FNASBDIR}"
   cp -r "${WORKSPACE}" "${FNASBDIR}"
   if [ $? -ne 0 ] ; then exit_clean; fi
@@ -334,8 +334,8 @@ if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
       exit 1
    fi
    rm -rf ${PROFILE}/_BE/${PRBUILDER}
-   echo "Replacing repo with PR-updated version:"
-   echo "${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
+   echo "*** Replacing repo with PR-updated version ***"
+   echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
    cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
 fi
 
