@@ -68,6 +68,7 @@ touch ${LOUT}
 get_bedir
 
 # Allow these defaults to be overridden
+TMPFSWORK="all"
 BCONF="/usr/local/etc/poudriere-builders.conf"
 if [ -e "$BCONF" ] ; then
   grep -q "^FNBUILDERS=" ${BCONF}
@@ -81,6 +82,10 @@ if [ -e "$BCONF" ] ; then
       echo "Setting POUDRIERE_JOBS=10"
       export POUDRIERE_JOBS="10"
     fi
+  fi
+  grep -q "^TMPFSWORK=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    TMPFSWORK=$(grep "^TMPFSWORK=" ${BCONF} | cut -d '=' -f 2)
   fi
 else
   # Some tuning for our big build boxes
@@ -321,9 +326,8 @@ fi
 
 # Set to use TMPFS for everything
 if [ -e "build/config/templates/poudriere.conf" ] ; then
-  echo "Enabling USE_TMPFS=all"
-
-  sed -i '' 's|USE_TMPFS=yes|USE_TMPFS=all|g' build/config/templates/poudriere.conf
+  echo "*** Enabling USE_TMPFS=$TMPFSWORK ***"
+  sed -i '' "s|USE_TMPFS=yes|USE_TMPFS=$TMPFSWORK|g" build/config/templates/poudriere.conf
   # Set the jail name to use for these builds
   export POUDRIERE_JAILNAME="`echo ${BUILDTAG} | sed 's|\.||g'`"
 
