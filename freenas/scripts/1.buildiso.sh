@@ -255,7 +255,8 @@ echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/nu
 echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} ***"
 ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
-  echo_fail "Failed running make checkout"
+  echo_fail "*** Failed running make checkout ***"
+  cat ${OUTFILE}
   finish_xml_results "make"
   exit 1
 fi
