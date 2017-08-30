@@ -508,7 +508,7 @@ check_rest_response()
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
-  grep -qi "$1" ${RESTYERR}
+  grep HTTP/1.1 ${RESTYERR}| grep -qi "$1"
   if [ $? -ne 0 ] ; then
     cat ${RESTYERR}
     cat ${RESTYOUT}
