@@ -59,7 +59,7 @@ ssh_tests()
   echo_test_title "Adding SSH public key from the executor to the root user account"
   if [ -n "$root_user_id" -a -n "$ssh_pubkey" ]; then
     rest_request "PUT" "/account/users/${root_user_id}/" '{ "bsdusr_sshpubkey": "'"${ssh_pubkey}"'" }'
-    check_rest_response "201"
+    check_rest_response "200"
   else
     echo_fail
     return 1
