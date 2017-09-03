@@ -1,7 +1,8 @@
 var WebSocket = require('ws');
 var wsserver = process.argv[2];
 var stdargs = "";
-var ignorefirst = "true";
+var ignorefirst = "false";
+var nstatus = "connect";
 
 function connectWebSocket()
 {
@@ -14,11 +15,11 @@ function connectWebSocket()
 
 function onOpen(evt)
 {
-  var authjson = '{ "namespace":"rpc", "name":"auth", "id":"authrequest", "args": { "username":"' + process.argv[3] +'", "password":"' + process.argv[4] + '" } }';
-  nstatus = "auth";
+  var connectjson = '{ "msg":"connect", "version":"1", "support": ["1"] }';
   wstatus = "idle";
-  doSend(authjson);
-  doSend(stdargs);
+  doSend(connectjson);
+//  doSend(authjson);
+//  doSend(stdargs);
 }
 
 function onClose(evt)
@@ -32,19 +33,28 @@ function onError(evt)
 
 function onMessage(evt)
 {
+  var authjson = '{ "id": "foologin", "msg":"method", "method":"auth.login", "params": [ "' + process.argv[3] + '", "' + process.argv[4] + '" ] }';
+
   var jsonobj = JSON.parse(evt.data);
-  if ( ignorefirst == "true" ) {
-    ignorefirst = "false";
+  console.log(JSON.stringify(jsonobj, null, 2));
+  if ( nstatus == "connect" ) {
+    nstatus = "auth";
+    doSend(authjson);
     return;
-  } else {
-    console.log(JSON.stringify(jsonobj, null, 2));
   }
-  websocket.close();
+  if ( nstatus == "auth" ) {
+    nstatus = "connected";
+    doSend(stdargs);
+    return;
+  }
+  if ( nstatus == "connected" ) {
+    websocket.close();
+  }
 }
 
 function doSend(message)
 {
-  //console.log('Sent: ' + message);
+  console.log('Sent: ' + message);
   websocket.send(message);
 }
 
