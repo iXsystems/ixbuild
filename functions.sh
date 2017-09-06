@@ -1572,15 +1572,7 @@ do_build_env_setup()
 
 jenkins_iocage_tests()
 {
-  cd $WORKSPACE
-  pwd
-  git checkout master
-  make install
-  service iocage onestart
-  pytest --zpool zroot --junitxml=$RESULTSDIR/results.xml 
-  TOTALTESTS="2"
-  publish_pytest_results "$TOTALCOUNT"
-  exit $?
+  iocage/tests.sh
 }
 
 jenkins_iocage_pkgs()
