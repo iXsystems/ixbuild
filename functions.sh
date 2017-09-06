@@ -1576,7 +1576,9 @@ jenkins_iocage_tests()
   pwd
   git checkout master
   make install
-  pytest --zpool zroot 
+  pytest --zpool zroot --junitxml=$RESULTSDIR/results.xml 
+  TOTALTESTS="2"
+  publish_pytest_results "$TOTALCOUNT"
   exit $?
 }
 
