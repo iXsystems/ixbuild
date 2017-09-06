@@ -1574,6 +1574,7 @@ jenkins_iocage_tests()
 {
   cd $WORKSPACE
   pwd
+  git checkout master
   make install
   pytest --zpool zroot 
   exit $?
