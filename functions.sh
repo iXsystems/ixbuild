@@ -1573,12 +1573,9 @@ do_build_env_setup()
 jenkins_iocage_tests()
 {
   cd $WORKSPACE
+  pwd
   make install
-  if [ ! "$2" ] ; then
-    echo "Missing pool name"
-    exit 1
-  fi
-  pytest --zpool $2 
+  pytest --zpool zroot 
   exit $?
 }
 
