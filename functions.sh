@@ -1576,6 +1576,7 @@ jenkins_iocage_tests()
   pwd
   git checkout master
   make install
+  service iocage onestart
   pytest --zpool zroot --junitxml=$RESULTSDIR/results.xml 
   TOTALTESTS="2"
   publish_pytest_results "$TOTALCOUNT"
