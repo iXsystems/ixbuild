@@ -1572,7 +1572,8 @@ do_build_env_setup()
 
 jenkins_iocage_tests()
 {
-  iocage/tests.sh
+  cd iocage 
+  ./tests.sh
 }
 
 jenkins_iocage_pkgs()
