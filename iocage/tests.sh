@@ -6,8 +6,8 @@
 PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"; export PROGDIR
 
 # Reuse FreeNAS test functions
-${PROGDIR}/../freenas/scripts/functions.sh
-${PROGDIR}/../freenas/scripts/functions-tests.sh
+${PROGDIR}/freenas/scripts/functions.sh
+${PROGDIR}/freenas/scripts/functions-tests.sh
 
 # Set which python, pip versions to use
 PYTHON="/usr/bin/env python3.6"
