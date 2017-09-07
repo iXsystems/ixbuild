@@ -71,7 +71,7 @@ sysadm-docs          - Build SysAdm handbook
 sysadm-api           - Build SysAdm API handbook
 
 -- iocage Commands --
-iocage-tests	       - Run CI from iocage git (Requires pool name)
+iocage-tests         - Run CI from iocage git (Requires pool name)
 iocage_pkgs          - Build iocage package set
 iocage_pkgs_push     - Push iocage package set public
 
