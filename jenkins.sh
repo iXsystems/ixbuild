@@ -67,8 +67,12 @@ push-trueos-docs     - Upload TrueOS handbook
 lumina-docs          - Create lumina handbook
 push-lumina-docs     - Upload lumina handbook
 ports-tests          - Test building a repo port files
+
+-- SysAdm Commands --
 sysadm-docs          - Build SysAdm handbook
+push-sysadm-docs     - Upload SysAdm handbook
 sysadm-api           - Build SysAdm API handbook
+push-sysadm-api      - Upload SysAdm API handbook
 
 -- iocage Commands --
 iocage-tests         - Run CI from iocage git (Requires pool name)
@@ -131,12 +135,13 @@ freenas-run-tests-jailed) jenkins_freenas_run_tests_jailed ;;
     freenas-push-nightly) jenkins_freenas_push_nightly ;;
             freenas-push) jenkins_freenas_push ;;
            freenas-combo) jenkins_freenas
-                 jenkins_freenas_tests ;;
-               mkcustard)  jenkins_mkcustard ;;
-              mktrueview)  jenkins_mktrueview ;;
+                          jenkins_freenas_tests
+                          ;;
+               mkcustard) jenkins_mkcustard ;;
+              mktrueview) jenkins_mktrueview ;;
              ports-tests) jenkins_ports_tests ;;
                        *) echo "Invalid command: $1"
-             display_usage
-         exit 1
-         ;;
+                          display_usage
+                          exit 1
+                          ;;
 esac
