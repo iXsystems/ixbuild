@@ -1572,8 +1572,13 @@ do_build_env_setup()
 
 jenkins_iocage_tests()
 {
-  cd iocage 
-  ./tests.sh
+  cd $WORKSPACE
+  pwd
+  git checkout master
+  make install
+  service iocage onestart
+  pytest --zpool zroot --junitxml=${WORKSPACE}/results/iocage.xml
+  exit $?
 }
 
 jenkins_iocage_pkgs()
