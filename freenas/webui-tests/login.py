@@ -2,6 +2,7 @@
 # License: BSD
 # Location for tests  of FreeNAS new GUI
 
+from source import * 
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -9,10 +10,6 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import ElementNotVisibleException
 from selenium.common.exceptions import NoSuchElementException
 import unittest
-
-baseurl = "http://10.231.1.76/ui/#login"
-username = "root"
-password = "abcd1234"
 
 xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
 	   'passwordTxtBox' : "//input[@id='inputPassword3']",
@@ -26,7 +23,7 @@ class Freenasui(unittest.TestCase):
     inst.driver = webdriver.Firefox()
     inst.driver.implicitly_wait(30)
     inst.driver.maximize_window()
-    inst.driver.get(baseurl)
+    inst.driver.get(baseurl())
 
 
 
@@ -34,7 +31,7 @@ class Freenasui(unittest.TestCase):
     #enter username in the username textbox
     #self.driver.find_element_by_xpath(xpaths['usernameTxtBox']).send_keys("root")
     #enter password in the password textbox
-    self.driver.find_element_by_xpath(xpaths['passwordTxtBox']).send_keys("abcd1234")
+    self.driver.find_element_by_xpath(xpaths['passwordTxtBox']).send_keys(password())
     #click
     self.driver.find_element_by_xpath("/html/body/app/main/login/div/div/form/div[3]/div[1]/button").click()
 
