@@ -11,6 +11,13 @@ from selenium.common.exceptions import ElementNotVisibleException
 from selenium.common.exceptions import NoSuchElementException
 import unittest
 
+import random
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
+
 xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
 	   'passwordTxtBox' : "//input[@id='inputPassword3']",
 	  'submitButton' : "/html/body/app/main/login/div/div/form/div[3]/div[1]/button"
