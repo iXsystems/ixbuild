@@ -12,7 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 
 # Test Module directory
-TDIR="${PROGDIR}/live-tests"
+TDIR="${PROGDIR}/9.10-live-tests"
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions-tests.sh
