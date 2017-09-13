@@ -1145,7 +1145,9 @@ jenkins_freenas_tests()
   cd ${TBUILDDIR}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  if [ -n "$SFTPHOST" ] ; then
+  if [ -n "$SFTPHOST" -a ! -d "${WORKSPACE}/qatarget" ] ; then
+
+    echo "*** Copying ISO from stage dir ***"
 
     # Now lets sync the ISOs
     if [ -d "${BEDIR}/release" ] ; then
@@ -1160,15 +1162,29 @@ jenkins_freenas_tests()
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
 
+  if [ -d "${WORKSPACE}/qatarget" ] ; then
+    echo "*** Copying ISO from artifact ***"
+
+    if [ -d "${BEDIR}/release" ] ; then
+      rm -rf ${BEDIR}/release
+    fi
+
+    mkdir -p ${BEDIR}/release/FreeNAS-PR/x64
+    cd ${BEDIR}/release
+    if [ $? -ne 0 ] ; then exit_clean; fi
+
+    cp ${WORKSPACE}/qatarget/*.iso ${BEDIR}/release/FreeNAS-PR/x64/
+  fi
+
   if [ -n "$JAILED_TESTS" ] ; then
     cd ${TBUILDDIR}
-    make tests  
+    make tests
   else
     cd ${TBUILDDIR}
     make tests
     if [ $? -ne 0 ] ; then exit_clean ; fi
     cleanup_workdir
-  fi        
+  fi
 
   return 0
 }
