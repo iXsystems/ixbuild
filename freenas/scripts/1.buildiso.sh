@@ -47,6 +47,12 @@ parse_build_error()
   fi
 }
 
+# Allowed settings for BUILDINCREMENTAL
+case $BUILDINCREMENTAL in
+   ON|on|YES|yes|true|TRUE) BUILDINCREMENTAL="true" ;;
+   *) BUILDINCREMENTAL="false" ;;
+esac
+
 # Set local location of FreeNAS build
 if [ -n "$BUILDTAG" ] ; then
   FNASBDIR="/$BUILDTAG"
@@ -59,11 +65,36 @@ export FNASBDIR
 LOUT="/tmp/fnas-error-debug.txt"
 touch ${LOUT}
 
-if [ -z "$BUILDINCREMENTAL" ] ; then
-  BUILDINCREMENTAL="false"
-fi
-
 get_bedir
+
+# Allow these defaults to be overridden
+TMPFSWORK="all"
+BCONF="/usr/local/etc/poudriere-builders.conf"
+if [ -e "$BCONF" ] ; then
+  grep -q "^FNBUILDERS=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    POUDRIERE_JOBS=$(grep "^FNBUILDERS=" ${BCONF} | cut -d '=' -f 2)
+    echo "Setting POUDRIERE_JOBS=$POUDRIERE_JOBS"
+    export POUDRIERE_JOBS
+  else
+    CPUS=$(sysctl -n kern.smp.cpus)
+    if [ $CPUS -gt 10 ] ; then
+      echo "Setting POUDRIERE_JOBS=10"
+      export POUDRIERE_JOBS="10"
+    fi
+  fi
+  grep -q "^TMPFSWORK=" ${BCONF}
+  if [ $? -eq 0 ] ; then
+    TMPFSWORK=$(grep "^TMPFSWORK=" ${BCONF} | cut -d '=' -f 2)
+  fi
+else
+  # Some tuning for our big build boxes
+  CPUS=$(sysctl -n kern.smp.cpus)
+  if [ $CPUS -gt 10 ] ; then
+    echo "Setting POUDRIERE_JOBS=10"
+    export POUDRIERE_JOBS="10"
+  fi
+fi
 
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
@@ -76,16 +107,15 @@ fi
 # If this is a github pull request builder, check if branch needs to be overridden
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
-  echo "Building GitHub PR, using builder branch: $GITFNASBRANCH"
+  echo "*** Building GitHub PR, using builder branch: $GITFNASBRANCH ***"
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
-  echo "Setting new TRAIN=$newTrain"
+  echo "*** Setting new TRAIN=$newTrain ***"
   BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
 fi
 
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
   echo "Doing incremental build!"
   cd ${FNASBDIR}
-  rc_halt "git reset --hard"
 
   # Nuke old ISO's / builds
   echo "Removing old build ISOs"
@@ -111,16 +141,29 @@ if [ -n "$BUILDSENV" ] ; then
 fi
 
 if [ -n "$PRBUILDER" ] ; then
-  # Nuke the build dir if doing Pull Request Build
-  cd ${PROGDIR}
-  rm -rf ${FNASBDIR} 2>/dev/null
-  chflags -R noschg ${FNASBDIR} 2>/dev/null
-  rm -rf ${FNASBDIR} 2>/dev/null
+  echo "$ghprbCommentBody" | grep -q "CLEAN"
+  if [ $? -eq 0 ] ; then
+    # Nuke the build dir if doing Pull Request Build
+    echo "*** Doing a clean build of PR ***"
+    cd ${PROGDIR}
+    rm -rf ${FNASBDIR} 2>/dev/null
+    chflags -R noschg ${FNASBDIR} 2>/dev/null
+    rm -rf ${FNASBDIR} 2>/dev/null
+    cd ${FNASSRC}
+    ${BUILDSENV} make clean ${PROFILEARGS}
+  else
+    if [ "$PRBUILDER" != "build" ] ; then
+      cd ${FNASBDIR}
+      eval $PROFILEARGS
+      echo "*** Incremental PR Build - Removing ${PROFILE}/_BE/${PRBUILDER}"
+      rm -rf ${PROFILE}/_BE/${PRBUILDER}
+    fi
+  fi
 fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
   # PR Build
-  echo "Doing PR build of the build/ repo"
+  echo "*** Doing PR build of the build/ repo ***"
   echo "${WORKSPACE} -> ${FNASBDIR}"
   cp -r "${WORKSPACE}" "${FNASBDIR}"
   if [ $? -ne 0 ] ; then exit_clean; fi
@@ -128,6 +171,7 @@ else
   # Regular build
   if [ -d "${FNASBDIR}" ] ; then
     rc_halt "cd ${FNASBDIR}"
+    git reset --hard
     OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
     if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
        # Branch mismatch, re-clone
@@ -139,12 +183,11 @@ else
     fi
   fi
 
-  # Make sure we have our freenas sources
+  # Make sure we have our freenas build sources updated
   if [ -d "${FNASBDIR}" ]; then
-    git_fnas_up "${FNASSRC}" "${FNASSRC}"
+    git_fnas_up "${FNASBDIR}"
   else
     rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
-    git_fnas_up "${FNASSRC}" "${FNASSRC}"
   fi
 fi
 rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
@@ -208,21 +251,15 @@ set_test_group_text "Build phase tests" "2"
 
 OUTFILE="/tmp/fnas-build.out.$$"
 
-# Display output to stdout
-touch ${OUTFILE}
-(tail -f ${OUTFILE} 2>/dev/null) &
-TPID=$!
-
 echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/null
-echo "${BUILDSENV} make checkout ${PROFILEARGS}"
+echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} ***"
 ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
-  kill -9 $TPID 2>/dev/null
-  echo_fail "Failed running make checkout"
+  echo_fail "*** Failed running make checkout ***"
+  cat ${OUTFILE}
   finish_xml_results "make"
   exit 1
 fi
-kill -9 $TPID 2>/dev/null
 echo_ok
 
 # If this build is on the nightlies train, make the changelog
@@ -283,19 +320,11 @@ fi
 
 # Set to use TMPFS for everything
 if [ -e "build/config/templates/poudriere.conf" ] ; then
-  echo "Enabling USE_TMPFS=all"
-
-  sed -i '' 's|USE_TMPFS=yes|USE_TMPFS=all|g' build/config/templates/poudriere.conf
+  echo "*** Enabling USE_TMPFS=$TMPFSWORK ***"
+  sed -i '' "s|USE_TMPFS=yes|USE_TMPFS=$TMPFSWORK|g" build/config/templates/poudriere.conf
   # Set the jail name to use for these builds
   export POUDRIERE_JAILNAME="`echo ${BUILDTAG} | sed 's|\.||g'`"
 
-fi
-
-# Some tuning for our big build boxes
-CPUS=$(sysctl -n kern.smp.cpus)
-if [ $CPUS -gt 10 ] ; then
-  echo "Setting POUDRIERE_JOBS=10"
-  export POUDRIERE_JOBS="10"
 fi
 
 # We are doing a build as a result of a PR
@@ -308,8 +337,8 @@ if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
       exit 1
    fi
    rm -rf ${PROFILE}/_BE/${PRBUILDER}
-   echo "Replacing repo with PR-updated version:"
-   echo "${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
+   echo "*** Replacing repo with PR-updated version ***"
+   echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
    cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
 fi
 
@@ -319,7 +348,7 @@ touch $OUTFILE
 TPID=$!
 
 echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
-echo "${BUILDSENV} make release ${PROFILEARGS}"
+echo "*** ${BUILDSENV} make release ${PROFILEARGS} ***"
 ${BUILDSENV} make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
   kill -9 $TPID 2>/dev/null
@@ -339,9 +368,9 @@ finish_xml_results "make"
 # If this is a github pull request builder, check if branch needs to be overridden
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
-  echo "Built GitHub PR, using builder branch: $GITFNASBRANCH"
+  echo "*** Built GitHub PR, using builder branch: $GITFNASBRANCH ***"
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
-  echo "Build TRAIN=$newTrain"
+  echo "*** Build TRAIN=$newTrain ***"
   cd ${FNASBDIR}
   eval $PROFILEARGS
   if [ ! -d "${PROFILE}/_BE/release" ] ; then

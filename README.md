@@ -60,6 +60,29 @@ Once a new "master" is deployed, you can access your Jenkins interface from:
 
 [http://localhost:8180/jenkins/](http://localhost:8180/jenkins/)
 
+Using Resty client example
+============
+
+For bash edit ~/.bashrc and add the following line:
+
+```
+source /home/rishabh/ixbuild/utils/resty -W "http://10.211.1.139:80/" -H "Accept: application/json" -H "Content-Type: application/json" -u root:abcd1234
+```
+
+For csh/sh edit ~/.profile and add the following line:
+
+```
+. /home/rishabh/ixbuild/utils/resty -W "http://10.211.1.139:80/" -H "Accept: application/json" -H "Content-Type: application/json" -u root:abcd1234
+```
+
+Running resty client example
+
+```
+GET /api/v1.0/system/version/
+```
+
+For more examples see https://api.freenas.org
+
 
 Setting options for jenkins
 ============

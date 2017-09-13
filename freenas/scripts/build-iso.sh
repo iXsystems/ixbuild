@@ -18,9 +18,15 @@ cd ${PROGDIR}/scripts
 . ${PROGDIR}/scripts/functions.sh
 
 # Check if we have required programs
-sh ${PROGDIR}/scripts/checkprogs.sh
+echo "*** Prepping Jenkins Node ***"
+sh ${PROGDIR}/scripts/checkprogs.sh 2>&1 >/var/tmp/.cProgs.$$
 cStat=$?
-if [ $cStat -ne 0 ] ; then exit $cStat; fi
+if [ $cStat -ne 0 ] ; then
+  cat /var/tmp/.cProgs.$$
+  rm /var/tmp/.cProgs.$$
+  exit $cStat
+fi
+rm /var/tmp/.cProgs.$$
 
 do_iso() {
 

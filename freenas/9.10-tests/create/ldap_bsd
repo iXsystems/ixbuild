@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Joe Maloney
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -17,7 +17,7 @@ ldap_bsd_tests()
   local MOUNTPOINT="/tmp/${BRIDGEHOST}ldap-bsd"
   local VOL_GROUP="qa"
 
-  set_test_group_text "1 - Create - LDAP BSD tests" "27"
+  set_test_group_text "1 - Create - LDAP BSD tests" "29"
   CLASSNAME=ixbuild.resty.functional.create.ldap_bsd
 
   if [ -z "$LDAPBINDDN" -o -z "$LDAPBINDPASSWORD" ] ; then

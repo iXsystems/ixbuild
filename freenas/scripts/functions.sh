@@ -49,19 +49,19 @@ fi
 git_fnas_up()
 {
   local lDir=${1}
-  local rDir=${2}
   local oDir=`pwd`
+  if [ ! -d "$lDir" ] ; then return 0; fi
   cd "${lDir}"
+  echo "*** $0: Updating git sources in ${lDir} ***"
 
-  git reset --hard
-
+  git reset --hard >/dev/null 2>/dev/null
   echo "GIT pull"
   git pull
   if [ $? -ne 0 ] ; then
      exit_err "Failed doing a git pull"
   fi
 
-  echo "Done with git_fnas_up()"
+  echo "*** $0: Done with git_fnas_up() ***"
   cd "${oDir}"
   return 0
 }

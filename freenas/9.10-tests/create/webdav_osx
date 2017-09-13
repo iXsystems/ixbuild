@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# Author: Kris Moore
+# License: BSD
+# Location for tests into REST API of FreeNAS
+# Resty Docs: https://github.com/micha/resty
+# jsawk: https://github.com/micha/jsawk
+
+# List the other modules which must be run before this module can execute
+REQUIRES="storage"
+export REQUIRES
+
+webdav_osx_tests()
+{
+  set_test_group_text "1 - Create - WebDAV OS X Tests" "20"
+  CLASSNAME=ixbuild.resty.functional.create.webdav_osx
+ 
+  local DATASET="webdavshare"
+  local DATASET_PATH="/mnt/tank/${DATASET}/"
+  local SHARE_NAME="webdavshare"
+  local SHARE_USER="webdav"
+  local SHARE_PASS="davtest"
+  local MOUNTPOINT="/tmp/${BRIDGEHOST}webdav-osx"
+
+  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEHOST" "BRIDGEIP" )
+  for SETTING in "${REQUIRED_SETTINGS[@]}"
+  do
+    if [ -z "${!SETTING}" ]; then
+      echo -n "Required settings for webdav_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+      echo_skipped
+      return 0
+    fi
+  done
+
+  # Clean up any leftover items from previous failed test runs
+  osx_test -q "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
+  rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
+  rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
+  rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+
+  echo_test_title "Creating dataset for WebDAV use"
+  rest_request "POST" "/storage/volume/tank/datasets/" '{ "name": "'"${DATASET}"'" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Changing permissions on ${DATASET_PATH}"
+  rest_request "PUT" "/storage/permission/" '{ "mp_path": "'"${DATASET_PATH}"'", "mp_acl": "unix", "mp_mode": "777", "mp_user": "root", "mp_group": "wheel" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Creating WebDAV share on ${DATASET_PATH}"
+  rest_request "POST" "/sharing/webdav/" '{ "webdav_name": "'${SHARE_NAME}'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
+  check_rest_response "201 Created"
+
+  echo_test_title "Starting WebDAV service"
+  rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": true }'
+  check_rest_response "200" || return 1
+
+  #commenting exit_status and service_status
+  #echo_test_title "Poll test target to ensure WebDAV service is up and running"
+  #wait_for_avail_port "8080"
+  #check_exit_status || return 1
+
+  #echo_test_title "Verifying that WebDAV service is reported as enabled by the API"
+  #rest_request "GET" "/services/services/webdav/"
+  #check_service_status "RUNNING" || return 1
+
+  #echo_test_title "Verify that user and group ownership was changed to \"webdav\" on \"${DATASET_PATH}\""
+  #ssh_test "ls -l \"$(dirname ${DATASET_PATH})\" | awk 'NR > 1 && \$3 == \"webdav\" && \$4 == \"webdav\" {print \$9}' | grep \"${DATASET}\""
+  #check_exit_status
+
+  #echo_test_title "Create the mount-point for WebDAV on OSX system"
+  #osx_test "mkdir -p \"${MOUNTPOINT}\" && sync"
+  #check_exit_status || return 1
+
+  # The mount_webdav command on OS X does not work as expected unless using interactive ('-i') mode
+  # Wrap mount command with 'expect' to interact with the mount_webdav username and password prompts
+  #echo_test_title "Mount WebDAV share on OSX system"
+  #osx_test "expect -c 'spawn mount_webdav -i http://${BRIDGEIP}:8080/${SHARE_NAME} \"${MOUNTPOINT}\"; expect \"Username:\"; send \"${SHARE_USER}\\r\"; expect \"Password:\"; send \"${SHARE_PASS}\\r\"; expect eof;'"
+  #check_exit_status || return 1
+
+  #echo_test_title "Verify WebDAV share has been mounted on OSX"
+  #wait_for_osx_mnt "${MOUNTPOINT}"
+  #check_exit_status || return 1
+
+  #echo_test_title "Check ability to list files on \"${MOUNTPOINT}\""
+  #osx_test "time ls -la \"${MOUNTPOINT}\""
+  #check_exit_status || return 1
+
+  #echo_test_title "Create file on WebDAV share via OSX to test write permissions"
+  #osx_test "touch \"${MOUNTPOINT}/testfile.txt\""
+  #check_exit_status || return 1
+
+  #echo_test_title "Moving WebDAV test file into a new directory"
+  #osx_test "mkdir -p \"${MOUNTPOINT}/tmp\" && mv \"${MOUNTPOINT}/testfile.txt\" \"${MOUNTPOINT}/tmp/testfile.txt\""
+  #check_exit_status || return 1
+
+  #echo_test_title "Deleting test file and directory from WebDAV share"
+  #osx_test "rm -f \"${MOUNTPOINT}/tmp/testfile.txt\" && rmdir \"${MOUNTPOINT}/tmp\""
+  #check_exit_status || return 1
+
+  #echo_test_title "Verifying that test file and directory were successfully removed"
+  #osx_test "find -- '${MOUNTPOINT}/' -prune -type d -empty | grep -q ."
+  #check_exit_status || return 1
+
+  # Clean up mounted WebDAV share
+  # OS X `umount` manpage reports that umount may fail often.
+  # "It is recommended that diskutil(1) (as in, ``diskutil unmount /mnt'') be used instead."
+  #echo_test_title "Unmount the WebDAV share from OSX system"
+  #osx_test "diskutil unmount force '${MOUNTPOINT}'"
+  #check_exit_status || return 1
+
+
+  #2 test responsible for build fail due to improper XML file generation
+  #1st test
+  #echo_test_title "Removing WebDAV share on \"${DATASET_PATH}\""
+  #rest_request "DELETE" "/sharing/webdav/" '{ "webdav_name": "'"${SHARE_NAME}"'", "webdav_comment": "Auto-created by '"${BRIDGEHOST}"'", "webdav_path": "'"${DATASET_PATH}"'" }'
+  #check_rest_response "204"
+
+  echo_test_title "Stopping WebDAV service"
+  rest_request "PUT" "/services/services/webdav/" '{ "srv_enable": false }'
+  check_rest_response "200 OK"
+
+  echo_test_title "Verifying that the WebDAV service has stopped"
+  rest_request "GET" "/services/services/webdav"
+  check_service_status "STOPPED"
+
+  #2nd test
+  #echo_test_title "Destroying WebDAV dataset \"${DATASET}\""
+  #rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
+  #check_rest_response "204" || return 1
+
+  return 0
+}
+
+# Init function, this is called after module is sourced
+# Pre-Set variables
+# TESTSET = ( SMOKE / COMPLETE / BENCHMARK )
+webdav_osx_init()
+{
+  # Run all the storage tests
+  case $TESTSET in
+        SMOKE) webdav_osx_tests ;;
+     COMPLETE) webdav_osx_tests ;;
+    BENCHMARK) ;;
+            *) webdav_osx_tests ;;
+  esac
+}

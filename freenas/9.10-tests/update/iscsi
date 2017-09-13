@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Kris Moore
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -16,7 +16,7 @@ iscsi_tests()
   local TARGET_NAME="iqn.1994-09.${BUILDTAG}qa:target0"
 
   # Set the group text and number of tests
-  set_test_group_text "2 - Update - iSCSI tests" "16"
+  set_test_group_text "2 - Update - iSCSI tests" "15"
   CLASSNAME=ixbuild.resty.functional.update.iscsi
 
   # TODO - Find correct process name on test executor

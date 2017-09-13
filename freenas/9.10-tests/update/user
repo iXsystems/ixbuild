@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Joe Maloney
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -10,7 +10,7 @@ REQUIRES=""
 export REQUIRES
 
 user_tests() {
-  set_test_group_text "2 - Update - User tests" "2"
+  set_test_group_text "2 - Update - User tests" "3"
   CLASSNAME=ixbuild.resty.functional.update.user
 
   # Get the ID of testuser

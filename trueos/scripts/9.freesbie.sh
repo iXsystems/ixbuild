@@ -64,7 +64,7 @@ uzip() {
     UZIPFILE=$1;
 
     echo -n "Compressing ${UFSFILE}..."
-    rc_halt "mkuzip -v -s 65536 -o ${UZIPFILE} ${UFSFILE}"
+    rc_halt "mkuzip -v -s 65536 -o ${UZIPFILE} ${UFSFILE}" 2>/dev/null >/dev/null
 
     UFSSIZE=$(ls -l ${UFSFILE} | awk '{print $5}')
     UZIPSIZE=$(ls -l ${UZIPFILE} | awk '{print $5}')
@@ -448,6 +448,8 @@ then
   exit 1
 fi
 
+echo "Starting TrueOS build: $SYSBUILD"
+
 case ${PICOFLAVOR} in
   rpi2) # Create a PICO mfsroot for upgrades
         create_pico_mfsroot "rpi2"
@@ -606,20 +608,20 @@ echo "$DEFAULTPKGBRANCH" > ${PDESTDIR9}/root/defaultpkgbranch
 
 # Compress the /root directory for extraction into a memory fs
 cp -r ${PROGDIR}/tmp/dep-list ${PDESTDIR9}/root/pkg-dep-lists
-rc_halt "tar cvJf ${PDESTDIR9}/uzip/root-dist.txz -C ${PDESTDIR9}/root ."
+rc_halt "tar cvJf ${PDESTDIR9}/uzip/root-dist.txz -C ${PDESTDIR9}/root ." 2>/dev/null
 rm -rf ${PDESTDIR9}/root >/dev/null 2>/dev/null
 mkdir ${PDESTDIR9}/root >/dev/null 2>/dev/null
 
 # Compress the /var directory for extraction into a memory fs
 rm -rf ${PDESTDIR9}/var/db/pkg
 mkdir ${PDESTDIR9}/var/db/pkg
-rc_halt "tar cvJf ${PDESTDIR9}/uzip/var-dist.txz -C ${PDESTDIR9}/var ."
+rc_halt "tar cvJf ${PDESTDIR9}/uzip/var-dist.txz -C ${PDESTDIR9}/var ." 2>/dev/null
 rm -rf ${PDESTDIR9}/var >/dev/null 2>/dev/null
 mkdir ${PDESTDIR9}/var >/dev/null 2>/dev/null
 
 # Compress the /etc directory for extraction into a memory fs
 rm -rf ${PDESTDIR9}/var/db/pkg
-rc_halt "tar cvJf ${PDESTDIR9}/uzip/etc-dist.txz -C ${PDESTDIR9}/etc ."
+rc_halt "tar cvJf ${PDESTDIR9}/uzip/etc-dist.txz -C ${PDESTDIR9}/etc ." 2>/dev/null
 
 # Symlink the /boot/zfs directory
 rm -rf ${PDESTDIR9}/boot/zfs >/dev/null 2>/dev/null

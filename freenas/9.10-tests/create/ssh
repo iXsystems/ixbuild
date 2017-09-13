@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Kris Moore
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -15,7 +15,7 @@ ssh_tests()
 {
   local ssh_keypath="${HOME}/.ssh/id_rsa"
 
-  set_test_group_text "1 - Create - SSH Tests" "4"
+  set_test_group_text "1 - Create - SSH Tests" "5"
   CLASSNAME=ixbuild.resty.functional.create.ssh
 
   echo_test_title "Configuring SSH settings"
@@ -59,7 +59,7 @@ ssh_tests()
   echo_test_title "Adding SSH public key from the executor to the root user account"
   if [ -n "$root_user_id" -a -n "$ssh_pubkey" ]; then
     rest_request "PUT" "/account/users/${root_user_id}/" '{ "bsdusr_sshpubkey": "'"${ssh_pubkey}"'" }'
-    check_rest_response "201"
+    check_rest_response "200"
   else
     echo_fail
     return 1

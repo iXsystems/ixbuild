@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 

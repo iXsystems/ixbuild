@@ -1305,13 +1305,18 @@ jenkins_freenas_run_tests()
   kill $tpid
   echo ""
   sleep 10
-  echo "Running API v2.0 tests"
-  tail -f "${V2_LOG}" &
-  local tpid=$!
-  ./api-v2.0-tests.sh ip=$FNASTESTIP > "${V2_LOG}" 2>&1
-  kill $tpid
-  echo ""
-  sleep 10
+  if [ -n "${NOMIDDLEWARED}" ] ; then
+    echo "Skipping middlewared tests.."
+  else
+    echo "Running API v2.0 tests"
+    touch /tmp/$VM-tests-v2.0.log 2>/dev/null
+    tail -f /tmp/$VM-tests-v2.0.log 2>/dev/null &
+    tpid=$!
+    ./api-v2.0-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-v2.0.log
+    kill -9 $tpid 
+    echo ""
+    sleep 10
+  fi  
 
   # This runs cleanup_workdir and is bad for jail host
   # if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -1655,6 +1660,17 @@ do_build_env_setup()
     echo "Invalid BRANCH"
     exit_clean
   fi
+}
+
+jenkins_iocage_tests()
+{
+  cd $WORKSPACE
+  pwd
+  git checkout master
+  make install
+  service iocage onestart
+  pytest --zpool zroot --junitxml=${WORKSPACE}/results/iocage.xml
+  exit $?
 }
 
 jenkins_iocage_pkgs()

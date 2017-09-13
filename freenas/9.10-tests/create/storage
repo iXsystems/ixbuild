@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Kris Moore
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -88,13 +88,13 @@ storage_tests()
 
   # Check creating a ZVOL 1/2
   echo_test_title "Creating a ZVOL 1/2"
-  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/zvols/" '{ "name": "testzvol1", "volsize": "10M" }'
-  check_rest_response "201" || return 1
+  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol1", "volsize": "10M" }'
+  check_rest_response "202" || return 1
 
   # Check creating a ZVOL 2/2
   echo_test_title "Creating a ZVOL 2/2"
-  rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/zvols/" '{ "name": "testzvol2", "volsize": "10M" }'
-  check_rest_response "201" || return 1
+  rest_request "POST" "/storage/volume/tank/zvols/" '{ "name": "testzvol2", "volsize": "10M" }'
+  check_rest_response "202" || return 1
 
   return 0
 }

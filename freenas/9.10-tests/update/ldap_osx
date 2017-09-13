@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Joe Maloney
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -44,10 +44,6 @@ ldap_osx_tests()
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
 
   # Set auxilary parameters to allow mount_smbfs to work with Active Directory
-  echo_test_title "Setting auxilary parameters for mount_smbfs.."
-  rest_request "PUT" "/services/cifs/" '{ "cifs_srv_smb_options": "lanman auth = no\nntlm auth = no \nraw NTLMv2 auth = no" }'
-  check_rest_response "200 OK"
-
   echo_test_title "Creating SMB dataset"
   rest_request "POST" "/storage/volume/${IXBUILD_ROOT_ZVOL}/datasets/" '{ "name": "'"${DATASET}"'" }'
   check_rest_response "201 Created" || return 1
