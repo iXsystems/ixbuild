@@ -198,11 +198,11 @@ should be added to delete folder.
 
 New tests can be written for FreeNAS 9.10.X by adding a test "module" to the 9.10 testing directories:
 
-https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/create
+https://github.com/iXsystems/ixbuild/tree/master/freenas/tests/create
 
-https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/update
+https://github.com/iXsystems/ixbuild/tree/master/freenas/tests/update
 
-https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
+https://github.com/iXsystems/ixbuild/tree/master/freenas/tests/delete
 
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.
