@@ -103,7 +103,7 @@ Build iX projects with jenkins
 
 FreeNAS
 ```
-sudo /ixbuild/jenkins.sh freenas freenas-9.10
+sudo /ixbuild/jenkins.sh freenas freenas
 ```
 TrueOS
 ```
@@ -122,7 +122,7 @@ Running test framework from jenkins
 
 FreeNAS
 ```
-sudo /ixbuild/jenkins.sh freenas-tests freenas-9.10
+sudo /ixbuild/jenkins.sh freenas-tests freenas
 ```
 TrueOS
 ```
@@ -134,7 +134,7 @@ Running test framework with pre-existing install from jenkins
 
 FreeNAS
 ```
-sudo /ixbuild/jenkins.sh freenas-run-tests freenas-9.10
+sudo /ixbuild/jenkins.sh freenas-run-tests freenas
 ```
 
 Manually running test framework
@@ -154,9 +154,9 @@ directly by pointing them at a FreeNAS instance with the following syntax:
 FreeNAS
 
 ```
- # cd freenas/scripts && ./9.10-create-tests.sh
- # cd freenas/scripts && ./9.10-update-tests.sh
- # cd freenas/scripts && ./9.10-delete-tests.sh
+ # cd freenas/scripts && ./create-tests.sh
+ # cd freenas/scripts && ./update-tests.sh
+ # cd freenas/scripts && ./delete-tests.sh
 ```
 
 ```
@@ -196,13 +196,13 @@ A create, update, delete directory exists for each directory of tests.  Tests wh
 to the create folder.  Tests which update an object should be added to the update folder.  Tests which delete an object 
 should be added to delete folder.
 
-New tests can be written for FreeNAS 9.10.X by adding a test "module" to the 9.10 testing directories:
+New tests can be written for FreeNAS by adding a test "module" to the testing directories:
 
-https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/create
+https://github.com/iXsystems/ixbuild/tree/master/freenas/tests/create
 
-https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/update
+https://github.com/iXsystems/ixbuild/tree/master/freenas/tests/update
 
-https://github.com/iXsystems/ixbuild/tree/master/freenas/9.10-tests/delete
+https://github.com/iXsystems/ixbuild/tree/master/freenas/tests/delete
 
 By setting REQUIRES="storage" you can list other testing modules which must be run before yours, I.E. "storage"
 may be required to setup a zpool / dataset to perform testing of shares.

@@ -17,7 +17,7 @@ GITFNASBRANCH="master"
 export GITFNASBRANCH
 
 # Set location for release to be stored when using Jenkins builds
-TARGETREL="freenas-9.10"
+TARGETREL="freenas"
 export TARGETREL
 
 # Set that this is a legacy 9.X build

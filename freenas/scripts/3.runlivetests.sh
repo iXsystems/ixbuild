@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Kris Moore
 # License: BSD
-# Location for tests into REST API of FreeNAS 9.10
+# Location for tests into REST API of FreeNAS
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -12,7 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 
 # Test Module directory
-TDIR="${PROGDIR}/9.10-live-tests"
+TDIR="${PROGDIR}/live-tests"
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions-tests.sh
