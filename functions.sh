@@ -1195,21 +1195,21 @@ jenkins_freenas_run_tests()
   touch /tmp/$VM-tests-create.log 2>/dev/null
   tail -f /tmp/$VM-tests-create.log 2>/dev/null &
   tpid=$!
-  ./create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
+  ./9.10-create-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-create.log
   kill -9 $tpid
   echo ""
   echo "Running API v1.0 test group update 2/3" 
   touch /tmp/$VM-tests-update.log 2>/dev/null
   tail -f /tmp/$VM-tests-update.log 2>/dev/null &
   tpid=$!
-  ./update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
+  ./9.10-update-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-update.log
   kill -9 $tpid
   echo ""
   echo "Running API v1.0 test group delete 3/3"
   touch /tmp/$VM-tests-delete.log 2>/dev/null
   tail -f /tmp/$VM-tests-delete.log 2>/dev/null &
   tpid=$!
-  ./delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
+  ./9.10-delete-tests.sh ip=$FNASTESTIP 2>&1 | tee >/tmp/$VM-tests-delete.log
   kill -9 $tpid
   echo ""
   sleep 10

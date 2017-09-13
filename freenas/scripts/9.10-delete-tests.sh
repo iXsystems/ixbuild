@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Author: Kris Moore
 # License: BSD
-# Location for tests into REST API of FreeNAS
+# Location for tests into REST API of FreeNAS 9.10
 # Resty Docs: https://github.com/micha/resty
 # jsawk: https://github.com/micha/jsawk
 
@@ -12,7 +12,7 @@ PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 JSAWK="${PROGDIR}/../utils/jsawk -j js24"
 
 # Test Module directories
-TDIR="${PROGDIR}/tests/update"
+TDIR="${PROGDIR}/9.10-tests/delete"
 
 # Source our Testing functions
 . ${PROGDIR}/scripts/functions.sh
@@ -62,9 +62,6 @@ start_xml_results
 
 RESULT="SUCCESS"
 
-echo "Running tests for $TDIR"
-cd $TDIR
-
 if [ -n "$runmod" ] ; then
   for mod in $runmod
   do
@@ -83,7 +80,7 @@ else
 fi
 
 # Made it to the end, exit with success!
-#echo "$RESULT - $TOTALCOUNT tests run - REST API testing complete!"
+echo "$RESULT - $TOTALCOUNT tests run - REST API testing complete!"
 
 finish_xml_results "$TOTALCOUNT"
 

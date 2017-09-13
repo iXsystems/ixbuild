@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # Author: Joe Maloney
 # License: BSD
-# Location for tests into REST API of FreeNAS
+# Location for tests into REST API of FreeNAS 9.10
 
 # Where is the ixbuild program installed
 PROGDIR="$(dirname "$(realpath "$(dirname "$0")")")"; export PROGDIR

@@ -197,10 +197,10 @@ if [ ! -d "/usr/ports/distfiles" ] ; then
   mkdir -p /usr/ports/distfiles
 fi
 if [ -e "${FNASSRC}/build/config/env.pyd" ] ; then
-  # FreeNAS 
+  # FreeNAS 9.10 / 10
   sed -i '' 's|${OBJDIR}/ports/distfiles|/usr/ports/distfiles|g' ${FNASSRC}/build/config/env.pyd
 else
-  # FreeNAS / TrueNAS
+  # FreeNAS / TrueNAS 9
   export PORTS_DISTFILES_CACHE="/usr/ports/distfiles"
 fi
 
@@ -276,7 +276,7 @@ fi
 # Ugly hack to get freenas 9.x to build on CURRENT
 if [ "$FREENASLEGACY" = "YES" ] ; then
 
-   # Add all the fixes to use a version of mtree
+   # Add all the fixes to use a 9.10 version of mtree
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/Makefile.inc1
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/Makefile.sysinstall
    sed -i '' "s|mtree -deU|${PROGDIR}/scripts/kludges/mtree -deU|g" ${FNASSRC}/FreeBSD/src/release/picobsd/build/picobsd
