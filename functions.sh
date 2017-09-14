@@ -1173,7 +1173,7 @@ jenkins_freenas_tests()
     cd ${BEDIR}/release
     if [ $? -ne 0 ] ; then exit_clean; fi
 
-    cp ${WORKSPACE}/qatarget/*.iso ${BEDIR}/release/FreeNAS-PR/x64/
+    cp ${WORKSPACE}/artifacts/FreeNAS-*/x64/*.iso ${BEDIR}/release/FreeNAS-PR/x64/
   fi
 
   if [ -n "$JAILED_TESTS" ] ; then
