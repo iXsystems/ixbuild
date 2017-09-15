@@ -11,18 +11,8 @@ export REQUIRES
 
 network_tests()
 {
-  local TEST_CNT=3
-  if [ -n "$BRIDGEIP" ]; then
-    TEST_CNT=4
-  fi
-
-  local IFACE="em0"
-  local IFACE2="em1"
-
-  if [ "${VMBACKEND}" == "bhyve" ] ; then
-    IFACE="vtnet0"
-    IFACE2="vtnet1"
-  fi
+  local TEST_CNT=1
+  local  IFACE="vtnet0"
 
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Network tests" "${TEST_CNT}"
@@ -35,38 +25,11 @@ network_tests()
      return 0
   fi
 
-  echo_test_title "Waiting for ${BUILDTAG} to start"
-  wait_for_avail
-  echo_ok
+  # Configure interface for DHCP
+  echo_test_title "Setting DHCP on vtnet0"
+  rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "'${IFACE}'" }'
+  check_rest_response "201 Created"
 
-  # Add $FNASTESTIP to database
-  if ! bsd_test "ifconfig ${IFACE} | awk '\$1 == \"inet\" {print \$2}' | grep -q \"${FNASTRESTIP}\"" ; then
-    rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${FNASTESTIP}"'", "int_name": "int", "int_v4netmaskbit": "24", "int_interface": "'${IFACE}'" }'
-  fi
-
-  # Wait for port 80 response before trying more REST queries again
-  echo_test_title "Wait for FreeNAS UI by polling port 80"
-  wait_for_avail_port "80"
-  check_exit_status || return 1
-
-  if [ -n "$BRIDGEIP" ] ; then
-    if [ "${BRIDGEIP}" != "${FNASTESTIP}" ] ; then
-      # Using the bridged adapter settings
-      echo_test_title "Setting bridged IP on em1"
-      rest_request "POST" "/network/interface/" '{ "int_ipv4address": "'"${BRIDGEIP}"'", "int_name": "ext", "int_v4netmaskbit": "'"${BRIDGENETMASK}"'", "int_interface": "'${IFACE2}'" }'
-      check_rest_response "201 Created"
-    fi
-
-    # Set the global config stuff
-    echo_test_title "Setting default route and DNS"
-    rest_request "PUT" "/network/globalconfiguration/" '{ "gc_domain": "'"${BRIDGEDOMAIN}"'", "gc_ipv4gateway": "'"${BRIDGEGW}"'", "gc_hostname": "'"${BRIDGEHOST}"'", "gc_nameserver1": "'"${BRIDGEDNS}"'" }'
-    check_rest_response "200 OK"
-  else
-    # Using the NAT mode
-    echo_test_title "Setting DHCP on em1"
-    rest_request "POST" "/network/interface/" '{ "int_dhcp": true, "int_name": "ext", "int_interface": "'${IFACE}'" }'
-    check_rest_response "201 Created"
-  fi
 }
 
 # Init function, this is called after module is sourced
