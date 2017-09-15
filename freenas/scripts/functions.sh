@@ -3,6 +3,27 @@
 # Most of these dont need to be modified
 #########################################################
 
+FNASCONF="/ixbuild/build.conf"
+
+if [ ! -f "${FNASCONF}" ] ; then
+  FNASCONF="${PROGDIR}/../build.conf"
+  if [ ! -f "${FNASCONF}" ] ; then
+    echo "Error: file not found \"${FNASCONF}\""
+    exit 1
+  fi
+fi
+
+# Source vars
+if [ -z "${PROGDIR}" ] ; then
+  . ../freenas.cfg
+elif [ -f "${PROGDIR}/freenas.cfg" ] ; then
+  . ${PROGDIR}/freenas.cfg
+else
+  echo "Warning: file not found \"${PROGDIR}/freenas.cfg\""
+  echo "Copying freenas.cfg.dist"
+  cp "${PROGDIR}/freenas.cfg.dist" "${PROGDIR}/freenas.cfg" && . ${PROGDIR}/freenas.cfg
+fi
+
 # Where on disk is the FreeNAS GIT branch
 if [ -n "$FNASGITDIR" ] ; then
   FNASSRC="${FNASGITDIR}"
