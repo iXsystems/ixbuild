@@ -33,50 +33,6 @@ system_tests()
   echo_test_title "Checking system tunable 'dummynet'.."
   rest_request GET "/system/tunable/"
   check_property_value "return this.tun_var" "dummynet_load"
-
-  # Reboot system to enable tunable
-  echo_test_title "Reboot system to enable tunable.."
-  rest_request "POST" "/system/reboot"
-  check_rest_response "202" || return 1
-
-  # bhyve requires manual re-start after shutting down.
-  if [ -n "${VMBACKEND}" -a "${VMBACKEND}" == "bhyve" ] ; then
-    . ${PROGDIR}/scripts/functions-vm.sh
-    # vm_reinit: Device busy - we need to wait for bhyve to shut down
-    until ! ps -aux | grep "bhyve" | grep -q "${BUILDTAG}" ; do
-      sleep 5
-    done
-    bhyve_boot >/dev/null
-  fi
-
-  # Ensure shutdown is complete before polling for initialization
-  echo_test_title "Waiting for VM to shut down"
-  loop_cnt=0
-  while :
-  do
-    ping -c1 -W 1 ${FNASTESTIP} &>/dev/null
-    if [ $? -ne 0 ]; then
-      # Ping response from VM has ceased responding
-      echo_ok && break;
-    fi
-    (( loop_cnt++ ))
-    if [ $loop_cnt -gt 60 ]; then
-      echo_fail
-      return 1
-    fi
-    sleep 4 && echo -n ".";
-  done
-
-  echo_test_title "Waiting for HTTP server and API initialization after reboot"
-  wait_for_avail_port "80" && wait_for_avail && echo_ok || (echo_fail && return 1)
-
-  echo_test_title "Verifying SSH server initialization after reboot"
-  wait_for_avail_port "22" && echo_ok || (echo_fail && return 1)
-
-  # Verify loader tunable
-  echo_test_title "Verify system tunable 'dummynet_load'.."
-  ssh_test "kldstat -m dummynet"
-  check_exit_status || return 1
 }
 
 # Init function, this is called after module is sourced
