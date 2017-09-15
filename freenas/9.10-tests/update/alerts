@@ -40,12 +40,12 @@ alerts_tests()
   set_test_group_text "2 - Update - System Alert tests" "2"
   CLASSNAME=ixbuild.resty.functional.update.alerts
 
-  echo_test_title "Polling API endpoint for new system alert"
-  __poll_for_property_value "this.message" "${ALERT_MSG}"
-  check_exit_status -q && echo_ok || return 1
+#  echo_test_title "Polling API endpoint for new system alert"
+#  __poll_for_property_value "this.message" "${ALERT_MSG}"
+#  check_exit_status -q && echo_ok || return 1
 
-  echo_test_title "Validating API alert values"
-  check_property_value -q "this.level" "CRIT" && check_property_value "this.dismissed" "false" || return 1
+#  echo_test_title "Validating API alert values"
+#  check_property_value -q "this.level" "CRIT" && check_property_value "this.dismissed" "false" || return 1
 
   return 0
 }
