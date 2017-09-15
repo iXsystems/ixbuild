@@ -91,7 +91,9 @@ fi
 
 # Source our functions
 cwd="`realpath $0 | xargs dirname`"
-. ${cwd}/build.conf
+if [ -f "${cwd}/build.conf" ] ; then
+  . ${cwd}/build.conf
+fi
 . ${cwd}/functions.sh
 
 ######################################################
