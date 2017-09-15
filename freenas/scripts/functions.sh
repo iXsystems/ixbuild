@@ -8,8 +8,9 @@ FNASCONF="/ixbuild/build.conf"
 if [ ! -f "${FNASCONF}" ] ; then
   FNASCONF="${PROGDIR}/../build.conf"
   if [ ! -f "${FNASCONF}" ] ; then
-    echo "Error: file not found \"${FNASCONF}\""
-    exit 1
+    echo ": Warning: file not found \"${FNASCONF}\""
+    echo "Copying build.conf.dist"
+    cp ${PROGDIR}/../build.conf.dist ${PROGDIR}/../build.conf
   fi
 fi
 
