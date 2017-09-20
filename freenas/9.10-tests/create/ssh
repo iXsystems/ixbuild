@@ -38,7 +38,8 @@ ssh_tests()
 
   # Grab the path if an RSA key already exists and is ready to use
   if ssh-add -L 2>&1 | grep -q "^ssh-rsa" ; then
-    ssh_keypath=$(ssh-add -L | awk '$1 == "ssh-rsa" {print $3}' | head -n 1)
+    #ssh_keypath=$(ssh-add -L | awk '$1 == "ssh-rsa" {print $3}' | head -n 1)
+    ssh_keypath=$(ls -d -1 ~/.ssh/*id_rsa)
   else
     # Use id_rsa.tests key if it exists, otherwise use the id_rsa key
     if [ -f "${HOME}/.ssh/id_rsa.tests" ] ; then
