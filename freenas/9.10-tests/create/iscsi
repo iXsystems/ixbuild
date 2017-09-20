@@ -26,6 +26,13 @@ iscsi_tests()
   #   return 0
   # fi
 
+  # if there is not HOST setting skip.
+  if [ -z "$BSD_HOST" -o -z "$BSD_USERNAME" ] ; then
+     echo -n "Missing the BSD_HOST / BSD_USERNAME settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing HOST settings"
+     return 0
+  fi
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   bsd_test "iscsictl -R -t ${TARGET_NAME}"
@@ -51,7 +58,7 @@ iscsi_tests()
   echo_test_title "Add target to groups"
   rest_request "POST" "/services/iscsi/targetgroup/" '{ "iscsi_target": "1", "iscsi_target_authgroup": null, "iscsi_target_portalgroup": 1, "iscsi_target_initiatorgroup": "1", "iscsi_target_authtype": "None", "iscsi_target_initialdigest": "Auto" }'
   check_rest_response "201 Created"
-  
+
   # Add iSCSI extent
   echo_test_title "Add iSCSI extent"
   rest_request "POST" "/services/iscsi/extent/" '{ "iscsi_target_extent_type": "File", "iscsi_target_extent_name": "extent", "iscsi_target_extent_filesize": "50MB", "iscsi_target_extent_rpm": "SSD", "iscsi_target_extent_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/dataset03/iscsi" }'
