@@ -16,10 +16,18 @@ smb_bsd_tests()
   local SMB_PATH="/mnt/${IXBUILD_ROOT_ZVOL}/${DATASET}"
   local MOUNTPOINT="/tmp/${BRIDGEHOST}smb-bsd"
   TEST_CNT=22
-    
+
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Samba BSD tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.smb_bsd
+
+  # if there is not HOST setting skip.
+  if [ -z "$BSD_HOST" -o -z "$BSD_USERNAME" ] ; then
+     echo -n "Missing the BSD_HOST / BSD_USERNAME settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing HOST settings"
+     return 0
+  fi
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
