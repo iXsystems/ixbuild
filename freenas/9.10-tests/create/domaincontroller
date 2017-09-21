@@ -14,7 +14,7 @@ domaincontroller_tests()
 # define variables
   local REALM="samdom.local"
   local DOMAIN="samdom"
-  local DNSFORWARDER="10.20.20.122"
+  local DNSFORWARDER="8.8.8.8"
   local FORESTLEVEL="2003"
 
   # Set the group text and number of tests
