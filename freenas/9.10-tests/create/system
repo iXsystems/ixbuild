@@ -11,7 +11,7 @@ export REQUIRES
 
 system_tests()
 {
-  set_test_group_text "1 - Create - System tests" "9"
+  set_test_group_text "1 - Create - System tests" "4"
   CLASSNAME=ixbuild.resty.functional.create.system
 
   # Get system version
