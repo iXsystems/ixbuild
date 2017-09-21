@@ -19,12 +19,12 @@ domaincontroller_tests()
 
   # Set the group text and number of tests
   set_test_group_text "1 - Create - domain controller test class" "5"
-  
- 	
+
+
   CLASSNAME=ixbuild.resty.functional.create.dommain_ctrl
 
   # skip if variable are not present
-  if [ -z "$REALM" -o -z "$DOMAIN" -o -z "$DNSFORWARDER" ]; 
+  if [ -z "$REALM" -o -z "$DOMAIN" -o -z "$DNSFORWARDER" ];
     then
       echo -n "MISSING the REALM / DOMAIN / DNS settings, test skipped.."
       echo_skipped

@@ -18,7 +18,7 @@ afp_osx_tests()
   local VOL_GROUP="qa"
 
   # Set the test count based on config settings
-  TESTS_CNT="14"
+  TESTS_CNT="8"
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     TESTS_CNT="18"
 
