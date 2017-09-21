@@ -3,13 +3,13 @@
 # Location for tests of FreeNAS new GUI
 
 def baseurl():
-  return "http://10.20.20.135/ui/#login"
+  return "http://10.250.1.133/ui"
 
 def username():
   return "root"
 
 def password():
-  return "testing"
+  return "abcd1234"
 
 #method to test if an element is present-not used in the current script
 def is_element_present_source(self, how, what):
