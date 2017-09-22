@@ -15,7 +15,10 @@ nfs_tests()
   local MOUNTPOINT="/tmp/${BRIDGEHOST}nfs"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - NFS tests" "15"
+  set_test_group_text "1 - Create - NFS tests" "7"
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
+    set_test_group_text "1 - Create - NFS tests" "15"
+  fi
   CLASSNAME=ixbuild.resty.functional.create.nfs
 
   # Enable NFS server
@@ -51,6 +54,7 @@ nfs_tests()
   check_service_status "RUNNING" || return 1
 
   # Now check if we can mount NFS / create / rename / copy / delete / umount
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
   echo_test_title "Creating NFS mountpoint"
   bsd_test "mkdir -p \"${MOUNTPOINT}\""
   check_exit_status || return 1
@@ -82,7 +86,7 @@ nfs_tests()
   echo_test_title "Removing NFS mountpoint"
   bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
   check_exit_status || return 1
-
+  fi
   return 0
 }
 
