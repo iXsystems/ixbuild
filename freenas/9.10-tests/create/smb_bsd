@@ -18,16 +18,12 @@ smb_bsd_tests()
   TEST_CNT=22
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - Samba BSD tests" "${TEST_CNT}"
-  CLASSNAME=ixbuild.resty.functional.create.smb_bsd
-
-  # if there is not HOST setting skip.
-  if [ -z "$BSD_HOST" -o -z "$BSD_USERNAME" ] ; then
-     echo -n "Missing the BSD_HOST / BSD_USERNAME settings, test skipped.."
-     echo_skipped
-     add_xml_result "skipped" "Skipped due to missing HOST settings"
-     return 0
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
+    set_test_group_text "1 - Create - Samba BSD tests" "22"
+  else
+    set_test_group_text "1 - Create - Samba BSD tests" "11"
   fi
+  CLASSNAME=ixbuild.resty.functional.create.smb_bsd
 
   # Clean up any leftover items from previous failed AD LDAP or SMB runs
   rest_request "PUT" "/directoryservice/activedirectory/1/" '{ "ad_bindpw": "'${ADPASSWORD}'", "ad_bindname": "'${ADUSERNAME}'", "ad_domainname": "'${BRIDGEDOMAIN}'", "ad_netbiosname_a": "'${BRIDGEHOST}'", "ad_idmap_backend": "rid", "ad_enable":"false" }'
@@ -35,7 +31,10 @@ smb_bsd_tests()
   rest_request "PUT" "/services/services/cifs/" '{ "srv_enable": false }'
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   rest_request "DELETE" "/storage/volume/1/datasets/${DATASET}/"
-  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
+
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
+    bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null; rmdir \"${MOUNTPOINT}\" &>/dev/null"
+  fi
 
   # Set auxilary parameters to allow mount_smbfs to work
   echo_test_title "Setting auxilary parameters for mount_smbfs.."
@@ -66,51 +65,53 @@ smb_bsd_tests()
   rest_request "POST" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
   check_rest_response "201 Created"
 
-  # Now check if we can mount SMB / create / rename / copy / delete / umount
-  echo_test_title "Creating SMB mountpoint"
-  bsd_test "mkdir -p \"${MOUNTPOINT}\" && sync"
-  check_exit_status || return 1
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
+    # Now check if we can mount SMB / create / rename / copy / delete / umount
+    echo_test_title "Creating SMB mountpoint"
+    bsd_test "mkdir -p \"${MOUNTPOINT}\" && sync"
+    check_exit_status || return 1
 
-  echo_test_title "Mounting SMB"
-  bsd_test "mount_smbfs -N -I ${BRIDGEIP} \"//guest@testnas/${SMB_NAME}\" \"${MOUNTPOINT}\""
-  check_exit_status || return 1
+    echo_test_title "Mounting SMB"
+    bsd_test "mount_smbfs -N -I ${BRIDGEIP} \"//guest@testnas/${SMB_NAME}\" \"${MOUNTPOINT}\""
+    check_exit_status || return 1
 
-  echo_test_title "Verify that SMB share has been mounted"
-  wait_for_bsd_mnt "${MOUNTPOINT}"
-  check_exit_status || return 1
+    echo_test_title "Verify that SMB share has been mounted"
+    wait_for_bsd_mnt "${MOUNTPOINT}"
+    check_exit_status || return 1
 
-  local device_name=`dirname "${MOUNTPOINT}"`
-  echo_test_title "Checking permissions on ${MOUNTPOINT}"
-  bsd_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
-  check_exit_status
+    local device_name=`dirname "${MOUNTPOINT}"`
+    echo_test_title "Checking permissions on ${MOUNTPOINT}"
+    bsd_test "ls -la '${device_name}' | awk '\$4 == \"${VOL_GROUP}\" && \$9 == \"${DATASET}\" ' "
+    check_exit_status
 
-  echo_test_title "Creating SMB file"
-  bsd_test "touch ${MOUNTPOINT}/testfile"
-  check_exit_status || return 1
+    echo_test_title "Creating SMB file"
+    bsd_test "touch ${MOUNTPOINT}/testfile"
+    check_exit_status || return 1
 
-  echo_test_title "Moving SMB file"
-  bsd_test "mv ${MOUNTPOINT}/testfile ${MOUNTPOINT}/testfile2"
-  check_exit_status || return 1
+    echo_test_title "Moving SMB file"
+    bsd_test "mv ${MOUNTPOINT}/testfile ${MOUNTPOINT}/testfile2"
+    check_exit_status || return 1
 
-  echo_test_title "Copying SMB file"
-  bsd_test "cp ${MOUNTPOINT}/testfile2 ${MOUNTPOINT}/testfile"
-  check_exit_status || return 1
+    echo_test_title "Copying SMB file"
+    bsd_test "cp ${MOUNTPOINT}/testfile2 ${MOUNTPOINT}/testfile"
+    check_exit_status || return 1
 
-  echo_test_title "Deleting SMB file 1/2"
-  bsd_test "rm ${MOUNTPOINT}/testfile"
-  check_exit_status || return 1
+    echo_test_title "Deleting SMB file 1/2"
+    bsd_test "rm ${MOUNTPOINT}/testfile"
+    check_exit_status || return 1
 
-  echo_test_title "Deleting SMB file 2/2"
-  bsd_test "rm ${MOUNTPOINT}/testfile2"
-  check_exit_status || return 1
+    echo_test_title "Deleting SMB file 2/2"
+    bsd_test "rm ${MOUNTPOINT}/testfile2"
+    check_exit_status || return 1
 
-  echo_test_title "Unmounting SMB"
-  bsd_test "umount -f ${MOUNTPOINT}"
-  check_exit_status || return 1
+    echo_test_title "Unmounting SMB"
+    bsd_test "umount -f ${MOUNTPOINT}"
+    check_exit_status || return 1
 
-  echo_test_title "Removing SMB mountpoint"
-  bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
-  check_exit_status || return 1
+    echo_test_title "Removing SMB mountpoint"
+    bsd_test "test -d \"${MOUNTPOINT}\" && rmdir \"${MOUNTPOINT}\" || exit 0"
+    check_exit_status || return 1
+  fi
 
   echo_test_title "Removing SMB share on ${SMB_PATH}"
   rest_request "DELETE" "/sharing/cifs/" '{ "cfs_comment": "My Test SMB Share", "cifs_path": "'"${SMB_PATH}"'", "cifs_name": "'"${SMB_NAME}"'", "cifs_guestok": true, "cifs_vfsobjects": "streams_xattr" }'
