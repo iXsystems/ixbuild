@@ -13,9 +13,8 @@ webdav_osx_tests()
 {
   set_test_group_text "1 - Create - WebDAV OS X Tests" "21"
   CLASSNAME=ixbuild.resty.functional.create.webdav_osx
-  ## Skipping test due to bug 25239/25240. This will need to be re-enabled when 25239/25240 is 
-  resolved.
-  return 0 
+  ## Skipping test due to bug 25239/25240. This will need to be re-enabled when 25239/25240 is resolved.
+  return 0
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local SHARE_NAME="webdavshare"
@@ -58,7 +57,7 @@ webdav_osx_tests()
   echo_test_title "Changing password for webdev"
   rest_request "PUT" "/services/services/webdav/" '{ "webdav_password": "'"${SHARE_PASS}"'" }'
   check_rest_response "200 ok"
-  
+
   #Commenting exit_status and service_status
   #echo_test_title "Poll test target to ensure WebDAV service is up and running"
   #wait_for_avail_port "8080"

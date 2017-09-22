@@ -13,8 +13,7 @@ webdav_bsd_tests()
 {
   set_test_group_text "1 - Create - WebDAV BSD Tests" "17"
   CLASSNAME=ixbuild.resty.functional.create.webdav_bsd
-  ## Skipping test due to bug 25239/25240. This will need to be re-enabled when 25239/25240 is 
-  resolved.
+  ## Skipping test due to bug 25239/25240. This will need to be re-enabled when 25239/25240 is resolved.
   return 0
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
@@ -70,14 +69,14 @@ webdav_bsd_tests()
 
   echo_test_title "Create a new directory on the WebDAV share using curl"
   rc_test "curl -f --digest -u \"${SHARE_USER}:${SHARE_PASS}\" -X MKCOL \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/\" -w \"%{http_code}\" | grep -q 201"
-    
+
   echo_test_title "Test moving file into new directory on WebDAV share using curl"
   rc_test "curl -f --digest -u \"${SHARE_USER}:${SHARE_PASS}\" -X MOVE --header \"Destination:http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/testfile.txt\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/testfile.txt\" -w \"%{http_code}\" | grep -q 201"
-  
+
   echo_test_title "Test deleting file from the WebDAV share using curl"
   curl --digest -u "${SHARE_USER}:${SHARE_PASS}" -X DELETE "http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/testfile.txt" &>/dev/null
   rc_test "curl --digest -u \"${SHARE_USER}:${SHARE_PASS}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/testfile.txt\" -w \"%{http_code}\" 2>/dev/null | grep -q 404"
-  
+
   echo_test_title "Test deleting directory from the WebDAV share using curl"
   curl --digest -u "${SHARE_USER}:${SHARE_PASS}" -X DELETE "http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/" &>/dev/null
   rc_test "curl --digest -u \"${SHARE_USER}:${SHARE_PASS}\" \"http://${FNASTESTIP}:8080/${SHARE_NAME}/tmp/\" -w \"%{http_code}\" 2>/dev/null | grep -q 404"
