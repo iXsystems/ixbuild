@@ -25,7 +25,15 @@ iscsi_tests()
   #   echo -n "iSCSI service does not appear to be running."
   #   echo_skipped
   #   return 0
-  # fi  
+  # fi
+
+  # if there is not HOST setting skip.
+  if [ -z "$BSD_HOST" -o -z "$BSD_USERNAME" ] ; then
+     echo -n "Missing the BSD_HOST / BSD_USERNAME settings, test skipped.."
+     echo_skipped
+     add_xml_result "skipped" "Skipped due to missing HOST settings"
+     return 0
+  fi
 
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
