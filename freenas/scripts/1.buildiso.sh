@@ -333,10 +333,19 @@ if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
    cd ${FNASBDIR}
    eval $PROFILEARGS
    if [ ! -d "${PROFILE}/_BE/${PRBUILDER}" ] ; then
-      echo "ERROR: Could not locate PR repo: ${PROFILE}/_BE/${PRBUILDER}"
-      exit 1
+     echo "ERROR: Could not locate PR repo: ${PROFILE}/_BE/${PRBUILDER}"
+     exit 1
    fi
-   rm -rf ${PROFILE}/_BE/${PRBUILDER}
+
+   # Clean out source repos which tend to get cranky on force-push
+   cRepos="webui freenas samba ports iocage os"
+   for r in $cRepos
+   do
+     if [ -d "${PROFILE}/_BE/${r}" ] ; then
+       rm -rf ${PROFILE}/_BE/${r}
+     fi
+   done
+
    echo "*** Replacing repo with PR-updated version ***"
    echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
    cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
