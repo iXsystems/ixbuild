@@ -47,6 +47,18 @@ parse_build_error()
   fi
 }
 
+clean_src_repos()
+{
+  # Clean out source repos which tend to get cranky on force-push
+  cRepos="webui freenas samba ports iocage os"
+  for r in $cRepos
+  do
+    if [ -d "${PROFILE}/_BE/${r}" ] ; then
+      rm -rf ${PROFILE}/_BE/${r}
+    fi
+  done
+}
+
 # Allowed settings for BUILDINCREMENTAL
 case $BUILDINCREMENTAL in
    ON|on|YES|yes|true|TRUE) BUILDINCREMENTAL="true" ;;
@@ -159,15 +171,6 @@ if [ -n "$PRBUILDER" ] ; then
       rm -rf ${PROFILE}/_BE/${PRBUILDER}
     fi
   fi
-
-  # Clean out source repos which tend to get cranky on force-push
-  cRepos="webui freenas samba ports iocage os"
-  for r in $cRepos
-  do
-    if [ -d "${PROFILE}/_BE/${r}" ] ; then
-      rm -rf ${PROFILE}/_BE/${r}
-    fi
-  done
 fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
@@ -264,10 +267,16 @@ echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/nu
 echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} ***"
 ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
 if [ $? -ne 0 ] ; then
-  echo_fail "*** Failed running make checkout ***"
-  cat ${OUTFILE}
-  finish_xml_results "make"
-  exit 1
+  # Try re-checking out SRC bits
+  clean_src_repos
+  echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} - Clean Checkout ***"
+  ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
+  if [ $? -ne 0 ] ; then
+    echo_fail "*** Failed running make checkout ***"
+    cat ${OUTFILE}
+    finish_xml_results "make"
+    exit 1
+  fi
 fi
 echo_ok
 
