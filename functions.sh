@@ -1590,11 +1590,9 @@ jenkins_iocage_tests()
 {
   cd $WORKSPACE
   pwd
-  git checkout master
   make install
-  service iocage onestart
+  sysrc -f /etc/rc.conf iocage_enable="YES"
   pytest --zpool zroot --junitxml=${WORKSPACE}/results/iocage.xml
-  exit $?
 }
 
 jenkins_iocage_pkgs()
