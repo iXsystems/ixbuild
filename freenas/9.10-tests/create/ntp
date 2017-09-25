@@ -28,6 +28,7 @@ ntp_tests() {
   echo_test_title "Removing non AD NTP servers 1/2"
   rest_request "DELETE" "/system/ntpserver/2/"
   check_rest_response "204"
+
   echo_test_title "Removing non AD NTP servers 2/2"
   rest_request "DELETE" "/system/ntpserver/3/"
   check_rest_response "204"
