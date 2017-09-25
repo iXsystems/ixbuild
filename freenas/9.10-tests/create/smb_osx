@@ -17,14 +17,14 @@ smb_osx_tests()
   local MOUNTPOINT="/tmp/smb-osx${BRIDGEHOST}"
   local VOL_GROUP="qa"
 
-  TEST_CNT=13
+  TEST_CNT=10
   if [ -n "${OSX_HOST}" -a -n "${BRIDGEIP}" ]; then
     TEST_CNT=20
 
     # Clean up any leftover items from previous failed SMB runs
     osx_test "umount -f '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'; exit 0;"
   fi
-    
+
   # Set the group text and number of tests
   set_test_group_text "1 - Create - Samba OS X tests" "${TEST_CNT}"
   CLASSNAME=ixbuild.resty.functional.create.smb_osx
