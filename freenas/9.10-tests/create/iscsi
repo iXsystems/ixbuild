@@ -16,7 +16,11 @@ iscsi_tests()
   local TARGET_NAME="iqn.1994-09.${BUILDTAG}qa:target0"
 
   # Set the group text and number of tests
-  set_test_group_text "1 - Create - iSCSI tests" "23"
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
+    set_test_group_text "1 - Create - iSCSI tests" "23"
+  else
+    set_test_group_text "1 - Create - iSCSI tests" "10"
+  fi
   CLASSNAME=ixbuild.resty.functional.create.iscsi
 
   # bsd_test "ps -aux | grep -q \"[i]scsid\""
@@ -27,7 +31,7 @@ iscsi_tests()
   # fi
 
   # if there is not HOST setting skip.
-  if [ -z "$BSD_HOST" -o -z "$BSD_USERNAME" ] ; then
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
      echo -n "Missing the BSD_HOST / BSD_USERNAME settings, test skipped.."
      echo_skipped
      add_xml_result "skipped" "Skipped due to missing HOST settings"
@@ -35,9 +39,11 @@ iscsi_tests()
   fi
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
-  bsd_test "iscsictl -R -t ${TARGET_NAME}"
-  bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
-  bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
+    bsd_test "iscsictl -R -t ${TARGET_NAME}"
+    bsd_test "umount -f \"${MOUNTPOINT}\" &>/dev/null"
+    bsd_test "rmdir \"${MOUNTPOINT}\" &>/dev/null"
+  fi
 
   # Add iSCSI initator
   echo_test_title "Add iSCSI initiator"
@@ -82,87 +88,88 @@ iscsi_tests()
   wait_for_avail_port "3260"
   check_exit_status || return 1
 
-  # Now connect to iSCSI target
-  echo_test_title "Connecting to iSCSI target.."
-  local loop_cnt=0
-  while [ $loop_cnt -le 6 ] ; do
-    bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
-    if [ $? -eq 0 ] ; then
-      echo_ok
-      break
-    fi
-    loop_cnt=$(expr $loop_cnt + 1)
-    [ $loop_cnt -gt 6 ] && echo_fail && return 1
-    echo -n "."
-    sleep 3
-  done
-
-  # TODO: remove debug sleep
-  sleep 15
-
-  echo_test_title "Waiting for iscsi connection before grabbing device name.."
-  local loop_cnt=0
-  while [ $loop_cnt -le 12 ] ; do
-    bsd_test "iscsictl -L"
-    local iscsi_state=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $3}')
-    local iscsi_dev=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $4}')
-
-    if [ -n "${iscsi_state}" -a "${iscsi_state}" == "Connected:" ] ; then
-      if [ -n "${iscsi_dev}" ] ; then
-        DEVICE_NAME=$iscsi_dev
-        echo -n " using \"${DEVICE_NAME}\""
-        echo_ok && break
-      else
-        echo -n "... connected with no device"
+  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
+    # Now connect to iSCSI target
+    echo_test_title "Connecting to iSCSI target.."
+    local loop_cnt=0
+    while [ $loop_cnt -le 6 ] ; do
+      bsd_test "iscsictl -A -p ${BRIDGEIP}:3620 -t ${TARGET_NAME}"
+      if [ $? -eq 0 ] ; then
+        echo_ok
+        break
       fi
-    fi
+      loop_cnt=$(expr $loop_cnt + 1)
+      [ $loop_cnt -gt 6 ] && echo_fail && return 1
+      echo -n "."
+      sleep 3
+    done
 
-    loop_cnt=$(expr $loop_cnt + 1)
-    [ $loop_cnt -gt 12 ] && echo_fail && return 1
-    echo -n "."
-    sleep 3
-  done
+    # TODO: remove debug sleep
+    sleep 15
 
-  echo_test_title "Format the target volume"
-  bsd_test "newfs \"/dev/${DEVICE_NAME}\""
-  check_exit_status || return 1
+    echo_test_title "Waiting for iscsi connection before grabbing device name.."
+    local loop_cnt=0
+    while [ $loop_cnt -le 12 ] ; do
+      bsd_test "iscsictl -L"
+      local iscsi_state=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $3}')
+      local iscsi_dev=$(cat /tmp/.bsdCmdTestStdOut | awk '$2 == "'${BRIDGEIP}':3620" {print $4}')
 
-  echo_test_title "Creating iSCSI mountpoint"
-  bsd_test "mkdir -p '${MOUNTPOINT}'"
-  check_exit_status || return 1
+      if [ -n "${iscsi_state}" -a "${iscsi_state}" == "Connected:" ] ; then
+        if [ -n "${iscsi_dev}" ] ; then
+          DEVICE_NAME=$iscsi_dev
+          echo -n " using \"${DEVICE_NAME}\""
+          echo_ok && break
+        else
+          echo -n "... connected with no device"
+        fi
+      fi
 
-  echo_test_title "Mount the target volume"
-  bsd_test "mount \"/dev/${DEVICE_NAME}\" \"${MOUNTPOINT}\""
-  check_exit_status || return 1
+      loop_cnt=$(expr $loop_cnt + 1)
+      [ $loop_cnt -gt 12 ] && echo_fail && return 1
+      echo -n "."
+      sleep 3
+    done
 
-  echo_test_title "Creating file"
-  bsd_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'"
-  check_exit_status || return 1
+    echo_test_title "Format the target volume"
+    bsd_test "newfs \"/dev/${DEVICE_NAME}\""
+    check_exit_status || return 1
 
-  echo_test_title "Moving file"
-  bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'"
-  check_exit_status || return 1
+    echo_test_title "Creating iSCSI mountpoint"
+    bsd_test "mkdir -p '${MOUNTPOINT}'"
+    check_exit_status || return 1
 
-  echo_test_title "Copying file"
-  bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'"
-  check_exit_status || return 1
+    echo_test_title "Mount the target volume"
+    bsd_test "mount \"/dev/${DEVICE_NAME}\" \"${MOUNTPOINT}\""
+    check_exit_status || return 1
 
-  echo_test_title "Deleting file"
-  bsd_test "rm '${MOUNTPOINT}/testfile2'"
-  check_exit_status || return 1
+    echo_test_title "Creating file"
+    bsd_test "touch '${MOUNTPOINT}/testfile'" "umount '${MOUNTPOINT}'; rmdir '${MOUNTPOINT}'"
+    check_exit_status || return 1
 
-  echo_test_title "Unmounting iSCSI volume"
-  bsd_test "umount '${MOUNTPOINT}'"
-  check_exit_status || return 1
+    echo_test_title "Moving file"
+    bsd_test "mv '${MOUNTPOINT}/testfile' '${MOUNTPOINT}/testfile2'"
+    check_exit_status || return 1
 
-  echo_test_title "Removing iSCSI volume mountpoint"
-  bsd_test "rmdir '${MOUNTPOINT}'"
-  check_exit_status || return 1
+    echo_test_title "Copying file"
+    bsd_test "cp '${MOUNTPOINT}/testfile2' '${MOUNTPOINT}/testfile'"
+    check_exit_status || return 1
 
-  echo_test_title "Disconnect all targets"
-  bsd_test "iscsictl -R -t ${TARGET_NAME}"
-  check_exit_status || return 1
+    echo_test_title "Deleting file"
+    bsd_test "rm '${MOUNTPOINT}/testfile2'"
+    check_exit_status || return 1
 
+    echo_test_title "Unmounting iSCSI volume"
+    bsd_test "umount '${MOUNTPOINT}'"
+    check_exit_status || return 1
+
+    echo_test_title "Removing iSCSI volume mountpoint"
+    bsd_test "rmdir '${MOUNTPOINT}'"
+    check_exit_status || return 1
+
+    echo_test_title "Disconnect all targets"
+    bsd_test "iscsictl -R -t ${TARGET_NAME}"
+    check_exit_status || return 1
+  fi
   # Disable the iSCSI service
   echo_test_title "Disable iSCSI service"
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
