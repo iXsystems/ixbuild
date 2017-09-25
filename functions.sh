@@ -1593,7 +1593,6 @@ jenkins_iocage_tests()
   make install
   service iocage onestart
   pytest --zpool zroot --junitxml=${WORKSPACE}/results/iocage.xml
-  exit $?
 }
 
 jenkins_iocage_pkgs()
