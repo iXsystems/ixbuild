@@ -1591,6 +1591,7 @@ jenkins_iocage_tests()
   cd $WORKSPACE
   pwd
   make install
+  sysrc -f /etc/rc.conf iocage_enable="YES"
   pytest --zpool zroot --junitxml=${WORKSPACE}/results/iocage.xml
 }
 
