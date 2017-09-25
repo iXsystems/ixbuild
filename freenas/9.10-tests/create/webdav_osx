@@ -11,9 +11,9 @@ export REQUIRES
 
 webdav_osx_tests()
 {
-  set_test_group_text "1 - Create - WebDAV OS X Tests" "20"
+  set_test_group_text "1 - Create - WebDAV OS X Tests" "i7"
   CLASSNAME=ixbuild.resty.functional.create.webdav_osx
- 
+
   local DATASET="webdavshare"
   local DATASET_PATH="/mnt/tank/${DATASET}/"
   local SHARE_NAME="webdavshare"
@@ -21,15 +21,15 @@ webdav_osx_tests()
   local SHARE_PASS="davtest"
   local MOUNTPOINT="/tmp/${BRIDGEHOST}webdav-osx"
 
-  local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEHOST" "BRIDGEIP" )
-  for SETTING in "${REQUIRED_SETTINGS[@]}"
-  do
-    if [ -z "${!SETTING}" ]; then
-      echo -n "Required settings for webdav_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
-      echo_skipped
-      return 0
-    fi
-  done
+  #local REQUIRED_SETTINGS=( "OSX_HOST" "OSX_USERNAME" "BRIDGEHOST" "BRIDGEIP" )
+  #for SETTING in "${REQUIRED_SETTINGS[@]}"
+  #do
+  #  if [ -z "${!SETTING}" ]; then
+  #    echo -n "Required settings for webdav_osx: '${REQUIRED_SETTINGS[*]}'; missing ${SETTING}"
+  #    echo_skipped
+  #    return 0
+  #  fi
+  #done
 
   # Clean up any leftover items from previous failed test runs
   osx_test -q "diskutil unmount force \"${MOUNTPOINT}\"; rmdir \"${MOUNTPOINT}\"; exit 0"
