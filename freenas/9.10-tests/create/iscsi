@@ -30,13 +30,6 @@ iscsi_tests()
   #   return 0
   # fi
 
-  # if there is not HOST setting skip.
-  if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
-     echo -n "Missing the BSD_HOST / BSD_USERNAME settings, test skipped.."
-     echo_skipped
-     add_xml_result "skipped" "Skipped due to missing HOST settings"
-     return 0
-  fi
   # Clean up any leftover items from any previous failed runs
   rest_request "PUT" "/services/services/iscsitarget/" '{ "srv_enable": "false" }'
   if [ -n "$BSD_HOST" -o -n "$BSD_USERNAME" ] ; then
