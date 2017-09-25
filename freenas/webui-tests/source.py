@@ -11,6 +11,18 @@ def username():
 def password():
   return "abcd1234"
 
+def newusername():
+  return "userNAS"
+
+def newuserfname():
+  return "user NAS"
+
+def newuserpassword():
+  return "abcd1234"
+
+
+
+
 #method to test if an element is present-not used in the current script
 def is_element_present_source(self, how, what):
   """
