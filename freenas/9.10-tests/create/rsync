@@ -29,10 +29,9 @@ rsync_tests() {
   rest_request "POST" "/services/rsyncmod/" '{ "rsyncmod_name": "testmod", "rsyncmod_path": "/mnt/'${IXBUILD_ROOT_ZVOL}'/share" }'
   check_rest_response "201 Created"
 
-  # test is failing not sure why.
   # Test rsync
-  #echo_test_title "Testing rsync access"
-  #rc_test "rsync -avn ${BRIDGEIP}::testmod" || return 1
+  echo_test_title "Testing rsync access"
+  rc_test "rsync -avn ${BRIDGEIP}::testmod" || return 1
 }
 
 # Init function, this is called after module is sourced

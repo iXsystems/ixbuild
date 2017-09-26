@@ -72,7 +72,7 @@ exit_err() {
    exit 1
 }
 
-clean_artifacts() 
+clean_artifacts()
 {
   # Move artifacts to pre-defined location
     echo "Cleaning previous artifacts"
@@ -108,7 +108,7 @@ save_artifacts_on_fail()
   fi
 }
 
-save_artifacts_on_success() 
+save_artifacts_on_success()
 {
   # Move artifacts to pre-defined location
   if [ -n "$ARTIFACTONSUCCESS" ] ; then
