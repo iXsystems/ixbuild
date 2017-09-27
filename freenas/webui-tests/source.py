@@ -3,13 +3,13 @@
 # Location for tests of FreeNAS new GUI
 
 def baseurl():
-  return "http://10.250.1.133/ui"
+  return "http://10.20.20.135/ui"
 
 def username():
   return "root"
 
 def password():
-  return "abcd1234"
+  return "testing"
 
 def newusername():
   return "userNAS"

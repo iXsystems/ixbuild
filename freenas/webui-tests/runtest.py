@@ -2,7 +2,7 @@ from login import *
 from subprocess import call
 
 #starting the test and genewratinf result
-call(["py.test", "--junitxml", "~/ixbuild/freenas/webui-tests/result/result.xml", "login.py"])
+call(["py.test", "--junitxml", "/temp/result.xml", "login.py"])
 
 #cleaning up files
 call(["rm", "login.pyc"])

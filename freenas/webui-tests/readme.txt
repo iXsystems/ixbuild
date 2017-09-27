@@ -10,13 +10,13 @@ sudo apt-get install git
 
 
 #Geckodriver 
-wget https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-linux64.tar.gz
 git clone https://github.com/rishabh27892/webui-test-files/
 cd webui-test-files/
 tar -xvzf geckodriver-v0.11.1-linux64.tar.gz
-rm geckodriver-v0.11.1-linux64.tar.gz
 chmod +x geckodriver
 sudo cp geckodriver /usr/local/bin/
+cd ~/
+rm -rf webui-test-files/
 
 #Download ixbuild repo
 git clone https://github.com/ixsystems/ixbuild/
