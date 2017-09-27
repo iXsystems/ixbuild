@@ -81,7 +81,8 @@ check_pr_depends()
      tgt=`echo $tgt | sed 's|https://||g'`
      tgt=`echo $tgt | sed 's|www.github.com||g'`
      tgt=`echo $tgt | sed 's|github.com||g'`
-     project=`echo $tgt | cut -d '/' -f 1`
+     tgt=`echo $tgt | sed 's|^/||g'`
+     tproject=`echo $tgt | cut -d '/' -f 1`
      trepo=`echo $tgt | cut -d '/' -f 2`
      tbranch=`echo $tgt | cut -d '/' -f 3-`
      tbranch=`echo $tbranch | sed 's|^tree/||g'`
