@@ -443,9 +443,8 @@ if [ -n "$ghprbTargetBranch" ] ; then
     echo "ERROR: Could not locate release dir: ${PROFILE}/_BE/release"
   fi
   echo "Saving build artifacts"
-  cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/iso/"
-  if [ "$FLAVOR" == "FREENAS" ] ; then
-    p -r ${PROFILE}/_BE/release/FreeNAS-*/x64/ "${WORKSPACE}/artifacts/iso/"
+  cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
+  if [ "$FLAVOR" = "FREENAS" ] ; then
     mv "${WORKSPACE}/artifacts/FreeNAS-*/x64" "${WORKSPACE}/artifacts/iso"
   else
     mv "${WORKSPACE}/artifacts/TrueNAS-*/x64" "${WORKSPACE}/artifacts/iso"
