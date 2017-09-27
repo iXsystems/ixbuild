@@ -10,4 +10,5 @@ Defaults env_keep += "VI_SERVER VI_USERNAME VI_PASSWORD VI_CFG VM VMBACKEND ADUS
 Defaults env_keep += "ADPASSWORD2 NOIPUSERNAME NOIPPASSWORD NOIPHOST LDAPHOSTNAME LDAPBASEDN LDAPBINDDN LDAPBINDPASSWORD"
 Defaults env_keep += "OSX_HOST OSX_USERNAME OSX_PASSWORD BSD_HOST BSD_USERNAME BSD_PASSWORD"
 Defaults env_keep += "LDAPHOSTNAME2 LDAPBASEDN2 LDAPBINDDN2 LDAPBINDPASSWORD2 PRODUCTNAME RSYNCHOST PUSHPATH"
-Defaults env_keep += "ghprbTargetBranch ghprbSourceBranch ghprbGhRepository ghprbCommentBody NOMIDDLEWARED"
+Defaults env_keep += "ghprbTargetBranch ghprbSourceBranch ghprbGhRepository ghprbCommentBody ghprbPullDescription"
+Defaults env_keep += "NOMIDDLEWARED"

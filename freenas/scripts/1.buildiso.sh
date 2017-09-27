@@ -59,6 +59,45 @@ clean_src_repos()
   done
 }
 
+# Parse the Pull Description and bring in any other things marked as depends
+check_pr_depends()
+{
+  if [ -z "$ghprbPullDescription" ] ; then return 0; fi
+
+  # Are there DEPENDS listed?
+  echo "$ghprbPullDescription" | grep -q "^DEPENDS:"
+  if [ $? -ne 0 ] ; then return 0; fi
+
+  local _deps=`echo $ghprbPullDescription | grep "^DEPENDS:" | awk '{$1=""; print $0}'`
+  for prtgt in $_deps
+  do
+     # Pull the target PR/Repo
+     rtgtg=`echo $prtgt | sed 's|http://||g'`
+     rtgtg=`echo $prtgt | sed 's|https://||g'`
+     rtgtg=`echo $prtgt | sed 's|www.github.com||g'`
+     rtgtg=`echo $prtgt | sed 's|github.com||g'`
+     tproject=`echo $prtgt | cut -d '/' -f 1`
+     trepo=`echo $prtgt | cut -d '/' -f 2`
+     tbranch=`echo $prtgt | cut -d '/' -f 3-`
+
+     if [ -d "${PROFILE}/_BE/${trepo}" ] ; then
+       rm -rf ${PROFILE}/_BE/${trepo}
+     else
+       echo "*** Warning, no such git repo currently checked out: $trepo***"
+     fi
+
+     echo "*** Cloning DEPENDS repo $tproject/$trepo $tbranch***"
+     git clone --depth=1 -b ${tbranch} https://github.com/${tproject}/${trepo} ${PROFILE}/_BE/${trepo} 2>@1 >/tmp/.ghClone.$$
+     if [ $? -ne 0 ] ; then
+	cat /tmp/.ghClone.$$
+	rm /tmp/.ghClone.$$
+	echo "**** ERROR: Failed to clone the repo https://github.com/$tproject/$trepo -b $tbranch****"
+	exit 1
+     fi
+     rm /tmp/.ghClone.$$
+  done
+}
+
 # Allowed settings for BUILDINCREMENTAL
 case $BUILDINCREMENTAL in
    ON|on|YES|yes|true|TRUE) BUILDINCREMENTAL="true" ;;
@@ -354,6 +393,9 @@ if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
    echo "*** Replacing repo with PR-updated version ***"
    echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
    cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
+
+   # Check for other PR repos to pull in
+   check_pr_depends
 fi
 
 # Display output to stdout
