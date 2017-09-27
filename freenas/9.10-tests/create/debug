@@ -24,9 +24,9 @@ debug_tests()
 
   # Currently there is no way to create an authenticated session with FreeNAS
   # WWW via the API, so fetch file with SCP and the expected path. CD - 03/24/17
-  echo_test_title "Fetch debug file from URL"
-  scp_from_test "/var/db/system/ixdiagnose/ixdiagnose.tgz" "/tmp/${VM}debug.tgz"
-  check_exit_status || return 1
+  # echo_test_title "Fetch debug file from URL"
+  # scp_from_test "/var/db/system/ixdiagnose/ixdiagnose.tgz" "/tmp/${VM}debug.tgz"
+  # check_exit_status || return 1
 
   return 0
 }
