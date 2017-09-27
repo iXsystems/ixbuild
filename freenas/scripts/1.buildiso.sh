@@ -62,23 +62,30 @@ clean_src_repos()
 # Parse the Pull Description and bring in any other things marked as depends
 check_pr_depends()
 {
-  if [ -z "$ghprbPullDescription" ] ; then return 0; fi
+  if [ -z "$ghprbPullLongDescription" ] ; then return 0; fi
+
+  echo "PRDESC: $ghprbPullLongDescription"
 
   # Are there DEPENDS listed?
-  echo "$ghprbPullDescription" | grep -q "^DEPENDS:"
+  echo "$ghprbPullLongDescription" | grep -q "DEPENDS:"
   if [ $? -ne 0 ] ; then return 0; fi
 
-  local _deps=`echo $ghprbPullDescription | grep "^DEPENDS:" | awk '{$1=""; print $0}'`
+  local _deps=`echo $ghprbPullLongDescription | sed -n -e 's/^.*DEPENDS: //p' | cut -d '\' -f 1`
+  echo "*** Found PR DEPENDS: $_deps ***"
+
   for prtgt in $_deps
   do
+
      # Pull the target PR/Repo
-     rtgtg=`echo $prtgt | sed 's|http://||g'`
-     rtgtg=`echo $prtgt | sed 's|https://||g'`
-     rtgtg=`echo $prtgt | sed 's|www.github.com||g'`
-     rtgtg=`echo $prtgt | sed 's|github.com||g'`
-     tproject=`echo $prtgt | cut -d '/' -f 1`
-     trepo=`echo $prtgt | cut -d '/' -f 2`
-     tbranch=`echo $prtgt | cut -d '/' -f 3-`
+     tgt=`echo $prtgt | sed 's|http://||g'`
+     tgt=`echo $tgt | sed 's|https://||g'`
+     tgt=`echo $tgt | sed 's|www.github.com||g'`
+     tgt=`echo $tgt | sed 's|github.com||g'`
+     tgt=`echo $tgt | sed 's|^/||g'`
+     tproject=`echo $tgt | cut -d '/' -f 1`
+     trepo=`echo $tgt | cut -d '/' -f 2`
+     tbranch=`echo $tgt | cut -d '/' -f 3-`
+     tbranch=`echo $tbranch | sed 's|^tree/||g'`
 
      if [ -d "${PROFILE}/_BE/${trepo}" ] ; then
        rm -rf ${PROFILE}/_BE/${trepo}
@@ -86,8 +93,8 @@ check_pr_depends()
        echo "*** Warning, no such git repo currently checked out: $trepo***"
      fi
 
-     echo "*** Cloning DEPENDS repo $tproject/$trepo $tbranch***"
-     git clone --depth=1 -b ${tbranch} https://github.com/${tproject}/${trepo} ${PROFILE}/_BE/${trepo} 2>@1 >/tmp/.ghClone.$$
+     echo "*** Cloning DEPENDS repo https://github.com/$tproject/$trepo $tbranch***"
+     git clone --depth=1 -b ${tbranch} https://github.com/${tproject}/${trepo} ${PROFILE}/_BE/${trepo} 2>/tmp/.ghClone.$$ >/tmp/.ghClone.$$
      if [ $? -ne 0 ] ; then
 	cat /tmp/.ghClone.$$
 	rm /tmp/.ghClone.$$
@@ -162,6 +169,7 @@ if [ -n "$ghprbTargetBranch" ] ; then
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
   echo "*** Setting new TRAIN=$newTrain ***"
   BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
+  rm -rf "${WORKSPACE}/artifacts"
 fi
 
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
@@ -391,12 +399,14 @@ if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
    eval $PROFILEARGS
 
    echo "*** Replacing repo with PR-updated version ***"
+   rm -rf "${PROFILE}/_BE/${PRBUILDER}"
    echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
    cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
 
-   # Check for other PR repos to pull in
-   check_pr_depends
 fi
+
+# Check for other PR repos to pull in
+check_pr_depends
 
 # Display output to stdout
 touch $OUTFILE
@@ -434,6 +444,11 @@ if [ -n "$ghprbTargetBranch" ] ; then
   fi
   echo "Saving build artifacts"
   cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
+  if [ "$FLAVOR" = "FREENAS" ] ; then
+    mv "${WORKSPACE}/artifacts/FreeNAS-*/x64" "${WORKSPACE}/artifacts/iso"
+  else
+    mv "${WORKSPACE}/artifacts/TrueNAS-*/x64" "${WORKSPACE}/artifacts/iso"
+  fi
 fi
 
 rm ${OUTFILE}
