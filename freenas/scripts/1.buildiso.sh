@@ -94,7 +94,7 @@ check_pr_depends()
      fi
 
      echo "*** Cloning DEPENDS repo https://github.com/$tproject/$trepo $tbranch***"
-     git clone --depth=1 -b ${tbranch} https://github.com/${tproject}/${trepo} ${PROFILE}/_BE/${trepo} 2>@1 >/tmp/.ghClone.$$
+     git clone --depth=1 -b ${tbranch} https://github.com/${tproject}/${trepo} ${PROFILE}/_BE/${trepo} 2>/tmp/.ghClone.$$ >/tmp/.ghClone.$$
      if [ $? -ne 0 ] ; then
 	cat /tmp/.ghClone.$$
 	rm /tmp/.ghClone.$$
