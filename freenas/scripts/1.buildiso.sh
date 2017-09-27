@@ -67,7 +67,7 @@ check_pr_depends()
   echo "PRDESC: $ghprbPullLongDescription"
 
   # Are there DEPENDS listed?
-  echo "$ghprbPullLongDescription" | grep -q "^DEPENDS:"
+  echo "$ghprbPullLongDescription" | grep -q "DEPENDS:"
   if [ $? -ne 0 ] ; then return 0; fi
 
   local _deps=`echo $ghprbPullLongDescription | sed -n -e 's/^.*DEPENDS: //p' | cut -d '\' -f 1`
@@ -440,12 +440,12 @@ if [ -n "$ghprbTargetBranch" ] ; then
     echo "ERROR: Could not locate release dir: ${PROFILE}/_BE/release"
   fi
   echo "Saving build artifacts"
-  cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
-  cd "${WORKSPACE}/artifacts/"
+  cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/iso/"
   if [ "$FLAVOR" == "FREENAS" ] ; then
-    ln -s "FreeNAS-*/x64" "iso"
+    p -r ${PROFILE}/_BE/release/FreeNAS-*/x64/ "${WORKSPACE}/artifacts/iso/"
+    mv "${WORKSPACE}/artifacts/FreeNAS-*/x64" "${WORKSPACE}/artifacts/iso"
   else
-    ln -s "TrueNAS-*/x64" "iso"
+    mv "${WORKSPACE}/artifacts/TrueNAS-*/x64" "${WORKSPACE}/artifacts/iso"
   fi
 fi
 
