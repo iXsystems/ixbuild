@@ -64,11 +64,16 @@ check_pr_depends()
 {
   if [ -z "$ghprbPullDescription" ] ; then return 0; fi
 
+  echo "PRDESC: $ghprbPullDescription"
+
   # Are there DEPENDS listed?
   echo "$ghprbPullDescription" | grep -q "^DEPENDS:"
   if [ $? -ne 0 ] ; then return 0; fi
 
+
   local _deps=`echo $ghprbPullDescription | grep "^DEPENDS:" | awk '{$1=""; print $0}'`
+  echo "*** Found PR DEPENDS: $_deps ***"
+
   for prtgt in $_deps
   do
      # Pull the target PR/Repo
@@ -395,9 +400,10 @@ if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
    echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
    cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
 
-   # Check for other PR repos to pull in
-   check_pr_depends
 fi
+
+# Check for other PR repos to pull in
+check_pr_depends
 
 # Display output to stdout
 touch $OUTFILE
