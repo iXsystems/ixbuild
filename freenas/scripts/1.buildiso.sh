@@ -77,13 +77,13 @@ check_pr_depends()
   do
 
      # Pull the target PR/Repo
-     rtgtg=`echo $prtgt | sed 's|http://||g'`
-     rtgtg=`echo $prtgt | sed 's|https://||g'`
-     rtgtg=`echo $prtgt | sed 's|www.github.com||g'`
-     rtgtg=`echo $prtgt | sed 's|github.com||g'`
-     tproject=`echo $prtgt | cut -d '/' -f 1`
-     trepo=`echo $prtgt | cut -d '/' -f 2`
-     tbranch=`echo $prtgt | cut -d '/' -f 3-`
+     tgt=`echo $prtgt | sed 's|http://||g'`
+     tgt=`echo $tgt | sed 's|https://||g'`
+     tgt=`echo $tgt | sed 's|www.github.com||g'`
+     tgt=`echo $tgt | sed 's|github.com||g'`
+     project=`echo $tgt | cut -d '/' -f 1`
+     trepo=`echo $tgt | cut -d '/' -f 2`
+     tbranch=`echo $tgt | cut -d '/' -f 3-`
      tbranch=`echo $tbranch | sed 's|^tree/||g'`
 
      if [ -d "${PROFILE}/_BE/${trepo}" ] ; then
@@ -92,7 +92,7 @@ check_pr_depends()
        echo "*** Warning, no such git repo currently checked out: $trepo***"
      fi
 
-     echo "*** Cloning DEPENDS repo $tproject/$trepo $tbranch***"
+     echo "*** Cloning DEPENDS repo https://github.com/$tproject/$trepo $tbranch***"
      git clone --depth=1 -b ${tbranch} https://github.com/${tproject}/${trepo} ${PROFILE}/_BE/${trepo} 2>@1 >/tmp/.ghClone.$$
      if [ $? -ne 0 ] ; then
 	cat /tmp/.ghClone.$$
@@ -168,6 +168,7 @@ if [ -n "$ghprbTargetBranch" ] ; then
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
   echo "*** Setting new TRAIN=$newTrain ***"
   BUILDOPTS="$BUILDOPTS TRAIN=$newTrain"
+  rm -rf "${WORKSPACE}/artifacts"
 fi
 
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
