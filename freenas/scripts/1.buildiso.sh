@@ -79,6 +79,7 @@ check_pr_depends()
      tproject=`echo $prtgt | cut -d '/' -f 1`
      trepo=`echo $prtgt | cut -d '/' -f 2`
      tbranch=`echo $prtgt | cut -d '/' -f 3-`
+     tbranch=`echo $tbranch | sed 's|^tree/||g'`
 
      if [ -d "${PROFILE}/_BE/${trepo}" ] ; then
        rm -rf ${PROFILE}/_BE/${trepo}
