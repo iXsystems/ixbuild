@@ -399,6 +399,7 @@ if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
    eval $PROFILEARGS
 
    echo "*** Replacing repo with PR-updated version ***"
+   rm -rf "${PROFILE}/_BE/${PRBUILDER}"
    echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
    cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
 
