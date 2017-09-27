@@ -62,16 +62,16 @@ clean_src_repos()
 # Parse the Pull Description and bring in any other things marked as depends
 check_pr_depends()
 {
-  if [ -z "$ghprbPullDescription" ] ; then return 0; fi
+  if [ -z "$ghprbPullLongDescription" ] ; then return 0; fi
 
-  echo "PRDESC: $ghprbPullDescription"
+  echo "PRDESC: $ghprbPullLongDescription"
 
   # Are there DEPENDS listed?
-  echo "$ghprbPullDescription" | grep -q "^DEPENDS:"
+  echo "$ghprbPullLongDescription" | grep -q "^DEPENDS:"
   if [ $? -ne 0 ] ; then return 0; fi
 
 
-  local _deps=`echo $ghprbPullDescription | grep "^DEPENDS:" | awk '{$1=""; print $0}'`
+  local _deps=`echo $ghprbPullLongDescription | grep "^DEPENDS:" | awk '{$1=""; print $0}'`
   echo "*** Found PR DEPENDS: $_deps ***"
 
   for prtgt in $_deps
