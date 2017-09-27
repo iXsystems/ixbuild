@@ -70,12 +70,12 @@ check_pr_depends()
   echo "$ghprbPullLongDescription" | grep -q "^DEPENDS:"
   if [ $? -ne 0 ] ; then return 0; fi
 
-
-  local _deps=`echo $ghprbPullLongDescription | grep "^DEPENDS:" | awk '{$1=""; print $0}'`
+  local _deps=`echo $ghprbPullLongDescription | sed -n -e 's/^.*DEPENDS: //p' | cut -d '\' -f 1`
   echo "*** Found PR DEPENDS: $_deps ***"
 
   for prtgt in $_deps
   do
+
      # Pull the target PR/Repo
      rtgtg=`echo $prtgt | sed 's|http://||g'`
      rtgtg=`echo $prtgt | sed 's|https://||g'`
@@ -441,6 +441,12 @@ if [ -n "$ghprbTargetBranch" ] ; then
   fi
   echo "Saving build artifacts"
   cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
+  cd "${WORKSPACE}/artifacts/"
+  if [ "$FLAVOR" == "FREENAS" ] ; then
+    ln -s "FreeNAS-*/x64" "iso"
+  else
+    ln -s "TrueNAS-*/x64" "iso"
+  fi
 fi
 
 rm ${OUTFILE}
