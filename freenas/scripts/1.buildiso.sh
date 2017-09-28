@@ -444,13 +444,14 @@ if [ -n "$ghprbTargetBranch" ] ; then
   fi
   echo "Saving build artifacts"
   cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
-  ls -d "${WORKSPACE}/artifacts/FreeNAS-*" >/dev/null 2>/dev/null
-  if [ $? -eq 0 ] ; then
-    echo "Moving FreeNAS ISO files to artifacts/iso"
-    mv "${WORKSPACE}/artifacts/FreeNAS-*/x64" "${WORKSPACE}/artifacts/iso"
-  else
-    echo "Moving TrueNAS ISO files to artifacts/iso"
-    mv "${WORKSPACE}/artifacts/TrueNAS-*/x64" "${WORKSPACE}/artifacts/iso"
+
+  # Locate the ISO file
+  ISOFILE=`find "${WORKSPACE}/artifacts" | grep \.iso$ | head -n 1`
+  ISODIR="`dirname $ISOFILE`"
+  if [ -d "$ISODIR" ] ; then
+    echo "Moving ISO files ($ISODIR) to artifacts/iso"
+    rm -rf "${WORKSPACE}/artifacts/iso"
+    mv "${ISODIR}" "${WORKSPACE}/artifacts/iso"
   fi
 fi
 
