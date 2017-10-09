@@ -2,23 +2,17 @@
 # License: BSD
 # Location for tests of FreeNAS new GUI
 
-def baseurl():
-  return "http://10.20.20.135/ui"
+baseurl = "http://10.20.20.135/ui"
 
-def username():
-  return "root"
+username = "root"
 
-def password():
-  return "testing"
+password = "testing"
 
-def newusername():
-  return "userNAS"
+newusername = "userNAS"
 
-def newuserfname():
-  return "user NAS"
+newuserfname = "user NAS"
 
-def newuserpassword():
-  return "abcd1234"
+newuserpassword = "abcd1234"
 
 
 
