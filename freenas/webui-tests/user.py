@@ -70,7 +70,7 @@ class create_user_test(unittest.TestCase):
         #check if the the user list is loaded after addding a new user
         self.assertTrue(self.is_element_present(By.XPATH, "/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/app-breadcrumb/div/ul/li[2]/a"), "User list not loaded")
         #wait to confirm new user in the list visually
-        time.sleep(15)
+        time.sleep(5)
 
 
     # Next step-- To check if the new user is present in the list via automation
