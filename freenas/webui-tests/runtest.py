@@ -1,25 +1,13 @@
 #/usr/bin/env python
 
-from source import *
-from login import run_login_test
 from subprocess import call
 from os import path
-from selenium import webdriver
-import unittest
-
-#caps = webdriver.DesiredCapabilities().FIREFOX
-#caps["marionette"] = False
-#driver = webdriver.Firefox(capabilities=caps)
-#driver.get(baseurl)
-
-
 
 
 #starting the test and genewratinf result
-#call(["py.test", "--junitxml", "/temp/result.xml", "login.py", session_id, executor_url])
-suite = unittest.TestLoader().loadTestsFromTestCase(run_login_test)
-unittest.TextTestRunner(verbosity=2).run(suite)
-
+#call(["py.test", "--junitxml", "/temp/result.xml", "driver.py"])
+# call driver.py with python
+call(["python", "driver.py"])
 
 #cleaning up files
 if path.exists('login.pyc'):
