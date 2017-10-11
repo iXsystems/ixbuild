@@ -36,13 +36,6 @@ xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
 class login_test(unittest.TestCase):
     @classmethod
     def setUpClass(inst):
-        #create a new Firefox session
-        #caps = webdriver.DesiredCapabilities().FIREFOX
-        #caps["marionette"] = False
-        #inst.driver = webdriver.Firefox(capabilities=caps)
-        #inst.driver.implicitly_wait(30)
-        #inst.driver.maximize_window()
-        #inst.driver.get(baseurl)
         driver.get(baseurl)
 
 

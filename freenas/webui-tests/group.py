@@ -30,46 +30,37 @@ xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
           'newUser' : "//*[@id='md-input-7']",
          'newUserName' : "//*[@id='md-input-13']",
          'newUserPass' : "//*[@id='md-input-17']",
-        'newUserPassConf' : "//*[@id='md-input-19']"
+        'newUserPassConf' : "//*[@id='md-input-19']",
+        'newGroupName' : "//*[@id='md-input-25']"
+        
         }
 
-class create_user_test(unittest.TestCase):
+class create_group_test(unittest.TestCase):
     @classmethod
     def setUpClass(inst):
         driver.implicitly_wait(30)
         pass
 
     #Test navigation Account>Users>Hover>New User and enter username,fullname,password,confirmation and wait till user is  visibile in the list
-    def test_1_create_newuser(self):
-        #Click  Account menu
-        a = driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[2]/md-list-item/div/a")
-        a.click()
-        #allowing the button to load
-        time.sleep(1)
-        #Click User submenu
-        driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[2]/md-list-item/div/md-nav-list/md-list-item[1]/div/a").click()
+    def test_2_create_newgroup(self):
+        time.sleep(5)
+        #Click Account submenu
+        driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[2]/md-list-item/div/md-nav-list/md-list-item[2]/div/a").click()
         #scroll down to find hover tab
         driver.find_element_by_tag_name('html').send_keys(Keys.END)
         time.sleep(2)
         #Perform hover to show menu
-        hover_element = driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-user-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-trigger/button")
+        hover_element = driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-trigger/button")
         hover = ActionChains(driver).move_to_element(hover_element)
         hover.perform()
         time.sleep(1)
         #Click create new user option
-        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-user-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-actions").click()
-        #Enter New Username
-        driver.find_element_by_xpath(xpaths['newUser']).send_keys(newusername)
-        #Enter User Full name
-        driver.find_element_by_xpath(xpaths['newUserName']).send_keys(newuserfname)
-        #Enter Password
-        driver.find_element_by_xpath(xpaths['newUserPass']).send_keys(newuserpassword)
-        #Enter Password Conf
-        driver.find_element_by_xpath(xpaths['newUserPassConf']).send_keys(newuserpassword)
-        #Click on creat new User button
-        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-user-form/entity-form/md-card/div/form/md-card-actions/button[1]").click()
-        #check if the the user list is loaded after addding a new user
-        self.assertTrue(self.is_element_present(By.XPATH, "/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/app-breadcrumb/div/ul/li[2]/a"), "User list not loaded")
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-actions").click()
+        #Enter New Groupname
+        time.sleep(1)
+        driver.find_element_by_xpath(xpaths['newGroupName']).send_keys(newgroupname)
+        #Click on save new Group button
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-form/entity-form/md-card/div/form/md-card-actions/button[1]").click()
         #wait to confirm new user in the list visually
         time.sleep(5)
 
@@ -90,11 +81,10 @@ class create_user_test(unittest.TestCase):
 
     @classmethod
     def tearDownClass(inst):
-        pass
-        #driver.close()
+        driver.close()
 
-def run_create_user_test(webdriver):
+def run_create_group_test(webdriver):
     global driver
     driver = webdriver
-    suite = unittest.TestLoader().loadTestsFromTestCase(create_user_test)
+    suite = unittest.TestLoader().loadTestsFromTestCase(create_group_test)
     unittest.TextTestRunner(verbosity=2).run(suite)

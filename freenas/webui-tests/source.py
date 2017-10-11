@@ -14,6 +14,7 @@ newuserfname = "user NAS"
 
 newuserpassword = "abcd1234"
 
+newgroupname = "groupNAS"
 
 
 
