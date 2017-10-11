@@ -61,7 +61,7 @@ class create_group_test(unittest.TestCase):
         #Click on save new Group button
         driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-form/entity-form/md-card/div/form/md-card-actions/button[1]").click()
         #wait to confirm new user in the list visually
-        time.sleep(5)
+        time.sleep(10)
 
 
     # Next step-- To check if the new user is present in the list via automation

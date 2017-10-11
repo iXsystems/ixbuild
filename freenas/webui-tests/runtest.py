@@ -22,6 +22,9 @@ if path.exists('user.pyc'):
 if path.exists('group.pyc'):
     call(["rm", "group.pyc"])
 
+if path.exists('logout.pyc'):
+    call(["rm", "logout.pyc"])
+
 if path.exists('__pycache__'):
     call(["rm", "-r", "__pycache__"])
 

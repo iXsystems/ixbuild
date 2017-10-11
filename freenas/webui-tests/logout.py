@@ -34,11 +34,11 @@ class logout_test(unittest.TestCase):
         #Click on root account
         driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/topbar/md-toolbar/div/md-toolbar-row/button[6]").click()
         #Click on logout
-        time.sleep(1)
-        driver.find_element_by_xpath("//*[@id='cdk-overlay-19']/div/div/button[3]/div").click()
-        #check if the the user list is loaded after addding a new user
-        #self.assertTrue(self.is_element_present(By.XPATH, "/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/app-breadcrumb/div/ul/li[2]/a"), "User list not loaded")
-        #wait to confirm new user in the list visually
+        time.sleep(5)
+        driver.find_element_by_xpath("/html/body/div[3]/div[2]/div/div/button[3]").click()
+        time.sleep(5)
+        #Click on OK when re-confirm logout
+        driver.find_element_by_xpath("/html/body/div[3]/div[2]/div[2]/md-dialog-container/confirm-dialog/div[2]/button[1]").click()
         time.sleep(5)
 
 
