@@ -32,7 +32,6 @@ xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
          'newUserPass' : "//*[@id='md-input-17']",
         'newUserPassConf' : "//*[@id='md-input-19']",
         'newGroupName' : "//*[@id='md-input-25']"
-        
         }
 
 class create_group_test(unittest.TestCase):
@@ -81,7 +80,9 @@ class create_group_test(unittest.TestCase):
 
     @classmethod
     def tearDownClass(inst):
-        driver.close()
+        #driver.close()
+        pass
+
 
 def run_create_group_test(webdriver):
     global driver

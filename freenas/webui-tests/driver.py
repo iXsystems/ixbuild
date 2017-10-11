@@ -1,9 +1,12 @@
 #/usr/bin/env python
+# Author: Eric Turgeon
+# License: BSD
 
 from source import *
 from login import run_login_test
 from group import run_create_group_test
 from user import run_create_user_test
+from logout import run_logout_test
 from os import path
 from selenium import webdriver
 
@@ -21,4 +24,5 @@ driver.maximize_window()
 run_login_test(driver)
 run_create_user_test(driver)
 run_create_group_test(driver)
+run_logout_test(driver)
 
