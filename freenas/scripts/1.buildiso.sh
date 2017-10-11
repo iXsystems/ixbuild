@@ -165,6 +165,10 @@ fi
 # If this is a github pull request builder, check if branch needs to be overridden
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
+  if [ "$GITFNASBRANCH" = "freenas/master" ] ; then
+    # Because freenas/master in some branches aligns to master branch of build
+    GITFNASBRANCH="master"
+  fi
   echo "*** Building GitHub PR, using builder branch: $GITFNASBRANCH ***"
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
   echo "*** Setting new TRAIN=$newTrain ***"
