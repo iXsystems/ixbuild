@@ -228,7 +228,8 @@ if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
   # PR Build
   echo "*** Doing PR build of the build/ repo ***"
   echo "${WORKSPACE} -> ${FNASBDIR}"
-  cp -r "${WORKSPACE}" "${FNASBDIR}"
+  mkdir "${FNASBDIR}"
+  tar cf - -C "${WORKSPACE}" . | tar xf - -C "${FNASBDIR}"
   if [ $? -ne 0 ] ; then exit_clean; fi
 else
   # Regular build
@@ -399,14 +400,15 @@ fi
 # We are doing a build as a result of a PR
 # Lets copy the repo from WORKSPACE into the correct location
 if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
-   cd ${FNASBDIR}
-   eval $PROFILEARGS
+  cd ${FNASBDIR}
+  eval $PROFILEARGS
 
-   echo "*** Replacing repo with PR-updated version ***"
-   rm -rf "${PROFILE}/_BE/${PRBUILDER}"
-   echo "cp -r ${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
-   cp -r "${WORKSPACE}" "${PROFILE}/_BE/${PRBUILDER}"
-
+  echo "*** Replacing repo with PR-updated version ***"
+  rm -rf "${PROFILE}/_BE/${PRBUILDER}"
+  mkdir "${PROFILE}/_BE/${PRBUILDER}"
+  echo "${WORKSPACE} -> ${PROFILE}/_BE/${PRBUILDER}"
+  tar cf - -C "${WORKSPACE}" . | tar xf - -C "${PROFILE}/_BE/${PRBUILDER}"
+  if [ $? -ne 0 ] ; then exit_clean; fi
 fi
 
 # Check for other PR repos to pull in
