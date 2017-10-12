@@ -18,6 +18,11 @@ if [ -z "$JENKINS_DO_UPDATE" ] ; then
   exit $?
 fi
 
+# Source other functions from ixautomation when present
+if [ -d "/ixautomation" ] ; then
+  . /ixautomation/backend/functions-tests.sh
+fi
+
 # Set the variables
 TYPE="${1}"
 BUILD="${2}"
