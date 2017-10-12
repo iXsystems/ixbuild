@@ -24,23 +24,30 @@ except ImportError:
     import unittest
 
 
-class logout_test(unittest.TestCase):
+class guide_test(unittest.TestCase):
     @classmethod
     def setUpClass(inst):
         driver.implicitly_wait(30)
 
     #Test navigation Account>Users>Hover>New User and enter username,fullname,password,confirmation and wait till user is  visibile in the list
-    def test_1_logout(self):
-        #Click on root account
-        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/topbar/md-toolbar/div/md-toolbar-row/button[6]").click()
-        #Click on logout
-        time.sleep(2)
-        driver.find_element_by_xpath("/html/body/div[3]/div[2]/div/div/button[3]").click()
-        #driver.find_element_by_xpath("//*[@id='cdk-overlay-12']/div/div/button[3]").click()
-        time.sleep(2)
-        #Click on OK when re-confirm logout
-        driver.find_element_by_xpath("/html/body/div[3]/div[2]/div[2]/md-dialog-container/confirm-dialog/div[2]/button[1]").click()
-        time.sleep(2)
+    def test_1_next_guide(self):
+        #Click on the guide button
+        driver.find_element_by_xpath("/html/body/div[4]/div[1]/button").click()
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/topbar/md-toolbar/div/md-toolbar-row/button[4]").click()
+        time.sleep(1)
+        #Click on Next the first guide
+        driver.find_element_by_xpath("/html/body/div[4]/div[1]/div[2]/button[1]").click()
+        time.sleep(1)
+        #Click on Next the second guide
+        driver.find_element_by_xpath("/html/body/div[4]/div[1]/div[2]/button[2]").click()
+        time.sleep(1)
+        #Click on Next the third guide
+        driver.find_element_by_xpath("/html/body/div[4]/div[1]/div[2]/button[2]").click()
+        time.sleep(1)
+        #Click on Next the fourth guide
+        driver.find_element_by_xpath("/html/body/div[4]/div[1]/div[2]/button[2]").click()
+        time.sleep(1)
+
         #self.assertTrue(self.is_element_present(By.XPATH, "//input[@id='md-input-1']"),
                         #"Logout failed")
 
@@ -60,10 +67,10 @@ class logout_test(unittest.TestCase):
 
     @classmethod
     def tearDownClass(inst):
-        driver.close()
+        pass
 
-def run_logout_test(webdriver):
+def run_guide_test(webdriver):
     global driver
     driver = webdriver
-    suite = unittest.TestLoader().loadTestsFromTestCase(logout_test)
+    suite = unittest.TestLoader().loadTestsFromTestCase(guide_test)
     unittest.TextTestRunner(verbosity=2).run(suite)

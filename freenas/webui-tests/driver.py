@@ -4,6 +4,7 @@
 
 from source import *
 from login import run_login_test
+from guide import run_guide_test
 from group import run_create_group_test
 from user import run_create_user_test
 from logout import run_logout_test
@@ -22,6 +23,7 @@ driver.maximize_window()
 
 #starting the test and genewratinf result
 run_login_test(driver)
+#run_guide_test(driver)
 run_create_user_test(driver)
 run_create_group_test(driver)
 run_logout_test(driver)

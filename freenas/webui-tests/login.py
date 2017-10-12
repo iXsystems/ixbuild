@@ -25,7 +25,7 @@ try:
 except ImportError:
     import unittest
 
-xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
+xpaths = { 'usernameTxtBox' : "//input[@id='md-input-1']",
            'passwordTxtBox' : "//input[@id='md-input-3']",
           'submitButton' : "/html/body/app/main/login/div/div/form/div[3]/div[1]/button",
           'newUser' : "//*[@id='md-input-7']",
@@ -44,10 +44,10 @@ class login_test(unittest.TestCase):
     #Test enter username,password,login and check successfully login
     def test_1_login(self):
         #enter username in the username textbox
-        #self.driver.find_element_by_xpath(xpaths['usernameTxtBox']).send_keys(username)
+        driver.find_element_by_xpath(xpaths['usernameTxtBox']).clear()
+        driver.find_element_by_xpath(xpaths['usernameTxtBox']).send_keys(username)
         #enter password in the password textbox
         driver.find_element_by_xpath(xpaths['passwordTxtBox']).send_keys(password)
-        #click
         #click
         driver.find_element_by_xpath("/html/body/app-root/app-auth-layout/app-signin/div/div/md-card/md-card-content/form/button").click()
         #check if the dashboard opens
