@@ -27,7 +27,8 @@ except ImportError:
 class guide_test(unittest.TestCase):
     @classmethod
     def setUpClass(inst):
-        driver.implicitly_wait(30)
+        #driver.implicitly_wait(30)
+        pass
 
     #Test navigation Account>Users>Hover>New User and enter username,fullname,password,confirmation and wait till user is  visibile in the list
     def test_1_next_guide(self):

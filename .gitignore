@@ -1,2 +1,5 @@
 /build.conf
 /freenas/freenas.cfg
+__pycache__
+*.xml
+*.pyc
