@@ -53,6 +53,10 @@ class login_test(unittest.TestCase):
         #check if the dashboard opens
         self.assertTrue(self.is_element_present(By.XPATH,"/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/app-breadcrumb/div"),"Unsuccessful Login")
 
+        #cancelling the tour
+        if self.is_element_present(By.XPATH,"/html/body/div[3]/div[1]/button"): 
+            driver.find_element_by_xpath("/html/body/div[3]/div[1]/button").click()
+
     #method to test if an element is present
     def is_element_present(self, how, what):
         """

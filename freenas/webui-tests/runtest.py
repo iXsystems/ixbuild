@@ -5,9 +5,9 @@ from os import path
 
 
 #starting the test and genewratinf result
-#call(["py.test", "--junitxml", "/temp/result.xml", "driver.py"])
+call(["py.test", "--junitxml", "/temp/result.xml", "driver.py"])
 # call driver.py with python
-call(["python", "driver.py"])
+#call(["python", "driver.py"])
 
 #cleaning up files
 if path.exists('login.pyc'):
@@ -24,6 +24,9 @@ if path.exists('group.pyc'):
 
 if path.exists('logout.pyc'):
     call(["rm", "logout.pyc"])
+
+if path.exists('guide.pyc'):
+    call(["rm", "guide.pyc"])
 
 if path.exists('__pycache__'):
     call(["rm", "-r", "__pycache__"])

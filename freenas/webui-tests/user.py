@@ -48,6 +48,12 @@ class create_user_test(unittest.TestCase):
         time.sleep(1)
         #Click User submenu
         driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[2]/md-list-item/div/md-nav-list/md-list-item[1]/div/a").click()
+
+        #cancelling the tour
+        if self.is_element_present(By.XPATH,"/html/body/div[4]/div[1]/button"): 
+            driver.find_element_by_xpath("/html/body/div[4]/div[1]/button").click()
+
+
         #scroll down to find hover tab
         driver.find_element_by_tag_name('html').send_keys(Keys.END)
         time.sleep(2)
