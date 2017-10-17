@@ -9,9 +9,9 @@ from sys import argv
 import getopt
 
 error_msg = """Usage for %s:
-    -ip <###.###.###.###>     - IP of the FreeNAS
-    -password <root password> - Password of the FreeNAS root user
-    -interface <interface>    - The interface that FreeNAS is run one
+    --ip <###.###.###.###>     - IP of the FreeNAS
+    --password <root password> - Password of the FreeNAS root user
+    --interface <interface>    - The interface that FreeNAS is run one
     """ % argv[0]
 
 # if have no argumment stop
@@ -21,18 +21,20 @@ if len(argv) == 1:
 
 # look if all the argument are there.
 try:
-    myopts, args = getopt.getopt(argv[1:], "ip:password:interface")
+    myopts, args = getopt.getopt(argv[1:], 'ipI', ["ip=",
+        "password=","interface="])
 except getopt.GetoptError as e:
     print (str(e))
     print(error_msg)
     exit()
 
+
 for output, arg in myopts:
-    if output == '-ip':
+    if output in ('-i', '--ip'):
         ip = arg
-    elif output == '-password':
-        password = arg
-    elif output == '-interface':
+    elif output in ('-p', '--password'):
+        passwd = arg
+    elif output in ('-I', '--interface'):
         interface = arg
 
 cfg_content = """#!/usr/bin/env python
@@ -45,7 +47,7 @@ password = "%s"
 ip_domain = "%s"
 freenas_url = 'http://' + ip_domain + '/api/v1.0/'
 interface = "%s"
-""" % (password, ip, interface )
+""" % (passwd, ip, interface )
 
 cfg_file = open("config.py", 'w')
 cfg_file.writelines(cfg_content)
