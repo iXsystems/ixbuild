@@ -169,6 +169,10 @@ if [ -n "$ghprbTargetBranch" ] ; then
     # Because freenas/master in some branches aligns to master branch of build
     GITFNASBRANCH="master"
   fi
+  if [ "$GITFNASBRANCH" = "freenas/11-stable" -a "$PRBUILDER" = "os" ] ; then
+    # Because freenas/master in some branches aligns to master branch of build
+    GITFNASBRANCH="master"
+  fi
   echo "*** Building GitHub PR, using builder branch: $GITFNASBRANCH ***"
   newTrain="PR-${PRBUILDER}-`echo $ghprbSourceBranch | sed 's|/|-|g'`"
   echo "*** Setting new TRAIN=$newTrain ***"
