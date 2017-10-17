@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Author: Eric Turgeon
-# License: BSD
+
 import os
+
 results_xml = os.getcwd() + '/results/'
 user="root"
 password = "abcd1234"
