@@ -443,8 +443,18 @@ jenkins_publish_pkg_ipfs()
   fi
 
   # Copy packages
-  go-ipfs add -r --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/
+  echo "Adding packages to IPFS, this will take a while..."
+  PKGHASH=$(go-ipfs add -r -Q --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/)
   if [ $? -ne 0 ] ; then exit_clean; fi
+
+  echo "Finished Adding: $PKGHASH"
+
+  echo "Pinning to IPFS cluster: $PKGHASH"
+  ipfs-cluster-ctl pin add ${PKGHASH}
+
+  # Save hash to list of pins
+  tstamp=$(date +%s)
+  echo "$tstamp $PKGHASH" >>/var/db/trueos-ipfs-pins
 
   # TODO
   # Pruning of old pinned hashes
