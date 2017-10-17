@@ -4,9 +4,11 @@
 # License: BSD
 
 from subprocess import call
-from config import results_xml
 from sys import argv
+from os import path, remove, getcwd
 import getopt
+
+results_xml = getcwd() + '/results/'
 
 error_msg = """Usage for %s:
     --ip <###.###.###.###>     - IP of the FreeNAS
@@ -39,9 +41,6 @@ for output, arg in myopts:
 
 cfg_content = """#!/usr/bin/env python
 
-import os
-
-results_xml = os.getcwd() + '/results/'
 user = "root"
 password = "%s"
 ip_domain = "%s"
@@ -55,3 +54,7 @@ cfg_file.close()
 
 call(["py.test", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
 
+if path.exists('config.py'):
+    remove("config.py")
+if path.exists('config.pyc'):
+    remove("config.pyc")
