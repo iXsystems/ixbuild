@@ -135,7 +135,7 @@ publish_pytest_results() {
 }
 
 
-# $1 = RESTY type to run 
+# $1 = RESTY type to run
 # $2 = RESTY URL
 # $3 = JSON to pass to RESTY
 rest_request()
@@ -170,8 +170,8 @@ rc_test()
   if [ -z "$3" ] ; then
     eval "${1}" >${TESTSTDOUT} 2>${TESTSTDERR}
     if [ $? -ne 0 ] ; then
-      echo_fail 
-      if [ -n "$2" ] ; then 
+      echo_fail
+      if [ -n "$2" ] ; then
         eval "${2}"
       fi
       echo "Failed running: $1"
@@ -438,7 +438,7 @@ check_exit_status()
       echo_fail
     fi
     return 1
-  fi  
+  fi
 }
 
 # $1 = Expected status value for service state property (STOPPED|RUNNING|CRASHED)
@@ -476,7 +476,7 @@ check_property_value()
       echo_fail
     fi
     return 1
-  fi  
+  fi
 
   PROP_VALUE=`cat ${RESTYOUT} | ${JSAWK} "${1}"`
   # If 'srv_state' property not found, return 'SKIPPED' status
@@ -494,7 +494,7 @@ check_property_value()
       echo "Expected: \"${2}\", Observed: \"${PROP_VALUE}\""
     fi
     return 1
-  fi  
+  fi
 
   if [ "$SILENT" == "false" ]; then
     echo_ok
@@ -504,7 +504,7 @@ check_property_value()
 
 # Check for $1 REST response, error out if not found
 check_rest_response()
-{ 
+{
   export TESTSTDOUT="$RESTYOUT"
   export TESTSTDERR="$RESTYERR"
 
@@ -813,7 +813,7 @@ read_module_dir() {
   done
 
   if [ "$ANYFAILS" = "true" ] ; then return 1; fi
-  return 0 
+  return 0
 }
 
 run_tests() {
