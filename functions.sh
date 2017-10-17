@@ -442,6 +442,9 @@ jenkins_publish_pkg_ipfs()
     exit 1
   fi
 
+  # Set location of go-ipfs binaries on our node
+  export PATH="${PATH}:/root/bin"
+
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
   PKGHASH=$(go-ipfs add -r -Q --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/)
