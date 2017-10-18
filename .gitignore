@@ -4,3 +4,4 @@ __pycache__
 *.xml
 *.pyc
 .cache
+config.py

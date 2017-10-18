@@ -43,18 +43,19 @@ cfg_content = """#!/usr/bin/env python
 
 user = "root"
 password = "%s"
-ip_domain = "%s"
-freenas_url = 'http://' + ip_domain + '/api/v1.0/'
+ip = "%s"
+freenas_url = 'http://' + ip + '/api/v1.0'
 interface = "%s"
 """ % (passwd, ip, interface )
 
 cfg_file = open("config.py", 'w')
 cfg_file.writelines(cfg_content)
 cfg_file.close()
-
+call(["py.test", "--junitxml", "%slogin_result.xml" % results_xml, "login.py"])
 call(["py.test", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
 
-if path.exists('config.py'):
-    remove("config.py")
-if path.exists('config.pyc'):
-    remove("config.pyc")
+#if path.exists('config.py'):
+#    remove("config.py")
+#if path.exists('config.pyc'):
+#    remove("config.pyc")
+
