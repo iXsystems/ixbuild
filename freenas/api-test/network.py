@@ -8,14 +8,15 @@
 import requests
 from config import freenas_url, password, user, interface
 import unittest
+import json
 
 class network(unittest.TestCase):
     @classmethod
     def setUpClass(inst):
         global header
-        header = {'content-type': 'application/json'}
+        header = {'Content-Type': 'application/json', 'Vary': 'accept'}
         global payload
-        payload = { "int_dhcp": True,
+        payload = { "int_dhcp": 'true',
                     "int_name": "ext",
                     "int_interface": interface}
         global authentification
@@ -23,7 +24,8 @@ class network(unittest.TestCase):
 
     def test_1_configure_interface_dhcp(self):
         self.posttest = requests.post(freenas_url + '/network/interface/', headers=header,
-                                      auth=authentification, data=payload)
+                                      auth=authentification,
+                                      data=json.dumps(payload))
         self.response = self.posttest.status_code
         assert self.response == 201
 

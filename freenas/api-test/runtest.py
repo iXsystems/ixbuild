@@ -51,7 +51,6 @@ interface = "%s"
 cfg_file = open("config.py", 'w')
 cfg_file.writelines(cfg_content)
 cfg_file.close()
-call(["py.test", "--junitxml", "%slogin_result.xml" % results_xml, "login.py"])
 call(["py.test", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
 
 #if path.exists('config.py'):
