@@ -6,28 +6,22 @@
 #Test case count: 1
 
 import requests
-from config import freenas_url, password, user, interface
+from config import interface
+from functions import POST
 import unittest
 import json
 
 class network(unittest.TestCase):
     @classmethod
     def setUpClass(inst):
-        global header
-        header = {'Content-Type': 'application/json', 'Vary': 'accept'}
-        global payload
-        payload = { "int_dhcp": 'true',
-                    "int_name": "ext",
-                    "int_interface": interface}
-        global authentification
-        authentification = (user, password)
+        pass
 
     def test_1_configure_interface_dhcp(self):
-        self.posttest = requests.post(freenas_url + '/network/interface/', headers=header,
-                                      auth=authentification,
-                                      data=json.dumps(payload))
-        self.response = self.posttest.status_code
-        assert self.response == 201
+        payload = {"int_dhcp": 'true',
+                   "int_name": "ext",
+                   "int_interface": interface
+                  }
+        assert POST("/network/interface/", payload) == 201
 
     @classmethod
     def tearDownClass(inst):
