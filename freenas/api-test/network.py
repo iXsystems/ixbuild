@@ -3,13 +3,9 @@
 # Author: Eric Turgeon
 # License: BSD
 
-#Test case count: 1
-
-import requests
 from config import interface
 from functions import POST
 import unittest
-import json
 
 class network(unittest.TestCase):
     @classmethod
