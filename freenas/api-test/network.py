@@ -13,18 +13,16 @@ class network(unittest.TestCase):
     @classmethod
     def setUpClass(inst):
         global header
-        header = {'content-type': '/network/interface/'}
+        header = {'content-type': 'application/json'}
         global payload
         payload = { "int_dhcp": True,
                     "int_name": "ext",
                     "int_interface": interface}
         global authentification
         authentification = (user, password)
-        #inst.session = requests.Session()
-        #inst.session.auth = (user, password)
 
     def test_1_configure_interface_dhcp(self):
-        self.posttest = requests.post(freenas_url, headers=header,
+        self.posttest = requests.post(freenas_url + '/network/interface/', headers=header,
                                       auth=authentification, data=payload)
         self.response = self.posttest.status_code
         assert self.response == 201
