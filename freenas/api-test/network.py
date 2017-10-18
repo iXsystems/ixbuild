@@ -17,7 +17,7 @@ class network(unittest.TestCase):
         global payload
         payload = { "int_dhcp": True,
                     "int_name": "ext",
-                    "int_interface": interface})
+                    "int_interface": interface}
         global authentification
         authentification = (user, password)
         #inst.session = requests.Session()
