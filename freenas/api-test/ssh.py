@@ -4,7 +4,8 @@
 # License: BSD
 
 import unittest
-from functions import PUT, GET
+from functions import PUT, GET_OUTPUT
+
 
 class ssh_test(unittest.TestCase):
     @classmethod
@@ -20,8 +21,7 @@ class ssh_test(unittest.TestCase):
         assert PUT("/services/services/ssh/", payload) == 200
 
     def test_3_Checking_SSH_enabled(self):
-        assert GET("/services/services/ssh/")
-
+        assert GET_OUTPUT("/services/services/ssh/",'srv_state') == "RUNNING"
 
     @classmethod
     def tearDownClass(inst):
