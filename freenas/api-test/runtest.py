@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.6
 
 # Author: Eric Turgeon
 # License: BSD
@@ -39,7 +39,7 @@ for output, arg in myopts:
     elif output in ('-I', '--interface'):
         interface = arg
 
-cfg_content = """#!/usr/bin/env python
+cfg_content = """#!/usr/bin/env python3.6
 
 user = "root"
 password = "%s"
@@ -51,8 +51,8 @@ interface = "%s"
 cfg_file = open("config.py", 'w')
 cfg_file.writelines(cfg_content)
 cfg_file.close()
-call(["py.test", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
-call(["py.test", "--junitxml", "%sssh_result.xml" % results_xml, "ssh.py"])
+call(["py.test-3.6", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
+call(["py.test-3.6", "--junitxml", "%sssh_result.xml" % results_xml, "ssh.py"])
 #if path.exists('config.py'):
 #    remove("config.py")
 #if path.exists('config.pyc'):
