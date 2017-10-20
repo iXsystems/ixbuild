@@ -4,13 +4,10 @@
 # License: BSD
 
 import unittest
-from functions import PUT, GET_OUTPUT
+from functions import PUT, GET_OUTPUT, setup_ssh_agent
 
 
 class ssh_test(unittest.TestCase):
-    @classmethod
-    def setUpClass(inst):
-        pass
 
     def test_1_Configuring_SSH_Settings(self):
         payload = {"ssh_rootlogin": 'true'}
@@ -23,9 +20,10 @@ class ssh_test(unittest.TestCase):
     def test_3_Checking_SSH_enabled(self):
         assert GET_OUTPUT("/services/services/ssh/",'srv_state') == "RUNNING"
 
-    @classmethod
-    def tearDownClass(inst):
-        pass
+    def test_4_Start_local_SSH_Agent(self):
+        assert setup_ssh_agent() == True
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
