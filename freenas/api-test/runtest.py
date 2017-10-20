@@ -7,7 +7,7 @@ from subprocess import call
 from sys import argv
 from os import path, remove, getcwd
 import getopt
-
+from functions import setup_ssh_agent
 results_xml = getcwd() + '/results/'
 
 error_msg = """Usage for %s:
@@ -51,10 +51,9 @@ interface = "%s"
 cfg_file = open("config.py", 'w')
 cfg_file.writelines(cfg_content)
 cfg_file.close()
+
+setup_ssh_agent()
+
 call(["py.test-3.6", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
 call(["py.test-3.6", "--junitxml", "%sssh_result.xml" % results_xml, "ssh.py"])
-#if path.exists('config.py'):
-#    remove("config.py")
-#if path.exists('config.pyc'):
-#    remove("config.pyc")
 
