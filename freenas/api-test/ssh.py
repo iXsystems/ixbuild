@@ -24,6 +24,5 @@ class ssh_test(unittest.TestCase):
         assert is_agent_setup() == True
 
 
-
 if __name__ == "__main__":
     unittest.main(verbosity=2)

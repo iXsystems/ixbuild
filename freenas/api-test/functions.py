@@ -60,4 +60,7 @@ def setup_ssh_agent():
         logging.info( 'ssh-agent not present, will now set it up' )
     return start_ssh_agent()
 
+def create_key(keyPath):
+    run(['ssh-keygen -t rsa -f %s -q -N ""' % keyPath], shell=True)
+    return True
 

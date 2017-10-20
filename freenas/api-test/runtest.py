@@ -8,7 +8,10 @@ from sys import argv
 from os import path, remove, getcwd
 import getopt
 from functions import setup_ssh_agent
+
 results_xml = getcwd() + '/results/'
+localHome = path.expanduser('~')
+keyPath = localHome + '/.ssh/test_id_rsa'
 
 error_msg = """Usage for %s:
     --ip <###.###.###.###>     - IP of the FreeNAS
@@ -41,12 +44,16 @@ for output, arg in myopts:
 
 cfg_content = """#!/usr/bin/env python3.6
 
+import os
+
 user = "root"
 password = "%s"
 ip = "%s"
 freenas_url = 'http://' + ip + '/api/v1.0'
 interface = "%s"
-""" % (passwd, ip, interface )
+localHome = "%s"
+keyPath = "%s"
+""" % (passwd, ip, interface, localHome, keyPath)
 
 cfg_file = open("config.py", 'w')
 cfg_file.writelines(cfg_content)
