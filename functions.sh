@@ -442,6 +442,15 @@ jenkins_publish_pkg_ipfs()
     exit 1
   fi
 
+  # Which hash file we are updating
+  if [ -n "$1" -a "$1" = "stable" ] ; then
+    HFILE="trueos-ipfs-stable"
+    KEEPHASH="3"
+  else
+    HFILE="trueos-ipfs-unstable"
+    KEEPHASH="5"
+  fi
+
   # Set location of go-ipfs binaries on our node
   export PATH="${PATH}:/root/bin"
 
@@ -457,11 +466,24 @@ jenkins_publish_pkg_ipfs()
 
   # Save hash to list of pins
   tstamp=$(date +%s)
-  echo "$tstamp $PKGHASH" >>/var/db/trueos-ipfs-pins
+  echo "$tstamp $PKGHASH" >>/var/db/${HFILE}
 
-  # TODO
+  # Unpin hashes beyond the KEEPHASH
+  PRUNEHASH=$(expr $KEEPHASH + 1)
+  cat /var/db/${HFILE} | sort -r | tail -n +${PRUNEHASH} | while read line
+  do
+    ohash=$(echo $line | awk '{print $2}')
+    echo "Unpinning: $ohash"
+    ipfs-cluster-ctl pin rm $ohash
+  done
+
   # Pruning of old pinned hashes
+  cat /var/db/${HFILE} | sort -r | head -n ${KEEPHASH} >/var/db/${HFILE}.new
+  mv /var/db/${HFILE}.new /var/db/${HFILE}
+
   # Publish HASH to trueos-ipfs-unstable file
+  scp /var/db/${HFILE} kris@web.pcbsd.org:updates/${HFILE}
+  if [ $? -ne 0 ] ; then exit_clean; fi
 
 }
 

@@ -114,6 +114,7 @@ case $TYPE in
         publish-pkg-edge) jenkins_publish_pkg "edge" ;;
     publish-pkg-unstable) jenkins_publish_pkg "unstable" ;;
         publish-pkg-ipfs) jenkins_publish_pkg_ipfs ;;
+ publish-pkg-ipfs-stable) jenkins_publish_pkg_ipfs "stable" ;;
              promote-pkg) jenkins_promote_pkg ;;
                trueos-vm) jenkins_vm ;;
                     jail) jenkins_jail ;;
