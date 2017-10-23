@@ -51,8 +51,6 @@ add_ssh_key(keyPath)
 f = open(keyPath +'.pub', 'r')
 Key = f.readlines()[0].rstrip()
 
-print(Key)
-
 cfg_content = """#!/usr/bin/env python3.6
 
 import os
@@ -65,6 +63,8 @@ interface = "%s"
 localHome = "%s"
 keyPath = "%s"
 sshKey = "%s"
+disk1 = "ada1"
+disk2 = "ada2"
 """ % (passwd, ip, interface, localHome, keyPath, Key)
 
 cfg_file = open("config.py", 'w')
@@ -73,4 +73,5 @@ cfg_file.close()
 
 call(["py.test-3.6", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
 call(["py.test-3.6", "--junitxml", "%sssh_result.xml" % results_xml, "ssh.py"])
+call(["py.test-3.6", "--junitxml", "%sstorage_result.xml" % results_xml, "storage.py"])
 
