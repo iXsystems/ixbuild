@@ -4,7 +4,8 @@
 # License: BSD
 
 import unittest
-from functions import PUT, GET_OUTPUT, is_agent_setup
+from functions import PUT, GET_OUTPUT, is_agent_setup, if_key_listed
+from config import sshKey
 
 
 class ssh_test(unittest.TestCase):
@@ -22,6 +23,13 @@ class ssh_test(unittest.TestCase):
 
     def test_4_Ensure_ssh_agent_is_setup(self):
         assert is_agent_setup() == True
+
+    def test_5_Ensure_ssh_key_is_up(self):
+        assert if_key_listed() == True
+
+    def test_6_Add_ssh_ky_to_root(self):
+        payload = {"bsdusr_sshpubkey": sshKey}
+        assert PUT("/account/users/1/", payload) == 200
 
 
 if __name__ == "__main__":

@@ -57,10 +57,26 @@ def setup_ssh_agent():
     if is_agent_setup():
         return True
     else:
-        logging.info( 'ssh-agent not present, will now set it up' )
-    return start_ssh_agent()
+        return start_ssh_agent()
 
 def create_key(keyPath):
-    run(['ssh-keygen -t rsa -f %s -q -N ""' % keyPath], shell=True)
-    return True
+    process = run('ssh-keygen -t rsa -f %s -q -N ""' % keyPath, shell=True)
+    if process.returncode != 0:
+        return False
+    else:
+        return True
+
+def if_key_listed():
+    process = run('ssh-add -L', shell=True)
+    if process.returncode != 0:
+        return False
+    else:
+        return True
+
+def add_ssh_key(keyPath):
+    process = run(['ssh-add', keyPath])
+    if process.returncode != 0:
+        return False
+    else:
+        return True
 
