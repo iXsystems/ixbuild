@@ -7,7 +7,6 @@ from subprocess import call
 from sys import argv
 from os import path, remove, getcwd
 import getopt
-from functions import setup_ssh_agent, create_key, add_ssh_key
 
 results_xml = getcwd() + '/results/'
 localHome = path.expanduser('~')
@@ -33,7 +32,6 @@ except getopt.GetoptError as e:
     print(error_msg)
     exit()
 
-
 for output, arg in myopts:
     if output in ('-i', '--ip'):
         ip = arg
@@ -41,15 +39,6 @@ for output, arg in myopts:
         passwd = arg
     elif output in ('-I', '--interface'):
         interface = arg
-
-# Setup ssh agent befor starting test.
-setup_ssh_agent()
-if path.exists(keyPath) is False:
-    create_key(keyPath)
-add_ssh_key(keyPath)
-
-f = open(keyPath +'.pub', 'r')
-Key = f.readlines()[0].rstrip()
 
 cfg_content = """#!/usr/bin/env python3.6
 
@@ -61,17 +50,30 @@ ip = "%s"
 freenas_url = 'http://' + ip + '/api/v1.0'
 interface = "%s"
 localHome = "%s"
-keyPath = "%s"
-sshKey = "%s"
 disk1 = "ada1"
 disk2 = "ada2"
-""" % (passwd, ip, interface, localHome, keyPath, Key)
+keyPath = "%s"
+""" % (passwd, ip, interface, localHome, keyPath)
 
 cfg_file = open("config.py", 'w')
 cfg_file.writelines(cfg_content)
 cfg_file.close()
 
+from functions import setup_ssh_agent, create_key, add_ssh_key
+
+# Setup ssh agent befor starting test.
+setup_ssh_agent()
+if path.exists(keyPath) is False:
+    create_key(keyPath)
+add_ssh_key(keyPath)
+
+f = open(keyPath +'.pub', 'r')
+Key = f.readlines()[0].rstrip()
+
+cfg_file = open("config.py", 'a')
+cfg_file.writelines('sshKey = "%s"\n' % Key)
+cfg_file.close()
+
 call(["py.test-3.6", "--junitxml", "%snetwork_result.xml" % results_xml, "network.py"])
 call(["py.test-3.6", "--junitxml", "%sssh_result.xml" % results_xml, "ssh.py"])
 call(["py.test-3.6", "--junitxml", "%sstorage_result.xml" % results_xml, "storage.py"])
-
