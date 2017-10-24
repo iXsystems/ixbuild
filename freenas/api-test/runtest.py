@@ -80,4 +80,5 @@ call(["py.test-3.6", "--junitxml", "%sssh_result.xml" % results_xml, "ssh.py"])
 call(["py.test-3.6", "--junitxml", "%sstorage_result.xml" % results_xml, "storage.py"])
 call(["py.test-3.6", "--junitxml", "%sntp_result.xml" % results_xml, "ntp.py"])
 call(["py.test-3.6", "--junitxml", "%sbootenv_result.xml" % results_xml, "bootenv.py"])
+call(["py.test-3.6", "--junitxml", "%scronjob_result.xml" % results_xml, "cronjob.py"])
 

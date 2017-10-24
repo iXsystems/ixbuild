@@ -15,7 +15,7 @@ class ntp_test(unittest.TestCase):
                    "ntp_address": netServer,
                    "ntp_burst": "true",
                    "ntp_iburst": "true",
-                   "ntp_maxpoll": "10"
+                   "ntp_maxpoll": "10",
                    "ntp_minpoll": "6",
                    "ntp_prefer": "true",
                    "pk": "1",
