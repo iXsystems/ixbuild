@@ -29,6 +29,13 @@ def GET_OUTPUT(testpath, inputs):
     return getit.json()[inputs]
 
 
+def GET_USER(username):
+    for uid in range(1, 1000)
+        if GET_OUTPUT("/account/users/%s/" % uid, "bsdusr_username") = username:
+            userid = uid
+            break
+    return userid
+
 def POST(testpath, payload):
     postit = requests.post(freenas_url + testpath, headers=header,
                            auth=authentification, data=json.dumps(payload))

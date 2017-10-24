@@ -7,7 +7,7 @@ import unittest
 from functions import PUT
 
 
-class debug_test(unittest.TestCase):
+class email_test(unittest.TestCase):
 
     def test_01_Configuring_email_settings(self):
         payload = {"em_fromemail": "william.spam@ixsystems.com",
