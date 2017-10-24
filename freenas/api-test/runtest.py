@@ -82,3 +82,5 @@ call(["py.test-3.6", "--junitxml", "%sntp_result.xml" % results_xml, "ntp.py"])
 call(["py.test-3.6", "--junitxml", "%sbootenv_result.xml" % results_xml, "bootenv.py"])
 call(["py.test-3.6", "--junitxml", "%scronjob_result.xml" % results_xml, "cronjob.py"])
 call(["py.test-3.6", "--junitxml", "%sdebug_result.xml" % results_xml, "debug.py"])
+call(["py.test-3.6", "--junitxml", "%semail_result.xml" % results_xml, "email.py"])
+

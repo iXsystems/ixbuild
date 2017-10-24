@@ -16,7 +16,7 @@ class cronjob_test(unittest.TestCase):
         assert POST("/tasks/cronjob/", payload) == 201
 
     def test_02_Checking_to_see_if_cronjob_was_created_and_enabled(self):
-        assert GET_OUTPUT("/tasks/cronjob/", "cron_enabled") == "true"
+        assert GET_OUTPUT("/tasks/cronjob/", "cron_enabled") == True
 
 
 if __name__ == "__main__":
