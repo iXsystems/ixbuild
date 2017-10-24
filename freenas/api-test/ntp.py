@@ -12,7 +12,7 @@ class ntp_test(unittest.TestCase):
 
     def test_01_Changing_permissions_on_share(self):
         payload = {"id": "1",
-                   "ntp_address": netServer,
+                   "ntp_address": ntpServer,
                    "ntp_burst": "true",
                    "ntp_iburst": "true",
                    "ntp_maxpoll": "10",
