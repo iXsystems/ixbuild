@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.6
 
 # Author: Eric Turgeon
 # License: BSD
@@ -31,7 +31,7 @@ def GET_OUTPUT(testpath, inputs):
 
 def GET_USER(username):
     for uid in range(1, 1000):
-        if GET_OUTPUT("/account/users/%s/" % uid, "bsdusr_username") = username:
+        if GET_OUTPUT("/account/users/%s/" % uid, "bsdusr_username") == username:
             userid = uid
             break
     return userid

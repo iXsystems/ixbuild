@@ -27,7 +27,7 @@ class user_test(unittest.TestCase):
     def test_03_Setting_user_groups_wheel_ftp(self):
         payload = ["wheel","ftp"]
         userid = GET_USER("testuser")
-        assert POST("/account/users/%s/groups/" % userid, payload) == 201
+        assert POST("/account/users/%s/groups/" % userid, payload) == 202
 
 
 if __name__ == "__main__":
