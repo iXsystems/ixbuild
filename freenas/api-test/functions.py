@@ -54,6 +54,15 @@ def DELETE(testpath):
                          auth=authentification)
     return deleteit.status_code
 
+
+def RC_TEST(command):
+    process = run(command, shell=True)
+    if process.returncode != 0:
+        return False
+    else:
+        return True
+
+
 def start_ssh_agent():
     process = run(['ssh-agent','-s'], stdout=PIPE, universal_newlines=True)
     OUTPUT_PATTERN = re.compile('SSH_AUTH_SOCK=(?P<socket>[^;]+).*SSH_AGENT_PID=(?P<pid>\d+)',

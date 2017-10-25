@@ -2,6 +2,7 @@
 
 # Author: Eric Turgeon
 # License: BSD
+# Location for tests into REST API of FreeNAS
 
 import unittest
 from functions import POST, GET_USER
