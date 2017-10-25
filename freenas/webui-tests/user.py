@@ -40,7 +40,7 @@ class create_user_test(unittest.TestCase):
         pass
 
     #Test navigation Account>Users>Hover>New User and enter username,fullname,password,confirmation and wait till user is  visibile in the list
-    def test_1_create_newuser(self):
+    def test_01_create_newuser(self):
         #Click  Account menu
         a = driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[2]/md-list-item/div/a")
         a.click()

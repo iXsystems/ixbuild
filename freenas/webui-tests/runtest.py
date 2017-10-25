@@ -19,6 +19,9 @@ if path.exists('source.pyc'):
 if path.exists('user.pyc'):
     call(["rm", "user.pyc"])
 
+if path.exists('ssh.pyc'):
+    call(["rm", "ssh.pyc"])
+
 if path.exists('group.pyc'):
     call(["rm", "group.pyc"])
 
