@@ -31,6 +31,9 @@ if path.exists('logout.pyc'):
 if path.exists('guide.pyc'):
     call(["rm", "guide.pyc"])
 
+#if path.exists('example.pyc'):
+#    call(["rm", "example.pyc"])
+
 if path.exists('__pycache__'):
     call(["rm", "-r", "__pycache__"])
 

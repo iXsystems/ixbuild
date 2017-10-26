@@ -11,6 +11,7 @@ from ssh import run_configure_ssh_test
 from logout import run_logout_test
 from os import path
 from selenium import webdriver
+#from example import run_creat_nameofthetest
 
 caps = webdriver.DesiredCapabilities().FIREFOX
 caps["marionette"] = False
@@ -29,3 +30,9 @@ run_create_user_test(driver)
 run_create_group_test(driver)
 run_configure_ssh_test(driver)
 run_logout_test(driver)
+
+
+
+
+#example test run
+#run_creat_nameofthetest(driver)

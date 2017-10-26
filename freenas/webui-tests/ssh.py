@@ -52,7 +52,15 @@ class configure_ssh_test(unittest.TestCase):
         self.assertTrue(self.is_element_present(By.XPATH,"//*[@id='md-slide-toggle-14-input']"),"ssh toggle not found")
 
         #Click on the ssh toggle button
-        driver.find_element_by_xpath("//*[@id='md-slide-toggle-14-input']").click()
+        #driver.find_element_by_xpath("//*[@id='md-slide-toggle-14-input']").click()
+
+        #attempt to conditionally execute toggle command
+        #s = driver.findElement(By.XPath("//*[@id='md-slide-toggle-14-input']").getAttribute("class")
+        #if s.Contains("mat-slide-toggle-input cdk-visually-hidden"):
+            #if the toggle(ssh service) is off
+        #    driver.find_element_by_xpath("//*[@id='md-slide-toggle-14-input']").click()
+        #else
+            #nothing
  
        #Check if the status is turned on
         #driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/services/div/service[11]/md-card/md-list/md-list-item[1]/div/p/em")
