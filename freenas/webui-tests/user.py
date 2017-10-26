@@ -17,6 +17,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 import time
 import unittest
+import xmlrunner
 import random
 try:
     import unittest2 as unittest
@@ -47,7 +48,7 @@ class create_user_test(unittest.TestCase):
         driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[2]/md-list-item/div/md-nav-list/md-list-item[1]/div/a").click()
 
         #cancelling the tour
-        if self.is_element_present(By.XPATH,"/html/body/div[4]/div[1]/button"): 
+        if self.is_element_present(By.XPATH,"/html/body/div[4]/div[1]/button"):
             driver.find_element_by_xpath("/html/body/div[4]/div[1]/button").click()
 
 
@@ -130,4 +131,4 @@ def run_create_user_test(webdriver):
     global driver
     driver = webdriver
     suite = unittest.TestLoader().loadTestsFromTestCase(create_user_test)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    xmlrunner.XMLTestRunner(output=results_xml, verbosity=2).run(suite)

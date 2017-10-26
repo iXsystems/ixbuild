@@ -17,6 +17,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 import time
 import unittest
+import xmlrunner
 import random
 try:
     import unittest2 as unittest
@@ -41,14 +42,14 @@ class create_nameofthetest(unittest.TestCase):
         driver.find_element_by_xpath("XPATH2").click()
 
         #Checking and executing if the condition is true
-        if self.is_element_present(By.XPATH,"XPATH"): 
+        if self.is_element_present(By.XPATH,"XPATH"):
             driver.find_element_by_xpath("XPATH").click()
 
         #scroll down to find an element
         driver.find_element_by_tag_name('html').send_keys(Keys.END)
         #give some sleep time
 
-        #Perform HOVER 
+        #Perform HOVER
         hover_element = driver.find_element_by_xpath("XPATH OF THE HOVER ELEMENT")
         hover = ActionChains(driver).move_to_element(hover_element)
         hover.perform()
@@ -84,4 +85,4 @@ def run_create_nameofthetest(webdriver):
     global driver
     driver = webdriver
     suite = unittest.TestLoader().loadTestsFromTestCase(create_nameofthetest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    xmlrunner.XMLTestRunner(output=results_xml, verbosity=2).run(suite)

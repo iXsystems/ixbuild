@@ -17,6 +17,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 import time
 import unittest
+import xmlrunner
 import random
 try:
     import unittest2 as unittest
@@ -54,7 +55,7 @@ class configure_ssh_test(unittest.TestCase):
         #    driver.find_element_by_xpath("//*[@id='md-slide-toggle-14-input']").click()
         #else
             #nothing
- 
+
        #Check if the status is turned on
         #driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/services/div/service[11]/md-card/md-list/md-list-item[1]/div/p/em")
 
@@ -87,4 +88,4 @@ def run_configure_ssh_test(webdriver):
     global driver
     driver = webdriver
     suite = unittest.TestLoader().loadTestsFromTestCase(configure_ssh_test)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    xmlrunner.XMLTestRunner(output=results_xml, verbosity=2).run(suite)
