@@ -2,6 +2,8 @@
 # License: BSD
 # Location for tests of FreeNAS new GUI
 
+from os import getcwd
+
 baseurl = "http://10.20.20.135/ui"
 
 username = "root"
@@ -24,7 +26,7 @@ superuserpassword = "abcd1234"
 
 supergroupname = "supergroupNAS"
 
-
+results_xml = getcwd() + '/results/'
 
 #method to test if an element is present-not used in the current script
 def is_element_present_source(self, how, what):

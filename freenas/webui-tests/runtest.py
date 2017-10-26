@@ -2,14 +2,34 @@
 
 from subprocess import call
 from os import path
+from driver import webDriver
+
+## Importing test
+
+from login import run_login_test
+# from guide import run_guide_test
+from group import run_create_group_test
+from user import run_create_user_test
+from ssh import run_configure_ssh_test
+from logout import run_logout_test
 
 
-#starting the test and genewratinf result
-call(["py.test", "--junitxml", "/temp/result.xml", "driver.py"])
-# call driver.py with python
-#call(["python", "driver.py"])
+global runDriver
+runDriver = webDriver()
 
-#cleaning up files
+
+## Starting the test and genewratinf result
+run_login_test(runDriver)
+# run_guide_test(runDriver)
+run_create_user_test(runDriver)
+run_create_group_test(runDriver)
+run_configure_ssh_test(runDriver)
+run_logout_test(runDriver)
+
+## Example test run
+# run_creat_nameofthetest(runDriver)
+
+##cleaning up files
 if path.exists('login.pyc'):
     call(["rm", "login.pyc"])
 

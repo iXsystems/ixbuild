@@ -19,6 +19,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 import time
 import unittest
+import xmlrunner
 import random
 try:
     import unittest2 as unittest
@@ -50,7 +51,7 @@ class login_test(unittest.TestCase):
         self.assertTrue(self.is_element_present(By.XPATH,"/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/app-breadcrumb/div"),"Unsuccessful Login")
 
         #cancelling the tour
-        if self.is_element_present(By.XPATH,"/html/body/div[3]/div[1]/button"): 
+        if self.is_element_present(By.XPATH,"/html/body/div[3]/div[1]/button"):
             driver.find_element_by_xpath("/html/body/div[3]/div[1]/button").click()
 
     #method to test if an element is present
@@ -72,5 +73,7 @@ class login_test(unittest.TestCase):
 def run_login_test(webdriver):
     global driver
     driver = webdriver
+
     suite = unittest.TestLoader().loadTestsFromTestCase(login_test)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
+    xmlrunner.XMLTestRunner(output=results_xml, verbosity=2).run(suite)

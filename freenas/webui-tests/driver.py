@@ -13,26 +13,13 @@ from os import path
 from selenium import webdriver
 #from example import run_creat_nameofthetest
 
-caps = webdriver.DesiredCapabilities().FIREFOX
-caps["marionette"] = False
-global driver
-driver = webdriver.Firefox(capabilities=caps)
-driver.implicitly_wait(30)
-driver.maximize_window()
-#driver.get(baseurl)
+def webDriver():
+    caps = webdriver.DesiredCapabilities().FIREFOX
 
+    caps["marionette"] = False
+    global driver
+    driver = webdriver.Firefox(capabilities=caps)
+    driver.implicitly_wait(30)
+    driver.maximize_window()
+    return driver
 
-
-#starting the test and genewratinf result
-run_login_test(driver)
-#run_guide_test(driver)
-run_create_user_test(driver)
-run_create_group_test(driver)
-run_configure_ssh_test(driver)
-run_logout_test(driver)
-
-
-
-
-#example test run
-#run_creat_nameofthetest(driver)
