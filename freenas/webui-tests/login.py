@@ -28,10 +28,6 @@ except ImportError:
 xpaths = { 'usernameTxtBox' : "//input[@id='md-input-1']",
            'passwordTxtBox' : "//input[@id='md-input-3']",
           'submitButton' : "/html/body/app/main/login/div/div/form/div[3]/div[1]/button",
-          'newUser' : "//*[@id='md-input-7']",
-         'newUserName' : "//*[@id='md-input-13']",
-         'newUserPass' : "//*[@id='md-input-17']",
-        'newUserPassConf' : "//*[@id='md-input-19']"
         }
 
 class login_test(unittest.TestCase):

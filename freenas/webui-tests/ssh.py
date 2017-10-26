@@ -24,14 +24,7 @@ except ImportError:
     import unittest
 
 
-xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
-           'passwordTxtBox' : "//input[@id='md-input-3']",
-          'submitButton' : "/html/body/app/main/login/div/div/form/div[3]/div[1]/button",
-          'newUser' : "//*[@id='md-input-7']",
-         'newUserName' : "//*[@id='md-input-13']",
-         'newUserPass' : "//*[@id='md-input-17']",
-        'newUserPassConf' : "//*[@id='md-input-19']",
-        'newGroupName' : "//*[@id='md-input-25']"
+xpaths = { 'service' : "//*[@id='scroll-area']/navigation/md-nav-list/div[9]/md-list-item/div/a",
         }
 
 class configure_ssh_test(unittest.TestCase):
@@ -44,7 +37,7 @@ class configure_ssh_test(unittest.TestCase):
     def test_01_turnon_ssh (self):
         time.sleep(5)
         #Click Service Menu
-        driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[9]/md-list-item/div/a").click()
+        driver.find_element_by_xpath(xpaths['service']).click()
         #scroll down
         driver.find_element_by_tag_name('html').send_keys(Keys.END)
         time.sleep(2)
@@ -52,7 +45,7 @@ class configure_ssh_test(unittest.TestCase):
         self.assertTrue(self.is_element_present(By.XPATH,"//*[@id='md-slide-toggle-14-input']"),"ssh toggle not found")
 
         #Click on the ssh toggle button
-        #driver.find_element_by_xpath("//*[@id='md-slide-toggle-14-input']").click()
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/services/div/service[14]/md-card/md-toolbar/div/md-toolbar-row/md-slide-toggle").click()
 
         #attempt to conditionally execute toggle command
         #s = driver.findElement(By.XPath("//*[@id='md-slide-toggle-14-input']").getAttribute("class")

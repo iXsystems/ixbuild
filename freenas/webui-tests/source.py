@@ -16,6 +16,14 @@ newuserpassword = "abcd1234"
 
 newgroupname = "groupNAS"
 
+superusername = "superNAS"
+
+superuserfname = "super NAS"
+
+superuserpassword = "abcd1234"
+
+supergroupname = "supergroupNAS"
+
 
 
 #method to test if an element is present-not used in the current script

@@ -24,14 +24,8 @@ except ImportError:
     import unittest
 
 
-xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
-           'passwordTxtBox' : "//input[@id='md-input-3']",
-          'submitButton' : "/html/body/app/main/login/div/div/form/div[3]/div[1]/button",
-          'newUser' : "//*[@id='md-input-7']",
-         'newUserName' : "//*[@id='md-input-13']",
-         'newUserPass' : "//*[@id='md-input-17']",
-        'newUserPassConf' : "//*[@id='md-input-19']",
-        'newGroupName' : "//*[@id='md-input-25']"
+xpaths = {
+         'newGroupName' : "//*[@id='1']/form-input/div/md-input-container/div/div[1]/div/input"
         }
 
 class create_group_test(unittest.TestCase):
@@ -42,8 +36,8 @@ class create_group_test(unittest.TestCase):
 
     #Test navigation Account>Users>Hover>New User and enter username,fullname,password,confirmation and wait till user is  visibile in the list
     def test_01_create_newgroup(self):
-        time.sleep(5)
-        #Click Account submenu
+        #time.sleep(5)
+        #Click Group submenu
         driver.find_element_by_xpath("//*[@id='scroll-area']/navigation/md-nav-list/div[2]/md-list-item/div/md-nav-list/md-list-item[2]/div/a").click()
         #scroll down to find hover tab
         driver.find_element_by_tag_name('html').send_keys(Keys.END)
@@ -61,7 +55,26 @@ class create_group_test(unittest.TestCase):
         #Click on save new Group button
         driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-form/entity-form/md-card/div/form/md-card-actions/button[1]").click()
         #wait to confirm new user in the list visually
-        time.sleep(10)
+        time.sleep(5)
+
+    def test_02_create_supergroup(self):
+        #Perform hover to show menu
+        hover_element = driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-trigger/button")
+        hover = ActionChains(driver).move_to_element(hover_element)
+        hover.perform()
+        time.sleep(1)
+        #Click create new user option
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-actions").click()
+        #Enter New Groupname
+        time.sleep(1)
+        driver.find_element_by_xpath(xpaths['newGroupName']).send_keys(supergroupname)
+        #Check Permit Sudo  checkbox
+        driver.find_element_by_xpath("//*[@id='2']/form-checkbox/div/md-checkbox/label/div").click()
+        #Click on save new Group button
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-group-form/entity-form/md-card/div/form/md-card-actions/button[1]").click()
+        #wait to confirm new user in the list visually
+        time.sleep(5)
+
 
 
     # Next step-- To check if the new user is present in the list via automation

@@ -24,13 +24,10 @@ except ImportError:
     import unittest
 
 
-xpaths = { 'usernameTxtBox' : "//input[@id='inputUsername']",
-           'passwordTxtBox' : "//input[@id='md-input-3']",
-          'submitButton' : "/html/body/app/main/login/div/div/form/div[3]/div[1]/button",
-          'newUser' : "//*[@id='md-input-7']",
-         'newUserName' : "//*[@id='md-input-13']",
-         'newUserPass' : "//*[@id='md-input-17']",
-        'newUserPassConf' : "//*[@id='md-input-19']"
+xpaths = { 'newUser' : "//*[@id='1']/form-input/div/md-input-container/div/div[1]/div/input",
+         'newUserName' : "//*[@id='7']/form-input/div/md-input-container/div/div[1]/div/input",
+         'newUserPass' : "//*[@id='9']/form-input/div/md-input-container/div/div[1]/div/input",
+        'newUserPassConf' : "//*[@id='10']/form-input/div/md-input-container/div/div[1]/div/input"
         }
 
 class create_user_test(unittest.TestCase):
@@ -72,12 +69,42 @@ class create_user_test(unittest.TestCase):
         driver.find_element_by_xpath(xpaths['newUserPass']).send_keys(newuserpassword)
         #Enter Password Conf
         driver.find_element_by_xpath(xpaths['newUserPassConf']).send_keys(newuserpassword)
-        #Click on creat new User button
+        #Click on create new User button
         driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-user-form/entity-form/md-card/div/form/md-card-actions/button[1]").click()
         #check if the the user list is loaded after addding a new user
         self.assertTrue(self.is_element_present(By.XPATH, "/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/app-breadcrumb/div/ul/li[2]/a"), "User list not loaded")
         #wait to confirm new user in the list visually
+        time.sleep(5)
+
+    def test_02_create_superuser(self):
+        #scroll down to find hover tab
+        driver.find_element_by_tag_name('html').send_keys(Keys.END)
+        time.sleep(2)
+        #Perform hover to show menu
+        hover_element = driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-user-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-trigger/button")
+        hover = ActionChains(driver).move_to_element(hover_element)
+        hover.perform()
+        time.sleep(1)
+        #Click create new user option
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-user-list/entity-table/div/app-entity-table-add-actions/div/smd-fab-speed-dial/div/smd-fab-actions").click()
+        #Enter New Username
+        driver.find_element_by_xpath(xpaths['newUser']).send_keys(superusername)
+        #Enter User Full name
+        driver.find_element_by_xpath(xpaths['newUserName']).send_keys(superuserfname)
+        #Enter Password
+        driver.find_element_by_xpath(xpaths['newUserPass']).send_keys(superuserpassword)
+        #Enter Password Conf
+        driver.find_element_by_xpath(xpaths['newUserPassConf']).send_keys(superuserpassword)
+        #check Permit Sudo Checkbox
+        driver.find_element_by_xpath("//*[@id='13']/form-checkbox/div/md-checkbox/label/div").click()
+        #Click on create new User button
+        driver.find_element_by_xpath("/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/div/app-user-form/entity-form/md-card/div/form/md-card-actions/button[1]").click()
+        #check if the the user list is loaded after addding a new user
+        #self.assertTrue(self.is_element_present(By.XPATH, "/html/body/app-root/app-admin-layout/md-sidenav-container/div[6]/app-breadcrumb/div/ul/li[2]/a"), "User list not loaded")
+        #wait to confirm new user in the list visually
         time.sleep(10)
+
+
 
 
     # Next step-- To check if the new user is present in the list via automation
