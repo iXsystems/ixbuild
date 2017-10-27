@@ -55,11 +55,11 @@ class storage_test(unittest.TestCase):
 
     def test_10_Creating_a_ZVOL_1sur2(self):
         payload = {"name": "testzvol1", "volsize": "10M"}
-        assert POST("/storage/volume/tank/zvols/",payload) == 202
+        assert POST("/storage/volume/tank/zvols/",payload) == 201
 
     def test_11_Creating_a_ZVOL_2sur2(self):
         payload = {"name": "testzvol2", "volsize": "10M"}
-        assert POST("/storage/volume/tank/zvols/",payload) == 202
+        assert POST("/storage/volume/tank/zvols/",payload) == 201
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
