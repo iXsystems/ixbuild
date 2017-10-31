@@ -10,7 +10,7 @@ from functions import POST, GET_USER
 
 class group_test(unittest.TestCase):
 
-    def test_01_Creating_home_dataset_tank_sur_testuser(self):
+    def test_01_Creating_group_testgroup(self):
         payload = {"bsdgrp_gid": 1200,"bsdgrp_group": "testgroup"}
         assert POST("/account/groups/", payload) == 201
 
