@@ -14,8 +14,9 @@ class debug_test(unittest.TestCase):
         assert POST("/system/debug/",payload) == 200
 
     def test_02_Verify_that_API_returns_WWW_download_path(self):
-        assert GET_OUTPUT("/system/debug/download/", "url") == "/system/debug/download/"
+        assert GET_OUTPUT("/system/debug/", "url") == "/system/debug/download/"
 
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
