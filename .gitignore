@@ -5,3 +5,4 @@ __pycache__
 *.pyc
 .cache
 config.py
+auto_config.py
