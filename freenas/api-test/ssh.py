@@ -5,7 +5,7 @@
 
 import unittest
 from functions import PUT, GET_OUTPUT, is_agent_setup, if_key_listed
-from config import sshKey
+from auto_config import sshKey
 
 
 class ssh_test(unittest.TestCase):

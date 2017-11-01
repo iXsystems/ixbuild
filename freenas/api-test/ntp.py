@@ -5,7 +5,7 @@
 
 import unittest
 from functions import PUT, DELETE
-from config import ntpServer
+from auto_config import ntpServer
 
 
 class ntp_test(unittest.TestCase):

@@ -3,7 +3,7 @@
 # Author: Eric Turgeon
 # License: BSD
 
-from config import interface
+from auto_config import interface
 from functions import POST
 import unittest
 

@@ -56,7 +56,7 @@ disk2 = "vtbd2"
 keyPath = "%s"
 """ % (passwd, ip, interface, localHome, keyPath)
 
-cfg_file = open("config.py", 'w')
+cfg_file = open("auto_config.py", 'w')
 cfg_file.writelines(cfg_content)
 cfg_file.close()
 
@@ -71,7 +71,7 @@ add_ssh_key(keyPath)
 f = open(keyPath +'.pub', 'r')
 Key = f.readlines()[0].rstrip()
 
-cfg_file = open("config.py", 'a')
+cfg_file = open("auto_config.py", 'a')
 cfg_file.writelines('sshKey = "%s"\n' % Key)
 cfg_file.close()
 

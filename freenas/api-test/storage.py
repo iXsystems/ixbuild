@@ -5,7 +5,7 @@
 
 import unittest
 from functions import PUT, GET, POST
-from config import disk1, disk2
+from auto_config import disk1, disk2
 
 
 class storage_test(unittest.TestCase):

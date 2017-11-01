@@ -6,7 +6,7 @@
 
 import unittest
 from functions import PUT, GET_OUTPUT, RC_TEST
-from config import ip
+from auto_config import ip
 
 
 class user_test(unittest.TestCase):

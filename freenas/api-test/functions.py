@@ -4,7 +4,7 @@
 # License: BSD
 
 import requests
-from config import freenas_url, password, user
+from auto_config import freenas_url, password, user
 import json
 import os
 from subprocess import run, PIPE
