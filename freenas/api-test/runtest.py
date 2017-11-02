@@ -5,11 +5,12 @@
 
 from subprocess import call
 from sys import argv
-from os import path, remove, getcwd
+from os import path, remove, getcwd, makedirs
 import getopt
 
 results_xml = getcwd() + '/results/'
 localHome = path.expanduser('~')
+dotsshPath = localHome + '/.ssh'
 keyPath = localHome + '/.ssh/test_id_rsa'
 
 error_msg = """Usage for %s:
@@ -64,6 +65,8 @@ from functions import setup_ssh_agent, create_key, add_ssh_key
 
 # Setup ssh agent befor starting test.
 setup_ssh_agent()
+if path.isdir(dotsshPath) is False:
+    makedirs(dotsshPath)
 if path.exists(keyPath) is False:
     create_key(keyPath)
 add_ssh_key(keyPath)
