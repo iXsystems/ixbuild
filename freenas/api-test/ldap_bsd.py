@@ -8,7 +8,7 @@ import unittest
 from functions import PUT, POST, GET_OUTPUT
 
 
-class iscsi_test(unittest.TestCase):
+class ldap_bsd_test(unittest.TestCase):
 
     def Clean_up_any_leftover_items(self):
         payload = { "ad_bindpw": ADPASSWORD,
