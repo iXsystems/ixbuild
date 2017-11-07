@@ -126,7 +126,7 @@ touch ${LOUT}
 get_bedir
 
 # Allow these defaults to be overridden
-TMPFSWORK="all"
+TMPFSWORK="yes"
 BCONF="/usr/local/etc/poudriere-builders.conf"
 if [ -e "$BCONF" ] ; then
   grep -q "^FNBUILDERS=" ${BCONF}
@@ -136,9 +136,9 @@ if [ -e "$BCONF" ] ; then
     export POUDRIERE_JOBS
   else
     CPUS=$(sysctl -n kern.smp.cpus)
-    if [ $CPUS -gt 10 ] ; then
-      echo "Setting POUDRIERE_JOBS=10"
-      export POUDRIERE_JOBS="10"
+    if [ $CPUS -gt 16 ] ; then
+      echo "Setting POUDRIERE_JOBS=16"
+      export POUDRIERE_JOBS="16"
     fi
   fi
   grep -q "^TMPFSWORK=" ${BCONF}
@@ -148,9 +148,9 @@ if [ -e "$BCONF" ] ; then
 else
   # Some tuning for our big build boxes
   CPUS=$(sysctl -n kern.smp.cpus)
-  if [ $CPUS -gt 10 ] ; then
-    echo "Setting POUDRIERE_JOBS=10"
-    export POUDRIERE_JOBS="10"
+  if [ $CPUS -gt 16 ] ; then
+    echo "Setting POUDRIERE_JOBS=16"
+    export POUDRIERE_JOBS="16"
   fi
 fi
 
