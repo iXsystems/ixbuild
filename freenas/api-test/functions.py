@@ -36,6 +36,7 @@ def GET_USER(username):
             break
     return userid
 
+
 def POST(testpath, payload):
     postit = requests.post(freenas_url + testpath, headers=header,
                            auth=authentification, data=json.dumps(payload))
@@ -44,8 +45,7 @@ def POST(testpath, payload):
 
 def PUT(testpath, payload):
     putit = requests.put(freenas_url + testpath, headers=header,
-                         auth=authentification,
-                         data=json.dumps(payload))
+                         auth=authentification, data=json.dumps(payload))
     return putit.status_code
 
 
@@ -53,6 +53,12 @@ def DELETE(testpath):
     deleteit = requests.delete(freenas_url + testpath, headers=header,
                          auth=authentification)
     return deleteit.status_code
+
+
+def DELETE_ALL(testpath, payload):
+    deleteitall = requests.delete(freenas_url + testpath, headers=header,
+                         auth=authentification, data=json.dumps(payload))
+    return deleteitall.status_code
 
 
 def RC_TEST(command):
