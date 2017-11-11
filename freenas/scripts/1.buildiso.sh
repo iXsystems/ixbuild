@@ -185,11 +185,12 @@ fi
 
 if [ "$BUILDINCREMENTAL" = "true" ] ; then
   echo "Doing incremental build!"
-  cd ${FNASBDIR}
-
-  # Nuke old ISO's / builds
-  echo "Removing old build ISOs"
-  rm -rf ${BEDIR}/release 2>/dev/null
+  if [ -d "${FNASBDIR}" ] ; then
+    cd ${FNASBDIR}
+    # Nuke old ISO's / builds
+    echo "Removing old build ISOs"
+    rm -rf ${BEDIR}/release 2>/dev/null
+  fi
 fi
 
 # Figure out the flavor for this test
@@ -230,10 +231,12 @@ if [ -n "$PRBUILDER" ] ; then
     ${BUILDSENV} make clean ${PROFILEARGS}
   else
     if [ "$PRBUILDER" != "build" ] ; then
-      cd ${FNASBDIR}
-      eval $PROFILEARGS
-      echo "*** Incremental PR Build - Removing ${PROFILE}/_BE/${PRBUILDER}"
-      rm -rf ${PROFILE}/_BE/${PRBUILDER}
+      if [ -d "${FNASBDIR}" ] ; then
+        cd ${FNASBDIR}
+        eval $PROFILEARGS
+        echo "*** Incremental PR Build - Removing ${PROFILE}/_BE/${PRBUILDER}"
+        rm -rf ${PROFILE}/_BE/${PRBUILDER}
+      fi
     fi
   fi
 fi
