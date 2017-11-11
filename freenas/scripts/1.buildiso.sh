@@ -216,9 +216,16 @@ if [ -n "$PRBUILDER" ] ; then
     # Nuke the build dir if doing Pull Request Build
     echo "*** Doing a clean build of PR ***"
     cd ${PROGDIR}
+    mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
     rm -rf ${FNASBDIR} 2>/dev/null
+    mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
     chflags -R noschg ${FNASBDIR} 2>/dev/null
+    mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
     rm -rf ${FNASBDIR} 2>/dev/null
+    if [ -d "${FNASBDIR}" ] ; then
+       echo "ERROR: Failed to cleanup ${FNASBDIR}"
+       exit 1
+    fi
     cd ${FNASSRC}
     ${BUILDSENV} make clean ${PROFILEARGS}
   else
@@ -248,9 +255,18 @@ else
        # Branch mismatch, re-clone
        echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
        cd ${PROGDIR}
+
+       # Try to unmount anyleftovers before we nuke
+       mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
        rm -rf ${FNASBDIR} 2>/dev/null
+       mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
        chflags -R noschg ${FNASBDIR} 2>/dev/null
+       mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
        rm -rf ${FNASBDIR} 2>/dev/null
+       if [ -d "${FNASBDIR}" ] ; then
+	  echo "ERROR: Failed to cleanup ${FNASBDIR}"
+	  exit 1
+       fi
     fi
   fi
 
