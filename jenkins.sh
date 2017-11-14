@@ -11,7 +11,15 @@ if [ -d "/mnt/tank/ixbuild/" ] ; then
 fi
 
 if [ -z "$JENKINS_DO_UPDATE" ] ; then
+
+  # Git pull may fail if this isn't set
+  if [ -z "$(git config --global user.email)" ] ; then
+    git config --global user.email "jenkins@example.com"
+    git config --global user.name "Jenkins Node"
+  fi
+
   # Before we begin any build, make sure we are updated from git
+  git reset --hard
   git pull
   export JENKINS_DO_UPDATE="YES"
   ./jenkins.sh "$1" "$2" "$3"
