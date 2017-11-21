@@ -474,17 +474,32 @@ if [ -n "$ghprbTargetBranch" ] ; then
   if [ ! -d "${PROFILE}/_BE/release" ] ; then
     echo "ERROR: Could not locate release dir: ${PROFILE}/_BE/release"
   fi
-  echo "Saving build artifacts"
+  echo "*** Saving build artifacts ***"
   cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
 
   # Locate the ISO file
   ISOFILE=`find "${WORKSPACE}/artifacts" | grep \.iso$ | head -n 1`
   ISODIR="`dirname $ISOFILE`"
   if [ -d "$ISODIR" ] ; then
-    echo "Moving ISO files ($ISODIR) to artifacts/iso"
+    echo "*** Moving ISO files ($ISODIR) to artifacts/iso ***"
     rm -rf "${WORKSPACE}/artifacts/iso"
     mv "${ISODIR}" "${WORKSPACE}/artifacts/iso"
   fi
+
+  # Copy the sources into the artifact repo as well
+  echo "*** Copying sources to artifacts/ ***"
+  rm -rf "${WORKSPACE}/artifacts/src"
+  mkdir -p "${WORKSPACE}/artifacts/src"
+
+  cd ${FNASBDIR}
+  eval $PROFILEARGS
+  for srcdir in freenas webui os samba
+  do
+    echo "*** Copying $srcdir to artifacts/src/$srcdir ***"
+    mkdir -p "$WORKSPACE/src/$srcdir"
+    tar cf - -C "${PROFILE}/_BE/${PRBUILDER}" . | tar xf - -C "${WORKSPACE}/artifacts/src/$srcdir"
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  done
 fi
 
 rm ${OUTFILE}
