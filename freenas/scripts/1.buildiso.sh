@@ -50,7 +50,7 @@ parse_build_error()
 clean_src_repos()
 {
   # Clean out source repos which tend to get cranky on force-push
-  cRepos="webui freenas samba ports iocage os"
+  cRepos="webui freenas samba ports iocage os py-licenselib py-bsd py-libzfs freenas-pkgtools freenas-docs"
   for r in $cRepos
   do
     if [ -d "${PROFILE}/_BE/${r}" ] ; then
