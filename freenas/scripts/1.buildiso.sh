@@ -491,13 +491,12 @@ if [ -n "$ghprbTargetBranch" ] ; then
   rm -rf "${WORKSPACE}/artifacts/src"
   mkdir -p "${WORKSPACE}/artifacts/src"
 
-  cd ${FNASBDIR}
   eval $PROFILEARGS
   for srcdir in freenas webui os samba
   do
     echo "*** Copying $srcdir to artifacts/src/$srcdir ***"
-    mkdir -p "$WORKSPACE/src/$srcdir"
-    tar cf - -C "${PROFILE}/_BE/${PRBUILDER}" . | tar xf - -C "${WORKSPACE}/artifacts/src/$srcdir"
+    mkdir -p "${WORKSPACE}/artifacts/src/${srcdir}"
+    tar cf - -C "${FNASBDIR}/${PROFILE}/_BE/${srcdir}" . | tar xf - -C "${WORKSPACE}/artifacts/src/$srcdir"
     if [ $? -ne 0 ] ; then exit_clean; fi
   done
 fi
