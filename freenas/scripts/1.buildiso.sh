@@ -499,6 +499,10 @@ if [ -n "$ghprbTargetBranch" ] ; then
     tar cf - -C "${FNASBDIR}/${PROFILE}/_BE/${srcdir}" . | tar xf - -C "${WORKSPACE}/artifacts/src/$srcdir"
     if [ $? -ne 0 ] ; then exit_clean; fi
   done
+
+  echo "*** Flushing artifacts to disk ***"
+  sync
+  sleep 10
 fi
 
 rm ${OUTFILE}
