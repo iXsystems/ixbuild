@@ -501,6 +501,7 @@ if [ -n "$ghprbTargetBranch" ] ; then
   done
 
   echo "*** Flushing artifacts to disk ***"
+  chown -R jenkins:jenkins "${WORKSPACE}"
   sync
   sleep 10
 fi
