@@ -1088,7 +1088,7 @@ jenkins_freenas()
   #jenkins_push_fn_statedir
 
   # Now lets sync the ISOs (If not a PR build)
-  if [ -n "$SFTPHOST" -a -z "$ghprbTargetBranch" ] ; then
+  if [ -n "$SFTPHOST" ] ; then
     if [ "$FREENASLEGACY" = "YES" ] ; then
       cd ${FNASBDIR}/objs
       if [ $? -ne 0 ] ; then exit_clean ; fi
