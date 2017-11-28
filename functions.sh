@@ -445,10 +445,10 @@ jenkins_publish_pkg_ipfs()
   # Which hash file we are updating
   if [ -n "$1" -a "$1" = "stable" ] ; then
     HFILE="trueos-ipfs-stable"
-    KEEPHASH="3"
+    KEEPHASH="2"
   else
     HFILE="trueos-ipfs-unstable"
-    KEEPHASH="5"
+    KEEPHASH="3"
   fi
 
   # Set location of go-ipfs binaries on our node
@@ -456,7 +456,7 @@ jenkins_publish_pkg_ipfs()
 
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
-  PKGHASH=$(go-ipfs add -r -Q --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/)
+  PKGHASH=$(ipfs-go add -r -Q --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/)
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   echo "Finished Adding: $PKGHASH"
