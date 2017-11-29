@@ -60,6 +60,20 @@ clean_src_repos()
   done
 }
 
+check_pr_profile()
+{
+  if [ -z "$ghprbPullLongDescription" ] ; then return 0; fi
+
+  # Are there PROFILE knobs listed
+  echo "$ghprbPullLongDescription" | grep -q "PROFILE:"
+  if [ $? -ne 0 ] ; then return 0; fi
+
+  local _profile=`echo $ghprbPullLongDescription | sed -n -e 's/^.*PROFILE: //p' | cut -d '\' -f 1`
+  echo "*** Found PR PROFILE: $_profile ***"
+
+  BUILDOPTS="PROFILE=${_profile}"
+}
+
 # Parse the Pull Description and bring in any other things marked as depends
 check_pr_depends()
 {
@@ -157,6 +171,9 @@ else
     export BUILDWORLD_JOBS="10"
   fi
 fi
+
+# Check if we are building with an alt profile
+check_pr_profile
 
 # Cleanup any hanging mounts left over from prior crashed builds
 mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
