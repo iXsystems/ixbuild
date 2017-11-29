@@ -49,6 +49,7 @@ parse_build_error()
 
 clean_src_repos()
 {
+
   # Clean out source repos which tend to get cranky on force-push
   cRepos="webui freenas samba ports iocage os py-licenselib py-bsd py-libzfs freenas-pkgtools freenas-docs truenas"
   for r in $cRepos
@@ -215,6 +216,9 @@ fi
 if [ -n "$BUILDSENV" ] ; then
   BUILDSENV="env $BUILDSENV"
 fi
+
+# Cleanup any hanging mounts left over from prior crashed builds
+mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
 
 if [ -n "$PRBUILDER" ] ; then
   echo "$ghprbCommentBody" | grep -q "CLEAN"
