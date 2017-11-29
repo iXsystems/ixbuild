@@ -529,12 +529,15 @@ if [ -n "$ghprbTargetBranch" ] ; then
     tar cf - -C "${FNASBDIR}/${PROFILE}/_BE/${srcdir}" . | tar xf - -C "${WORKSPACE}/artifacts/src/$srcdir"
     if [ $? -ne 0 ] ; then exit_clean; fi
   done
-
-  echo "*** Flushing artifacts to disk ***"
-  chown -R jenkins:jenkins "${WORKSPACE}"
-  sync
-  sleep 10
 fi
+
+echo "*** Flushing artifacts to disk ***"
+chown -R jenkins:jenkins "${WORKSPACE}"
+if [ -d "${WORKSPACE}/artifacts/logs" ] ; then
+  chmod -R 755 "${WORKSPACE}/artifacts/logs"
+fi
+sync
+sleep 10
 
 rm ${OUTFILE}
 exit 0
