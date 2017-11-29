@@ -158,6 +158,9 @@ else
   fi
 fi
 
+# Cleanup any hanging mounts left over from prior crashed builds
+mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
+
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
   echo "Doing fresh build!"
@@ -216,9 +219,6 @@ fi
 if [ -n "$BUILDSENV" ] ; then
   BUILDSENV="env $BUILDSENV"
 fi
-
-# Cleanup any hanging mounts left over from prior crashed builds
-mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
 
 if [ -n "$PRBUILDER" ] ; then
   echo "$ghprbCommentBody" | grep -q "CLEAN"
