@@ -176,7 +176,11 @@ fi
 check_pr_profile
 
 # Cleanup any hanging mounts left over from prior crashed builds
-mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
+_hMounts=$(mount | grep "on ${FNASBDIR}/")
+if [ -n "$_hMounts" ] ; then
+  echo "Cleaning hanging mounts: $_hMounts"
+  mount | grep "on ${FNASBDIR}/" | awk '{print $1}' | xargs umount -f
+fi
 
 # Rotate an old build
 if [ -d "${FNASBDIR}" -a "${BUILDINCREMENTAL}" != "true" ] ; then
