@@ -10,16 +10,11 @@ export REQUIRES
 
 cronjob_tests()
 {
-  set_test_group_text "1 - Delete - Cron tests" "3"
+  set_test_group_text "1 - Delete - Cron tests" "2"
   CLASSNAME=ixbuild.resty.functional.delete.cronjob
 
   local TESTFILE="/tmp/.testFileUpdatedViaCronjob"
   local CRONJOB_ID=1
-
-  # Ensure test file does not exist
-  echo_test_title "Verify cronjob has been removed and is no longer creating test file.."
-  ssh_test 'test -f '${TESTFILE}'; test $? -eq 1'
-  check_exit_status || return 1
 
   # Delete cronjob from API
   echo_test_title "Deleting cron job which will run every minute"
