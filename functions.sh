@@ -1047,6 +1047,22 @@ jenkins_trueos_push_lumina_docs()
 # Set the FreeNAS _BE directory location
 get_bedir()
 {
+  # Some overrides for github PRs
+  if [ -n "$ghprbPullLongDescription" ] ; then
+    GITFNASBRANCH="$ghprbTargetBranch"
+    if [ "$GITFNASBRANCH" = "freenas/master" -a "$PRBUILDER" = "os" ] ; then
+      # When building PRs for the "os" repo on freenas/master branch, use right PROFILE
+      BUILDOPTS="PROFILE=fn_head"
+    fi
+
+    # Are there PROFILE knobs listed
+    echo "$ghprbPullLongDescription" | grep -q "PROFILE:"
+    if [ $? -eq 0 ] ; then
+      local _profile=`echo $ghprbPullLongDescription | sed -n -e 's/^.*PROFILE: //p' | cut -d '\' -f 1`
+      BUILDOPTS="PROFILE=${_profile}"
+    fi
+  fi
+
   if [ -n "$BUILDOPTS" ] ; then
     eval $BUILDOPTS
   fi
