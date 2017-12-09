@@ -193,6 +193,11 @@ fi
 # If this is a github pull request builder, check if branch needs to be overridden
 if [ -n "$ghprbTargetBranch" ] ; then
   GITFNASBRANCH="$ghprbTargetBranch"
+  if [ "$GITFNASBRANCH" = "freenas/master" -a "$PRBUILDER" = "os" ] ; then
+    # When building PRs for the "os" repo on freenas/master branch, use right PROFILE
+    echo "*** Building with PROFILE=fn_head ***"
+    BUILDOPTS="PROFILE=fn_head"
+  fi
   if [ "$GITFNASBRANCH" = "freenas/master" ] ; then
     # Because freenas/master in some branches aligns to master branch of build
     GITFNASBRANCH="master"
@@ -200,11 +205,6 @@ if [ -n "$ghprbTargetBranch" ] ; then
   if [ "$GITFNASBRANCH" = "freenas/11-stable" -a "$PRBUILDER" = "os" ] ; then
     # Because freenas/master in some branches aligns to master branch of build
     GITFNASBRANCH="master"
-  fi
-  if [ "$GITFNASBRANCH" = "freenas/master" -a "$PRBUILDER" = "os" ] ; then
-    # When building PRs for the "os" repo on freenas/master branch, use right PROFILE
-    echo "*** Building with PROFILE=fn_head ***"
-    BUILDOPTS="PROFILE=fn_head"
   fi
   echo "$GITFNASBRANCH" | grep -q "^truenas/"
   if [ $? -eq 0 ] ; then
