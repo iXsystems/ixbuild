@@ -197,6 +197,7 @@ if [ -n "$ghprbTargetBranch" ] ; then
     # When building PRs for the "os" repo on freenas/master branch, use right PROFILE
     echo "*** Building with PROFILE=fn_head ***"
     BUILDOPTS="PROFILE=fn_head"
+    PROFILEARGS="PROFILE=fn_head"
   fi
   if [ "$GITFNASBRANCH" = "freenas/master" ] ; then
     # Because freenas/master in some branches aligns to master branch of build
