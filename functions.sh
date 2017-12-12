@@ -538,7 +538,7 @@ i=$1
     fi
     _sha256=`cat ${i}.sha256`
     
-    _PUSH_JSON_FILE="${_PUSH_JSON_FILE} { \"name\":\"TrueOS ${_name} (${_type} image)\",  \"date\":\"${_date}\", \"version\":\"${_dateversion}\", \"sha256\":\"${_sha256}\", \"type\":\"${_imgtype}/${_name}\", \"filetype\":\"${_filetype}\", \"url\":\"${i}\""
+    _PUSH_JSON_FILE="${_PUSH_JSON_FILE} { \"name\":\"TrueOS ${_name} (${_type} image)\",  \"date\":\"${_date}\", \"version\":\"${_dateversion}\", \"sha256\":\"${_sha256}\", \"type\":\"${_imgtype}\", \"platform\":\"${_name}\", \"filetype\":\"${_filetype}\", \"url\":\"${i}\""
     for j in "md5 sha256 sig torrent" ; do
       if [ -e "${i}.${j}" ] ; then
         _PUSH_JSON_FILE="${_PUSH_JSON_FILE}, \"${j}_url\":\"${i}.${j}\""
