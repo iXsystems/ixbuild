@@ -481,6 +481,9 @@ touch $OUTFILE
 (sleep 5 ; tail -f $OUTFILE 2>/dev/null) &
 TPID=$!
 
+# FreeBSD head removed lint, disable it
+export LINT=""
+
 echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "*** ${BUILDSENV} make release ${PROFILEARGS} ***"
 ${BUILDSENV} make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
