@@ -38,12 +38,20 @@ fi
 
 # Base file name
 if [ "$SYSBUILD" = "server" ] ; then
-  bFile="TrueOS-Server-${fDate}-${FARCH}"
+  if [ "$DEFAULTPKGBRANCH" = "UNSTABLE" ] ; then
+    bFile="TrueOS-Server-${fDate}-${FARCH}"
+  else
+    bFile="TrueOS-Server-${ISOVER}-${FARCH}"
+  fi
   bTitle="TrueOS"
   brand="trueos"
   touch ${PDESTDIR9}/trueos-server
 else
-  bFile="TrueOS-Desktop-${fDate}-${FARCH}"
+  if [ "$DEFAULTPKGBRANCH" = "UNSTABLE" ] ; then
+    bFile="TrueOS-Desktop-${fDate}-${FARCH}"
+  else
+    bFile="TrueOS-Desktop-${ISOVER}-${FARCH}"
+  fi
   bTitle="TrueOS"
   brand="trueos"
   touch ${PDESTDIR9}/trueos-desktop
