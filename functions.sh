@@ -517,6 +517,44 @@ jenkins_promote_pkg()
   echo "Don't forget to sym-link master -> ${target}"
 }
 
+generateJsonObjectForImage()
+{
+i=$1
+
+# Now add the information about this file to the JSON manifest
+    if [ -n "${_PUSH_JSON_FILE}" ] ; then
+      _PUSH_JSON_FILE="${_PUSH_JSON_FILE}, " #add the comma separation between elements
+    fi
+    _name=`echo ${i} | cut -d - -f 2` #Desktop or Server
+    _filetype=`echo ${i} | rev | cut -d . -f 1 | rev` #iso or img
+    _imgtype=`echo ${i} | cut -d - -f 6` #UNSTABLE or <junk>
+    _type=`echo ${i} | rev | cut -d . -f 2 | cut -d - -f 1 | rev` #DVD or USB
+    _date=`date "+%Y-%m-%d"`
+    if [ ! "UNSTABLE" == "${_imgtype}" ] ; then
+      _imgtype="STABLE"
+      _dateversion=`echo ${i} | cut -d - -f 3` #YY.MM
+    else
+      _dateversion=`echo ${i} | cut -d - -f 3-5` #YYYY-MM-DD
+    fi
+    _sha256=`cat ${i}.sha256`
+    
+    _PUSH_JSON_FILE="${_PUSH_JSON_FILE} { \"name\":\"TrueOS ${_name} (${_type} image)\",  \"date\":\"${_date}\", \"version\":\"${_dateversion}\", \"sha256\":\"${_sha256}\", \"type\":\"${_imgtype}/${_name}\", \"filetype\":\"${_filetype}\", \"url\":\"${i}\""
+    for j in "md5 sha256 sig torrent" ; do
+      if [ -e "${i}.${j}" ] ; then
+        _PUSH_JSON_FILE="${_PUSH_JSON_FILE}, \"${j}_url\":\"${i}.${j}\""
+      fi
+    done
+    _PUSH_JSON_FILE="${_PUSH_JSON_FILE} }" #close off the json object
+  #clean up the internal variables
+  unset _name
+  unset _filetype
+  unset _imgtype
+  unset _type
+  unset _dateversion
+  unset _date
+  unset _sha256
+}
+
 jenkins_publish_iso()
 {
   if [ ! -d "${SFTPFINALDIR}/iso/${TARGETREL}" ] ; then
@@ -538,13 +576,18 @@ jenkins_publish_iso()
   # We sign the ISO's with gpg
   cd ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
+  unset _PUSH_JSON_FILE #Make sure this internal variable is cleared first
   for i in `ls *.iso *.img *.xz`
   do
     echo "Signing: $i"
     rm ${i}.sig >/dev/null 2>/dev/null
     gpg -u releng@trueos.org --output ${i}.sig --detach-sig ${i}
+    # Now add the information about this file to the JSON manifest
+    generateJsonObjectForImage ${i}
   done
-
+  # Generate the files.json file with all information about the files that are available
+  echo "[ ${_PUSH_JSON_FILE} ]" > files.json #make sure to encapulate the list of JSON objects within an array
+  unset _PUSH_JSON_FILE #clear it out (done with it)
   # Copy the ISOs
   rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPFINALDIR}/iso/${TARGETREL}/${ARCH}/ ${scale}:${target}/${RTARGET}/${ARCH}/
   if [ $? -ne 0 ] ; then exit_clean; fi
