@@ -586,6 +586,7 @@ jenkins_publish_iso()
     # Now add the information about this file to the JSON manifest
     _latest=`echo ${i} | cut -d - -f 1`
     if [ ! "${_latest}" == "latest" ] ; then  #Skip the "latest-[desktop/server]" symlinks
+      echo "Adding Image to JSON Manifest: ${i}"
       generateJsonObjectForImage ${i}
     fi
   done
