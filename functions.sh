@@ -539,7 +539,8 @@ i=$1
     _sha256=`cat ${i}.sha256`
     
     _PUSH_JSON_FILE="${_PUSH_JSON_FILE} { \"name\":\"TrueOS ${_name} (${_type} image)\",  \"date\":\"${_date}\", \"version\":\"${_dateversion}\", \"sha256\":\"${_sha256}\", \"type\":\"${_imgtype}\", \"platform\":\"${_name}\", \"filetype\":\"${_filetype}\", \"url\":\"${i}\""
-    for j in "md5 sha256 sig torrent" ; do
+    for j in "md5" "sha256" "sig" "torrent"
+    do
       if [ -e "${i}.${j}" ] ; then
         _PUSH_JSON_FILE="${_PUSH_JSON_FILE}, \"${j}_url\":\"${i}.${j}\""
       fi
@@ -583,7 +584,10 @@ jenkins_publish_iso()
     rm ${i}.sig >/dev/null 2>/dev/null
     gpg -u releng@trueos.org --output ${i}.sig --detach-sig ${i}
     # Now add the information about this file to the JSON manifest
-    generateJsonObjectForImage ${i}
+    _latest=`echo ${i} | cut -d - -f 1`
+    if [ ! "${_latest}" == "latest" ] ; then  #Skip the "latest-[desktop/server]" symlinks
+      generateJsonObjectForImage ${i}
+    fi
   done
   # Generate the files.json file with all information about the files that are available
   echo "[ ${_PUSH_JSON_FILE} ]" > files.json #make sure to encapulate the list of JSON objects within an array
