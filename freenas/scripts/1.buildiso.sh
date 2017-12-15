@@ -497,6 +497,7 @@ if [ $? -ne 0 ] ; then
   exit 1
 fi
 kill -9 $TPID 2>/dev/null
+export ARTIFACTONSUCCESS=TRUE
 echo_ok
 clean_artifacts
 save_artifacts_on_success
@@ -508,6 +509,9 @@ if [ ! -d "${PROFILE}/_BE/release" ] ; then
   echo "ERROR: Could not locate release dir: ${PROFILE}/_BE/release"
 fi
 echo "*** Saving build artifacts ***"
+if [ ! -d "${WORKSPACE}/artifacts" ] ; then
+  mkdir -p "${WORKSPACE}/artifacts/"
+fi
 cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
 
 
