@@ -530,7 +530,7 @@ rm -rf "${WORKSPACE}/artifacts/src"
 mkdir -p "${WORKSPACE}/artifacts/src"
 
 eval $PROFILEARGS
-for srcdir in freenas webui os samba
+for srcdir in freenas webui
 do
   echo "*** Copying $srcdir to artifacts/src/$srcdir ***"
   mkdir -p "${WORKSPACE}/artifacts/src/${srcdir}"
