@@ -407,12 +407,48 @@ jenkins_iso()
 
   exit 0
 }
+generatePackageManifestFile()
+{
+  #inputs: 1: Directory of package files (*.txz), 2: text file for manifest
+  #Note: This will **append** the manifest info to the file!!
+  _pkgdir=$1
+  _pkgfile=$2
+  for _line in `ls ${_pkgdir}/*.txz | sort`
+  do
+    #Cleanup the individual line (directory, suffix)
+    _line=$(echo ${_line} | rev | cut -d "/" -f 1| rev | sed "s|.txz||g")
+    #Grab the version tag
+    _version=$(echo ${_line} | rev | cut -d '-' -f 1-2 | rev)
+    #check that the version string starts with a number, otherwise only use the last "-" section
+    _tmp=$(echo ${_version} | egrep '^[0-9]+')
+    if [ -z "${_tmp}" ] ; then
+      _version=$(echo ${_line} | rev | cut -d '-' -f 1 | rev)
+    fi
+    _name=$(echo ${_line} | sed "s|-${_version}||g")
+    echo "${_name} : ${_version}" >> ${_pkgfile}
+    #echo "Name: ${_name}  : Version: ${_version}"
+    #echo "  -raw line: ${line}"
+  done
+  #cleanup the temporary variables
+  unset _pkgdir
+  unset _pkgfile
+  unset _line
+  unset _name
+  unset _version
+  unset _tmp
+}
 
 jenkins_publish_pkg()
 {
   if [ ! -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
     echo "Missing packages to push!"
     exit 1
+  fi
+
+  if [ ! -e "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist" ] ; then
+    #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
+    echo "Generating package manifest..."
+    generatePackageManifestFile "${SFTPFINALDIR}/pkg/${TARGETREL}" "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist"
   fi
 
   # Set target locations
@@ -440,6 +476,12 @@ jenkins_publish_pkg_ipfs()
   if [ ! -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
     echo "Missing packages to push!"
     exit 1
+  fi
+
+  if [ ! -e "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist" ] ; then
+    #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
+    echo "Generating package manifest..."
+    generatePackageManifestFile "${SFTPFINALDIR}/pkg/${TARGETREL}" "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist"
   fi
 
   # Which hash file we are updating
