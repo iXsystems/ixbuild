@@ -417,6 +417,12 @@ generatePackageManifestFile()
   do
     #Cleanup the individual line (directory, suffix)
     _line=$(echo ${_line} | rev | cut -d "/" -f 1| rev | sed "s|.txz||g")
+    #Make sure it is a valid package name - otherwise skip it
+    case "${_line}" in
+	fbsd-distrib) continue ;;
+	*-*) ;;
+	*) continue ;;
+    esac
     #Grab the version tag
     _version=$(echo ${_line} | rev | cut -d '-' -f 1-2 | rev)
     #check that the version string starts with a number, otherwise only use the last "-" section
@@ -445,10 +451,15 @@ jenkins_publish_pkg()
     exit 1
   fi
 
-  if [ ! -e "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist" ] ; then
+  if [ ! -e "${SFTPFINALDIR}/pkg/${TARGETREL}/pkg_manifest.pkglist" ] ; then
     #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
     echo "Generating package manifest..."
-    generatePackageManifestFile "${SFTPFINALDIR}/pkg/${TARGETREL}" "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist"
+    _all_pkgs_dir="amd64/All"  #Relative to the release dir
+    _base_pkgs_dir="amd64-base"
+    generatePackageManifestFile "${SFTPFINALDIR}/pkg/${TARGETREL}/${_all_pkgs_dir}" "${SFTPFINALDIR}/pkg/${TARGETREL}/pkg_manifest.pkglist"
+    generatePackageManifestFile "${SFTPFINALDIR}/pkg/${TARGETREL}/${_base_pkgs_dir}" "${SFTPFINALDIR}/pkg/${TARGETREL}/FreeBSD_manifest.pkglist"
+    unset _all_pkgs_dir
+    unset _base_pkgs_dir
   fi
 
   # Set target locations
