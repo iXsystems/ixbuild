@@ -85,12 +85,21 @@ check_pr_depends()
   echo "$ghprbPullLongDescription" | grep -q "DEPENDS:"
   if [ $? -ne 0 ] ; then return 0; fi
 
-  local _deps=`echo $ghprbPullLongDescription | sed -n -e 's/^.*DEPENDS: //p' | cut -d '\' -f 1`
-  echo "*** Found PR DEPENDS: $_deps ***"
+  echo -e "$ghprbPullLongDescription" > /tmp/.depsParse.$$
+  while read line
+  do
+    echo $line | grep -q "DEPENDS:"
+    if [ $? -ne 0 ] ; then continue; fi
+    _depsLine=`echo $line | sed -n -e 's/^.*DEPENDS: //p' | cut -d '\' -f 1`
+    echo "*** Found PR DEPENDS Line: $_depsLine ***"
+    _deps="$_deps $_depsLine"
+  done < /tmp/.depsParse.$$
+  rm /tmp/.depsParse.$$
+
 
   for prtgt in $_deps
   do
-
+     echo "*** Found PR DEPENDS: $_prtgt ***"
      # Pull the target PR/Repo
      tgt=`echo $prtgt | sed 's|http://||g'`
      tgt=`echo $tgt | sed 's|https://||g'`

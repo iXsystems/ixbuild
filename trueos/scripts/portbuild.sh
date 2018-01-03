@@ -191,6 +191,9 @@ EOF
     echo "SIGNING_COMMAND=${PKGSIGNCMD}" >> /usr/local/etc/poudriere.conf
   fi
 
+  # Workaround an issue using ldconfig inside a jail with OpenRC
+  sed -i '' 's|injail service ldconfig start|injail /etc/rc.d/ldconfig start|g' /usr/local/share/poudriere/common.sh
+
 }
 
 do_portsnap()
