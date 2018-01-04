@@ -413,7 +413,7 @@ generatePackageManifestFile()
   #Note: This will **append** the manifest info to the file!!
   _pkgdir=$1
   _pkgfile=$2
-  for _line in `ls ${_pkgdir}/*.txz | sort`
+  for _line in `find "${_pkgdir}" -depth 1 -name "*.txz" | sort`
   do
     #Cleanup the individual line (directory, suffix)
     _line=$(echo ${_line} | rev | cut -d "/" -f 1| rev | sed "s|.txz||g")
