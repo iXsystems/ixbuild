@@ -99,6 +99,8 @@ check_pr_depends()
 
   for prtgt in $_deps
   do
+     if [ -z "$prtgt" ] ; then continue ; fi
+     if [ "$prtgt" = " " ] ; then continue ; fi
      echo "*** Found PR DEPENDS: $_prtgt ***"
      # Pull the target PR/Repo
      tgt=`echo $prtgt | sed 's|http://||g'`
