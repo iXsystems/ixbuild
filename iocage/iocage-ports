@@ -17,8 +17,8 @@ net-p2p/transmission-daemon
 irc/quassel-core
 security/clamav
 sysutils/backuppc4
-sysutils/linux-crashplan
 sysutils/tarsnap
+sysutils/munin-node
 www/nextcloud
 www/nginx
 www/redmine
