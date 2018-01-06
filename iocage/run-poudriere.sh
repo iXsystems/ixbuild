@@ -6,7 +6,7 @@ ZROOT="/poud"
 POUDCONFDIR="${PROGDIR}/poudriere"
 PORTS_GIT_URL="https://github.com/freenas/iocage-ports.git"
 PORTS_GIT_BRANCH="master"
-JAILVER="11.0-RELEASE"
+JAILVER="11.1-RELEASE"
 PPKGDIR="${ZROOT}/data/packages/${PJAILNAME}-${PPORTS}"
 PPORTSDIR="${ZROOT}/ports/${PPORTS}"
 
