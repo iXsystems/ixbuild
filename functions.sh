@@ -490,7 +490,7 @@ jenkins_publish_pkg_ipfs()
   tstamp=$(date +%s)
 
   mkdir -p /trueos-cdn/${TARGETREL}/${tstamp}
-  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/${TARGETREL} /trueos-cdn/${TARGETREL}/${tstamp}
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/${TARGETREL}/ /trueos-cdn/${TARGETREL}/${tstamp}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   if [ ! -e "/trueos-cdn/${TARGETREL}/${tstamp}/manifest.pkglist" ] ; then
