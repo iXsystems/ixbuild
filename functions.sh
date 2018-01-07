@@ -510,7 +510,7 @@ jenkins_publish_pkg_ipfs()
 
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
-  PKGHASH=$(ipfs-go add -r -Q --pin /trueos-cdn/${TARGETREL}/${tstamp})
+  PKGHASH=$(ipfs-go add --nocopy -r -Q --pin /trueos-cdn/${TARGETREL}/${tstamp})
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   echo "Finished Adding: $PKGHASH"
