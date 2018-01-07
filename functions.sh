@@ -484,15 +484,19 @@ jenkins_publish_pkg()
 
 jenkins_publish_pkg_ipfs()
 {
-  if [ ! -d "${SFTPFINALDIR}/pkg/${TARGETREL}" ] ; then
-    echo "Missing packages to push!"
-    exit 1
-  fi
+  # Now lets sync the docs
+  if [ -z "$SFTPHOST" ] ; then exit 1; fi
 
-  if [ ! -e "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist" ] ; then
+  tstamp=$(date +%s)
+
+  mkdir -p /trueos-cdn/${TARGETREL}/${tstamp}
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/${TARGETREL} /trueos-cdn/${TARGETREL}/${tstamp}
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  if [ ! -e "/trueos-cdn/${TARGETREL}/${tstamp}/manifest.pkglist" ] ; then
     #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
     echo "Generating package manifest..."
-    generatePackageManifestFile "${SFTPFINALDIR}/pkg/${TARGETREL}" "${SFTPFINALDIR}/pkg/${TARGETREL}/manifest.pkglist"
+    generatePackageManifestFile "/trueos-cdn/${TARGETREL}/${tstamp}" "/trueos-cdn/${TARGETREL}/${tstamp}/manifest.pkglist"
   fi
 
   # Which hash file we are updating
@@ -504,12 +508,9 @@ jenkins_publish_pkg_ipfs()
     KEEPHASH="3"
   fi
 
-  # Set location of go-ipfs binaries on our node
-  export PATH="${PATH}:/root/bin"
-
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
-  PKGHASH=$(ipfs-go add -r -Q --pin ${SFTPFINALDIR}/pkg/${TARGETREL}/)
+  PKGHASH=$(ipfs-go add -r -Q --pin /trueos-cdn/${TARGETREL}/${tstamp})
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   echo "Finished Adding: $PKGHASH"
@@ -518,16 +519,20 @@ jenkins_publish_pkg_ipfs()
   ipfs-cluster-ctl pin add ${PKGHASH}
 
   # Save hash to list of pins
-  tstamp=$(date +%s)
   echo "$tstamp $PKGHASH" >>/var/db/${HFILE}
 
   # Unpin hashes beyond the KEEPHASH
   PRUNEHASH=$(expr $KEEPHASH + 1)
   cat /var/db/${HFILE} | sort -r | tail -n +${PRUNEHASH} | while read line
   do
+    otstamp=$(echo $line | awk '{print $1}')
     ohash=$(echo $line | awk '{print $2}')
     echo "Unpinning: $ohash"
     ipfs-cluster-ctl pin rm $ohash
+    if [ -d "/trueos-cdn/${TARGETREL}/${otstamp}" ] ; then
+      echo "Removing pruned package files: /trueos-cdn/${TARGETRE}/${otstamp}"
+      rm -rf "/trueos-cdn/${TARGETREL}/${otstamp}"
+    fi
   done
 
   # Pruning of old pinned hashes
