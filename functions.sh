@@ -489,14 +489,14 @@ jenkins_publish_pkg_ipfs()
 
   tstamp=$(date +%s)
 
-  mkdir -p /trueos-cdn/${TARGETREL}/${tstamp}
-  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/${TARGETREL}/ /trueos-cdn/${TARGETREL}/${tstamp}
+  mkdir -p /root/trueos/${TARGETREL}/${tstamp}
+  rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/${TARGETREL}/ /root/trueos/${TARGETREL}/${tstamp}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  if [ ! -e "/trueos-cdn/${TARGETREL}/${tstamp}/manifest.pkglist" ] ; then
+  if [ ! -e "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist" ] ; then
     #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
     echo "Generating package manifest..."
-    generatePackageManifestFile "/trueos-cdn/${TARGETREL}/${tstamp}" "/trueos-cdn/${TARGETREL}/${tstamp}/manifest.pkglist"
+    generatePackageManifestFile "/root/trueos/${TARGETREL}/${tstamp}" "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist"
   fi
 
   # Which hash file we are updating
@@ -511,7 +511,7 @@ jenkins_publish_pkg_ipfs()
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
   ipfs-go config --json Experimental.FilestoreEnabled true
-  PKGHASH=$(ipfs-go add --nocopy -r -Q --pin /trueos-cdn/${TARGETREL}/${tstamp})
+  PKGHASH=$(ipfs-go add --nocopy -r -Q --pin /root/trueos/${TARGETREL}/${tstamp})
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   echo "Finished Adding: $PKGHASH"
@@ -530,9 +530,9 @@ jenkins_publish_pkg_ipfs()
     ohash=$(echo $line | awk '{print $2}')
     echo "Unpinning: $ohash"
     ipfs-cluster-ctl pin rm $ohash
-    if [ -d "/trueos-cdn/${TARGETREL}/${otstamp}" ] ; then
-      echo "Removing pruned package files: /trueos-cdn/${TARGETRE}/${otstamp}"
-      rm -rf "/trueos-cdn/${TARGETREL}/${otstamp}"
+    if [ -d "/root/trueos/${TARGETREL}/${otstamp}" ] ; then
+      echo "Removing pruned package files: /root/trueos/${TARGETRE}/${otstamp}"
+      rm -rf "/root/trueos/${TARGETREL}/${otstamp}"
     fi
   done
 
