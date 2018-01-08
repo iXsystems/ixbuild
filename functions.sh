@@ -484,6 +484,10 @@ jenkins_publish_pkg()
 
 jenkins_publish_pkg_ipfs()
 {
+  # Location of our ipfs-cluster-ctl command
+  PATH="${PATH}:/root/bin"
+  export PATH
+
   # Now lets sync the docs
   if [ -z "$SFTPHOST" ] ; then exit 1; fi
 
