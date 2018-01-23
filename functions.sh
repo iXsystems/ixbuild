@@ -403,6 +403,14 @@ jenkins_iso()
     if [ $? -ne 0 ] ; then tail -50 ${MASTERWRKDIR}/push.log ; exit_clean; fi
   fi
 
+  # Do ISO artifact creation for Jenkins
+  if [ -d "${WORKSPACE}" ] ; then
+     rm -rf "${WORKSPACE}/iso"
+     mkdir -p "${WORKSPACE}/iso"
+     cp -r ${TBUILDDIR}/iso/* "${WORKSPACE}/iso"
+     chown -R jenkins:jenkins "${WORKSPACE}"
+  fi
+
   cleanup_workdir
 
   exit 0
