@@ -1797,11 +1797,12 @@ populate_pr_pipeline()
   PRBUILDER="$2"
 
   # Fetch the details from github API
-  curl "https://api.github.com/repos/$ORG/$PRBUILDER/pulls/$CHANGEID" > /tmp/jsonout.$$
+  curl "https://api.github.com/repos/$ORG/$PRBUILDER/pulls/$CHANGE_ID" > /tmp/jsonout.$$
   ghprTargetBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
   ghprSourceBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
   ghprCommentBody=$(cat /tmp/jsonout.$$ | jq -r '.body')
   ghprPullLongDescription=$(cat /tmp/jsonout.$$ | jq -r '.body')
+  rm /tmp/jsonout.$$
 
   export ghprTargetBranch ghprSourceBranch ghprCommentBody ghprPullLongDescription
   export PRBUILDER
