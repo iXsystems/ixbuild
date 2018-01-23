@@ -1200,7 +1200,7 @@ jenkins_freenas()
   create_workdir
 
   # Build out all the pipeline variables
-  populate_pr_pipeline "freenas" "freenas"
+  populate_pr_pipeline
 
   if [ -z "$DISABLE_SHALLOW_CHECKOUT" ] ; then
     # Make sure we always checkout shallow, save us some bandwidth
@@ -1793,8 +1793,10 @@ jenkins_iocage_pkgs_push()
 populate_pr_pipeline()
 {
   if [ -z "$CHANGE_ID" ] ; then return 0; fi
-  ORG="$1"
-  PRBUILDER="$2"
+  if [ -z "$GH_ORG" ] ; then return 0; fi
+  if [ -z "$GH_REPO" ] ; then return 0; fi
+  ORG="$GH_ORG"
+  PRBUILDER="$GH_REPO"
 
   # Fetch the details from github API
   curl "https://api.github.com/repos/$ORG/$PRBUILDER/pulls/$CHANGE_ID" > /tmp/jsonout.$$
