@@ -1199,8 +1199,8 @@ jenkins_freenas()
 {
   create_workdir
 
-  # If we have a saved build state, lets pull that before we begin
-  #jenkins_pull_fn_statedir
+  # Build out all the pipeline variables
+  populate_pr_pipeline "freenas" "freenas"
 
   if [ -z "$DISABLE_SHALLOW_CHECKOUT" ] ; then
     # Make sure we always checkout shallow, save us some bandwidth
@@ -1217,10 +1217,6 @@ jenkins_freenas()
   if [ $? -ne 0 ] ; then exit_clean; fi
 
   get_bedir
-
-  # Check if this is a Release Engineer build
-  # Push the entire build statedir
-  #jenkins_push_fn_statedir
 
   # Now lets sync the ISOs (If not a PR build)
   if [ -n "$SFTPHOST" ] ; then
@@ -1791,6 +1787,37 @@ jenkins_iocage_pkgs_push()
   rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" /outgoing/pkg/iocage/ ${scale}:${target}/
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+}
+
+# Helper script which reads some pipeline ENV settings and figures out GH PR details
+populate_pr_pipeline()
+{
+  if [ -z "$CHANGE_ID" ] ; then return 0; fi
+  ORG="$1"
+  PRBUILDER="$2"
+
+  # Fetch the details from github API
+  curl "https://api.github.com/repos/$ORG/$PRBUILDER/pulls/$CHANGEID" > /tmp/jsonout.$$
+  ghprTargetBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
+  ghprSourceBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
+  ghprCommentBody=$(cat /tmp/jsonout.$$ | jq -r '.body')
+  ghprPullLongDescription=$(cat /tmp/jsonout.$$ | jq -r '.body')
+
+  export ghprTargetBranch ghprSourceBranch ghprCommentBody ghprPullLongDescription
+  export PRBUILDER
+
+  export BUILDINCREMENTAL="YES"
+  export ARTIFACTONFAIL=yes
+  export ARTIFACTONSUCCESS=yes
+
+  echo "Populated GitHub PR details:"
+  echo "ghprTargetBranch: $ghprTargetBranch"
+  echo "ghprSourceBranch: $ghprSourceBranch"
+  echo "ghprCommentBody: $ghprCommentBody"
+  echo "ghprPullLongDescription: $ghprPullLongDescription"
+
+  # Something went wrong?
+  if [ -z "$ghprTargetBranch" ] ; then exit 1 ; fi
 }
 
 # Set the builds directory
