@@ -1185,6 +1185,11 @@ get_bedir()
   if [ -n "$BUILDOPTS" ] ; then
     eval $BUILDOPTS
   fi
+  echo "$BUILDOPTS" | grep -q fn_head
+  if [ $? -eq 0 ] ; then
+    PROFILE="fn_head"
+    export PROFILE
+  fi
 
   if [ -z "$LEGACYBEDIR" -a -n "${PROFILE}" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
@@ -1226,7 +1231,16 @@ jenkins_freenas()
       rm -rf os-base
     else
       cd ${BEDIR}/release
-      if [ $? -ne 0 ] ; then exit_clean ; fi
+      if [ $? -ne 0 ] ; then
+        if [ -d "freenas/_BE/release" ] ; then
+	   cd freenas/_BE/release
+        elif [ -d "fn_head/_BE/release" ] ; then
+	   cd fn_head/_BE/release
+	else
+           echo "Cannot locate ISO to copy to staging area, skipping"
+           exit 0
+        fi
+      fi
     fi
 
     if [ -n "${RELENGBUILD}" ] ; then

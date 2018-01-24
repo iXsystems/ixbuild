@@ -176,6 +176,12 @@ get_bedir()
     eval $BUILDOPTS
   fi
 
+  echo $BUILDOPTS | grep -q fn_head
+  if [ $? -eq 0 ] ; then
+    PROFILE="fn_head"
+    export PROFILE
+  fi
+
   if [ -z "$LEGACYBEDIR" -a -n "${PROFILE}" ] ; then
     export BEDIR="${FNASBDIR}/${PROFILE}/_BE"
     return 0
