@@ -160,13 +160,13 @@ if [ -e "$BCONF" ] ; then
     POUDRIERE_JOBS=$(grep "^FNBUILDERS=" ${BCONF} | cut -d '=' -f 2)
     echo "Setting POUDRIERE_JOBS=$POUDRIERE_JOBS"
     export POUDRIERE_JOBS
-    export BUILDWORLD_JOBS="10"
+    export BUILDWORLD_JOBS="16"
   else
     CPUS=$(sysctl -n kern.smp.cpus)
     if [ $CPUS -gt 8 ] ; then
       echo "Setting POUDRIERE_JOBS=8"
       export POUDRIERE_JOBS="8"
-      export BUILDWORLD_JOBS="10"
+      export BUILDWORLD_JOBS="16"
     fi
   fi
   grep -q "^TMPFSWORK=" ${BCONF}
