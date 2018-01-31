@@ -259,33 +259,21 @@ if [ -n "$BUILDSENV" ] ; then
 fi
 
 if [ -n "$PRBUILDER" ] ; then
-  echo "$ghprbCommentBody" | grep -q "CLEAN"
-  if [ $? -eq 0 ] ; then
-    # Nuke the build dir if doing Pull Request Build
-    echo "*** Doing a clean build of PR ***"
-    cd ${PROGDIR}
-    mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
-    rm -rf ${FNASBDIR} 2>/dev/null
-    mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
-    chflags -R noschg ${FNASBDIR} 2>/dev/null
-    mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
-    rm -rf ${FNASBDIR} 2>/dev/null
-    if [ -d "${FNASBDIR}" ] ; then
-       echo "ERROR: Failed to cleanup ${FNASBDIR}"
-       exit 1
-    fi
-    cd ${FNASSRC}
-    ${BUILDSENV} make clean ${PROFILEARGS}
-  else
-    if [ "$PRBUILDER" != "build" ] ; then
-      if [ -d "${FNASBDIR}" ] ; then
-        cd ${FNASBDIR}
-        eval $PROFILEARGS
-        echo "*** Incremental PR Build - Removing ${PROFILE}/_BE/${PRBUILDER}"
-        rm -rf ${PROFILE}/_BE/${PRBUILDER}
-      fi
-    fi
+  # Nuke the build dir if doing Pull Request Build
+  echo "*** Doing a clean build of PR ***"
+  cd ${PROGDIR}
+  mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
+  rm -rf ${FNASBDIR} 2>/dev/null
+  mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
+  chflags -R noschg ${FNASBDIR} 2>/dev/null
+  mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
+  rm -rf ${FNASBDIR} 2>/dev/null
+  if [ -d "${FNASBDIR}" ] ; then
+     echo "ERROR: Failed to cleanup ${FNASBDIR}"
+     exit 1
   fi
+  cd ${FNASSRC}
+  ${BUILDSENV} make clean ${PROFILEARGS}
 fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
