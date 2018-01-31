@@ -272,8 +272,6 @@ if [ -n "$PRBUILDER" ] ; then
      echo "ERROR: Failed to cleanup ${FNASBDIR}"
      exit 1
   fi
-  cd ${FNASSRC}
-  ${BUILDSENV} make clean ${PROFILEARGS}
 fi
 
 if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
