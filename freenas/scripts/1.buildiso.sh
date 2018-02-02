@@ -558,7 +558,7 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
   fi
 
   echo "Saving PR objects for next run..."
-  tar cf /pr-objs/objs-${GH_REPO}.tar --lz4 .
+  tar cf /pr-objs/objs-${GH_REPO}.tar --lz4 ${BEDIR}
   if [ $? -ne 0 ] ; then
     echo "Warning: Errors returned saving PR objects"
   fi
