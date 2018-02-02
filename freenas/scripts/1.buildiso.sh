@@ -436,7 +436,7 @@ fi
 # lets extract those to do an INCREMENTAL build and save
 # some time
 if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
-  if [ -e "/pr-objs-${GH_REPO}.tar" ] ; then
+  if [ -e "/pr-objs/objs-${GH_REPO}.tar" ] ; then
     echo "Extracting previous PR build objects..."
     cd ${FNASBDIR}
     tar xpf /pr-objs/objs-${GH_REPO}.tar
