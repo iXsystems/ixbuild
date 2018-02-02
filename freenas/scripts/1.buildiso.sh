@@ -376,12 +376,12 @@ OUTFILE="/tmp/fnas-build.out.$$"
 
 echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} ***"
-${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
+${BUILDSENV} make checkout ${PROFILEARGS} 2>&1 | tee -a ${OUTFILE}
 if [ $? -ne 0 ] ; then
   # Try re-checking out SRC bits
   clean_src_repos
   echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} - Clean Checkout ***"
-  ${BUILDSENV} make checkout ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
+  ${BUILDSENV} make checkout ${PROFILEARGS} 2>&1 | tee -a ${OUTFILE}
   if [ $? -ne 0 ] ; then
     echo_fail "*** Failed running make checkout ***"
     cat ${OUTFILE}
@@ -456,6 +456,17 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
 
 fi
 
+# If we have the saved objects from a previous PR build run
+# lets extract those to do an INCREMENTAL build and save
+# some time
+if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
+  if [ -e "/pr-objs-${GH_REPO}.tar" ] ; then
+    echo "Extracting previous PR build objects..."
+    cd ${FNASBDIR}
+    tar xpf /pr-objs/objs-${GH_REPO}.tar
+  fi
+fi
+
 # We are doing a build as a result of a PR
 # Lets copy the repo from WORKSPACE into the correct location
 if [ -n "${PRBUILDER}" -a "$PRBUILDER" != "build" ] ; then
@@ -473,19 +484,13 @@ fi
 # Check for other PR repos to pull in
 check_pr_depends
 
-# Display output to stdout
-touch $OUTFILE
-(sleep 5 ; tail -f $OUTFILE 2>/dev/null) &
-TPID=$!
-
 # FreeBSD head removed lint, disable it
 export LINT=""
 
 echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "*** ${BUILDSENV} make release ${PROFILEARGS} ***"
-${BUILDSENV} make release ${PROFILEARGS} >${OUTFILE} 2>${OUTFILE}
+${BUILDSENV} make release ${PROFILEARGS} 2>&1 | tee -a ${OUTFILE}
 if [ $? -ne 0 ] ; then
-  kill -9 $TPID 2>/dev/null
   echo_fail "Failed running make release"
   parse_build_error "${OUTFILE}"
   clean_artifacts
@@ -493,7 +498,6 @@ if [ $? -ne 0 ] ; then
   finish_xml_results "make"
   exit 1
 fi
-kill -9 $TPID 2>/dev/null
 export ARTIFACTONSUCCESS=TRUE
 echo_ok
 clean_artifacts
@@ -541,7 +545,44 @@ if [ -d "${WORKSPACE}/artifacts/logs" ] ; then
   chmod -R 755 "${WORKSPACE}/artifacts/logs"
 fi
 sync
-sleep 10
+
+# Kris Moore (2-2-2018)
+#
+# The PR builder needs to try and be incremental whenever possible
+# This is to keep build times at a minimum so those waiting on merges
+# can get their fixes in without horrible wait times (2-5 hours in some cases)
+#
+# To do this we are going to save a copy of the build objs dir at
+# the end of every successful build.
+#
+# This will be restored before the next build allowing the job to
+# only rebuild the world / kernel / pkg bits that have specifically
+# changed from the previous run of that particular PR type
+if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
+  # First locate the _BE dir
+  if [ -d "freenas/_BE/objs" ] ; then
+    BEDIR="freenas/_BE/objs"
+  elif [ -d "fn_head/_BE/objs" ] ; then
+    BEDIR="fn_head/_BE/objs"
+  elif [ -d "_BE/objs" ] ; then
+    BEDIR="_BE/objs"
+  else
+    rm ${OUTFILE}
+    exit 0
+  fi
+
+  # Tar up the objs dir
+  if [ ! -d "/pr-objs" ] ; then
+    mkdir /pr-objs
+  fi
+
+  echo "Saving PR objects for next run..."
+  tar cf /pr-objs/objs-${GH_REPO}.tar --lz4 .
+  if [ $? -ne 0 ] ; then
+    echo "Warning: Errors returned saving PR objects"
+  fi
+
+fi
 
 rm ${OUTFILE}
 exit 0
