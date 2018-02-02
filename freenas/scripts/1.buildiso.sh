@@ -352,12 +352,12 @@ OUTFILE="/tmp/fnas-build.out.$$"
 
 echo_test_title "${BUILDSENV} make checkout ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} ***"
-${BUILDSENV} make checkout ${PROFILEARGS} 2>&1 | tee -a ${OUTFILE}
+${BUILDSENV} make checkout ${PROFILEARGS} 2>&1 #| tee -a ${OUTFILE}
 if [ $? -ne 0 ] ; then
   # Try re-checking out SRC bits
   clean_src_repos
   echo "*** Running: ${BUILDSENV} make checkout ${PROFILEARGS} - Clean Checkout ***"
-  ${BUILDSENV} make checkout ${PROFILEARGS} 2>&1 | tee -a ${OUTFILE}
+  ${BUILDSENV} make checkout ${PROFILEARGS} 2>&1 #| tee -a ${OUTFILE}
   if [ $? -ne 0 ] ; then
     echo_fail "*** Failed running make checkout ***"
     cat ${OUTFILE}
@@ -468,10 +468,10 @@ echo "" > ${OUTFILE}
 
 echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "*** ${BUILDSENV} make release ${PROFILEARGS} ***"
-${BUILDSENV} make release ${PROFILEARGS} 2>&1 | tee -a ${OUTFILE}
+${BUILDSENV} make release ${PROFILEARGS} 2>&1 #| tee -a ${OUTFILE}
 if [ $? -ne 0 ] ; then
   echo_fail "Failed running make release"
-  parse_build_error "${OUTFILE}"
+  #parse_build_error "${OUTFILE}"
   clean_artifacts
   save_artifacts_on_fail
   finish_xml_results "make"
@@ -538,6 +538,8 @@ sync
 # only rebuild the world / kernel / pkg bits that have specifically
 # changed from the previous run of that particular PR type
 if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
+  cd ${FNASBDIR}
+
   # First locate the _BE dir
   if [ -d "freenas/_BE/objs" ] ; then
     BEDIR="freenas/_BE/objs"
