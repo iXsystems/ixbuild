@@ -160,13 +160,13 @@ if [ -e "$BCONF" ] ; then
     POUDRIERE_JOBS=$(grep "^FNBUILDERS=" ${BCONF} | cut -d '=' -f 2)
     echo "Setting POUDRIERE_JOBS=$POUDRIERE_JOBS"
     export POUDRIERE_JOBS
-    export BUILDWORLD_JOBS="16"
+    export BUILDWORLD_JOBS="20"
   else
     CPUS=$(sysctl -n kern.smp.cpus)
     if [ $CPUS -gt 8 ] ; then
       echo "Setting POUDRIERE_JOBS=8"
       export POUDRIERE_JOBS="8"
-      export BUILDWORLD_JOBS="16"
+      export BUILDWORLD_JOBS="20"
     fi
   fi
   grep -q "^TMPFSWORK=" ${BCONF}
@@ -179,7 +179,7 @@ else
   if [ $CPUS -gt 8 ] ; then
     echo "Setting POUDRIERE_JOBS=8"
     export POUDRIERE_JOBS="8"
-    export BUILDWORLD_JOBS="10"
+    export BUILDWORLD_JOBS="20"
   fi
 fi
 
@@ -260,7 +260,7 @@ fi
 
 if [ -n "$PRBUILDER" ] ; then
   # Nuke the build dir if doing Pull Request Build
-  echo "*** Doing a clean build of PR ***"
+  echo "*** Cleaning old PR build directory ***"
   cd ${PROGDIR}
   mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
   rm -rf ${FNASBDIR} 2>/dev/null
@@ -272,45 +272,21 @@ if [ -n "$PRBUILDER" ] ; then
      echo "ERROR: Failed to cleanup ${FNASBDIR}"
      exit 1
   fi
-fi
 
-if [ -n "$PRBUILDER" -a "$PRBUILDER" = "build" ] ; then
-  # PR Build
-  echo "*** Doing PR build of the build/ repo ***"
-  echo "${WORKSPACE} -> ${FNASBDIR}"
-  mkdir "${FNASBDIR}"
-  tar cf - -C "${WORKSPACE}" . | tar xf - -C "${FNASBDIR}"
-  if [ $? -ne 0 ] ; then exit_clean; fi
-else
-  # Regular build
-  if [ -d "${FNASBDIR}" ] ; then
-    rc_halt "cd ${FNASBDIR}"
-    git reset --hard
-    OBRANCH=$(git branch | grep '^*' | awk '{print $2}')
-    if [ "${OBRANCH}" != "${GITFNASBRANCH}" ] ; then
-       # Branch mismatch, re-clone
-       echo "New freenas-build branch detected (${OBRANCH} != ${GITFNASBRANCH}) ... Re-cloning..."
-       cd ${PROGDIR}
-
-       # Try to unmount anyleftovers before we nuke
-       mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
-       rm -rf ${FNASBDIR} 2>/dev/null
-       mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
-       chflags -R noschg ${FNASBDIR} 2>/dev/null
-       mount | grep "on ${FNASBDIR}/" | awk '{print $3}' | xargs umount -f
-       rm -rf ${FNASBDIR} 2>/dev/null
-       if [ -d "${FNASBDIR}" ] ; then
-	  echo "ERROR: Failed to cleanup ${FNASBDIR}"
-	  exit 1
-       fi
-    fi
-  fi
-
-  # Make sure we have our freenas build sources updated
-  if [ -d "${FNASBDIR}" ]; then
-    git_fnas_up "${FNASBDIR}"
+  if [ "$PRBUILDER" = "build" ] ; then
+    # PR Build
+    echo "*** Doing PR build of the build/ repo ***"
+    echo "${WORKSPACE} -> ${FNASBDIR}"
+    mkdir "${FNASBDIR}"
+    tar cf - -C "${WORKSPACE}" . | tar xf - -C "${FNASBDIR}"
+    if [ $? -ne 0 ] ; then exit_clean; fi
   else
-    rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+    # Make sure we have our freenas build sources updated
+    if [ -d "${FNASBDIR}" ]; then
+      git_fnas_up "${FNASBDIR}"
+    else
+      rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+    fi
   fi
 fi
 rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
@@ -486,6 +462,9 @@ check_pr_depends
 
 # FreeBSD head removed lint, disable it
 export LINT=""
+
+# Clear the OUTFILE
+echo "" > ${OUTFILE}
 
 echo_test_title "${BUILDSENV} make release ${PROFILEARGS}" 2>/dev/null >/dev/null
 echo "*** ${BUILDSENV} make release ${PROFILEARGS} ***"
