@@ -515,13 +515,16 @@ rm -rf "${WORKSPACE}/artifacts/src"
 mkdir -p "${WORKSPACE}/artifacts/src"
 
 eval $PROFILEARGS
-for srcdir in freenas webui
-do
-  echo "*** Copying $srcdir to artifacts/src/$srcdir ***"
-  mkdir -p "${WORKSPACE}/artifacts/src/${srcdir}"
-  tar cf - -C "${FNASBDIR}/${PROFILE}/_BE/${srcdir}" . | tar xf - -C "${WORKSPACE}/artifacts/src/$srcdir"
-  if [ $? -ne 0 ] ; then exit_clean; fi
-done
+
+# Disable for now, we may be able to use the already-checked out dirs via pipelines for QA testing now
+# KPM - 2-3-2018
+#for srcdir in freenas webui
+#do
+#  echo "*** Copying $srcdir to artifacts/src/$srcdir ***"
+#  mkdir -p "${WORKSPACE}/artifacts/src/${srcdir}"
+#  tar cf - -C "${FNASBDIR}/${PROFILE}/_BE/${srcdir}" . | tar xf - -C "${WORKSPACE}/artifacts/src/$srcdir"
+#  if [ $? -ne 0 ] ; then exit_clean; fi
+#done
 
 echo "*** Flushing artifacts to disk ***"
 chown -R jenkins:jenkins "${WORKSPACE}"
