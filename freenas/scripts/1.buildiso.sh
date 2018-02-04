@@ -440,7 +440,7 @@ if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
   if [ -e "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
     echo "Extracting previous PR build objects..."
     cd ${FNASBDIR}
-    BELOC=$(cat /pr-objs/objs-${GH_REPO}/belocation)
+    BELOC=$(cat /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation)
     BELOC=$(dirname $BELOC)
     if [ -n "$BELOC" ] ; then
       mkdir -p ${BELOC} 2>/dev/null
@@ -574,7 +574,7 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
   fi
 
   # Save the location we need to restore to
-  echo "${BEDIR}" > /pr-objs/objs-${GH_REPO}/belocation
+  echo "${BEDIR}" > /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation
 
 fi
 
