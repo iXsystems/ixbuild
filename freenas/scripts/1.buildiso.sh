@@ -439,7 +439,12 @@ if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
   if [ -e "/pr-objs/objs-${GH_REPO}.tar" ] ; then
     echo "Extracting previous PR build objects..."
     cd ${FNASBDIR}
-    tar xpf /pr-objs/objs-${GH_REPO}.tar
+    BELOC=$(cat /pr-objs/objs-${GH_REPO}/belocation)
+    BELOC=$(dirname $BELOC)
+    if [ -n "$BELOC" ] ; then
+      mkdir -p ${BELOC} 2>/dev/null
+      mv /pr-objs/objs-${GH_REPO} ${BELOC}/objs
+    fi
   fi
 fi
 
@@ -558,10 +563,13 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
   fi
 
   echo "Saving PR objects for next run..."
-  tar cf /pr-objs/objs-${GH_REPO}.tar --lz4 ${BEDIR}
+  mv ${BEDIR} /pr-objs/objs-${GH_REPO}
   if [ $? -ne 0 ] ; then
     echo "Warning: Errors returned saving PR objects"
   fi
+
+  # Save the location we need to restore to
+  echo "${BEDIR}" > /pr-objs/objs-${GH_REPO}/belocation
 
 fi
 
