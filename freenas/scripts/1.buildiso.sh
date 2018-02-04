@@ -436,14 +436,15 @@ fi
 # lets extract those to do an INCREMENTAL build and save
 # some time
 if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
-  if [ -e "/pr-objs/objs-${GH_REPO}.tar" ] ; then
+  TGBRANCH=$(echo ${ghprTargetBranch} | sed -i '' 's|/|-|g')
+  if [ -e "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
     echo "Extracting previous PR build objects..."
     cd ${FNASBDIR}
     BELOC=$(cat /pr-objs/objs-${GH_REPO}/belocation)
     BELOC=$(dirname $BELOC)
     if [ -n "$BELOC" ] ; then
       mkdir -p ${BELOC} 2>/dev/null
-      mv /pr-objs/objs-${GH_REPO} ${BELOC}/objs
+      mv /pr-objs/objs-${GH_REPO}-${TGBRANCH} ${BELOC}/objs
     fi
   fi
 fi
@@ -566,7 +567,8 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
   fi
 
   echo "Saving PR objects for next run..."
-  mv ${BEDIR} /pr-objs/objs-${GH_REPO}
+  TGBRANCH=$(echo ${ghprTargetBranch} | sed -i '' 's|/|-|g')
+  mv ${BEDIR} /pr-objs/objs-${GH_REPO}-${TGBRANCH}
   if [ $? -ne 0 ] ; then
     echo "Warning: Errors returned saving PR objects"
   fi
