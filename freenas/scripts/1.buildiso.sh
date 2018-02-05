@@ -342,6 +342,25 @@ if [ "$1" = "docs" -o "$1" = "api-docs" ] ; then
   exit 0
 fi
 
+# If we have the saved objects from a previous PR build run
+# lets extract those to do an INCREMENTAL build and save
+# some time
+if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
+  TGBRANCH=$(echo ${ghprTargetBranch} | sed 's|/|-|g')
+  if [ -e "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
+    cd ${FNASBDIR}
+    BELOC=$(cat /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation)
+    BELOC=$(dirname $BELOC)
+    if [ -n "$BELOC" ] ; then
+      mkdir -p ${BELOC} 2>/dev/null
+      echo "*** Using previous PR build objects... ***"
+      rm -rf ${BELOC}/objs
+      echo "mv /pr-objs/objs-${GH_REPO}-${TGBRANCH} ${BELOC}/objs"
+      mv /pr-objs/objs-${GH_REPO}-${TGBRANCH} ${BELOC}/objs
+    fi
+  fi
+fi
+
 
 # Start the XML reporting
 clean_xml_results "Clean previous results"
@@ -432,22 +451,6 @@ if [ -e "build/config/templates/poudriere.conf" ] ; then
 
 fi
 
-# If we have the saved objects from a previous PR build run
-# lets extract those to do an INCREMENTAL build and save
-# some time
-if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
-  TGBRANCH=$(echo ${ghprTargetBranch} | sed 's|/|-|g')
-  if [ -e "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
-    cd ${FNASBDIR}
-    BELOC=$(cat /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation)
-    BELOC=$(dirname $BELOC)
-    if [ -n "$BELOC" ] ; then
-      mkdir -p ${BELOC} 2>/dev/null
-      echo "*** Using previous PR build objects... ***"
-      mv /pr-objs/objs-${GH_REPO}-${TGBRANCH} ${BELOC}/objs
-    fi
-  fi
-fi
 
 # We are doing a build as a result of a PR
 # Lets copy the repo from WORKSPACE into the correct location
