@@ -438,12 +438,12 @@ fi
 if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
   TGBRANCH=$(echo ${ghprTargetBranch} | sed 's|/|-|g')
   if [ -e "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
-    echo "Extracting previous PR build objects..."
     cd ${FNASBDIR}
     BELOC=$(cat /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation)
     BELOC=$(dirname $BELOC)
     if [ -n "$BELOC" ] ; then
       mkdir -p ${BELOC} 2>/dev/null
+      echo "*** Using previous PR build objects... ***"
       mv /pr-objs/objs-${GH_REPO}-${TGBRANCH} ${BELOC}/objs
     fi
   fi
@@ -566,8 +566,21 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
     mkdir /pr-objs
   fi
 
-  echo "Saving PR objects for next run..."
   TGBRANCH=$(echo ${ghprTargetBranch} | sed 's|/|-|g')
+  if [ -d "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
+    echo "*** Removing previous PR objects... ***"
+    rm -rf /pr-objs/objs-${GH_REPO}-${TGBRANCH} 2>/dev/null
+    chflags -R noschg /pr-objs/objs-${GH_REPO}-${TGBRANCH} 2>/dev/null
+    rm -rf /pr-objs/objs-${GH_REPO}-${TGBRANCH} 2>/dev/null
+  fi
+  if [ -d "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
+    echo "Warning: Failed to remove previous PR objects:"
+    echo "/pr-objs/objs-${GH_REPO}-${TGBRANCH}"
+    rm ${OUTFILE}
+    exit 0
+  fi
+
+  echo "*** Saving PR objects for next run... ***"
   mv ${BEDIR} /pr-objs/objs-${GH_REPO}-${TGBRANCH}
   if [ $? -ne 0 ] ; then
     echo "Warning: Errors returned saving PR objects"
