@@ -288,6 +288,12 @@ if [ -n "$PRBUILDER" ] ; then
       rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
     fi
   fi
+else
+  if [ -d "${FNASBDIR}" ]; then
+    git_fnas_up "${FNASBDIR}"
+  else
+    rc_halt "git clone --depth=1 -b ${GITFNASBRANCH} ${GITFNASURL} ${FNASBDIR}"
+  fi
 fi
 rc_halt "ln -fs ${FNASBDIR} ${FNASSRC}"
 
