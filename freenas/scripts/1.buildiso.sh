@@ -357,6 +357,11 @@ if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
       rm -rf ${BELOC}/objs
       echo "mv /pr-objs/objs-${GH_REPO}-${TGBRANCH} ${BELOC}/objs"
       mv /pr-objs/objs-${GH_REPO}-${TGBRANCH} ${BELOC}/objs
+      if [ -d "${BELOC}/objs/os" ] ; then
+	rm -rf ${BELOC}/os 2>/dev/null
+        echo "*** Using previous PR build OS source... ***"
+	mv ${BELOC}/objs/os ${BELOC}/os
+      fi
     fi
   fi
 fi
@@ -554,11 +559,11 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
 
   # First locate the _BE dir
   if [ -d "freenas/_BE/objs" ] ; then
-    BEDIR="freenas/_BE/objs"
+    _BEDIR="freenas/_BE"
   elif [ -d "fn_head/_BE/objs" ] ; then
-    BEDIR="fn_head/_BE/objs"
+    _BEDIR="fn_head/_BE"
   elif [ -d "_BE/objs" ] ; then
-    BEDIR="_BE/objs"
+    _BEDIR="_BE"
   else
     rm ${OUTFILE}
     exit 0
@@ -584,13 +589,15 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
   fi
 
   echo "*** Saving PR objects for next run... ***"
-  mv ${BEDIR} /pr-objs/objs-${GH_REPO}-${TGBRANCH}
+  mv ${_BEDIR}/objs /pr-objs/objs-${GH_REPO}-${TGBRANCH}
   if [ $? -ne 0 ] ; then
     echo "Warning: Errors returned saving PR objects"
   fi
+  echo "*** Saving PR world for next run... ***"
+  mv ${_BEDIR}/os /pr-objs/objs-${GH_REPO}-${TGBRANCH}/
 
   # Save the location we need to restore to
-  echo "${BEDIR}" > /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation
+  echo "${_BEDIR}/objs" > /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation
 
 fi
 
