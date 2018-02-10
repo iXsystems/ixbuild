@@ -1814,13 +1814,13 @@ populate_pr_pipeline()
 
   # Fetch the details from github API
   curl "https://api.github.com/repos/$ORG/$PRBUILDER/pulls/$CHANGE_ID" > /tmp/jsonout.$$
-  ghprTargetBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
-  ghprSourceBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
-  ghprCommentBody=$(cat /tmp/jsonout.$$ | jq -r '.body')
-  ghprPullLongDescription=$(cat /tmp/jsonout.$$ | jq -r '.body')
+  ghprbTargetBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
+  ghprbSourceBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
+  ghprbCommentBody=$(cat /tmp/jsonout.$$ | jq -r '.body')
+  ghprbPullLongDescription=$(cat /tmp/jsonout.$$ | jq -r '.body')
   rm /tmp/jsonout.$$
 
-  export ghprTargetBranch ghprSourceBranch ghprCommentBody ghprPullLongDescription
+  export ghprTargetBranch ghprSourceBranch ghprCommentBody ghprbPullLongDescription
   export PRBUILDER
 
   export BUILDINCREMENTAL="YES"

@@ -352,7 +352,7 @@ fi
 # lets extract those to do an INCREMENTAL build and save
 # some time
 if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
-  TGBRANCH=$(echo ${ghprTargetBranch} | sed 's|/|-|g')
+  TGBRANCH=$(echo ${ghprbTargetBranch} | sed 's|/|-|g')
   if [ -e "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
     cd ${FNASBDIR}
     BELOC=$(cat /pr-objs/objs-${GH_REPO}-${TGBRANCH}/belocation)
@@ -580,7 +580,7 @@ if [ -n "${PRBUILDER}" -a -n "$GH_REPO" ] ; then
     mkdir /pr-objs
   fi
 
-  TGBRANCH=$(echo ${ghprTargetBranch} | sed 's|/|-|g')
+  TGBRANCH=$(echo ${ghprbTargetBranch} | sed 's|/|-|g')
   if [ -d "/pr-objs/objs-${GH_REPO}-${TGBRANCH}" ] ; then
     echo "*** Removing previous PR objects... ***"
     rm -rf /pr-objs/objs-${GH_REPO}-${TGBRANCH} 2>/dev/null
