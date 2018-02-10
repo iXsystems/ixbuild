@@ -1815,8 +1815,8 @@ populate_pr_pipeline()
   # Fetch the details from github API
   echo "curl https://api.github.com/repos/$ORG/$PRBUILDER/pulls/$CHANGE_ID"
   curl "https://api.github.com/repos/$ORG/$PRBUILDER/pulls/$CHANGE_ID" > /tmp/jsonout.$$
-  echo "Raw GH output:"
-  cat /tmp/jsonout.$$
+  #echo "Raw GH output:"
+  #cat /tmp/jsonout.$$
 
   ghprbTargetBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
   ghprbSourceBranch=$(cat /tmp/jsonout.$$ | jq -r '.base.ref')
