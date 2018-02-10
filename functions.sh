@@ -1824,7 +1824,7 @@ populate_pr_pipeline()
   ghprbPullLongDescription=$(cat /tmp/jsonout.$$ | jq -r '.body')
   rm /tmp/jsonout.$$
 
-  export ghprTargetBranch ghprSourceBranch ghprCommentBody ghprbPullLongDescription
+  export ghprbTargetBranch ghprbSourceBranch ghprbCommentBody ghprbbPullLongDescription
   export PRBUILDER
 
   export BUILDINCREMENTAL="YES"
@@ -1832,13 +1832,13 @@ populate_pr_pipeline()
   export ARTIFACTONSUCCESS=yes
 
   echo "Populated GitHub PR details:"
-  echo "ghprTargetBranch: $ghprTargetBranch"
-  echo "ghprSourceBranch: $ghprSourceBranch"
-  echo "ghprCommentBody: $ghprCommentBody"
-  echo "ghprPullLongDescription: $ghprPullLongDescription"
+  echo "ghprbTargetBranch: $ghprbTargetBranch"
+  echo "ghprbSourceBranch: $ghprbSourceBranch"
+  echo "ghprbCommentBody: $ghprbCommentBody"
+  echo "ghprbPullLongDescription: $ghprbPullLongDescription"
 
   # Something went wrong?
-  if [ -z "$ghprTargetBranch" ] ; then exit 1 ; fi
+  if [ -z "$ghprbTargetBranch" ] ; then exit 1 ; fi
 }
 
 # Set the builds directory
