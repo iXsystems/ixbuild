@@ -18,25 +18,38 @@ case $ans in
 esac
 
 which sudo >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
+if [ $? -ne 0 ]; then
   echo "Installing sudo.."
   pkg install -y security/sudo
 fi
 
 which sudo >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
+if [ $? -eq 0 ]; then
   echo "Failed installing sudo!"
   exit 1
 fi
 
 which git >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
+if [ $? -ne 0 ]; then
   echo "Installing git.."
   pkg install -y devel/git
 fi
 
+pkg info -q python3 >/dev/null 2>/dev/null
+if [ $? -ne 0 ]; then
+  echo "Installing python3.."
+  pkg install -y python3
+fi
+
+which jq >/dev/null 2>/dev/null
+if [ $? -ne 0 ]; then
+  echo "Installing jq.."
+  pkg install -y jq
+fi
+
+
 which git >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
+if [ $? -ne 0 ]; then
   echo "Failed installing git!"
   exit 1
 fi
