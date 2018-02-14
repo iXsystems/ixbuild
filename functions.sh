@@ -1224,7 +1224,7 @@ jenkins_freenas()
   get_bedir
 
   # Now lets sync the ISOs (If not a PR build)
-  if [ -n "$SFTPHOST" ] ; then
+  if [ -n "$SFTPHOST" -a -z "$CHANGE_ID" -a -z "$GH_ORG" ] ; then
     if [ "$FREENASLEGACY" = "YES" ] ; then
       cd ${FNASBDIR}/objs
       if [ $? -ne 0 ] ; then exit_clean ; fi
