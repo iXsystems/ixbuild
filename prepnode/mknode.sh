@@ -29,6 +29,17 @@ if [ $? -eq 0 ]; then
   exit 1
 fi
 
+which pigz >/dev/null 2>/dev/null
+if [ $? -eq 0 ]; then
+  pkg install -y pigz
+fi
+
+which pigz >/dev/null 2>/dev/null
+if [ $? -eq 0 ]; then
+  echo "Failed installing pigz!"
+  exit 1
+fi
+
 which git >/dev/null 2>/dev/null
 if [ $? -ne 0 ]; then
   echo "Installing git.."

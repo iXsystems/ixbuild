@@ -17,12 +17,6 @@ if [ "$?" != "0" ]; then
   rc_halt "pkg-static install git"
 fi
 
-which pigz >/dev/null 2>/dev/null
-if [ "$?" != "0" ]; then
-  echo "Installing pigz.."
-  rc_halt "pkg-static install pigz"
-fi
-
 which grub-mkrescue >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing grub-mkrescue.."
