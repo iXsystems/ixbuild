@@ -26,21 +26,6 @@ merge_trueos_src_ports()
    local portsdir="$2"
    distCache="/usr/ports/distfiles"
 
-   # Copy over the ports-overlay from trueos-core
-   tar cvf - -C ${gitdir}/overlays/ports-overlay . 2>/dev/null | tar xvf - -C ${portsdir}
-   if [ $? -ne 0 ] ; then
-	   echo "Error copying ports-overlay"
-	   exit 1
-   fi
-
-   # Make sure these ports are in top-level Makefile
-   rc_halt "cd ${gitdir}/overlays/ports-overlay"
-   for sdir in `ls`
-   do
-     massage_subdir "$sdir"
-     rc_halt "cd ${gitdir}/overlays/ports-overlay"
-   done
-
    # Jump back to where we belong
    rc_halt "cd $mcwd"
 
