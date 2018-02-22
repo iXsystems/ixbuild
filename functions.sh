@@ -431,8 +431,8 @@ generatePackageManifestFile()
 	*-*) ;;
 	*) continue ;;
     esac
-    #Grab the version tag
-    _version=$(echo ${_line} | rev | cut -d '-' -f 1-2 | rev)
+    #Grab the version tag (ignore the first word - name might start with a number)
+    _version=$(echo ${_line} | cut -d '-' -f 2-12 | rev | cut -d '-' -f 1-2 | rev)
     #check that the version string starts with a number, otherwise only use the last "-" section
     _tmp=$(echo ${_version} | egrep '^[0-9]+')
     if [ -z "${_tmp}" ] ; then
