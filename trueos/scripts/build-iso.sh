@@ -1,6 +1,8 @@
 #!/bin/sh
 # PC-BSD Build configuration settings
 
+export IGNORE_OSVERSION="yes"
+
 # Where is the build program installed
 PROGDIR="`realpath | sed 's|/scripts||g'`" ; export PROGDIR
 
