@@ -1487,30 +1487,39 @@ jenkins_ports_tests()
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
   # Now determine the port to build
-  bPort=`cat mkport.sh | grep ^port= | cut -d '"' -f 2`
-  if [ -z "$bPort" ] ; then
-    echo "ERROR: Unable to determine bPort="
-    exit 1
+  if [ -z "${bPort}" ] ; then
+    echo "bPort variable not set: Try to auto-calculate it..."
+    bPort=`cat mkport.sh | grep ^port= | cut -d '"' -f 2`
+    if [ -z "$bPort" ] ; then
+      echo "ERROR: Unable to determine bPort="
+      exit 1
+    fi
   fi
+  echo "Test build port(s): ${bPort}"
+  for _port in ${bPort}
+  do
+    #Quick skip of any empty variables
+    if [ -z "${port}" ] ; then continue; fi
 
-  cd /usr/ports/${bPort}
-  if [ $? -ne 0 ] ; then exit 1; fi
+    cd /usr/ports/${_port}
+    if [ $? -ne 0 ] ; then exit 1; fi
 
-  make clean
-  if [ $? -ne 0 ] ; then exit 1; fi
+    make clean
+    if [ $? -ne 0 ] ; then exit 1; fi
 
-  portlint
-  if [ $? -ne 0 ] ; then exit 1; fi
+    portlint
+    if [ $? -ne 0 ] ; then exit 1; fi
 
-  make BATCH=yes
-  if [ $? -ne 0 ] ; then exit 1 ; fi
+    make BATCH=yes
+    if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  make stage
-  if [ $? -ne 0 ] ; then exit 1 ; fi
+    make stage
+    if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  make check-plist
-  if [ $? -ne 0 ] ; then exit 1 ; fi
-
+    make check-plist
+    if [ $? -ne 0 ] ; then exit 1 ; fi
+  done
+  
   exit 0
 }
 
