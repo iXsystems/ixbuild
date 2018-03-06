@@ -1498,9 +1498,9 @@ jenkins_ports_tests()
   echo "Test build port(s): ${bPort}"
   for _port in ${bPort}
   do
-    echo "[STARTING BUILD] ${port}"
+    echo "[STARTING BUILD] ${_port}"
     #Quick skip of any empty variables
-    if [ -z "${port}" ] ; then continue; fi
+    if [ -z "${_port}" ] ; then continue; fi
 
     cd /usr/ports/${_port}
     if [ $? -ne 0 ] ; then exit 1; fi
