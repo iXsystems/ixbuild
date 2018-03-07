@@ -508,8 +508,8 @@ jenkins_publish_pkg_ipfs()
 
   if [ ! -e "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist" ] ; then
     #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
-    #echo "Generating package manifest..."
-    #generatePackageManifestFile "/root/trueos/${TARGETREL}/${tstamp}" "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist"
+    echo "Generating package manifest..."
+    generatePackageManifestFile "/root/trueos/${TARGETREL}/${tstamp}" "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist"
   fi
 
   # Which hash file we are updating
@@ -521,8 +521,8 @@ jenkins_publish_pkg_ipfs()
     KEEPHASH="3"
   fi
 
-  sync
-  sleep 30
+  echo "Setting permissions on /root/trueos/${TARGETREL}/${tstamp}"
+  chown -R root:wheel /root/trueos/${TARGETREL}/${tstamp}
 
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
