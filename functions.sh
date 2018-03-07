@@ -501,14 +501,15 @@ jenkins_publish_pkg_ipfs()
 
   tstamp=$(date +%s)
 
+  echo "mkdir -p /root/trueos/${TARGETREL}/${tstamp}"
   mkdir -p /root/trueos/${TARGETREL}/${tstamp}
   rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/${TARGETREL}/ /root/trueos/${TARGETREL}/${tstamp}
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
   if [ ! -e "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist" ] ; then
     #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
-    echo "Generating package manifest..."
-    generatePackageManifestFile "/root/trueos/${TARGETREL}/${tstamp}" "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist"
+    #echo "Generating package manifest..."
+    #generatePackageManifestFile "/root/trueos/${TARGETREL}/${tstamp}" "/root/trueos/${TARGETREL}/${tstamp}/manifest.pkglist"
   fi
 
   # Which hash file we are updating
@@ -526,6 +527,7 @@ jenkins_publish_pkg_ipfs()
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
   ipfs-go config --json Experimental.FilestoreEnabled true
+  echo "ipfs-go add --nocopy -r -Q --pin /root/trueos/${TARGETREL}/${tstamp}"
   PKGHASH=$(ipfs-go add --nocopy -r -Q --pin /root/trueos/${TARGETREL}/${tstamp})
   if [ $? -ne 0 ] ; then exit_clean; fi
 
