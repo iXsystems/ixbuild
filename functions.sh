@@ -520,6 +520,9 @@ jenkins_publish_pkg_ipfs()
     KEEPHASH="3"
   fi
 
+  sync
+  sleep 30
+
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
   ipfs-go config --json Experimental.FilestoreEnabled true
