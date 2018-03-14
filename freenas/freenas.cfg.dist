@@ -7,7 +7,7 @@ GITFNASURL="https://github.com/freenas/freenas.git"
 export GITFNASURL
 
 # Branch of the FreeNAS repo to build with
-# Available (master|freenas10/development)
+# Available (master|development)
 # For 9.x
 GITFNASBRANCH="master"
 export GITFNASBRANCH
