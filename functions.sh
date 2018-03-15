@@ -1500,33 +1500,97 @@ jenkins_ports_tests()
       exit 1
     fi
   fi
+  #Determine if there are any pkg-preinstalls requested
+  if [ -z "${pkg_dep}"} ] ; then
+    echo "pkg_dep variable not set: Try to auto-calculate it..."
+    pkg_dep=`cat mkport.sh | grep ^pkg_dep= | cut -d '"' -f 2`
+  fi
+  #setup the error code for handling in-line below
+  errcode=0
+  _pkg_installed=""
+  #Pre-install any pkg dependencies
+  for _pkg in ${pkg_dep}
+  do
+    if [ 0 -ne ${errcode} ] ; then break; fi
+    if [ -z "${_pkg}" ] ; then continue; fi
+    pkg info "${_pkg}" >/dev/null 2>/dev/null
+    if [ $? -ne 0 ] ; then
+      echo "Pre-installing package dependency: ${_pkg}"
+      pkg-static add -y "${_pkg}"
+      if [ $? -ne 0 ] ; then
+        echo "ERROR: Could not pre-install package: ${_pkg}"
+        errcode=1
+      else
+        #Add this pkg to the list for cleanup later
+        _pkg_installed="${_pkg_installed} ${_pkg}"
+      fi
+    fi
+  done
+  #Now start building the ports
   echo "Test build port(s): ${bPort}"
   for _port in ${bPort}
   do
+    if [ 0 -ne ${errcode} ] ; then break; fi
     echo "[STARTING BUILD] ${_port}"
     #Quick skip of any empty variables
     if [ -z "${_port}" ] ; then continue; fi
 
     cd /usr/ports/${_port}
-    if [ $? -ne 0 ] ; then exit 1; fi
+    if [ $? -ne 0 ] ; then 
+      errcode=1
+      break
+    fi
 
     make clean
-    if [ $? -ne 0 ] ; then exit 1; fi
+    if [ $? -ne 0 ] ; then 
+      errcode=1
+      break
+    fi
 
     portlint
-    if [ $? -ne 0 ] ; then exit 1; fi
+    if [ $? -ne 0 ] ; then 
+      errcode=1
+      break
+    fi
 
     make BATCH=yes
-    if [ $? -ne 0 ] ; then exit 1 ; fi
+    if [ $? -ne 0 ] ; then 
+      errcode=1
+      break
+    fi
 
     make stage
-    if [ $? -ne 0 ] ; then exit 1 ; fi
+    if [ $? -ne 0 ] ; then 
+      errcode=1
+      break
+    fi
 
     make check-plist
-    if [ $? -ne 0 ] ; then exit 1 ; fi
+    if [ $? -ne 0 ] ; then 
+      errcode=1
+      break
+    fi
   done
   
-  exit 0
+  #Now clean up any pkg dependencies
+  if [ ! -z "${_pkg_installed}" ] ; then
+    for _pkg in ${_pkg_installed}
+    do
+      if [ -z "${_pkg}" ] ; then continue; fi
+      pkg-static delete -y ${_pkg}
+    done
+    #Now cleanup any leftover orphans 
+    #(DANGEROUS - let Kris decide yea/nay on this)
+    #pkg-static autoremove -y
+  fi
+  #cleanup the internal variables
+  unset _pkg_installed
+  unset _pkg
+  unset _port
+  
+  #return the error/success code
+  test 0 -eq ${errcode}
+  exit $?
 }
 
 jenkins_mktrueview()
