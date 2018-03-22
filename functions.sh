@@ -501,6 +501,7 @@ jenkins_publish_pkg_ipfs()
 
   tstamp=$(date +%s)
 
+  echo "mkdir -p /root/trueos/${TARGETREL}/${tstamp}"
   mkdir -p /root/trueos/${TARGETREL}/${tstamp}
   rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${SFTPFINALDIR}/pkg/${TARGETREL}/ /root/trueos/${TARGETREL}/${tstamp}
   if [ $? -ne 0 ] ; then exit_clean ; fi
@@ -520,9 +521,13 @@ jenkins_publish_pkg_ipfs()
     KEEPHASH="3"
   fi
 
+  echo "Setting permissions on /root/trueos/${TARGETREL}/${tstamp}"
+  chown -R root:wheel /root/trueos/${TARGETREL}/${tstamp}
+
   # Copy packages
   echo "Adding packages to IPFS, this will take a while..."
   ipfs-go config --json Experimental.FilestoreEnabled true
+  echo "ipfs-go add --nocopy -r -Q --pin /root/trueos/${TARGETREL}/${tstamp}"
   PKGHASH=$(ipfs-go add --nocopy -r -Q --pin /root/trueos/${TARGETREL}/${tstamp})
   if [ $? -ne 0 ] ; then exit_clean; fi
 
@@ -1487,30 +1492,40 @@ jenkins_ports_tests()
   if [ $? -ne 0 ] ; then exit 1 ; fi
 
   # Now determine the port to build
-  bPort=`cat mkport.sh | grep ^port= | cut -d '"' -f 2`
-  if [ -z "$bPort" ] ; then
-    echo "ERROR: Unable to determine bPort="
-    exit 1
+  if [ -z "${bPort}" ] ; then
+    echo "bPort variable not set: Try to auto-calculate it..."
+    bPort=`cat mkport.sh | grep ^port= | cut -d '"' -f 2`
+    if [ -z "$bPort" ] ; then
+      echo "ERROR: Unable to determine bPort="
+      exit 1
+    fi
   fi
+  echo "Test build port(s): ${bPort}"
+  for _port in ${bPort}
+  do
+    echo "[STARTING BUILD] ${_port}"
+    #Quick skip of any empty variables
+    if [ -z "${_port}" ] ; then continue; fi
 
-  cd /usr/ports/${bPort}
-  if [ $? -ne 0 ] ; then exit 1; fi
+    cd /usr/ports/${_port}
+    if [ $? -ne 0 ] ; then exit 1; fi
 
-  make clean
-  if [ $? -ne 0 ] ; then exit 1; fi
+    make clean
+    if [ $? -ne 0 ] ; then exit 1; fi
 
-  portlint
-  if [ $? -ne 0 ] ; then exit 1; fi
+    portlint
+    if [ $? -ne 0 ] ; then exit 1; fi
 
-  make BATCH=yes
-  if [ $? -ne 0 ] ; then exit 1 ; fi
+    make BATCH=yes
+    if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  make stage
-  if [ $? -ne 0 ] ; then exit 1 ; fi
+    make stage
+    if [ $? -ne 0 ] ; then exit 1 ; fi
 
-  make check-plist
-  if [ $? -ne 0 ] ; then exit 1 ; fi
-
+    make check-plist
+    if [ $? -ne 0 ] ; then exit 1 ; fi
+  done
+  
   exit 0
 }
 
