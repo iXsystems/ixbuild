@@ -1824,7 +1824,7 @@ populate_pr_pipeline()
   ghprbPullLongDescription=$(cat /tmp/jsonout.$$ | jq -r '.body')
   rm /tmp/jsonout.$$
 
-  export ghprbTargetBranch ghprbSourceBranch ghprbCommentBody ghprbbPullLongDescription
+  export ghprbTargetBranch ghprbSourceBranch ghprbCommentBody ghprbPullLongDescription
   export PRBUILDER
 
   export BUILDINCREMENTAL="YES"
