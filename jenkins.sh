@@ -34,6 +34,9 @@ BRANCH="${3}"
 # Set JENKINS var
 export USING_JENKINS="YES"
 
+# Pkg does stuff now with ABIs and it prevents updating the database
+export IGNORE_OSVERSION="YES"
+
 display_usage() {
 
    cat << EOF
