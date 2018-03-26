@@ -2,16 +2,12 @@
 # FreeNAS Build configuration settings
 
 # Which FreeNAS git URL to clone
-# For 10.x
-#GITFNASURL="https://github.com/freenas/freenas-build.git"
 # For 9.x
 GITFNASURL="https://github.com/freenas/freenas.git"
 export GITFNASURL
 
 # Branch of the FreeNAS repo to build with
-# Available (master|freenas10/development)
-# For 10.x
-#GITFNASBRANCH="freenas10/development"
+# Available (master|development)
 # For 9.x
 GITFNASBRANCH="master"
 export GITFNASBRANCH
@@ -21,6 +17,5 @@ TARGETREL="freenas-9.10"
 export TARGETREL
 
 # Set that this is a legacy 9.X build
-# Comment this out if building 10.x
 FREENASLEGACY="YES"
 export FREENASLEGACY
