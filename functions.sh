@@ -753,21 +753,30 @@ jenkins_freenas_push_be()
 }
 jenkins_freenas_push_docs()
 {
+  if [ -z "$DOCBRANCH" ] ; then
+    DOCBRANCH="master"
+  fi
+
   # Now lets upload the docs
   if [ -n "$SFTPHOST" ] ; then
     rm -rf /tmp/handbookpush 2>/dev/null
     mkdir -p /tmp/handbookpush
 
     # Get the docs from the staging server
-    rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook/ /tmp/handbookpush
+    rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook-${DOCBRANCH}/ /tmp/handbookpush
     if [ $? -ne 0 ] ; then exit_clean; fi
 
     cd /tmp/handbookpush
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
     # Make them live!
-    rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html11
-    if [ $? -ne 0 ] ; then exit_clean; fi
+    if [ -z "$DOCTARGET" ] ; then
+      rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html11
+      if [ $? -ne 0 ] ; then exit_clean; fi
+    else
+      rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/${DOCTARGET}
+      if [ $? -ne 0 ] ; then exit_clean; fi
+    fi
     rm -rf /tmp/handbookpush 2>/dev/null
   fi
 
@@ -932,7 +941,11 @@ jenkins_freenas_docs()
 
   DDIR=`mktemp -d /tmp/build/XXXX`
 
-  git clone --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
+  if [ -z "$DOCBRANCH" ] ; then
+    DOCBRANCH="master"
+  fi
+
+  git clone -b $DOCBRANCH --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   cd ${DDIR}/userguide
@@ -946,9 +959,8 @@ jenkins_freenas_docs()
     cd ${DDIR}/userguide/processed/_build/html/
     if [ $? -ne 0 ] ; then exit_clean ; fi
 
-    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook" >/dev/null 2>/dev/null
-    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook
-    if [ $? -ne 0 ] ; then exit_clean; fi
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/handbook-${DOCBRANCH}" >/dev/null 2>/dev/null
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" . ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook-${DOCBRANCH}
   fi
 
   rm -rf ${DDIR}
