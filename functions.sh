@@ -418,9 +418,14 @@ jenkins_iso()
 generatePackageManifestFile()
 {
   #inputs: 1: Directory of package files (*.txz), 2: text file for manifest
-  #Note: This will **append** the manifest info to the file!!
+  #Note: This will **replace** the manifest info in the file!!
   _pkgdir=$1
   _pkgfile=$2
+  #Remove the old file if it exists
+  if [ -e "${_pkgfile}" ] ; then
+    rm "${_pkgfile}"
+  fi
+  
   for _line in `find "${_pkgdir}" -depth 1 -name "*.txz" | sort`
   do
     #Cleanup the individual line (directory, suffix)
@@ -459,8 +464,7 @@ jenkins_publish_pkg()
     exit 1
   fi
 
-  if [ ! -e "${SFTPFINALDIR}/pkg/${TARGETREL}/pkg_manifest.pkglist" ] ; then
-    #Note: There are two pkg publish jobs - so only generate the manifest if it has not already been created
+  #Generate the pkg manifest files every time we push to the CDN
     echo "Generating package manifest..."
     _all_pkgs_dir="amd64/All"  #Relative to the release dir
     _base_pkgs_dir="amd64-base"
@@ -468,7 +472,6 @@ jenkins_publish_pkg()
     generatePackageManifestFile "${SFTPFINALDIR}/pkg/${TARGETREL}/${_base_pkgs_dir}" "${SFTPFINALDIR}/pkg/${TARGETREL}/FreeBSD_manifest.pkglist"
     unset _all_pkgs_dir
     unset _base_pkgs_dir
-  fi
 
   # Set target locations
   scale="pcbsd@pcbsd-master.scaleengine.net"
