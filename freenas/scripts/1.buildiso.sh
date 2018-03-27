@@ -144,12 +144,15 @@ check_local_git_repo()
   export REPO_WEBUI_URL=git://10.20.21.137/webui
   export REPO_MDNSRESPONDER_URL=git://10.20.21.137/mDNSResponder
   export REPO_FREENAS_DOCS_URL=git://10.20.21.137/freenas-docs
+  export REPO_FREENAS_DOCS_LEGACY_URL=git://10.20.21.137/freenas-docs
   export REPO_FREENAS_PKGTOOLS_URL=git://10.20.21.137/freenas-pkgtools
   export REPO_PORTS_URL=git://10.20.21.137/ports
   export REPO_SAMBA_URL=git://10.20.21.137/samba
   export REPO_NETATALK_URL=git://10.20.21.137/Netatalk
   export REPO_IX_INSTALLER_URL=git://10.20.21.137/ix-installer
   export REPO_PY_LIBZFS_URL=git://10.20.21.137/py-libzfs
+  export REPO_PY_BSD_URL=git://10.20.21.137/py-bsd
+  export REPO_IOCAGE_URL=git://10.20.21.137/iocage
 }
 
 check_local_git_repo
