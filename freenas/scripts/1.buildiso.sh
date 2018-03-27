@@ -131,6 +131,29 @@ check_pr_depends()
   done
 }
 
+# If we are building on internal IX network use local git mirrors
+check_local_git_repo()
+{
+  if [ -z "$SFTPUSER" -o "$SFTPUSER" != "pkgsync" ]; then
+    return 0
+  fi
+
+  echo "*** Using local iX Git Mirror ***"
+  export REPO_OS_URL=git://10.20.21.137/os
+  export REPO_FREENAS_URL=git://10.20.21.137/freenas
+  export REPO_WEBUI_URL=git://10.20.21.137/webui
+  export REPO_MDNSRESPONDER_URL=git://10.20.21.137/mDNSResponder
+  export REPO_FREENAS_DOCS_URL=git://10.20.21.137/freenas-docs
+  export REPO_FREENAS_PKGTOOLS_URL=git://10.20.21.137/freenas-pkgtools
+  export REPO_PORTS_URL=git://10.20.21.137/ports
+  export REPO_SAMBA_URL=git://10.20.21.137/samba
+  export REPO_NETATALK_URL=git://10.20.21.137/Netatalk
+  export REPO_IX_INSTALLER_URL=git://10.20.21.137/ix-installer
+  export REPO_PY_LIBZFS_URL=git://10.20.21.137/py-libzfs
+}
+
+check_local_git_repo
+
 # Allowed settings for BUILDINCREMENTAL
 case $BUILDINCREMENTAL in
    ON|on|YES|yes|true|TRUE) BUILDINCREMENTAL="true" ;;
@@ -150,6 +173,7 @@ LOUT="/tmp/fnas-error-debug.txt"
 touch ${LOUT}
 
 get_bedir
+
 
 # Allow these defaults to be overridden
 TMPFSWORK="all"
@@ -371,7 +395,6 @@ if [ -n "$PRBUILDER" -a -n "${GH_REPO}" ] ; then
     fi
   fi
 fi
-
 
 # Start the XML reporting
 clean_xml_results "Clean previous results"
