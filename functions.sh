@@ -516,7 +516,7 @@ jenkins_publish_pkg_ipfs()
   fi
 
   # Which hash file we are updating
-  if [ -n "$1" -a "$1" = "stable" ] ; then
+  if [ "$TARGETREL" = "master" ] ; then
     HFILE="trueos-ipfs-stable"
     KEEPHASH="2"
   else
