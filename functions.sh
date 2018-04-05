@@ -564,6 +564,9 @@ jenkins_publish_pkg_ipfs()
   scp /var/db/${HFILE} kris@web.pcbsd.org:updates/${HFILE}
   if [ $? -ne 0 ] ; then exit_clean; fi
 
+  echo "Doing garbage collection of IPFS..."
+  ipfs-go repo gc
+
 }
 
 jenkins_promote_pkg()
