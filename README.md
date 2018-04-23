@@ -66,7 +66,7 @@ export ARTIFACTONFAIL=yes
 export ARTIFACTONSUCCESS=yes
 ```
 
-For more options including VM backends for QA tests see:
+For more options see:
 
 https://github.com/iXsystems/ixbuild/blob/master/build.conf.dist
 
@@ -75,7 +75,7 @@ Build iX projects with jenkins
 
 FreeNAS
 ```
-sudo /ixbuild/jenkins.sh freenas freenas-9.10
+sudo /ixbuild/jenkins.sh freenas freenas-11-nightlies
 ```
 TrueOS
 ```
@@ -87,18 +87,6 @@ sudo /ixbuild/jenkins.sh trueos-iso trueos-current production
 iocage
 ```
 sudo /ixbuild/jenkins.sh iocage_pkgs
-```
-
-Running test framework from jenkins
-============
-
-FreeNAS
-```
-sudo /ixbuild/jenkins.sh freenas-tests freenas-9.10
-```
-TrueOS
-```
-sudo /ixbuild/jenkins.sh ports-tests
 ```
 
 Use Jenkins FreeNAS or TrueNAS update servers (iX Internal only)
