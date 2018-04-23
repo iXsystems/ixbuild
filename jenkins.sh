@@ -5,11 +5,6 @@ mypath=`realpath $0`
 cd `dirname $mypath`
 export PROGDIR="`realpath`"
 
-# Skip updating git repo if we are using iocage basejails
-if [ -d "/mnt/tank/ixbuild/" ] ; then
-  export JENKINS_DO_UPDATE="YES"
-fi
-
 if [ -z "$JENKINS_DO_UPDATE" ] ; then
 
   # Git pull may fail if this isn't set
@@ -44,13 +39,6 @@ Available Commands:
 
 -- FreeNAS Commands --
 freenas                  - Builds FreeNAS release
-freenas-tests            - Runs FreeNAS VM API tests against built release
-freenas-tests-jailed     - Runs FreeNAS VM API tests against built release in a iocage jail
-freenas-run-tests        - Runs FreeNAS tests with other VM backend
-freenas-run-tests-jailed - Runs FreeNAS tests with other VM backend in a iocage jail
-freenas-combo            - Build release and run VM API tests against it automatically
-freenas-ltest            - Runs the FreeNAS "live" tests against a target system
-freenas-lupgrade         - Runs the FreeNAS "live" upgrade against a target system
 freenas-docs             - Create FreeNAS Handbook
 freenas-tn-docs          - Create TrueNAS Handbook
 freenas-api              - Create FreeNAS API
@@ -133,12 +121,6 @@ case $TYPE in
              iocage_pkgs) jenkins_iocage_pkgs ;;
         iocage_pkgs_push) jenkins_iocage_pkgs_push ;;
                  freenas) jenkins_freenas ;;
-           freenas-tests) jenkins_freenas_tests ;;
-    freenas-tests-jailed) jenkins_freenas_tests_jailed ;;
-       freenas-run-tests) jenkins_freenas_run_tests ;;
-freenas-run-tests-jailed) jenkins_freenas_run_tests_jailed ;;
-           freenas-ltest) jenkins_freenas_live_tests ;;
-        freenas-lupgrade) jenkins_freenas_live_upgrade ;;
          freenas-tn-docs) jenkins_truenas_docs ;;
             freenas-docs) jenkins_freenas_docs ;;
        freenas-push-docs) jenkins_freenas_push_docs ;;
