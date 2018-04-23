@@ -1595,15 +1595,6 @@ do_build_env_setup()
   fi
 }
 
-jenkins_iocage_tests()
-{
-  cd $WORKSPACE
-  pwd
-  make install
-  sysrc -f /etc/rc.conf iocage_enable="YES"
-  pytest --zpool zroot --junitxml=${WORKSPACE}/results/iocage.xml
-}
-
 jenkins_iocage_pkgs()
 {
   echo "Starting iocage package build..."

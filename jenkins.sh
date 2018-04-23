@@ -76,7 +76,6 @@ sysadm-api               - Build SysAdm API handbook
 push-sysadm-api          - Upload SysAdm API handbook
 
 -- iocage Commands --
-iocage-tests             - Run CI from iocage git (Requires pool name)
 iocage_pkgs              - Build iocage package set
 iocage_pkgs_push         - Push iocage package set public
 EOF
@@ -117,7 +116,6 @@ case $TYPE in
              promote-pkg) jenkins_promote_pkg ;;
                trueos-vm) jenkins_vm ;;
                     jail) jenkins_jail ;;
-            iocage-tests) jenkins_iocage_tests ;;
              iocage_pkgs) jenkins_iocage_pkgs ;;
         iocage_pkgs_push) jenkins_iocage_pkgs_push ;;
                  freenas) jenkins_freenas ;;
