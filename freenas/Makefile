@@ -10,12 +10,6 @@ image:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh iso
 iso:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh iso
-tests:
-	@cd ${.CURDIR}/scripts/ && sh build-iso.sh tests
-livetests:
-	@cd ${.CURDIR}/scripts/ && sh build-iso.sh livetests
-liveupgrade:
-	@cd ${.CURDIR}/scripts/ && sh build-iso.sh liveupgrade
 api:
 	@cd ${.CURDIR}/scripts/ && sh build-iso.sh api
 docs:
