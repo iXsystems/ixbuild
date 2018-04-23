@@ -5,10 +5,6 @@
 - [Jenkins build framework for iX projects](#jenkins-build-framework-for-ix-projects)
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
-- [Manually running test framework](#manually-running-test-framework)
-- [FreeNAS Testing Framework](#freenas-testing-framework)
-  - [Adding New tests](#adding-new-tests)
-  - [Where are tests run?](#where-are-tests-run)
 - [Use Jenkins FreeNAS or TrueNAS update servers (iX Internal only)](#use-jenkins-freenas-or-truenas-update-servers-ix-internal-only)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
