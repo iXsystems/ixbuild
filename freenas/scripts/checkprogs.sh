@@ -14,13 +14,13 @@ mkdir -p ${PROGDIR}/log >/dev/null 2>/dev/null
 which git >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing git.."
-  rc_halt "pkg-static install git"
+  rc_halt "pkg-static install -y git"
 fi
 
 which bash >/dev/null 2>/dev/null
 if [ "$?" != "0" ]; then
   echo "Installing bash.."
-  rc_halt "pkg-static install bash"
+  rc_halt "pkg-static install -y bash"
 fi
 
 which grub-mkrescue >/dev/null 2>/dev/null
