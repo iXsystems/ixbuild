@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # Log files
 export RESTYOUT=/tmp/resty.out
 export RESTYERR=/tmp/resty.err
