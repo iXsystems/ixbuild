@@ -1345,6 +1345,9 @@ jenkins_ports_tests()
 
 jenkins_mktrueview()
 {
+  # These following steps are required to import and snapshot the VM before this function will work
+  # VBoxManage import --vsys 0 --vmname trueview /root/TrueView-Builder.ova --eula accept
+  # VBoxManage snapshot trueview take clean
   cd /root
 
   # Roll back to clean snapshot
