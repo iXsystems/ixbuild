@@ -1345,10 +1345,14 @@ jenkins_ports_tests()
 
 jenkins_mktrueview()
 {
+  # Commands used to import the initial ova used for this function
+  # VBoxManage import --vsys 0 --vmname TrueView TrueView-Builder.ova --eula accept
+  # VBoxManage snapshot TrueView take clean
+  
   cd /root
 
   # Roll back to clean snapshot
-  VBoxManage snapshot trueview restore clean
+  VBoxManage snapshot TrueView restore clean
   if [ $? -ne 0 ] ; then
     echo "Failed to roll-back to @clean snapshot"
     exit 1
