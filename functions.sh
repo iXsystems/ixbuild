@@ -1359,7 +1359,7 @@ jenkins_mktrueview()
   fi
 
   # Start the trueview VM and wait for it to finish
-  ( VBoxHeadless -s trueview >/dev/null 2>/dev/null ) &
+  ( VBoxHeadless -s Trueview >/dev/null 2>/dev/null ) &
   count=0
 
   echo "Waiting for TrueView prep to finish..."
@@ -1368,14 +1368,14 @@ jenkins_mktrueview()
     sleep 60
     echo "."
 
-    vboxmanage list runningvms | grep -q "trueview"
+    vboxmanage list runningvms | grep -q "TrueView"
     if [ $? -ne 0 ] ; then
       break
     fi
 
     count=`expr $count + 1`
     if [ $count -gt 20 ] ; then
-      VBoxManage controlvm trueview poweroff
+      VBoxManage controlvm TrueView poweroff
       exit 1
     fi
   done
@@ -1385,20 +1385,20 @@ jenkins_mktrueview()
   OUTFILE=/root/trueview/trueview-`date '+%Y-%m-%d-%H-%M'`
 
   # Looks like trueview finished on its own, lets package it up
-  VBoxManage modifyvm trueview --nic1 bridged
+  VBoxManage modifyvm TrueView --nic1 bridged
 
   echo "Exporting TrueView .ova file..."
-  VBoxManage export trueview -o ${OUTFILE}.ova
+  VBoxManage export TrueView -o ${OUTFILE}.ova
   chmod 644 ${OUTFILE}.ova
   echo "Exporting TrueView legacy .ova file..."
-  VBoxManage export trueview -o ${OUTFILE}-legacy.ova --legacy09
+  VBoxManage export TrueView -o ${OUTFILE}-legacy.ova --legacy09
   chmod 644 ${OUTFILE}-legacy.ova
   echo "Exporting TrueView ovf20 .ova file..."
-  VBoxManage export trueview -o ${OUTFILE}-ovf20.ova --ovf20
+  VBoxManage export TrueView -o ${OUTFILE}-ovf20.ova --ovf20
   chmod 644 ${OUTFILE}-ovf20.ova
 
   # Export the RAW disk image
-  dimg=`ls /root/VirtualBox\ VMs/trueview/trueview*.vmdk`
+  dimg=`ls /root/VirtualBox\ VMs/TrueView/trueview*.vmdk`
   vboxmanage clonemedium "$dimg" /root/trueview/trueview.vmdk --format VMDK --variant Fixed,ESX
   cd /root/trueview
   zip -r ${OUTFILE}-vmdk.zip trueview-flat.vmdk trueview.vmdk
