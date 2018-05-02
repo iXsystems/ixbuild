@@ -1396,6 +1396,15 @@ jenkins_mktrueview()
   VBoxManage export trueview -o ${OUTFILE}-ovf20.ova --ovf20
   chmod 644 ${OUTFILE}-ovf20.ova
 
+  # Export the RAW disk image
+  dimg=`ls /root/VirtualBox\ VMs/trueview/trueview*.vmdk`
+  vboxmanage clonemedium "$dimg" /root/trueview/trueview.vmdk --format VMDK --variant Fixed,ESX
+  cd /root/trueview
+  zip -r ${OUTFILE}-vmdk.zip trueview-flat.vmdk trueview.vmdk
+  chmod 644 ${OUTFILE}-vmdk.zip
+  rm trueview-flat.vmdk
+  rm trueview.vmdk
+
   # Save the .ova to stage server
   if [ -n "$SFTPHOST" ] ; then
     STAGE="${SFTPFINALDIR}/iso/trueview/amd64"
