@@ -14,8 +14,13 @@ net-p2p/couchpotato
 net-p2p/sonarr
 net-p2p/deluge-cli
 net-p2p/transmission-daemon
+net-p2p/xmrig
 irc/quassel-core
 security/clamav
+sysutils/bacula-client
+sysutils/bacula-server
+sysutils/bacula9-client
+sysutils/bacula9-server
 sysutils/backuppc4
 sysutils/tarsnap
 sysutils/munin-node
