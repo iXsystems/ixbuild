@@ -179,6 +179,7 @@ get_bedir
 
 
 # Allow these defaults to be overridden
+export USE_ZFS="YES"
 TMPFSWORK="all"
 BCONF="/usr/local/etc/poudriere-builders.conf"
 if [ -e "$BCONF" ] ; then
