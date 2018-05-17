@@ -178,8 +178,12 @@ touch ${LOUT}
 get_bedir
 
 
-# Allow these defaults to be overridden
+# Enable ZFS for our poudriere builds
 export USE_ZFS="YES"
+export ZPOOL=$(mount | grep 'on / ' | cut -d '/' -f 1)
+export ZROOTFS="/poudriere"
+
+# Allow these defaults to be overridden
 TMPFSWORK="all"
 BCONF="/usr/local/etc/poudriere-builders.conf"
 if [ -e "$BCONF" ] ; then
