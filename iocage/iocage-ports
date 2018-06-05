@@ -1,6 +1,7 @@
 databases/mysql56-server
-databases/postgresql93-server
-databases/postgresql93-contrib
+databases/postgresql95-server
+databases/postgresql95-contrib
+databases/postgresql95-client
 devel/jenkins
 devel/jenkins-lts
 editors/libreoffice
