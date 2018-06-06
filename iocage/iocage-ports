@@ -4,7 +4,6 @@ databases/postgresql95-contrib
 databases/postgresql95-client
 devel/jenkins
 devel/jenkins-lts
-editors/libreoffice
 games/minecraft-server
 multimedia/emby-server
 multimedia/plexmediaserver
