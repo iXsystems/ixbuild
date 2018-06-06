@@ -9,7 +9,7 @@ multimedia/emby-server
 multimedia/plexmediaserver
 multimedia/plexmediaserver-plexpass
 net/syncthing
-net-p2p/btsync
+net-p2p/rslsync
 net-p2p/couchpotato
 net-p2p/sonarr
 net-p2p/deluge-cli
