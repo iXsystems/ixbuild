@@ -540,14 +540,18 @@ if [ ! -d "${WORKSPACE}/artifacts" ] ; then
 fi
 cp -r ${PROFILE}/_BE/release/* "${WORKSPACE}/artifacts/"
 
-
 # Locate the ISO file
 ISOFILE=`find "${WORKSPACE}/artifacts" | grep \.iso$ | head -n 1`
-ISODIR="`dirname $ISOFILE`"
+ISODIR="`dirname $ISOFILE 2>/dev/null`"
 if [ -d "$ISODIR" ] ; then
   echo "*** Moving ISO files ($ISODIR) to artifacts/iso ***"
   rm -rf "${WORKSPACE}/artifacts/iso"
   mv "${ISODIR}" "${WORKSPACE}/artifacts/iso"
+else
+  # Copy ISO's from objs/ if they exist
+  echo "*** Copy ISO files (${PROFILE}/_BE/objs/) to artifacts/iso ***"
+  mkdir -p "${WORKSPACE}/artifacts/iso"
+  cp -r ${PROFILE}/_BE/objs/*.iso "${WORKSPACE}/artifacts/iso/"
 fi
 
 # Copy the sources into the artifact repo as well
