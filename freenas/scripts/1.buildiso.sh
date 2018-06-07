@@ -551,7 +551,7 @@ else
   # Copy ISO's from objs/ if they exist
   echo "*** Copy ISO files (${PROFILE}/_BE/objs/) to artifacts/iso ***"
   mkdir -p "${WORKSPACE}/artifacts/iso"
-  cp -r ${PROFILE}/_BE/objs/*.iso "${WORKSPACE}/artifacts/iso/"
+  mv ${PROFILE}/_BE/objs/*.iso "${WORKSPACE}/artifacts/iso/"
 fi
 
 # Copy the sources into the artifact repo as well
