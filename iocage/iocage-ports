@@ -17,6 +17,7 @@ net-p2p/deluge-cli
 net-p2p/transmission-daemon
 net-p2p/xmrig
 irc/quassel-core
+irc/irssi
 security/clamav
 sysutils/bacula-client
 sysutils/bacula-server
