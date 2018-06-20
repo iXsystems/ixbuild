@@ -18,6 +18,7 @@ net-p2p/transmission-daemon
 net-p2p/xmrig
 irc/quassel-core
 irc/irssi
+irc/weechat
 security/clamav
 sysutils/bacula-client
 sysutils/bacula-server
