@@ -35,4 +35,4 @@ www/subsonic-standalone
 www/madsonic-standalone
 www/transmission-web
 www/tt-rss
-net-p2p/qbittorrent
+net-p2p/qbittorrent@nox
