@@ -1377,7 +1377,7 @@ jenkins_mktrueview()
     fi
 
     count=`expr $count + 1`
-    if [ $count -gt 20 ] ; then
+    if [ $count -gt 60 ] ; then
       VBoxManage controlvm trueview poweroff
       exit 1
     fi
