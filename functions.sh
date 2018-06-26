@@ -713,6 +713,7 @@ jenkins_freenas_push_docs()
   if [ -z "$DOCBRANCH" ] ; then
     DOCBRANCH="master"
   fi
+  echo "Using DOCBRANCH: $DOCBRANCH"
 
   # Now lets upload the docs
   if [ -n "$SFTPHOST" ] ; then
@@ -728,9 +729,11 @@ jenkins_freenas_push_docs()
 
     # Make them live!
     if [ -z "$DOCTARGET" ] ; then
+      echo "Pushing to /tank/doc/userguide/html11"
       rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html11
       if [ $? -ne 0 ] ; then exit_clean; fi
     else
+      echo "Pushing to /tank/doc/userguide/${DOCTARGET}"
       rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/${DOCTARGET}
       if [ $? -ne 0 ] ; then exit_clean; fi
     fi
@@ -901,6 +904,7 @@ jenkins_freenas_docs()
   if [ -z "$DOCBRANCH" ] ; then
     DOCBRANCH="master"
   fi
+  echo "Using DOCBRANCH: $DOCBRANCH"
 
   git clone -b $DOCBRANCH --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
