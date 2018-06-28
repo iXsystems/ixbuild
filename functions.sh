@@ -1360,7 +1360,13 @@ jenkins_mktrueview()
     echo "Failed to roll-back to @clean snapshot"
     exit 1
   fi
-
+  
+  # Clean up old update files
+  if [ -d /root/trueview-updates ] ; then
+    rm -rf /root/trueview-updates/
+  fi
+  mkdir /root/trueview-updates
+  
   # Start the trueview VM and wait for it to finish
   ( VBoxHeadless -s trueview >/dev/null 2>/dev/null ) &
   count=0
@@ -1418,8 +1424,15 @@ jenkins_mktrueview()
     rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" /root/trueview/ ${SFTPUSER}@${SFTPHOST}:${STAGE}/
     if [ $? -ne 0 ] ; then exit_clean ; fi
   fi
-
-  exit 0
+  
+  # Now verify that the build was successful, by checking for the update files
+  if [ "$(ls -A /root/trueview-updates)" ] ; then
+    # Directory not empty - flag as success
+    exit 0
+  else
+    # No update files - flag as error
+    exit 1
+  fi
 }
 
 jenkins_mkcustard()
