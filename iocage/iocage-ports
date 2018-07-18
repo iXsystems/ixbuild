@@ -9,13 +9,17 @@ games/minecraft-server
 multimedia/emby-server
 multimedia/plexmediaserver
 multimedia/plexmediaserver-plexpass
+multimedia/zoneminder
 net/syncthing
 net-p2p/btsync
+net-p2p/qbittorrent@nox
 net-p2p/couchpotato
 net-p2p/sonarr
 net-p2p/deluge-cli
+net-p2p/radarr
 net-p2p/transmission-daemon
 net-p2p/xmrig
+news/sabnzbdplus 
 irc/quassel-core
 irc/irssi
 irc/weechat
@@ -36,4 +40,4 @@ www/subsonic-standalone
 www/madsonic-standalone
 www/transmission-web
 www/tt-rss
-net-p2p/qbittorrent@nox
+
