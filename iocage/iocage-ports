@@ -32,7 +32,7 @@ sysutils/backuppc4
 sysutils/tarsnap
 sysutils/munin-node
 www/apache24
-www/nextcloud
+www/nextcloud@php71
 www/nginx
 www/redmine
 www/gitlab
