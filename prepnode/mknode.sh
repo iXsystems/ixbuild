@@ -46,12 +46,24 @@ if [ $? -ne 0 ]; then
   pkg install -y jq
 fi
 
-
 which git >/dev/null 2>/dev/null
 if [ $? -ne 0 ]; then
   echo "Failed installing git!"
   exit 1
 fi
+
+if [ "$PREPTYPE" = "NODE" ] ; then
+  pkg info -q openjdk8 >/dev/null 2>/dev/null
+  if [ "$?" != "0" ]; then
+    pkg install -y openjdk8
+    # we need to add the jenkins group otherwise build failes
+    pw groupadd jenkins
+    if [ "$?" != "0" ]; then
+      echo "Failed installing openjdk8!"
+      exit 1
+    fi
+  fi
+
 if [ -d "/ixbuild" ] ; then
   echo "/ixbuild already exists! Remove this directory to continue!"
   exit 1
