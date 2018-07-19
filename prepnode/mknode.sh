@@ -56,7 +56,7 @@ if [ "$PREPTYPE" = "NODE" ] ; then
   pkg info -q openjdk8 >/dev/null 2>/dev/null
   if [ "$?" != "0" ]; then
     pkg install -y openjdk8
-    # we need to add the jenkins group otherwise build
+    # we need to add the jenkins group otherwise build failes
     pw groupadd jenkins
     if [ "$?" != "0" ]; then
       echo "Failed installing openjdk8!"
