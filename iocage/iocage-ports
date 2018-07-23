@@ -9,7 +9,6 @@ games/minecraft-server
 multimedia/emby-server
 multimedia/plexmediaserver
 multimedia/plexmediaserver-plexpass
-multimedia/zoneminder
 net/syncthing
 net-p2p/btsync
 net-p2p/qbittorrent@nox
