@@ -32,7 +32,6 @@ sysutils/backuppc4
 sysutils/tarsnap
 sysutils/munin-node
 sysutils/cdrtools
-mvn -Pdeveloper,systemvm clean install
 www/apache24
 www/nextcloud@php71
 www/nginx
