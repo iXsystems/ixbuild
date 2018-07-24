@@ -3,6 +3,7 @@ databases/postgresql95-server
 databases/postgresql95-contrib
 databases/postgresql95-client
 databases/php56-pdo_pgsql
+devel/cloudstack
 devel/jenkins
 devel/jenkins-lts
 games/minecraft-server
