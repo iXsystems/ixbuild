@@ -15,7 +15,8 @@ games/minecraft-server
 irc/irssi
 irc/quassel-core
 irc/weechat
-lang/perl5.24
+lang/python27
+lang/python
 multimedia/emby-server
 multimedia/plexmediaserver
 multimedia/plexmediaserver-plexpass
@@ -34,6 +35,7 @@ news/sabnzbdplus
 print/indexinfo
 security/clamav
 security/pam_ldap
+security/sudo
 sysutils/backuppc4
 sysutils/bacula9-client
 sysutils/bacula9-server
