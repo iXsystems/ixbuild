@@ -53,5 +53,6 @@ www/nextcloud@php71
 www/nginx
 www/redmine
 www/subsonic-standalone
+www/tomcat9
 www/transmission-web
 www/tt-rss
