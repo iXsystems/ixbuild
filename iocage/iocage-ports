@@ -46,7 +46,7 @@ sysutils/munin-node
 sysutils/tarsnap
 textproc/libxml2
 www/apache24
-www/gitlab
+www/gitlab-ce
 www/madsonic-standalone
 www/mod_php71
 www/nextcloud@php71
