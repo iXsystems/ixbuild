@@ -42,6 +42,7 @@ sysutils/bacula9-server
 sysutils/bacula-client
 sysutils/bacula-server
 sysutils/cdrtools
+sysutils/linux-crashplan
 sysutils/munin-node
 sysutils/tarsnap
 textproc/libxml2
