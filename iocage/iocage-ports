@@ -43,14 +43,11 @@ sysutils/cdrtools
 sysutils/munin-node
 sysutils/tarsnap
 textproc/libxml2
-www/apache24
 www/gitlab-ce
 www/madsonic-standalone
-www/mod_php71
 www/nextcloud@php71
 www/nginx
 www/redmine
 www/subsonic-standalone
-www/tomcat9
 www/transmission-web
 www/tt-rss
