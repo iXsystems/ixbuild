@@ -181,5 +181,5 @@ if [ -z "$SFTPHOST" ] ; then return 0 ; fi
 
 # Now rsync this sucker
 echo "Copying packages to staging area... ${PPKGDIR}/ -> ${SFTPFINALDIR}/pkg/iocage"
-rsync -a --delete ${PPKGDIR}/ ${SFTPFINALDIR}/pkg/iocage
+rsync -a --delete ${PPKGDIR}/ ${SFTPFINALDIR}/pkg/iocage/unstable
 if [ $? -ne 0 ] ; then exit 1 ; fi
