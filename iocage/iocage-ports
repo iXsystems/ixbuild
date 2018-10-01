@@ -27,6 +27,7 @@ net-p2p/qbittorrent@nox
 net-p2p/radarr
 net-p2p/sonarr
 net-p2p/transmission-daemon
+net-p2p/transmission-web
 net-p2p/xmrig
 net/syncthing
 news/sabnzbdplus 
