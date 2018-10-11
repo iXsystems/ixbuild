@@ -1140,14 +1140,14 @@ jenkins_trueos_push_lumina_docs()
     mkdir -p /outgoing/doc/master/lumina-docs
     cd /outgoing/doc/master/lumina-docs
     ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/lumina-docs" >/dev/null 2>/dev/null
-    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/lumina-docs .
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/lumina-docs/ .
     if [ $? -ne 0 ] ; then exit_clean; fi
   fi
 
   cd /outgoing/doc/master/lumina-docs
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
-  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" . docpush@web.pcbsd.org:/home/pcbsd/www/lumina-desktop.org/handbook/
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" . docpush@web.trueos.org:/home/pcbsd/www/lumina-desktop.org/handbook/
   return 0
 }
 
