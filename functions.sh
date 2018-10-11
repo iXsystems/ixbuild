@@ -1135,6 +1135,18 @@ jenkins_trueos_lumina_docs()
 
 jenkins_trueos_push_lumina_docs()
 {
+  # Now lets sync the Lumina docs
+  if [ -n "$SFTPHOST" ] ; then
+    cd ${DDIR}/_build/html/
+    if [ $? -ne 0 ] ; then exit_clean ; fi
+
+    mkdir -p /outgoing/doc/master/lumina-docs
+    cd /outgoing/doc/master/lumina-docs
+    ssh ${SFTPUSER}@${SFTPHOST} "mkdir -p ${DOCSTAGE}/lumina-docs" >/dev/null 2>/dev/null
+    rsync -va --delete -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/lumina-docs .
+    if [ $? -ne 0 ] ; then exit_clean; fi
+  fi
+
   cd /outgoing/doc/master/lumina-docs
   if [ $? -ne 0 ] ; then exit_clean ; fi
 
