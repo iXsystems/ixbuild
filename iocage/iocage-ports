@@ -18,6 +18,7 @@ irc/weechat
 multimedia/emby-server
 multimedia/plexmediaserver
 multimedia/plexmediaserver-plexpass
+multimedia/zoneminder
 net/nss_ldap
 net/openldap24-client
 net-p2p/btsync
