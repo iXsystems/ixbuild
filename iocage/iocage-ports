@@ -44,6 +44,7 @@ sysutils/cdrtools
 sysutils/munin-node
 sysutils/tarsnap
 textproc/libxml2
+www/apache22
 www/gitlab-ce
 www/madsonic-standalone
 www/nextcloud@php71
