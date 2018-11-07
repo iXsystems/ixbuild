@@ -121,8 +121,8 @@ case $TYPE in
                  freenas) jenkins_freenas ;;
          freenas-tn-docs) jenkins_truenas_docs ;;
             freenas-docs) jenkins_freenas_docs ;;
-       freenas-push-docs) jenkins_freenas_push_docs ;;
-    freenas-push-tn-docs) jenkins_truenas_push_docs ;;
+       freenas-push-docs) jenkins_freenas_push_docs "freenas" ;;
+    freenas-push-tn-docs) jenkins_freenas_push_docs "truenas" ;;
              freenas-api) jenkins_freenas_api ;;
         freenas-push-api) jenkins_freenas_push_api ;;
          freenas-push-be) jenkins_freenas_push_be ;;

@@ -715,30 +715,59 @@ jenkins_freenas_push_docs()
   fi
   echo "Using DOCBRANCH: $DOCBRANCH"
 
-  # Now lets upload the docs
-  if [ -n "$SFTPHOST" ] ; then
-    rm -rf /tmp/handbookpush 2>/dev/null
-    mkdir -p /tmp/handbookpush
-
-    # Get the docs from the staging server
-    rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook-${DOCBRANCH}/ /tmp/handbookpush
-    if [ $? -ne 0 ] ; then exit_clean; fi
-
-    cd /tmp/handbookpush
-    if [ $? -ne 0 ] ; then exit_clean ; fi
-
-    # Make them live!
-    if [ -z "$DOCTARGET" ] ; then
-      echo "Pushing to /tank/doc/userguide/html11"
-      rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/html11
-      if [ $? -ne 0 ] ; then exit_clean; fi
-    else
-      echo "Pushing to /tank/doc/userguide/${DOCTARGET}"
-      rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -o StrictHostKeyChecking=no -i /root/.ssh/id_rsa.jenkins' . jenkins@api.freenas.org:/tank/doc/userguide/${DOCTARGET}
-      if [ $? -ne 0 ] ; then exit_clean; fi
-    fi
-    rm -rf /tmp/handbookpush 2>/dev/null
+  # Set the default DOC target if not provided
+  if [ -z "$DOCTARGET" ] ; then
+	DOCTARGET="html11"
   fi
+
+  # Set the default remote directory if not provided
+  if [ -z "REMOTE_DIR" ] ; then
+	if [ "$1" = "truenas" ] ; then
+		REMOTE_DIR="/usr/local/www/vhosts/truenas-guide"
+	else
+		REMOTE_DIR="/tank/doc/userguide/${DOCTARGET}"
+	fi
+  fi
+
+  # Set all the SSH options / overrides
+  if [ -z "$SSHPORT" ] ; then
+	  SSHPORT="22"
+  fi
+  if [ -z "$SSHUSER" ] ; then
+	  SSHUSER="jenkins"
+  fi
+  if [ -z "$SSHHOST" ] ; then
+	if [ "$1" = "truenas" ] ; then
+		SSHHOST="support.ixsystems.com"
+	else
+		SSHHOST="api.freenas.org"
+	fi
+  fi
+
+  # Now lets upload the docs
+  if [ -z "$SFTPHOST" ] ; then
+	  echo "ERROR: Unset SFTPHOST!"
+	  exit 1
+  fi
+
+  echo "Uploading Docs to: ${SSHUSER}@${SSHHOST}:${SSHPORT} -> ${REMOTE_DIR}"
+
+  rm -rf /tmp/handbookpush 2>/dev/null
+  mkdir -p /tmp/handbookpush
+
+  # Get the docs from the staging server
+  rsync -va --delete-delay --delay-updates -e "ssh -o StrictHostKeyChecking=no" ${SFTPUSER}@${SFTPHOST}:${DOCSTAGE}/handbook-${DOCBRANCH}/ /tmp/handbookpush
+  if [ $? -ne 0 ] ; then exit_clean; fi
+
+  cd /tmp/handbookpush
+  if [ $? -ne 0 ] ; then exit_clean ; fi
+
+  # Make them live!
+  echo "Pushing to ${REMOTE_DIR}"
+  ssh -p ${SSHPORT} ${SSHUSER}@${SSHHOST} mkdir -p ${REMOTE_DIR} || true
+  rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -p ${SSHPORT} -o StrictHostKeyChecking=no' . ${SSHUSER}@${SSHHOST}:${REMOTE_DIR}
+  if [ $? -ne 0 ] ; then exit_clean; fi
+  rm -rf /tmp/handbookpush 2>/dev/null
 
   return 0
 }
