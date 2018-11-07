@@ -765,7 +765,7 @@ jenkins_freenas_push_docs()
   # Make them live!
   echo "Pushing to ${REMOTE_DIR}"
   ssh -p ${SSHPORT} ${SSHUSER}@${SSHHOST} mkdir -p ${REMOTE_DIR} || true
-  rsync -a -v -z --delete --exclude "truenas*" -e 'ssh -p ${SSHPORT} -o StrictHostKeyChecking=no' . ${SSHUSER}@${SSHHOST}:${REMOTE_DIR}
+  rsync -a -v -z --delete --exclude "truenas*" -e "ssh -p ${SSHPORT} -o StrictHostKeyChecking=no" . ${SSHUSER}@${SSHHOST}:${REMOTE_DIR}
   if [ $? -ne 0 ] ; then exit_clean; fi
   rm -rf /tmp/handbookpush 2>/dev/null
 
