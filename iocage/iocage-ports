@@ -43,6 +43,7 @@ sysutils/bacula-client
 sysutils/bacula-server
 sysutils/cdrtools
 sysutils/munin-node
+sysutils/kiconvtool
 sysutils/tarsnap
 textproc/libxml2
 www/apache24
