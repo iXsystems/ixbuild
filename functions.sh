@@ -935,14 +935,27 @@ jenkins_freenas_docs()
   fi
   echo "Using DOCBRANCH: $DOCBRANCH"
 
+  if [ -z "DOCTAG" ] ; then
+	  DOCTAG="freenas"
+  fi
+
   git clone -b $DOCBRANCH --depth=1 https://github.com/freenas/freenas-docs ${DDIR}
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
   cd ${DDIR}/userguide
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
 
-  make TAG=freenas html
+  make TAG=${DOCTAG} html
   if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+  mv ${DDIR}/userguide/processed/_build/html ${DDIR}/html
+
+  make TAG=${DOCTAG} pdf
+  if [ $? -ne 0 ] ; then rm -rf ${DDIR} ; exit 1 ; fi
+
+  # Put the PDF in the same dir as html
+  mv ${DDIR}/html ${DDIR}/userguide/processed/_build/html
+  cp ${DDIR}/userguide/processed/_build/latex/*.pdf ${DDIR}/userguide/processed/_build/html/
+
 
   # Now lets sync the docs
   if [ -n "$SFTPHOST" ] ; then
