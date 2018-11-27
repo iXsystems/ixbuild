@@ -11,6 +11,7 @@ devel/gettext-runtime
 devel/icu
 devel/jenkins
 devel/jenkins-lts
+devel/gitlab-runner
 games/minecraft-server
 irc/irssi
 irc/quassel-core
