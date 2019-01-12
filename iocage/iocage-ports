@@ -1,5 +1,5 @@
 databases/mysql56-server
-databases/php56-pdo_pgsql
+databases/rrdtool
 databases/postgresql95-client
 databases/postgresql95-contrib
 databases/postgresql95-server
@@ -22,7 +22,12 @@ multimedia/plexmediaserver-plexpass
 multimedia/zoneminder
 net/nss_ldap
 net/openldap24-client
+net/samba48
+net/rsync
+net/rsync-bpc
 net-p2p/btsync
+net-p2p/bitcoin-daemon
+net-p2p/bitcoin-utils
 net-p2p/couchpotato
 net-p2p/deluge-cli
 net-p2p/qbittorrent@nox
@@ -47,6 +52,7 @@ sysutils/munin-node
 sysutils/kiconvtool
 sysutils/tarsnap
 textproc/libxml2
+textproc/p5-XML-RSS
 www/apache24
 www/fcgiwrap 
 www/gitlab-ce
