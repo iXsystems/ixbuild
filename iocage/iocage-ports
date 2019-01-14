@@ -21,6 +21,7 @@ multimedia/emby-server
 multimedia/plexmediaserver
 multimedia/plexmediaserver-plexpass
 multimedia/zoneminder
+multimedia/x264
 net/nss_ldap
 net/openldap24-client
 net/samba48
