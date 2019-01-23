@@ -62,6 +62,7 @@ www/fcgiwrap
 www/gitlab-ce
 www/madsonic-standalone
 www/nextcloud
+www/nextcloud@php71
 www/nginx
 www/redmine
 www/subsonic-standalone
