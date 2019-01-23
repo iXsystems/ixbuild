@@ -13,6 +13,7 @@ devel/icu
 devel/jenkins
 devel/jenkins-lts
 devel/gitlab-runner
+graphics/pecl-imagick
 games/minecraft-server
 irc/irssi
 irc/quassel-core
@@ -39,6 +40,7 @@ net-p2p/transmission-daemon
 www/transmission-web
 net-p2p/xmrig
 net/syncthing
+net-mgmt/unifi5
 news/sabnzbdplus 
 print/indexinfo
 security/clamav
