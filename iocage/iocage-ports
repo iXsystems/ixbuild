@@ -14,6 +14,7 @@ devel/jenkins
 devel/jenkins-lts
 devel/gitlab-runner
 graphics/pecl-imagick
+graphics/pecl-imagick@php71
 games/minecraft-server
 irc/irssi
 irc/quassel-core
