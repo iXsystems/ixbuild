@@ -42,6 +42,7 @@ www/transmission-web
 net-p2p/xmrig
 net/syncthing
 net-mgmt/unifi5
+net-mgmt/unifi-lts
 news/sabnzbdplus 
 print/indexinfo
 security/clamav
