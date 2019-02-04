@@ -23,8 +23,8 @@ MEM=$(expr $MEM / 1024)
 MEM=$(expr $MEM / 1024)
 
 CPUS=$(sysctl -n kern.smp.cpus)
-if [ $CPUS -gt 16 ] ; then
-  BUILDERS="16"
+if [ $CPUS -gt 64 ] ; then
+  BUILDERS="64"
   JOBS="YES"
 else
   BUILDERS="$CPUS"
